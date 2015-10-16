@@ -1,0 +1,4 @@
+产生独一无二的序列：
+create sequence seq;
+
+select seq.nextval from dual;

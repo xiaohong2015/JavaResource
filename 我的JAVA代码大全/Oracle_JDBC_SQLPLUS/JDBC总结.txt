@@ -1,0 +1,11 @@
+事务处理Transaction注意点及步骤：
+第一步：设置setAutoCommit属性为false；
+第二步：执行需要执行的操作；
+第三步：自己进行提交conn.commit(true);
+第四步：恢复现场,设置setAutoCommit属性为true；
+第五步：捕获到任何的SQLException,注意要conn.rollback();
+
+
+
+
+DataSource & RowSet

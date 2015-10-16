@@ -1,0 +1,371 @@
+Oracle 11g  常用语句
+
+-- 退出 SQLPLUS
+exit;
+
+-- 修改 system(sys) 账号密码
+SQLPLUS /NOLOG
+CONN /AS SYSDBA
+ALTER USER SYSTEM IDENTIFIED BY tarring;
+
+-- 清除 SQLPLUS 屏幕
+CLEAR SCREEN;
+CL SCR;
+
+-- 查看数据文件位置
+SELECT NAME FROM v$datafile;
+
+-- 查看控制文件位置
+SELECT NAME FROM v$controlfile;
+
+-- 查看日志文件位置
+SELECT MEMBER FROM v$logfile;
+
+-- 建立表空间
+CREATE TABLESPACE ts01 
+DATAFILE 'D:\DataBase\Oracle11g\oradata\orcl\test_db01.dbf'SIZE 100M
+AUTOEXTEND ON NEXT 100M MAXSIZE 1024M
+DEFAULT STORAGE(INITIAL 10m NEXT 1M)
+PERMANENT
+ONLINE
+LOGGING;
+
+-- 修改表空间
+ALTER TABLESPACE ts01
+NOLOGGING;
+
+-- 表空间增加数据文件
+ALTER TABLESPACE ts01 
+ADD DATAFILE 'D:\DataBase\Oracle11g\oradata\orcl\test_db02.dbf'SIZE 100M REUSE
+AUTOEXTEND ON NEXT 100M MAXSIZE UNLIMITED;
+
+-- 删除表空间
+DROP TABLESPACE ts01;
+
+-- 删除表空间同时删除数据文件
+DROP TABLESPACE ts01 INCLUDING CONTENTS AND DATAFILES;
+
+-- 表空间中建表
+CREATE TABLE student(
+student_id VARCHAR2(10),
+student_name VARCHAR2(20)
+)TABLESPACE ts01;
+
+-- 查看表所属表空间
+SELECT TABLE_NAME, TABLESPACE_NAME FROM tabs WHERE TABLE_NAME = 'STUDENT';
+
+-- 查看表结构
+DESCRIBE student;
+DESC student;
+
+-- 增加表注释
+COMMENT ON TABLE student IS '学生信息表';
+
+-- 查看表注释
+SELECT * FROM USER_TAB_COMMENTS WHERE TABLE_NAME = 'STUDENT';
+SELECT * FROM ALL_TAB_COMMENTS WHERE TABLE_NAME = 'STUDENT';
+
+-- 表字段增加注释
+COMMENT ON COLUMN STUDENT.STUDENT_ID IS '学生编号';
+
+-- 查看表字段注释
+SELECT * FROM USER_COL_COMMENTS WHERE TABLE_NAME = 'STUDENT';
+SELECT * FROM ALL_COL_COMMENTS WHERE TABLE_NAME = 'STUDENT';
+
+-- 查看用户所有表
+SELECT * FROM User_Tables;
+
+-- 查看用户拥有的所有对象
+SELECT * FROM User_Objects;
+
+-- 查看用户拥有的 表 试图 序列
+SELECT * FROM User_Catalog;
+
+-- 表字段修改
+ALTER TABLE student MODIFY(student_id CHAR(15));
+
+-- 表字段增加
+ALTER TABLE STUDENT ADD(AGE NUMBER(2));
+
+-- 删除表字段
+ALTER TABLE STUDENT DROP COLUMN student_name;
+
+-- 修改表名称
+RENAME STUDENT TO STU;
+
+-- 删除表
+DROP TABLE STUDENT;
+
+CREATE TABLE student(
+s_id Varchar2(10),
+s_name varchar2(20),
+s_age Number(3),
+s_birthday DATE
+)TABLESPACE ts01;
+
+-- 增加一条记录
+INSERT INTO
+student (s_id, s_name, s_age, s_birthday) 
+VALUES ('S000000001', 'Tarring01', 10, to_date('1982-10-06','yyyy-mm-dd'));
+
+INSERT INTO
+student (s_id, s_name, s_age, s_birthday) 
+VALUES ('S000000002', 'Tarring02', 10, Sysdate);
+
+-- 使用替代变量时，输入字符串字段时一样要写上引号
+INSERT INTO
+student (s_id, s_name, s_age, s_birthday) 
+VALUES (&s_id, &s_name, 10, Sysdate);
+
+-- 修改记录
+UPDATE student SET s_name = '陶川', s_age = 20 WHERE s_id = 'S000000002';
+
+-- 删除记录
+DELETE FROM student WHERE s_id = 'S000000002';
+
+-- 截断表
+TRUNCATE TABLE student;
+
+-- 事务处理
+COMMIT; -- 提交事务
+INSERT INTO student (s_id, s_name) VALUES ('S001', 'tarring1');
+ROLLBACK; -- 回滚，回滚到上一次提交过后的点
+
+-- 带恢复点的事务
+COMMIT;
+INSERT INTO student (s_id, s_name) VALUES ('S001', 'tarring1');
+SAVEPOINT firstdate;
+INSERT INTO student (s_id, s_name) VALUES ('S002', 'tarring2');
+SAVEPOINT seconddate;
+DELETE FROM student;
+ROLLBACK TO firstdate;
+SELECT * FROM student;
+
+--  约束条件            说明
+--------------------------------------------------------------------
+--  UNIQUE              指定字段的值，必须是唯一的
+--  PRIMARY KEY         主键，会为指定的字段作索引，并且也是唯一的值
+--  NOT NULL            不可以是空值【'' NULL】或0（零）
+--  CHECK               检查，必须符合指定的条件
+--  FOREIGN KEY         外键，用来创建一个参考表之间的关系
+
+-- 建表同时建立唯一约束
+CREATE TABLE student(
+s_id Varchar2(10),
+s_name varchar2(20),
+s_age Number(3),
+s_birthday DATE,
+CONSTRAINT s_name_uk UNIQUE(s_name)
+)TABLESPACE ts01;
+
+-- 查看唯一约束
+SELECT table_name, constraint_name, constraint_type FROM User_Constraints WHERE table_name = 'STUDENT';
+
+-- 作业：数据字典【分类 常用】
+
+-- 建表同时建立主键
+CREATE TABLE student(
+s_id Varchar2(10),
+s_name varchar2(20),
+s_age Number(3),
+s_birthday DATE,
+CONSTRAINT s_id_pk PRIMARY KEY (s_id)
+)TABLESPACE ts01;
+
+-- 查看主键约束
+SELECT table_name, constraint_name, constraint_type FROM User_Constraints WHERE table_name = 'STUDENT';
+
+-- 建表同时建立非空字段
+CREATE TABLE student(
+s_id Varchar2(10),
+s_name varchar2(20) NOT NULL,
+s_age Number(3),
+s_birthday DATE,
+CONSTRAINT s_id_pk PRIMARY KEY (s_id)
+)TABLESPACE ts01;
+
+INSERT INTO student (s_id, s_name) VALUES ('S001', NULL); -- 插入一个null
+
+-- 查看非空约束
+SELECT table_name, constraint_name, constraint_type, search_condition FROM User_Constraints WHERE table_name = 'STUDENT';
+
+-- 建表同时建立检查
+CREATE TABLE student(
+s_id Varchar2(10),
+s_name varchar2(20),
+s_age Number(3),
+s_birthday DATE,
+CONSTRAINT s_age_ck CHECK (s_age BETWEEN 1 AND 100) -- 端点值可以使用
+)TABLESPACE ts01;
+
+-- 查看检查约束
+SELECT table_name, constraint_name, constraint_type, search_condition FROM User_Constraints WHERE table_name = 'STUDENT';
+
+
+-- 外键的使用
+CREATE TABLE team(
+t_id Varchar2(10),
+t_name Varchar2(20),
+CONSTRAINT t_id_pk PRIMARY KEY (t_id)
+)TABLESPACE ts01;
+
+CREATE TABLE student(
+s_id Varchar2(10),
+team_id VARCHAR2(10),
+s_name varchar2(20),
+CONSTRAINT s_id_pk PRIMARY KEY (s_id),
+CONSTRAINT s_team_id_fk FOREIGN KEY (team_id) REFERENCES team(t_id)
+)TABLESPACE ts01;
+
+-- 查看表的外键约束
+SELECT table_name, constraint_name, constraint_type FROM User_Constraints WHERE table_name = 'STUDENT';
+
+drop table team;  -- 被引用表是不能删除的
+
+insert into team (t_id, t_name) values ('t001', 'lansene');
+insert into student(s_id, s_name, team_id) values ('s001','tarring', 't001');
+delete from team; -- 被引用的记录是不能删除的
+
+-- 关闭一个约束
+ALTER TABLE student DISABLE CONSTRAINT s_team_id_fk;
+
+-- 启用一个约束
+ALTER TABLE student ENABLE CONSTRAINT s_team_id_fk;
+
+-- 删除一个约束
+ALTER TABLE student DROP CONSTRAINT s_team_id_fk;
+
+-- 已创建的表增加一个约束
+ALTER TABLE student ADD CONSTRAINT s_team_id_fk FOREIGN KEY (team_id) REFERENCES team(t_id);
+
+/********************************************************************************************|
+|             SQL语句5大类型                    |  命令     | 说明                           |
+|********************************************************************************************|
+| Data Retrieval数据检索                        | select    | 查询记录                       |
+|********************************************************************************************|
+| Date Manipulation Language【DML】数据操纵语言 | insert    | 添加记录                       |
+|                                               | update    | 修改记录                       |
+|                                               | delete    | 删除记录                       |
+|********************************************************************************************|
+| Data Definition Language【DDL】数据定义语言   | create    | 创建                           |
+|                                               | alter     | 修改                           |
+|                                               | drop      | 丢弃【删除】                   |
+|                                               | rename    | 重命名                         |
+|                                               | truncate  | 截断                           |
+|********************************************************************************************|
+| Transaction Control事务控制                   | commit    | 确认命令                       |
+|                                               | rollback  | 回退至前一次确认的命令或保存点 |
+|                                               | savepoint | 设置保存点                     |
+|********************************************************************************************|
+| Data Control Language【DCL】数据控制语言      | grant     | 授予权限                       |
+|                                               | revoke    | 撤消权限                       |
+|********************************************************************************************/
+
+
+/*************************************|
+|       系统权限       |     说明     |
+|*************************************|
+|   create session     |  连接数据库  |
+|*************************************|
+|   create table       |  创建表      |
+|*************************************|
+|   create sequence    |  创建序列    |
+|*************************************|
+|   create view        |  创建视图    |
+|*************************************|
+|   create proceduer   |  创建程序    |
+|*************************************/
+
+
+/*******************************************************************|
+|      \  对象 |  表【table】 |  视图【view】 |  程序【procedure】  |
+| 权限  \      |              |               |                     |
+|*******************************************************************|
+|    insert    |      Y       |       Y       |                     |
+|*******************************************************************|
+|    alter     |      Y       |               |                     |
+|*******************************************************************|
+|    update    |      Y       |       Y       |                     |
+|*******************************************************************|
+|    delete    |      Y       |       Y       |                     |
+|*******************************************************************|
+|    select    |      Y       |       Y       |                     |
+|*******************************************************************|
+|    index     |      Y       |               |                     |
+|*******************************************************************|
+|    execute   |              |               |          Y          |
+|*******************************************************************/
+
+-- 创建用户
+CREATE USER u01 IDENTIFIED BY p01;
+
+-- 创建用户并制定默认表空间
+CREATE USER u01 IDENTIFIED BY p01 DEFAULT TABLESPACE QUOTA 2M ON ts01; --quota 表空间中可使用的配额
+
+-- 修改用户密码
+ALTER USER u01 IDENTIFIED BY p001;
+
+-- 修改用户表空间配额
+ALTER USER u01 QUOTA 20M ON ts01;
+ALTER USER u01 QUOTA UNLIMITED ON ts01; -- 用户对表空间没有配额限制
+
+-- 回收unlimited tablespace权限
+REVOKE UNLIMITED TABLESPACE FROM ts01; 
+
+-- 删除用户
+DROP USER u01;
+
+-- 切换连接数据库的用户
+CONNECT u01/p01;
+conn u01/p01;
+
+-- 授权用户连接数据库的权限
+GRANT CREATE SESSION TO u01;
+
+-- 授权用户创建序列(sequence)的权限
+GRANT CREATE sequence TO u01;
+
+-- 授权用户创建表的权限
+GRANT CREATE TABLE TO u01;
+--授权用户查表的权限
+grant select on ts01.user1 to wangkai；
+--授权用户修改表的权限
+grant alter on user1 to  wangkai；
+--授权用户删除表的权限(没有此权限)
+grant drop on user1 to  wangkai；(错误)
+--授权用户对一个表的所有权限
+grant all on user1 to wangkai; 
+--授权所有用户对一个表的所有权限
+grant all on user1 to public;
+
+-- 收回用户创建表的权限
+REVOKE CREATE TABLE FROM u01;
+-- 收回用户查表的权限
+REVOKE select on user1 FROM u01;
+-- 收回用户修改的权限
+REVOKE select on user1 FROM u01;
+-- 收回用户对一个表的所有权限
+revoke all on user1 from wangkai;
+--收回所有用户对一个表的所有权限
+revoke all on user1 to public; 
+
+-- 创建角色
+CREATE ROLE r01;
+
+-- 角色授权
+GRANT CREATE SESSION, CREATE TABLE TO r01;
+
+-- 收回角色权限
+REVOKE CREATE TABLE FROM r01;
+
+-- 查看角色权限
+SELECT ROLE,PRIVILEGE FROM role_sys_privs WHERE ROLE='R01'
+
+-- 角色赋给用户
+GRANT r01 TO u01;
+
+-- 查看当前用户角色
+SELECT * FROM user_role_privs;
+
+-- 删除角色
+DROP ROLE r01;

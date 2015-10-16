@@ -1,0 +1,466 @@
+
+
+
+一、三大框架简介 
+
+1、Spring 
+
+Spring是一个解决了许多在J2EE开发中常见的问题的强大框架。 Spring提供了管理业务对象的一致方法并且鼓励了注入对接口编程而不是对类编程的良好习惯。Spring的架构基础是基于使用JavaBean属性的Inversion of Control容器。然而，这仅仅是完整图景中的一部分：Spring在使用IoC容器作为构建完关注所有架构层的完整解决方案方面是独一无二的。 Spring提供了唯一的数据访问抽象，包括简单和有效率的JDBC框架，极大的改进了效率并且减少了可能的错误。Spring的数据访问架构还集成了Hibernate和其他O/R mapping解决方案。Spring还提供了唯一的事务管理抽象，它能够在各种底层事务管理技术，例如JTA或者JDBC事务提供一个一致的编程模型。Spring提供了一个用标准Java语言编写的AOP框架，它给POJOs提供了声明式的事务管理和其他企业事务--如果你需要--还能实现你自己的aspects。这个框架足够强大，使得应用程序能够抛开EJB的复杂性，同时享受着和传统EJB相关的关键服务。Spring还提供了可以和IoC容器集成的强大而灵活的MVC Web框架。
+
+
+
+
+2、Struts 
+
+Struts是一个基于Sun J2EE平台的MVC框架，主要是采用Servlet和JSP技术来实现的。由于Struts能充分满足应用开发的需求，简单易用，敏捷迅速，在过去的一年中颇受关注。Struts把Servlet、JSP、自定义标签和信息资源(message resources)整合到一个统一的框架中，开发人员利用其进行开发时不用再自己编码实现全套MVC模式，极大的节省了时间，所以说Struts是一个非常不错的应用框架。
+
+
+
+
+3、Hibernate 
+
+Hibernate是一个开放源代码的对象关系映射框架，它对JDBC进行了非常轻量级的对象封装，使得Java程序员可以随心所欲的使用对象编程思维来操纵数据库。 Hibernate可以应用在任何使用JDBC的场合，既可以在Java的客户端程序实用，也可以在Servlet/JSP的Web应用中使用，最具革命意义的是，Hibernate可以在应用EJB的J2EE架构中取代CMP，完成数据持久化的重任。，Hibernate可以在应用EJB的J2EE架构中取代CMP，完成数据持久化的重任。
+
+
+
+
+
+
+
+JAVA三大框架用来做WEB应用。
+
+struts主要负责表示层的显示
+
+spring利用它的IOC和AOP来处理控制业务（负责对数据库的操作）
+
+hibernate主要是数据的持久化到数据库
+
+
+
+
+在用jsp的servlet做网页开发的时候有个web.xml的映射文件，里面有个mapping的标签就是用来做文件映射的。
+
+当你在浏览器上输入URL地址的时候，文件就会根据你写的名称对应到一个java文件，根据java文件里编写的内容显示在浏览器上，就是一个网页，所以网页名字是随便写的，随便起的名字，不管你起的是.php .jsp .do还是其他的什么都对应这个java文件，这个java文件里的代码进行什么操作就干什么，显示一句话还是连接数据库还是跳转到其他页面等等，这个java文件把数据进行封装起到安全和便于管理的作用。其实这个java文件编译过来是.class的一个字节码文件，没有那么一个类似html嵌入标签和代码的网页文件。他与jsp文件区别就是jsp把代码嵌入到html标签中。
+
+还有servlet或者struts中html表单的action中的提交名称对应一个java文件，struts一般是.do的，都和上面一样是映射。
+
+
+
+
+
+
+
+
+
+
+Struts是web开发框架负责表单提交）（相当于电脑显卡）
+
+Hibernate负责对数据库的操作（相当于电脑CPU）
+
+Spring相当于一个主板（将显卡和CPU组装在一起
+
+
+
+
+
+
+
+二、Spring框架
+
+编辑本段定义
+
+　　要谈Spring的历史，就要先谈J2EE。J2EE应用程序的广泛实现是在1999年和2000年开始的，它的出现带来了诸如事务管理之类的核心中间层概念的标准化，但是在实践中并没有获得绝对的成功，因为开发效率，开发难度和实际的性能都令人失望。　　曾经使用过EJB开发J2EE应用的人，一定知道，在EJB开始的学习和应用非常的艰苦，很多东西都不能一下子就很容易的理解。EJB要严格地继承各种不同类型的接口，类似的或者重复的代码大量存在。而配置也是复杂和单调，同样使用JNDI进行对象查找的代码也是单调而枯燥。虽然有一些开发工作随着xdoclet的出现，而有所缓解，但是学习EJB的高昂代价，和极低的开发效率，极高的资源消耗，都造成了EJB的使用困难。而Spring出现的初衷就是为了解决类似的这些问题。　　Spring的一个最大的目的就是使J2EE开发更加容易。同时，Spring之所以与Struts、Hibernate等单层框架不同，是因为Spring致力于提供一个以统一的、高效的方式构造整个应用，并且可以将单层框架以最佳的组合揉和在一起建立一个连贯的体系。可以说Spring是一个提供了更完善开发环境的一个框架，可以为POJO(Plain Old Java Object)对象提供企业级的服务。　　Spring的形成，最初来自Rod Jahnson所著的一本很有影响力的书籍《Expert One-on-One J2EE Design and Development》，就是在这本书中第一次出现了Spring的一些核心思想，该书出版于2002年。另外一本书《Expert One-on-One J2EE Development without EJB》，更进一步阐述了在不使用EJB开发J2EE企业级应用的一些设计思想和具体的做法。有时间了可以详细的研读一下。　　Spring的初衷：　　1、J2EE开始应该更加简单。　　2、使用接口而不是使用类，是更好的编程习惯。Spring将使用接口的复杂度几乎降低到了零。　　3、为JavaBean提供了一个更好的应用配置框架。　　4、更多地强调面向对象的设计，而不是现行的技术如J2EE。　　5、尽量减少不必要的异常捕捉。　　6、使应用程序更加容易测试。　　Spring的目标：　　1、可以令人方便愉快的使用Spring。　　2、应用程序代码并不依赖于Spring APIs。 　　3、Spring不和现有的解决方案竞争，而是致力于将它们融合在一起。　　Spring的基本组成：　　1、最完善的轻量级核心框架。　　2、通用的事务管理抽象层。　　3、JDBC抽象层。　　4、集成了Toplink, Hibernate, JDO, and iBATIS SQL Maps。 　　5、AOP功能。　　6、灵活的MVC Web应用框架。
+
+编辑本段Spring框架简介
+
+　　Spring：　　Spring是一个开源框架，它由Rod Johnson创建。它是为了解决企业应用开发的复杂性而创建的。Spring使用基本的JavaBean来完成以前只可能由EJB完成的事情。然而，Spring的用途不仅限于服务器端的开发。从简单性、可测试性和松耦合的角度而言，任何Java应用都可以从Spring中受益。　　简单来说，Spring是一个轻量级的控制反转(IoC)和面向切面(AOP)的容器框架。　　轻量——从大小与开销两方面而言Spring都是轻量的。完整的Spring框架可以在一个大小只有1MB多的JAR文件里发布。并且Spring所需的处理开销也是微不足道的。此外，Spring是非侵入式的：典型地，Spring应用中的对象不依赖于Spring的特定类。　　控制反转——Spring通过一种称作控制反转（IoC）的技术促进了松耦合。当应用了IoC，一个对象依赖的其它对象会通过被动的方式传递进来，而不是这个对象自己创建或者查找依赖对象。你可以认为IoC与JNDI相反——不是对象从容器中查找依赖，而是容器在对象初始化时不等对象请求就主动将依赖传递给它。　　面向切面——Spring提供了面向切面编程的丰富支持，允许通过分离应用的业务逻辑与系统级服务（例如审计（auditing）和事务（transaction）管理）进行内聚性的开发。应用对象只实现它们应该做的——完成业务逻辑——仅此而已。它们并不负责（甚至是意识）其它的系统级关注点，例如日志或事务支持。　　容器——Spring包含并管理应用对象的配置和生命周期，在这个意义上它是一种容器，你可以配置你的每个bean如何被创建——基于一个可配置原型（prototype），你的bean可以创建一个单独的实例或者每次需要时都生成一个新的实例——以及它们是如何相互关联的。然而，Spring不应该被混同于传统的重量级的EJB容器，它们经常是庞大与笨重的，难以使用。　　框架——Spring可以将简单的组件配置、组合成为复杂的应用。在Spring中，应用对象被声明式地组合，典型地是在一个XML文件里。Spring也提供了很多基础功能（事务管理、持久化框架集成等等），将应用逻辑的开发留给了你。　　所有Spring的这些特征使你能够编写更干净、更可管理、并且更易于测试的代码。它们也为Spring中的各种模块提供了基础支持。
+
+编辑本段Spring框架的7个模块
+
+　　1、核心容器　　2、Spring 上下文 　　3、Spring AOP 　　4、Spring DAO 　　5、Spring ORM 　　6、Spring Web 模块 　　7、Spring MVC 框架
+
+
+
+
+三、struts 
+
+struts是开源软件。使用Struts的目的是为了帮助我们减少在运用MVC设计模型来开发Web应用的时间。如果我们想混合使用Servlets和JSP的优点来建立可扩展的应用，struts是一个不错的选择。
+
+
+
+
+目录
+
+
+
+
+Struts 1.x的起源
+
+流程
+
+框架结构图综述
+
+Model部分
+
+View部分
+
+Controller组件
+
+框架压缩包内容
+
+体系结构
+
+框架中的组件
+
+Struts配置文件
+
+ActionServlet类
+
+ActionMapping类
+
+Action类
+
+ActionForm类
+
+ActionForward类
+
+错误处理
+
+OGNL 
+
+Struts2Struts 1.x的起源
+
+流程
+
+框架结构图 综述
+
+Model部分
+
+View部分
+
+Controller组件
+
+框架 压缩包内容
+
+体系结构
+
+框架中的组件
+
+Struts配置文件
+
+ActionServlet类
+
+ActionMapping类
+
+Action类
+
+ActionForm类
+
+ActionForward类
+
+错误处理
+
+OGNL 
+
+Struts2 
+
+展开 编辑本段Struts 1.x的起源
+
+　　Struts最早是作为Apache Jakarta项目的组成部分，项目的创立者希望通过对该项目的研究，改进和提高JavaServer Pages 、Servlet、标签库以及面向对象的技术水准。Struts这个名字来源于在建 struts 
+
+筑和旧式飞机中使用的支持金属架。这个框架之所以叫"Struts"，是为了提醒我们记住那些支撑我们房屋，建筑，桥梁，甚至我们踩高跷时候的基础支撑。这也是一个解释Struts在开发Web应用程序中所扮演的角色的精彩描述。当建立一个物理建筑时，建筑工程师使用支柱为建筑的每一层提供支持。同样，软件工程师使用Struts为业务应用的每一层提供支持。它的目的是为了帮助我们减少在运用MVC设计模型来开发Web应用的时间。我们仍然需要学习和应用该架构，不过它将可以完成其中一些繁重的工作。如果想混合使用Servlets和JSP的优点来建立可扩展的应用，Struts是一个不错的选择。　　早期Smalltalk 程序语言便采用了MVC(Model-View -Controller) 模式( Patterns ) 以增加程序代码弹性，MVC模式将程序代码整理切割为三部份，Model 部分是业务与应用领域( Business domain) 相关逻辑、管理状态之对象，Controller 部分接收来自View 所输入的资料并与Model 部分互动， struts 
+
+[1]是业务流程控制( Flow Control) 之处，View 部分则负责展现资料、接收使用者输入资料。在Java 应用中，JFC/Swing、AWT、JSP 皆是可用作View 之技术规格，而JavaBean 与Enterprise JavaBean 规格则可用于Model 程序代码，一旦应用程序以MVC 模式加以适当（的）分割，Model 部分程序代码可在不同使用者接口外观（的）应用程序中重复使用。　　随着JSP 与Servlet 技术大量应用于以Web 为基础（的）应用程序，Java 开发人员群体认为应以较佳之模式以提升Web 应用程序之可维护性与重复使用性。早期JSP 规格书中曾列举两种可行之JSP 应用架构，分别为Model1 与Model 2。　　在Model 1 架构中，JSP 直接处理Web 浏览器送来之请求( Request )，并辅以JavaBean 处理应用相关逻辑。Model 1 架构单纯编写比较容易，但在Model 1 中JSP 可能同时肩负View 与Controller 角色，两类程序代码有可能混杂而不易维护。而Model 2 中将Servlet 纳入架构中扮演前端Controller 角色，将Web 浏览器送出之请求集中送至Servlet ，Servlet 可集中管理使用者登入、权限控制、多国语言转换等前置处理，再视需求转向给对应之JSP 处理。Model 2 中采用了较佳之MVC 模式，但增加了编写复杂度。　　Struts是Apache软件基金下Jakarta项目的一部分。除Struts之外，还有其他成功的开源产品，包括Tomcat， Ant 和Velocity。2000 年Craig R. McClanahan 先生贡献了他编写 struts 
+
+的JSP Model 2 架构之Application Framework 原始程序代码给Apache 基金会，成为Apache Jakarta 计划Struts Framework 前身。　　开始的代码基础从2000年5月开始开发，直到2001年6月，1.0版本发布。有30 多个开发者参与进来，并有数千人参与到讨论组中。Struts 代码基础由一个志愿的Commnitter团队来管理。到2002年，Struts 小组共有9个志愿Commnitter。　　Struts框架的主要架构设计和开发者是Craig R.McClanahan。Craig 也是Tomcat 4的主要架构师，以及Java Web Services Developer Pack的主要架构师和实现者。他现在是Sun的JavaServer Faces (JSR-127) 以及J2EE平台的Web层架构的规范领导。Craig R. McClanahan 先生是JCP ExpertGroup 成员之一，曾参与JSP 规格制定与Tomcat 4 之编写，因此Struts Framework 广受Java 开发人员群体所重视。Borland 自2002 年底开始于开发工具JBuilder 中支持Struts Framework。 　　Struts是Apache 基金会Jakarta 项目组的一个Open Source 项目，它采用MVC模式，能够很好地帮助java 开发者利用J2EE开发Web应用。和其他的java架构一样，Struts 也是面向对象设计，将MVC模式"分离显示逻辑和业务逻辑"的能力发挥得淋漓尽致。Structs 框架的核心是一个弹性 struts 
+
+的控制层，基于如 Java Servlets，JavaBeans，ResourceBundles与XML等标准技术，以及 Jakarta Commons 的一些类库。Struts由一组相互协作的类（组件）、Servlet以及jsp tag lib组成。基于struts构架的web应用程序基本上符合JSP Model2的设计标准，可以说是一个传统 MVC设计模式的一种变化类型。　　Struts最早是作为Apache Jakarta项目的组成部分问世运作。项目的创立者希望通过对该项目的研究，改进和提高Java Server Pages、Servlet、标签库以及面向对象的技术水准。　　Struts跟Tomcat、Turbine等诸多Apache项目一样，是开源软件，这是它的一大优点，使开发者能更深入的了解其内部实现机制。　　除此之外，Struts的优点主要集中体现在两个方面：Taglib和页面导航。Taglib是Struts的标记库，灵活运用，能大大提高开发效率。另外，就目前国内的JSP开发者而言，除了使用JSP自带的常用标记外，很少开发自己的标记，或许Struts是一个很好的起点。　　关于页面导航，我认为那将是今后的一个发展方向，事实上，这样做， struts 
+
+使系统的脉络更加清晰。通过一个配置文件，即可把握整个系统各部分之间的联系，这对于后期的维护有着莫大的好处。尤其是当另一批开发者接手这个项目时，这种优势体现得更加明显。　　MVC即Model-View-Controller的缩写，是一种常用的设计模式。MVC 减弱了业务逻辑接口和数据接口之间的耦合，以及让视图层更富于变化。Struts 是MVC的一种实现，它将 Servlet和 JSP 标记（属于 J2EE 规范）用作实现的一部分。Struts继承了MVC的各项特性，并根据J2EE的特点，做了相应的变化与扩展。　　说明：加粗括号内为修改的内容
+
+编辑本段流程
+
+　　服务器启动后，根据web.xml加载ActionServlet读取struts-config.xml文件内容到内存。　　以登录为例:第一次进login.jsp会先实例化Form、把默认值(String默认为空字符串,整形默认为0)赋给表单元素。　　输入用户名密码提交表单、提交到action属性的login.do,通过ActionServlet读struts-config.xml文件找到 action下的path属性找到.do,通过name属性找form-beans中的form-bean的name属性得到ActionForm的包名类名,先实例化form，把表单的值填充给form，调用form的validate方法验证、ActionErrors返回null表示验证通过，否则失败返回input指定的页面.验证通过会实例化Action，执行Action的excute方法。
+
+编辑本段框架结构图
+
+综述
+
+　　相应框架结构如图：　　Struts对Model，View和Controller都提供了对应的组件。　　在上图中，ActionServlet，这个类是Struts的核心控制器，负责拦截来自用户的请求。　　Action，这个类通常由用户提供，该控制器负责接收来自ActionServlet的请求，并根据该请求调用模型的业务逻辑方法处理请求，并将处理结果返回给JSP页面显示。
+
+Model部分
+
+　　由JavaBean组成，ActionForm用于封装用户的请求参数，封装成ActionForm对象，该对象被ActionServlet转发给Action，Action根据ActionForm里面的请求参数处理用户的请求。　　JavaBean则封装了底层的业务逻辑，包括数据库访问等。
+
+View部分
+
+　　该部分采用JSP实现。　　Struts提供了丰富的标签库，通过标签库可以减少脚本的使用，自定义的标签库可以实现与Model的有效交互，并增加了现实功能。对应上图的JSP部分。
+
+Controller组件
+
+　　Controller组件有两个部分组成——系统核心控制器，业务逻辑控制器。　　系统核心控制器，对应上图的ActionServlet。该控制器由Struts框架提供，继承HttpServlet类，因此可以配置成标注的Servlet。该控制器负责拦截所有的HTTP请求，然后根据用户请求决定是否要转给业务逻辑控制器。　　业务逻辑控制器，负责处理用户请求，本身不具备处理能力，而是调用Model来完成处理。对应Action部分。
+
+编辑本段框架
+
+　　struts框架具有组件的模块化，灵活性和重用性的优点，同时简化了基于MVC的web应用程序的开发。　　struts可以清晰地区分控制，事务逻辑和外观，从而简化了开发应用程序的过程。struts提供的类使得开发工作更加简单，这些类包括：　　a. 控制程序流程的类　　b. 实现和执行程序事务逻辑的类　　c. 自定义的标记库使得创建和验证HTML表单更加容易
+
+
+
+
+
+
+
+四、Hibernate 
+
+Hibernate 
+
+百科名片
+
+Hibernate是一个开放源代码的对象关系映射框架，它对JDBC进行了非常轻量级的对象封装，使得Java程序员可以随心所欲的使用对象编程思维来操纵数据库。 Hibernate可以应用在任何使用JDBC的场合，既可以在Java的客户端程序使用，也可以在Servlet/JSP的Web应用中使用，最具革命意义的是，Hibernate可以在应用EJB的J2EE架构中取代CMP，完成数据持久化的重任。
+
+
+
+
+目录
+
+
+
+
+核心接口简介Session接口
+
+SessionFactory接口
+
+Configuration接口
+
+Transaction接口
+
+Query和Criteria接口
+
+Hibernate版本更新情况
+
+Hibernate主键介绍Assigned 
+
+Hilo 
+
+Increment 
+
+Identity 
+
+Sequence 
+
+Native 
+
+UUID 
+
+Foreign GUID 
+
+Hibernate源码中几个包的作用简要介绍
+
+缓存管理一级缓存和二级缓存的比较
+
+一级缓存的管理
+
+二级缓存的管理
+
+Hibernate与延迟加载
+
+在Web层进行延迟加载核心接口简介 Session接口
+
+SessionFactory接口
+
+Configuration接口
+
+Transaction接口
+
+Query和Criteria接口
+
+Hibernate版本更新情况
+
+Hibernate主键介绍 Assigned 
+
+Hilo 
+
+Increment 
+
+Identity 
+
+Sequence 
+
+Native 
+
+UUID 
+
+Foreign GUID 
+
+Hibernate源码中几个包的作用简要介绍
+
+缓存管理 一级缓存和二级缓存的比较
+
+一级缓存的管理
+
+二级缓存的管理
+
+Hibernate与延迟加载
+
+在Web层进行延迟加载
+
+展开 编辑本段核心接口简介
+
+　　Hibernate的核心接口一共有5个，分别为:Session、SessionFactory、Transaction、Query和Configuration。这5个核心接口在任何开发中都会用到。通过这些接口，不仅可以对持久化对象进行存取，还能够进行事务控制。下面对这五个核心接口分别加以介绍。
+
+Session接口
+
+　　Session接口负责执行被持久化对象的CRUD操作(CRUD的任务是完成与数据库的交流，包含了很多常见的SQL语句。)。但需要注意的是Session对象是非线程安全的。同时，Hibernate的session不同于JSP应用中的HttpSession。这里当使用session这个术语时，其实指的是Hibernate中的session，而以后会将HttpSession对象称为用户session。
+
+SessionFactory接口
+
+　　SessionFactory接口负责初始化Hibernate。它充当数据存储源的代理，并负责创建Session对象。这里用到了工厂模式。需要注意的是SessionFactory并不是轻量级的，因为一般情况下，一个项目通常只需要一个SessionFactory就够，当需要操作多个数据库时，可以为每个数据库指定一个SessionFactory。
+
+Configuration接口
+
+　　Configuration接口负责配置并启动Hibernate，创建SessionFactory对象。在Hibernate的启动的过程中，Configuration类的实例首先定位映射文档位置、读取配置，然后创建SessionFactory对象。
+
+Transaction接口
+
+　　Transaction接口负责事务相关的操作。它是可选的，开发人员也可以设计编写自己的底层事务处理代码。
+
+Query和Criteria接口
+
+　　Query和Criteria接口负责执行各种数据库查询。它可以使用HQL语言或SQL语句两种表达方式。
+
+编辑本段Hibernate版本更新情况
+
+　　Hibernate版本更新速度很快，目前为止有两个阶段性的版本：Hibernate2和Hibernate3，这一点程序员从其Jar文件名便可以看出来。目前最新发布的版本是Hibernate3.6.1. 　　Hibernate2系列的最高版本是Hibernate2.1.8，Hibernate3系列的最高版本是Hibernate 3.2.5 GA版，GA也就是General Availability，即推荐广泛使用的版本，但目前使用较多且较稳定的版本是Hibernate 3.1.3或Hibernat 3.1.2. 　　另外，自Hibernate3发布以来，其产品线愈加成熟，相继出现了Hibernate注释、Hibernate实体管理器、Hibernate插件工具等一系列产品套件。在方便程序员使用Hibernate进行应用程序的开发的同时，也逐渐增强了Hibernate产品线的实力。　　但目前市面上用于学习Hibernate开发的图书并不多见，大多是介绍老版的Hibernate2，最近希赛和博文联手推出的《贯通Hibernate开发》，对最新的Hibernate3作了详尽的解答，推荐读者阅读。
+
+编辑本段Hibernate主键介绍
+
+Assigned 
+
+　　Assigned方式由用户生成主键值，并且要在save()之前指定否则会抛 Hibernate相关书籍
+
+出异常　　特点：主键的生成值完全由用户决定，与底层数据库无关。用户需要维护主键值，在调用session.save()之前要指定主键值。
+
+Hilo 
+
+　　Hilo使用高低位算法生成主键，高低位算法使用一个高位值和一个低位值，然后把算法得到的两个值拼接起来作为数据库中的唯一主键。Hilo方式需要额外的数据库表和字段提供高位值来源。默认请况下使用的表是　　hibernate_unique_key，默认字段叫作next_hi。next_hi必须有一条记录否则会出现错误。　　特点：需要额外的数据库表的支持，能保证同一个数据库中主键的唯一性，但不能保证多个数据库之间主键的唯一性。Hilo主键生成方式由Hibernate 维护，所以Hilo方式与底层数据库无关，但不应该手动修改hi/lo算法使用的表的值，否则会引起主键重复的异常。
+
+Increment 
+
+　　Increment方式对主键值采取自动增长的方式生成新的主键值，但要求底层数据库的支持Sequence。如Oracle，DB2等。需要在映射文件xxx.hbm.xml中加入Increment标志符的设置。　　特点：由Hibernate本身维护，适用于所有的数据库，不适合多进程并发更新数据库，适合单一进程访问数据库。不能用于群集环境。
+
+Identity 
+
+　　Identity当时根据底层数据库，来支持自动增长，不同的数据库用不同的主 Hibernate相关书籍
+
+键增长方式。　　特点：与底层数据库有关，要求数据库支持Identity，如MySQl中是auto_increment, SQL Server 中是Identity，支持的数据库有MySql、SQL Server、DB2、Sybase和HypersonicSQL。 Identity无需Hibernate和用户的干涉，使用较为方便，但不便于在不同的数据库之间移植程序。
+
+Sequence 
+
+　　Sequence需要底层数据库支持Sequence方式，例如Oracle数据库等　　特点：需要底层数据库的支持序列，支持序列的数据库有DB2、PostgreSql、Oracle、SAPDb等在不同数据库之间移植程序，特别从支持序列的数据库移植到不支持序列的数据库需要修改配置文件
+
+Native 
+
+　　Native主键生成方式会根据不同的底层数据库自动选择Identity、Sequence、Hilo主键生成方式　　特点：根据不同的底层数据库采用不同的主键生成方式。由于Hibernate会根据底层数据库采用不同的映射方式，因此便于程序移植，项目中如果用到多个数据库时，可以使用这种方式。
+
+UUID 
+
+　　UUID使用128位UUID算法生成主键，能够保证网络环境下的主键唯一性，也就能够保证在不同数据库及不同服务器下主键的唯一性。　　特点;能够保证数据库中的主键唯一性，生成的主键占用比较多的存贮空间
+
+Foreign GUID 
+
+　　Foreign用于一对一关系中。GUID主键生成方式使用了一种特殊算法，保证生成主键的唯一性，支持SQL Server和MySQL 
+
+编辑本段Hibernate源码中几个包的作用简要介绍
+
+　　net.sf.hibernate.* 　 　　该包的类基本上都是接口类和异常类　　net.sf.hibernate.cache.* 　　　JCS的实现类　　net.sf.hibernate.cfg.* 　　　配置文件读取类 　　net.sf.hibernate.collection.* 　　　Hibernate集合接口实现类，例如List，Set，Bag等等，Hibernate之所以要自行编写集合接口实现类是为了支持lazy loading 　　net.sf.hibernate.connection.* 　 　　几个数据库连接池的Provider 　　net.sf.hibernate.dialect.* 　　　支持多种数据库特性，每个Dialect实现类代表一种数据库，描述了该数据库支持的数据类型和其它特点，例如是否有AutoIncrement，是否有Sequence，是否有分页sql等等　　net.sf.hibernate. eg.* 　　　Hibernate文档中用到的例子　　net.sf.hibernate.engine.* 　 　　这个包的类作用比较散　　net.sf.hibernate.expression.* 　 　　HQL支持的表达式　　net.sf.hibernate.hq.* 　　　HQL实现　　net.sf.hibernate. id.* 　　　ID生成器　　net.sf.hibernate.impl.* 　　　最核心的包，一些重要接口的实现类，如果Session，SessionFactory，Query等　　net.sf.hibernate.jca.* 　　　JCA支持，把Session包装为支持JCA的接口实现类　　net.sf.hibernate.jmx.* 　　　我不懂JMX，只知道JMX是用来编写App Server的管理程序的，大概是JMX部分接口的实现，使得App Server可以通过JMX接口管理Hibernate 　　net.sf.hibernate.loader.* 　 　　也是很核心的包，主要是生成sql语句的　　net.sf.hibernate.lob.* 　　　Blob和Clob支持　　net.sf.hibernate.mapping.* 　 　　hbm文件的属性实现　　net.sf.hibernate.metadata.* 　 　　PO的Meta实现　　net.sf.hibernate.odmg.* 　　　ODMG是一个ORM标准，这个包是ODMG标准的实现类　　net.sf.hibernate.persister.* 　 　　核心包，实现持久对象和表之间的映射　　net.sf.hibernate.proxy.* 　　　Proxy和Lazy Loading支持 　　net.sf.hibernate. ps.* 　 　　该包是PreparedStatment Cache 　　net.sf.hibernate.sql.* 　 　　生成JDBC sql语句的包 　　net.sf.hibernate.test.* 　 　　测试类，你可以用junit来测试Hibernate 　　net.sf.hibernate.tool.hbm2ddl.* 　 　　用hbm配置文件生成DDL 　　net.sf.hibernate.transaction.* 　 　　Hibernate Transaction实现类 　　net.sf.hibernate.type.* 　 　　Hibernate中定义的持久对象的属性的数据类型　　net.sf.hibernate.util.* 　　　一些工具类，作用比较散 　　net.sf.hibernate.xml.* 　 　　XML数据绑定
+
+编辑本段缓存管理
+
+　　Hibernate 中提供了两级Cache，第一级别的缓存是Session级别的缓存，它是属于事务范围的缓存。这一级别的缓存由hibernate管理的，一般情况下无需进行干预；第二级别的缓存是SessionFactory级别的缓存，它是属于进程范围或群集范围的缓存。这一级别的缓存可以进行配置和更改，并且可以动态加载和卸载。 Hibernate还为查询结果提供了一个查询缓存，它依赖于第二级缓存。
+
+一级缓存和二级缓存的比较
+
+　　第一级缓存 第二级缓存存放数据的形式 相互关联的持久化对象 对象的散装数据缓存的范围 事务范围，每个事务都有单独的第一级缓存进程范围或集群范围，缓存被同一个进程或集群范围内的所有事务共享并发访问策略由于每个事务都拥有单独的第一级缓存，不会出现并发问题，无需提供并发访问策略由于多个事务会同时访问第二级缓存中相同数据，因此必须提供适当的并发访问策略，来保证特定的事务隔离级别数据过期策略没有提供数据过期策略。处于一级缓存中的对象永远不会过期，除非应用程序显式清空缓存或者清除特定的对象必须提供数据过期策略，如基于内存的缓存中的对象的最大数目，允许对象处于缓存中的最长时间，以及允许对象处于缓存中的最长空闲时间物理存储介质内存内存和硬盘。对象的散装数据首先存放在基于内存的缓存中，当内存中对象的数目达到数据过期策略中指定上限时，就会把其余的对象写入基于硬盘的缓存中。缓存的软件实现在Hibernate的Session的实现中包含了缓存的实现由第三方提供，Hibernate仅提供了缓存适配器(CacheProvider)。用于把特定的缓存插件集成到Hibernate中。启用缓存的方式只要应用程序通过Session接口来执行保存、更新、删除、加载和查询数据库数据的操作，Hibernate就会启用第一级缓存，把数据库中的数据以对象的形式拷贝到缓存中，对于批量更新和批量删除操作，如果不希望启用第一级缓存，可以绕过Hibernate API，直接通过JDBC　API来执行指操作。用户可以在单个类或类的单个集合的粒度上配置第二级缓存。如果类的实例被经常读但很少被修改，就可以考虑使用第二级缓存。只有为某个类或集合配置了第二级缓存，Hibernate在运行时才会把它的实例加入到第二级缓存中。用户管理缓存的方式第一级缓存的物理介质为内存，由于内存容量有限，必须通过恰当的检索策略和检索方式来限制加载对象的数目。Session的evit()方法可以显式清空缓存中特定对象，但这种方法不值得推荐。第二级缓存的物理介质可以是内存和硬盘，因此第二级缓存可以存放大量的数据，数据过期策略的maxElementsInMemory属性值可以控制内存中的对象数目。管理第二级缓存主要包括两个方面：选择需要使用第二级缓存的持久类，设置合适的并发访问策略：选择缓存适配器，设置合适的数据过期策略。
+
+一级缓存的管理
+
+　　当应用程序调用Session的save()、update()、saveOrUpdate()、get()或load()，以及调用查询接口的 list()、iterate()或filter()方法时，如果在Session缓存中还不存在相应的对象，Hibernate就会把该对象加入到第一级缓存中。当清理缓存时，Hibernate会根据缓存中对象的状态变化来同步更新数据库。 Session为应用程序提供了两个管理缓存的方法： evict(Object obj)：从缓存中清除参数指定的持久化对象。 clear()：清空缓存中所有持久化对象。
+
+二级缓存的管理
+
+　　3.1. Hibernate的二级缓存策略的一般过程如下： 　　1) 条件查询的时候，总是发出一条select * from table_name where …. （选择所有字段）这样的SQL语句查询数据库，一次获得所有的数据对象。　　2) 把获得的所有数据对象根据ID放入到第二级缓存中。　　3) 当Hibernate根据ID访问数据对象的时候，首先从Session一级缓存中查；查不到，如果配置了二级缓存，那么从二级缓存中查；查不到，再查询数据库，把结果按照ID放入到缓存。　　4) 删除、更新、增加数据的时候，同时更新缓存。　　Hibernate的二级缓存策略，是针对于ID查询的缓存策略，对于条件查询则毫无作用。为此，Hibernate提供了针对条件查询的Query Cache。 　　3.2. 什么样的数据适合存放到第二级缓存中？ 1 很少被修改的数据 2 不是很重要的数据，允许出现偶尔并发的数据 3 不会被并发访问的数据 4 参考数据,指的是供应用参考的常量数据，它的实例数目有限，它的实例会被许多其他类的实例引用，实例极少或者从来不会被修改。　　3.3. 不适合存放到第二级缓存的数据？ 1 经常被修改的数据 2 财务数据，绝对不允许出现并发 3 与其他应用共享的数据。　　3.4. 常用的缓存插件 Hibernater 的二级缓存是一个插件，下面是几种常用的缓存插件：　　l EhCache：可作为进程范围的缓存，存放数据的物理介质可以是内存或硬盘，对Hibernate的查询缓存提供了支持。　　l OSCache：可作为进程范围的缓存，存放数据的物理介质可以是内存或硬盘，提供了丰富的缓存数据过期策略，对Hibernate的查询缓存提供了支持。　　l SwarmCache：可作为群集范围内的缓存，但不支持Hibernate的查询缓存。　　l JBossCache：可作为群集范围内的缓存，支持事务型并发访问策略，对Hibernate的查询缓存提供了支持。　　上述4种缓存插件的对比情况列于表9-3中。　　表9-3 4种缓存插件的对比情况　　缓 存 插 件 支 持 只 读 支持非严格读写 支 持 读写 支 持 事 务
+
+EhCache 是 是 是
+
+
+
+
+OSCache 是 是 是
+
+
+
+
+SwarmCache 是 是
+
+
+
+
+
+
+
+JBossCache 是
+
+
+
+
+是
+
+它们的提供器列于表9-4中。　　表9-4 缓存策略的提供器　　缓 存 插 件 提供器（Cache Providers）
+
+Hashtable（只能测试时使用） org.hibernate.cache.HashtableCacheProvider 
+
+EhCache org.hibernate.cache.EhCacheProvider 
+
+OSCache org.hibernate.cache.OSCacheProvider 
+
+SwarmCache org.hibernate.cache.SwarmCacheProvider 
+
+JBossCache org.hibernate.cache.TreeCacheProvider 
+
+在默认情况下，Hibernate使用EhCache进行JVM级别的缓存。用户可以通过设置Hibernate配置文件中的hibernate.cache.provider_class的属性，指定其他的缓存策略，该缓存策略必须实现org.hibernate.cache.CacheProvider接口。　　3.5. 配置二级缓存的主要步骤：　　1) 选择需要使用二级缓存的持久化类，设置它的命名缓存的并发访问策略。这是最值得认真考虑的步骤。　　2) 选择合适的缓存插件，然后编辑该插件的配置文件。
+
+编辑本段Hibernate与延迟加载
+
+　　Hibernate对象关系映射提供延迟的与非延迟的对象初始化。非延迟加载在读取一个对象的时候会将与这个对象所有相关的其他对象一起读取出来。这有时会导致成百的（如果不是成千的话）select语句在读取对象的时候执行。这个问题有时出现在使用双向关系的时候，经常会导致整个数据库都在初始化的阶段被读出来了。当然，你可以不厌其烦地检查每一个对象与其他对象的关系，并把那些最昂贵的删除，但是到最后，我们可能会因此失去了本想在ORM工具中获得的便利。　　一个明显的解决方法是使用Hibernate提供的延迟加载机制。这种初始化策略只在一个对象调用它的一对多或多对多关系时才将关系对象读取出来。这个过程对开发者来说是透明的，而且只进行了很少的数据库操作请求，因此会得到比较明显的性能提升。这项技术的一个缺陷是延迟加载技术要求一个Hibernate会话要在对象使用的时候一直开着。这会成为通过使用DAO模式将持久层抽象出来时的一个主要问题。为了将持久化机制完全地抽象出来，所有的数据库逻辑，包括打开或关闭会话，都不能在应用层出现。最常见的是，一些实现了简单接口的DAO实现类将数据库逻辑完全封装起来了。一种快速但是笨拙的解决方法是放弃DAO模式，将数据库连接逻辑加到应用层中来。这可能对一些小的应用程序有效，但是在大的系统中，这是一个严重的设计缺陷，妨碍了系统的可扩展性。
+
+编辑本段在Web层进行延迟加载
+
+　　幸运的是，Spring框架为Hibernate延迟加载与DAO模式的整合提供了一种方便的解决方法。以一个Web应用为例，Spring提供了OpenSessionInViewFilter和OpenSessionInViewInterceptor。我们可以随意选择一个类来实现相同的功能。两种方法唯一的不同就在于interceptor在Spring容器中运行并被配置在web应用的上下文中，而Filter在Spring之前运行并被配置在web.xml中。不管用哪个，他们都在请求将当前会话与当前（数据库）线程绑定时打开Hibernate会话。一旦已绑定到线程，这个打开了的Hibernate会话可以在DAO实现类中透明地使用。这个会话会为延迟加载数据库中值对象的视图保持打开状态。一旦这个逻辑视图完成了，Hibernate会话会在Filter的doFilter方法或者Interceptor的postHandle方法中被关闭。　　实现方法在web.xml中加入　　<filter> 　　<filter-name>hibernateFilter</filter-name> 　　<filter-class> 　　org.springframework.orm.hibernate3.support.OpenSessionInViewFilter 　　</filter-class> 　　</filter 　　<filter-mapping> 　　<filter-name>hibernateFilter</filter-name> 　　<url-pattern>*.do</url-pattern> 　　</filter-mapping> 
+
+
+
+
+
+
+
+
+
+
+五、学习顺序和条件
+
+一步一步的学，要学三个框架（struts + hibernate +spring）,建议，先学懂以下技术
+
+1、J2SE 必须的，有点废话 - - 
+
+2、数据库（Oracle,MySql...）
+
+3、JDBC 
+
+4、jsp + servlet 
+
+然后先学struts，接着学hibernate，再学spring。
+
+
+
+
+

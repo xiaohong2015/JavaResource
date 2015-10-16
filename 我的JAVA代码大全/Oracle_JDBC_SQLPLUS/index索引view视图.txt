@@ -1,0 +1,20 @@
+select index_name from user_indexes
+
+创建索引：
+craete index index_stu_email  on stu(email)
+
+
+
+
+
+SQL> conn sys/bjsxt as sysdba;
+
+SQL> grant create table,create view to scott;
+
+select view_name from user_views
+
+创建视图：
+create view v$_dept_avg_sal_info as select deptno,avg_sal,grade from
+
+(select deptno,avg(sal) avg_sal from emp group by deptno) t
+join salgrade s on (t.avg_sal between s.losal and s.hisal);

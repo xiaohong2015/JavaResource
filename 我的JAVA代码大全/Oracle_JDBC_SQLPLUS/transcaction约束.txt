@@ -1,0 +1,41 @@
+执行DDL\DCL语句时事物自动提交，不能rollback 
+
+执行DML（insert update delete）手动提交,能rollback 
+
+用定长字符串有利于提高效率
+
+
+
+
+主键primay key 即非空nou null 唯一 unique
+
+列级约束
+not null
+unique
+primay key
+foreign key
+
+default values 默认
+
+constraint stu_name_nn not null;
+constraint stu_email_un unique;
+constraint stu_id_pk primay key;
+
+
+表级约束
+constraint stu_name_nn not null(name);
+constraint stu_email_un unique(email);
+constraint stu_id_pk primay key(id);
+constraint stu_class_fk foreign key(class) references class(id);
+
+
+参考：references  
+注意：外检约束被参考的字段必须是主键
+
+表级组合约束：
+constraint stu_name_email_uni unique(email,name)
+
+
+
+
+

@@ -1,0 +1,13 @@
+com.wzp.action    -->用于存放所有的所有Action类，主要实现前后台的数据传送，以及页面的跳转
+
+com.wzp.dao   -->直接操作数据库的接口类
+
+com.wzp.dao.impl   -->直接操作数据库的接口类的实现子类，具体实现了直接对数据库的增删改查
+
+com.wzp.dto  --> 数据库表格类，用于将该包中的类与数据库中相对应的表联系在一起
+
+com.wzp.service  --> 间接操作数据库的接口类
+
+com.wzp.service.impl -->  间接操作数据库的接口类的实现子类,作用是编写好hql数据库操作语言，
+然后通过调用com.wzp.dao包中的接口类，再有com.wzp.dao包中的接口类调用com.wzp.dao.impl包中的子类，实现对数据库的直接操作。
+换句话说com.wzp.service.impl是间接操作数据库的类。

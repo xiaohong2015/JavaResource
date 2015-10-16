@@ -1,0 +1,34 @@
+超级管理员登陆：
+sqlplus sys/bjsxt as sysdba
+
+SQL:alter uesr scott account unlock;
+
+SQL:conn scott/tiger
+
+描述表：
+desc 表名（desc emp）
+
+desc 2*3 from dual【虚表】
+
+获取当前系统时间：
+select sysdate from dual
+
+
+创建数据库新用户
+
+1--backup scott
+   exp
+
+2--create user
+   create user liyang【用户名】 identified【认证】 by liyang【密码】 default tablespace users【默认表空间为user】 quota【配额】 10M on users 
+   grant【授权】 create session ,create table ,create view to liyang
+
+3--imprt the daat 
+   imp 
+
+
+数据备份create table ...as...
+
+create table dept2 as select * from dept;
+
+create table emp2 as select * from emp;

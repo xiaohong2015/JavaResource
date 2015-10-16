@@ -1,0 +1,37 @@
+hashCode
+public int hashCode()返回该对象的哈希代码值。支持该方法是为哈希表提供一些优点，例如，java.util.Hashtable 提供的哈希表。 
+hashCode 的常规协定是： 
+
+在 Java 应用程序执行期间，在同一对象上多次调用 hashCode 方法时，必须一致地返回相同的整数，前提是对象上 equals 比较中所用的信息没有被修改。从某一应用程序的一次执行到同一应用程序的另一次执行，该整数无需保持一致。 
+如果根据 equals(Object) 方法，两个对象是相等的，那么在两个对象中的每个对象上调用 hashCode 方法都必须生成相同的整数结果。 
+以下情况不 是必需的：如果根据 equals(java.lang.Object) 方法，两个对象不相等，那么在两个对象中的任一对象上调用 hashCode 方法必定会生成不同的整数结果。但是，程序员应该知道，为不相等的对象生成不同整数结果可以提高哈希表的性能。 
+实际上，由 Object 类定义的 hashCode 方法确实会针对不同的对象返回不同的整数。（这一般是通过将该对象的内部地址转换成一个整数来实现的，但是 JavaTM 编程语言不需要这种实现技巧。） 
+
+
+返回：
+此对象的一个哈希代码值。
+另请参见：
+equals(java.lang.Object), Hashtable
+
+--------------------------------------------------------------------------------
+
+equals
+public boolean equals(Object obj)指示某个其他对象是否与此对象“相等”。 
+equals 方法在非空对象引用上实现相等关系： 
+
+自反性：对于任何非空引用值 x，x.equals(x) 都应返回 true。 
+对称性：对于任何非空引用值 x 和 y，当且仅当 y.equals(x) 返回 true 时，x.equals(y) 才应返回 true。 
+传递性：对于任何非空引用值 x、y 和 z，如果 x.equals(y) 返回 true，并且 y.equals(z) 返回 true，那么 x.equals(z) 应返回 true。 
+一致性：对于任何非空引用值 x 和 y，多次调用 x.equals(y) 始终返回 true 或始终返回 false，前提是对象上 equals 比较中所用的信息没有被修改。 
+对于任何非空引用值 x，x.equals(null) 都应返回 false。 
+Object 类的 equals 方法实现对象上差别可能性最大的相等关系；即，对于任何非空引用值 x 和 y，当且仅当 x 和 y 引用同一个对象时，此方法才返回 true（x == y 具有值 true）。 
+
+注意：当此方法被重写时，通常有必要重写 hashCode 方法，以维护 hashCode 方法的常规协定，该协定声明相等对象必须具有相等的哈希代码。 
+
+
+参数：
+obj - 要与之比较的引用对象。 
+返回：
+如果此对象与 obj 参数相同，则返回 true；否则返回 false。
+另请参见：
+hashCode(), Hashtable

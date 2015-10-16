@@ -1,0 +1,184 @@
+
+
+
+因为不是同一时间传的，更全关于IO和Thread私房笔记正在审批中，
+
+以我的能力也只有拿出自己整理的笔记，分享给大家
+
+希望对同学们有所帮助……
+
+祝同学们学业有成，恭喜发财……
+
+
+
+
+package Thread;
+
+/**两个线程同时向box内添加字符串，两个线程同时调用
+ *     box的addString();方法。
+ * 两个线程同时改变一个对象，可能会出问题，假设线程1刚开辟完
+ *     空间，准备放对象时，时间片却到了，进入就绪状态。假设2亦
+ *     如此。再开始线程1时，却把对象放入线程2开辟的空间内。
+ * 所以此程序有不确定性，解决办法：只能有一个线程放对象，也就是
+ *     在同一个时刻不能有两个线程调同一个方法。(addString();)*/
+
+
+ /**实现：关键字：synchronized(obj){list.add(str);}我们希望一个线程运行
+ *     完  list.add(str); 代码之后，再让另外一个运行，那么用synchronized
+ *     关键字围起来。
+ * (obj) 括号内相当于蹲了一个看门的，java语言中，任何一个对象，除了
+ *     他自己的功能外，还有此功能。
+ * 1 本来圈 3 行就可以，圈了 5 行，会有什么后果？
+ *         范围圈的大了，同步可以实现，但降低了程序的效率。(卫生间的门和楼门)；
+ *         如果圈地少了，漏在外面的代码也会出问题。
+ * 2 选择看门人要选择合适。如下面将box.addString("thread")改为
+ *         box.removeString("thread");。这样对同一个集合同时添加和删除可以吗？
+ *         两个看门人看个两门合适吗？所以用一个看门人 obj就可以了。
+ * 3 根据具体情况具体分析。*/
+/***/
+
+
+ /** 线程同步的概念
+ * 线程同步，可理解为线程A和线程B一块配合，A执行到一定程度时
+ *     要依靠B的某个结果，于是停下来，示意B运行；B依言执行
+ *     再将结果给A；A在继续操作。
+ * 所谓同步，就是在发出一个功能调用时，在没有得到结果之前
+ *     该调用就不返回，其他线程也不能调用这个方法。
+ * 异步 和 同步。*/
+
+
+
+
+/**线程安全类：两个线程同时访问该类的一个对象不会有线程同步的问题
+ *     1)不可变类：此类现象只能读，而不能改变。
+ *             如：String
+ *     2)可变类，但是作了 synchronizsd 同步，改变他的方法，不可能两个
+ *             线程同时访问。
+ *             如：StringBuffer
+ *                     Vector
+ *                     Hashtable
+ *  * 线程不安全类.
+ *              StringBuilder
+ *              ArrayList
+ *              HashMap
+ *  那么JDK为什么不把所有的类都搞成线程安全的呢？
+ *  如果作了同步，就会有效率丧失的问题。如果单线程的话，看门人
+ *      反而会造成效率问题*/
+
+/**怎么优化下面代码？
+ * for(int i=0;i<vector.size();i++){
+ *         System.out.println(vector.get(i));
+ *     }
+ * 答案：
+ * int size = vector.size();
+ * for(int i=0;i<size;i++){
+ *     System.out.println(vector.get(i));
+ * }有vector类是线程安全的，因为size();方法是同步的，每循环一次
+ * 都得调用一次size();方法*/
+
+/**课件：
+ * Synchronized关键字
+ * 多个线程并发读写同一个临界资源时候会发生“线程并发安全问题”
+ * 常见的临界资源：
+ *         1) 多线程共享实例变量
+ *         2) 静态公共变量
+ * 使用同步代码块解决线程并发安全问题
+ * synchronized(同步监视器){}
+ *         同步监视器是一个任意对象实例，是一个多线程之间的互斥的鎖机制，
+ *         多个线程要使用同一个“监视器”对象实现同步互斥
+ *     如果方法的全部过程需要同步，可以简单使用synchronized修饰
+ *         方法，相当于整个方法的synchronized
+ * public void f(){
+ *         synchronized(this){
+ *             ……
+ *     }
+ *         }
+ * 以上代码，看门人如果写成本对象this,且f()内所有的代码都被synchronized(this){}
+ * 括了起来，可以写成 public synchronized void f(){} 样式*/
+/**wait/notify等待机制*/
+public class BoxMain {
+    public static void main(String[] args){
+        //创建一个对象box，调用Box的addString();方法.
+        final Box box = new Box();
+        
+        //匿名内部类：这个类出了此方法就没有意义了。
+        //匿名类在使用局部变量box的时候，局部变量要声明为final
+        Thread t = new Thread(){
+            public void run(){
+                for(int i=0;i<100;i++){
+                    //box.addString("thread");
+                    box.removeString("thread");
+                }
+            }
+        };
+        t.start();
+        
+        for(int i=0;i<100;i++){
+            //box.addString("#" +i);
+            box.removeString("#" + i);
+
+        }
+
+用到的类
+
+package Thread;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Box {
+    private List<String> list = new ArrayList<String>();
+    private List<String> list1 = new ArrayList<String>();
+    
+    private Object obj = new Object();
+    //new对象obj，看门人。鎖机制
+    /** 只有一个token 门牌，有门牌方可进入运行代码。外面的线程
+     * 等里面线程运行完后才能进入运行代码。*/
+    public void addString(String str){
+        synchronized(obj){
+            list.add(str);
+        }
+    }
+    
+    //private Object obj1 = new Object();
+    public void removeString(String str){
+        synchronized(obj){
+            //list.remove(str);
+            list1.remove(str);
+        }
+    }
+}
+
+    }
+}
+
+下面为用到的类
+
+package Thread;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Box {
+    private List<String> list = new ArrayList<String>();
+    private List<String> list1 = new ArrayList<String>();
+    
+    private Object obj = new Object();
+    //new对象obj，看门人。鎖机制
+    /** 只有一个token 门牌，有门牌方可进入运行代码。外面的线程
+     * 等里面线程运行完后才能进入运行代码。*/
+    public void addString(String str){
+        synchronized(obj){
+            list.add(str);
+        }
+    }
+    
+    //private Object obj1 = new Object();
+    public void removeString(String str){
+        synchronized(obj){
+            //list.remove(str);
+            list1.remove(str);
+        }
+    }
+}
+
+
+

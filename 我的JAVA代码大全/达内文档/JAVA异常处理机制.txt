@@ -1,0 +1,324 @@
+  异常结构中的父类Throwable类，其下子类Exceptionlei类和Error类
+    我们在程序中可以捕获的是Exception的子类异常
+    Error系统级别的错误：Java运行时环境出现的错误，我们不可控
+    Exception是程序级别的错误：我们可控
+    1）异常处理语句：try-catch，如果try块捕获到异常，则到catch块中处理，否则跳过忽略catch块。
+        try{//关键字，只能有一个try语句
+                    可能发生异常的代码片段
+        }catch(Exception e){//列举代码中可能出现的异常类型，可有多个catch语句
+                      当出现了列举的异常类型后，在这里处理，并有针对性的处理
+        }
+    2）良好的编程习惯，在异常捕获机制的最后书写catch(Exception e)（父类，顶极异常）捕获未知的错误(或不需要针对处理的错误)。
+    3）catch的捕获是由上至下的，所以不要把父类异常写在子类异常的上面，否则子类异常永远没有机会处理！在catch块中可以使用方法获取异常信息：
+            getMessage()方法：用来得到有关异常事件的信息。
+            printStackTrace()方法：用来跟踪异常事件发生时执行堆栈的内容。
+    4）throw关键字：用于主动抛出一个异常
+        当我们的方法出现错误时(不一定是真实异常)，这个错误我们不应该去解决，而是通知调用方法去解决时，会将这个错误告知外界，而告知外界的方式就是throw异常（抛出异常）catch语句中也可抛出异常。
+        虽然不解决，但要捕获，然后抛出去。
+        使用环境：
+        我们常在方法中主动抛出异常，但不是什么情况下我们都应该抛出异常。原则上，自身决定不了的应该抛出。那么方法中什么时候该自己处理异常什么时候抛出？
+        方法通常有参数，调用者在调用我们的方法帮助解决问题时，通常会传入参数，若我们方法的逻辑是因为参数的错误而引发的异常，应该抛出，若是我们自身的原因应该自己处理。
+    eg：
+    public static void main(String[] args) {
+        try{
+            /**
+             * 通常我们调用方法时需要传入参数的话，那么这些方法
+             * JVM都不会自动处理异常，而是将错误抛给我们解决
+             */
+            String result=getGirlFirend("女神");
+            System.out.println("追到女神了么？"+result);
+        }catch(Exception e){
+            //我们应该在这里捕获异常并处理。
+            System.out.println("没追到");
+        }
+    }
+    public static String getGirlFirend(String name){
+        try{
+            if("春哥".equals(name)){
+                return "行";
+            }else if("曾哥".equals(name)){
+                return "行";
+            }else if("我女朋友".equals(name)){
+                return "不行";
+            }else{
+                /**
+                 * 当出现了错误(不一定是真实异常)
+                 * 我们可以主动想外界抛出一个异常！
+                 */
+                throw new RuntimeException("人家不干！");
+            }
+        }catch(NullPointerException e){
+            throw e;//出了错不解决，抛给调用者解决
+        }
+        
+    }
+    5）throws关键字：不希望直接在某个方法中处理异常，而是希望调用者统一处理该异常。声明方法的时候，我们可以同时声明可能抛出的异常种类，通知调用者强制捕获。就是所谓的“丑话说前面”。
+        throws可以在方法声明时声明抛出的异常，原则上throws声明的异常，一定要在该方法中抛出。否则没有意义。相反的，若方法中我们主动通过throw抛出一个异常，应该在throws中声明该种类异常，通知外界捕获。
+        注意throw和throws关键字的区别，笔试    抛出异常，声明抛出异常
+        不能在main方法上throws，因为调用者JVM直接关闭程序
+     eg：    public static void main(String[] args) {
+                try{//不能在main方法上throws，因为调用者JVM直接关闭程序
+                    Date today=stringToDate("2013-05-20");
+                }catch(ParseException e){
+                    //catch中必须含有有效的捕获stringToDate方法throws的异常
+                    /**
+                     * 输出这次错误的栈信息
+                     * 可以直观的查看方法调用过程和出错的根源
+                     */
+                    e.printStackTrace();
+                }
+            }
+    /**
+     * 将一个字符串转换为一个Date对象，java.util.Date
+     * @param str    yyyy-MM-dd
+     * 抛出的异常是字符格式错误
+     * java.text.ParseException
+     */
+    public static Date stringToDate(String str) throws ParseException{
+        SimpleDateFormat format=
+                    new SimpleDateFormat("yyyy-MM-DD");
+        Date date=format.parse(str);
+        //public Date parse(String source) throws ParseException
+        return date;
+    }
+         SimpleDataFormat的parse方法在声明的时候就是用了throws，强制我们调用parse方法时必须捕获ParseException，我们的做法有两种：一是添加try-catch捕获该异常，二是在我们的方法中声明出也追加这种异常的抛出（继续往外抛）。
+    6）java中抛出异常过程：
+       java虚拟机在运行程序时，一但在某行代码运行时出现了错误，JVM会创建这个错误的实例，并抛出。这时JVM会检查出错代码所在的方法是否有try捕获，若有，则检查catch块是否有可以处理该异常的能力（看能否把异常实例作为参数传进去，看有没有匹配的异常类型）。若没有，则将该异常抛给该方法的调用者（向上抛）。以此类推，直到抛至main方法外仍没有解决（即抛给了JVM处理）。那么JVM会终止该程序。        
+    7）java中的异常Exception分为：
+        非检测异常：编译时不检查异常。若方法中抛出该类异常或其子类，那么声明方法时可以不在throws中列举该类抛出的异常。常见的为运行时异常（RuntimeException）如：NullPointerException
+        IllegalArgumentException,ClassCastException,NumberFormatException，
+        ArrayIndexOutOfBoundsException（它不是RuntimeException的子类，但它是非检测异常）
+        可检测异常：编译时检查，除了运行时异常之外的异常，都是可检查异常，则必须在声明方法时用throws声明出可能抛出的异常种类！
+    8）finally块
+        finally块定义在catch块的最后（所有catch最后），且只能出现一次（0－1次）， 无论程序是否出错都会执行的块！ 无条件执行！通常在finally语句中进行资源的消除工作，如关闭打开的文件，删除临时文件等。
+        final和finally的区别，笔试
+    eg：    public static void main(String[] args) {
+                System.out.println(
+                        test(null)+","+test("0")+","+test("")
+                );
+            }
+            /**
+             * 输出结果？
+             * 1,0,2
+             * 4,4,4正确结果
+             */
+            public static int test(String str){
+                try{
+                    return    str.charAt(0)-'0';
+                }catch(NullPointerException e){
+                    return 1;
+                }catch(RuntimeException e){
+                    return 2;
+                }catch(Exception e){
+                    return 3;
+                }finally{//无条件执行
+                    return 4;
+                }
+            }
+    9）重写方法时的异常处理
+        如果使用继承时，在父类别的某个地方上宣告了throws某些异常，而在子类别中重新定义该方法时，可以：
+        1不处理异常（重新定义时不设定throws）
+        2可仅throws父类别中被重新定义的方法上的某些异常（抛出一个或几个）
+        3可throws被重新定义的方法上的异常之子类别（抛出异常的子类）
+    但不可以：
+        1throws出额外的异常
+        2throws被重新定义的方法上的异常之父类别（抛出了异常的父类）  
+
+
+5.2 File文件类
+    java使用File类（java.io.File）表示操作系统上文件系统中的文件或目录。换句话说，我们可以使用File操作硬盘上的文件或目录进行创建或删除。
+    File可以描述文件或目录的名字，大小等信息，但不能对文件的内容操作！File类的构造器都是有参的。
+    1）关于路径的描述：不同的文件系统差异较大，Linux和Windows就不同！最好使用相对路径，不要用绝对路径。
+    2）"."代表的路径：当前目录（项目所处的目录），在eclipse_workspace/project_name下，File.separator：常量，目录分隔符，推荐使用！根据系统自动识别用哪种分割符，windows中为/，Linux中为\。
+    3）创建该对象并不意味着硬盘上对应路径上就有该文件了，只是在内存中创建了该对象去代表路径指定的文件。当然这个路径对应的文件可能根本不存在！
+    eg：File file=new File("."+File.separator+"data.dat");//  效果为./data.dat
+        //File file=new File("e:/XX/XXX.txt");不建议使用
+    4）createNewFile()中有throws声明，要求强制捕获异常！
+    5）新建文件或目录：    
+        boolean mkdir()：只能在已有的目录基础上创建目录。
+        boolean mkdirs()：可以创建所有必要的父目录（不存在的自动创建）并创建该目录。
+        boolean createNewFile()：创建一个空的新文件。
+    6）创建目录中文件的两种方式：
+        1：直接指定data.dat需要创建的位置，并调用createNewFile()，前提是目录都要存在！
+            2：先创建一个File实例指定data.dat即将存放的目录，若该目录不存在，则创建所有不存在的目录，再创建一个File实例，代表data.dat文件，创建是基于上一个代表目录的File实例的。使用File(File dir,String fileName)构造方法创建File实例，然后再调用createNewFile()：在dir所代表的目录中表示fileName指定的文件
+    eg：File dir=new File("."+File.separator+"demo"+File.separator+"A");
+        if(!dir.exists()){ dir.mkdirs();//不存在则创建所有必须的父目录和当亲目录        }
+        File file=new File(dir,"data.dat");
+        if(!file.exists()){file.createNewFile();System.out.println("文件创建完毕！");        }
+    7）查看文件或目录属性常用方法
+        long length()：返回文件的长度。
+        long lastModified()：返回文件最后一次被修改的时间。
+        String getName()：返回文件或目录名。
+        String getPath()：返回路径字符串。
+        boolean exists()：是否存在。
+        boolean isFile()：是否是标准文件。
+        boolean isDirectory()：是否是目录。
+        boolean canRead()：是否可以读取。
+        boolean canWrite()：是否可以写入、修改。
+    eg1：File dir=new File(".");    //是否为一个目录
+        if(dir.exists()&&dir.isDirectory()){
+                //获取当亲目录的子项（文件活目录）
+                File[] files=dir.listFiles();
+                //循环子项
+                for(File file:files){
+                    //若这个子项是一个文件
+                    if(file.isFile()){
+                        System.out.println("文件："+file.getName());
+                    }else{
+                        System.out.println("目录："+file.getName());
+                    }
+                }
+            }
+    eg2:File[] files=dir.listFiles();
+        //判断子项数组有项
+        if(files!=null&&files.length>0){
+            //遍历该目录下的所有子项
+            for(File file:files){
+                //若子项是目录
+                if(file.isDirectory()){
+                    /**
+                     * 当前方法的作用就是给定一个目录，输出目录下的所有子项，
+                     * 所以，若这个还是一个目录，自然还可以通过当亲方法输出其子项
+                     * 这种在当前方法中调用当亲方法的行为被称为递归。
+                     * 不到万不得已，尽量不使用递归，非常消耗资源的方式
+                     */
+                    listDirectory(file);
+                //否则是一个文件，那么我们直接输出文件名
+                }else{
+                    System.out.println("文件："+file);//有路径显示，输出File的toString()
+                                          //file.getName()无路径显示，只获取文件名
+                }
+            }
+        }
+
+    8）删除一个文件    boolean delete()        
+        1 直接写文件名作为路径和"./data.dat"代表相同文件，也可直接写目录名，但要注意第2条。
+        2 删除目录时：要确保该目录下没有任何子项后才可以将该目录删除，否则删除失败！
+        eg:
+            File[] files=dir.listFiles();
+        if(files!=null&&files.length>0){
+            for(File file:files){
+                if(file.isDirectory()){
+                    //递归删除子目录下的所有子项
+                    deleteDirectory(file);
+                }else{
+                    if(!file.delete()){
+                        throw new IOException("无法删除文件："+file);
+                    }
+                    System.out.println("文件："+file+"已被删除！");
+                }
+            }
+    
+    9）FileFilter：文件过滤器
+        FileFilter是一个接口，不可实例化，可以规定过滤条件，在获取某个目录时可以通过给定的删选条件来获取满足要求的子项。
+    eg：重写accept方法
+    FileFilter filter=new FileFilter(){
+            /**accept方法是用来定义过滤条件的
+             * 参数pathname是将被过滤的目录中的每个子项一次传入进行匹配
+             * 若我们认为该子项满足条件则返回true
+             */
+            public boolean accept(File pathname){
+                //保留文件名以.java结尾的
+                return pathname.getName().endsWith(".java");
+                //return pathname.length()>1700;按大小过滤
+            }
+        };
+        //创建一个目录
+        File dir=new File(".");
+        //获取过滤器中满足条件的子项
+        File[] sub=dir.listFiles(filter);//回调模式
+        for(File file:sub){
+            System.out.println(file);
+        }
+    10）回调模式
+        我们定义一段逻辑，在调用其他方法时，将该逻辑通过参数传入。这个方法在执行过程中会调用我们传入的逻辑来达成目的。这种现象就是回调模式。
+        最常见的应用环境：按钮监听器，过滤器的应用
+
+
+…………………………
+
+……………………
+
+………………
+
+…………
+
+……
+
+…
+
+5.4基本流：FIS和FOS
+        Java I/O 输入/输出   
+          流：根据方向分为：输入流和输出流。方向的定了是基于我们的程序的。流向我们程序的流叫做：输入流；从程序向外流的叫做：输出流
+        我们可以把流想象为管道，管道里流动的水，而java中的流，流动的是字节。
+
+        图…………………………………………02 －3
+
+        1）输入流是用于获取（读取）数据的，输出流是用于向外输出（写出）数据的。
+        InputStream：该接口定义了输入流的特征
+        OutputStream：该接口定义了输出流的特征
+        2）流根据源头分为：
+            基本流（节点流）：从特定的地方读写的流类，如磁盘或一块内存区域。即有来源。
+            处理流（高级流、过滤流）：没有数据来源，不能独立存在，它的存在是用于处理基本流的。
+        3）流根据处理的数据单位不同划分为：
+            字节流：以一个“字节”为单位，以Stream结尾
+            字符流：以一个“字符”为单位，以Reader/Writer结尾
+        4）close()方法：流用完一定要关闭！流关闭后，不能再通过其读、写数据
+        5）用于读写文件的字节流FIS/FOS（基本流）
+            FileInputStream：文件字节输入流
+            FileOutputStream：文件字节输出流
+        6）FileInputStream    常用构造方法：
+            FileInputStream(File file)：通过打开一个到实际文件的连接来创建一个FileInputStream，该文件通过文件系统中的File对象file指定。即向file文件中写入数据。
+            FileInputStream(String filePath)：通过打开一个到实际文件的连接来创建一个FileInputStream，该文件通过文件系统中的文件路径名指定。也可直接写当前项目下文件名。
+            常用方法：
+            int read(int d):读取int值的低8位。
+            int read(byte[] b):将b数组中所有字节读出，返回读取的字节个数。
+            int read(byte[] b,int offset,int length):将b数组中offset位置开始读出length个字节。
+            available()方法：返回当前字节输入流 可读取的总字节数。
+        7）FileOutputStream常用构造方法：
+            FileOutputStream(File File)：创建一个向指定File对象表示的文件中写入数据的文件输出流。会重写以前的内容，向file文件中写入数据时，若该文件不存在，则会自动创建该文件。
+            FileOubputStream(File file,boolean append)：append为true则对当前文件末尾进行写操作（追加，但不重写以前的）。
+            FileOubputStream(String filePath)：创建一个向具有指定名称的文件中写入数据的文件输出流。前提路径存在，写当前目录下的文件名或者全路径
+            FileOubputStream(String filePath,boolean append)：append为true则对当前文件末尾进行写操作（追加，但不重写以前的）。
+            常用方法：
+            void write(int d):写入int值的低8位。
+            void write(byte[] d):将d数组中所有字节写入。
+            void write(byte[] d,int offset,int length):将d数组中offset位置开始写入length个字节。
+
+
+
+5.5缓冲字节高级流：BIS和BOS
+            对传入的流进行处理加工，可以嵌套使用.
+            1）BufferedInputStream：缓冲字节输入流
+                构造方法：BufferedInputStream(InputStream in)和 BufferedInputStream(InputStream in, int size)
+                常用方法：
+                int read()：从输入流中读取一个字节。
+                int read(byte[] b,int offset,int length)：从此字节输入流中给定偏移量offset处开始将各字节读取到指定的 byte 数组中。
+            2）BufferedOutputStream：缓冲字节输出流
+                构造方法：BufferedOutputStream(OutputStream out)和BufferedOutputStream(OutputStream out, int size)
+                常用方法：
+                void write(int d)：将指定的字节写入此缓冲的输出流。
+                void write(byte[] d,int offset,int length)：将指定 byte数组中从偏移量 offset开始的 length个字节写入此缓冲的输出流。
+                void flush()：将缓冲区中的数据一次性写出，“清空”缓冲区。
+                内部维护这一个缓冲区，每次都尽可能的读取更多的字节放入到缓冲区，再将缓冲区中的内容部分或全部返回给用户。因此可以提高读写效率。
+            3）辨别高级流的简单方法：看构造方法，若构造方法要求传入另一个流，那么这个流就是高级流。所以高级流是没有空参数的构造器的，都需要传入一个流。
+            4）有缓冲效果的流，一般为写入操作的流，在数据都写完后一定要flush,flush的作用是将缓冲区中未写出的数据一次性写出：bos.flush();即不论缓存区有多少数据，先写过去，缓冲区再下班～确保所有字符都写出
+            5）使用JDK的话，通常情况下，我们只需要关闭最外层的流。第三方流可能需要一层一层关。
+
+
+5.6基本数据类型高级流：DIS和DOS
+            是对“流”功能的扩展，简化了对基本类型数据的读写操作。
+            1）DataInputStream(InputStream in)：可以直接读取基本数据类型的流
+                常用方法：
+                int readInt()：连续读取4个字节（一个int值），返回该int值
+                double readDouble()：连续读取8个字节（一个double值），返回double值
+                String readUTF()：连续读取字符串
+                ……
+            2）DataOutputStream(OutputStream out)：可以直接写基本数据类型的流
+                常用方法：
+                void writeInt(int i)：连续写入4个字节（一个int值）
+                void writeLong(long l)：连续写入8个字节（一个long值）
+                void writeUTF(String s)：连续写入字符串
+                void flush()：将缓冲区中的数据一次性写出，“清空”缓冲区。
+                ……
+

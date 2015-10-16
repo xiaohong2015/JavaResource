@@ -1,0 +1,58 @@
+有3个表S,C,SC
+S(SNO,SNAME)            （学号，姓名）
+C(CNO,CNAME,CTEACHER)   （课号，课名，教师）
+SC(SNO,CNO,SCGREADE)    （学号，课号，成绩）
+
+问题：
+1、找出没有选过“黎明”老师的所有学生姓名。
+2、列出2门以上（含2门）不及格学生姓名及平均成绩。
+3、既学过1号课程又学过2号课程的所有学生姓名。
+
+答案：
+1、select sname from c join sc on (s.sno=c.cno)
+join sc on (sc.cno=c.cno) where ctaecher <> '黎明';
+
+2、select sname from s where sno in(select sno from sc where scgread<60 
+group by sno having count(*)>=2;
+
+3、select sname from s where sno in
+(select sno from sc where cno=2 and cno in(select distinct sno from sc where cno=2);
+
+
+
+
+
+company table 
+
+companyname（公司）	        id（编号）
+LS			6
+DG			9
+GR			19
+
+
+employeehired table
+
+id(公司)	numhired（人数）	fiscalqurter（财季）
+6		2			1	
+9		2			4
+19		4			1
+
+1、找出表中的主键
+    company table 中 id（编号）为主键；
+    employeehired table 中 id(公司)及fiscalqurter（财季） 为主键（组合组建）；
+
+2、找出表之间的关系
+   employeehired table 中的 id(公司) 参照 company table 中的 id（编号）；
+
+3、求第四季招聘过员工的公司名称
+   select companyname from company join employeehired
+  on(company.id=employeehired.id)  where fiscalqurter=4；
+
+4、求从一到四财季从没有招聘过员工的公司名称
+   select compayname from compay where compay.id not in 
+    (select distinct id from employeehired 
+       where  fiscalqurter<>1 and fiscalqurter<>2 and fiscalqurter<>3 and fiscalqurter<>4; )
+
+5、求从一到四财季之间招聘过员工的公司名称和他们各自招聘的员工总数
+  select companyname from company c join 
+    (select id,sun(numhired) from  employeehired group by id) t on     (company.id=employeehired.id)

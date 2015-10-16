@@ -1,0 +1,349 @@
+Declare
+
+Begin 
+
+Exception
+
+End;
+
+PL语言是为了补充SQL语言
+
+示例01：
+begin 
+  dbms_output.put_line('HELLOWORD!');
+end;
+
+
+示例02：
+set serveroutput on;
+begin 
+  dbms_output.put_line('HELLOWORD!');
+end;
+
+
+示例03：
+declare 
+   v_name varchar2(20);
+begin 
+  v_name := 'myname'
+  dbms_output.put_line('v_name');
+end;
+
+
+
+示例04：PL_SQL语句块组成
+declare 
+   v_num number :=0;
+begin 
+  v_num := 2/v_num;
+  dbms_output.put_line(v_num);
+exception 
+  when others then 
+     dbms_output.put_line('error');
+end;
+
+
+--常用变量类型
+1、	binary_integer:整数，主要用来计数而不是用来表示字段类型
+2、	number:数字类型
+3、	char:定长字符串
+4、	varchar2:变长字符串
+5、	date:日期
+6、	long:长字符串，最长为2GB
+7、	boolean:布尔类型，可取值为true,fals和null(PL_SQL默认值)
+
+
+--变量声明
+declare
+	v_temp number(4);
+	v_count binary_integer :=0;
+	v_sal number(7,2) :=4000.00;
+	v_date date :=sysdate;
+	v_pi constant number(3,2) :=3.14;
+	v_valid boolean :=false;  --注意要给定初值，默认值为空值null
+	v_name varchar2(20) not null :='myName'
+begin 
+	dbms_output.put_line('v_temp value:' || v_temp);
+end;
+
+
+--变量声明，使用%type属性
+     %type类型可以保证定义的变量的  数据类型  和  长度 与数据表中对应的表示一致，
+即使数据表中的数据类型和长度发生了变化，也可以保持一直。
+declare
+  v_empno number(4);
+  v_empno2 enp.empno%type;
+  v_empno3 v_empno2%type;
+begin
+  dbms_output.put_line('Test');
+end;
+
+ 
+--Table变量声明(table 相当于java里面的数组array[]):
+declare
+   type[关键字，相当于数组] type_table_emp_empno[新类型名] is table of emp.empno%type 【index by】 binary_integer;
+       v_enpnos  type_table_emp_empno;
+begin  
+    v_enpnos(0) := 7369;
+    v_enpnos(2) := 7389; 
+    v_enpnos(-1) := 9999;
+    dbms_output.put_line(v_enpnos(-1));
+end;
+
+
+--Record变量类型（类似于JAVA里类）
+declare
+   type type_record_dept is record 
+    (
+	deptno dept.deptno%type,
+	dname dept.dname%type,
+	loc dept.loc%type
+    );
+    v_temp type_record_dept;
+begin 
+   v_temp.deptno :=50;
+   v_temp.dname :='aaaa';
+   v_temp.loc :='bj';
+   dbms_output.put_line(v_temp.deptno ||' '||v_temp.dname);
+end;
+
+
+
+--使用%rowtype声明record变量
+declare
+    v_temp type%rowtype;
+begin 
+   v_temp.deptno :=50;
+   v_temp.dname :='aaaa';
+   v_temp.loc :='bj';
+   dbms_output.put_line(v_temp.deptno ||' '||v_temp.dname);
+end;
+
+
+
+--SQL语句的运用
+案例一：
+declare
+    v_name emp.ename%type;
+    v_sal emp.ename%type;
+begin 
+   select ename,sal into v_ename,v_sal from emp 
+      where empno=7369;
+   dbms_output.put_line(v_name ||' '||v_sal);
+end;
+
+案例二：
+declare
+    v_emp emp%rowtype;
+begin 
+   select * into v_emp from emp  where empno=7369
+   dbms_output.put_line(v_emp);
+end;
+
+
+--循环loop
+declare
+   i binary_integer :=1;
+degin 
+   loop 
+     dbms_output.put_line(i);
+       i := (i+1);
+     exit when(i>=11);
+   end loop;
+end; 
+
+
+--循环for
+begin 
+   for k in 1..10 loop
+      dbms_output.put_line(k);
+   end loop;
+
+   for k in reverse 1..10 loop
+      dbms_output.put_line(k);
+   end loop;
+end;
+
+
+ 
+PL_SQL重点/游标
+1、声明游标
+2、打开游标
+3、提取结果
+4、关闭游标
+
+--游标cursor
+案例一：
+declare
+   cursor c is
+           select * from emp;
+   v_emp c%rowtype;
+begin 
+   open c;
+     fetch c into v_emp;
+     dbms_output.put_line(v_emp.ename);
+   close c;
+end;
+
+
+案例二：
+declare
+   cursor c is
+           select * from emp;
+   v_emp c%rowtype;
+begin 
+   open c;
+   loop
+
+     fetch c into v_emp;
+     exit when (c%notfound);  -- isopen /notfound /found /rowcount/
+     dbms_output.put_line(v_emp.ename);
+
+   end loop;
+   close c;
+end;
+
+
+案例三：
+declare
+   cursor c is
+           select * from emp;
+   v_emp c%rowtype;
+begin 
+   open c;
+   fetch c into v_emp;
+   while (c%found) loop
+
+     dbms_output.put_line(v_emp.ename);
+
+   end loop;
+   close c;
+end;
+
+
+案例四：【重要】
+declare
+   cursor c is
+           select * from emp;
+begin 
+   for v_emp in c loop
+【不用声明v_emp ，for循环自动帮你声明】
+【游标不需要打开，for开始的时候自动帮你打开游标；游标不需要关闭，for结束的时候自动帮你关闭游标】
+【不用每次都fetch，它自动fetch完成后跳到下一条记录】
+     dbms_output.put_line(v_emp.ename);
+
+   end loop;
+   close c;
+end;
+
+
+
+
+案例四：带参数的游标
+declare
+   cursor c(v_deptno  emp.deptno%type , v_job emp.job%type) is
+           select ename,sal from emp where deptno = v_deptno
+             and job = v_job;
+begin 
+
+   for v_temp in c(30,'CLERK') loop
+     dbms_output.put_line(v_temp.ename);
+   end loop;
+
+end;
+
+
+
+
+--存储过程：
+
+创建存储过程produre:为程序块起一个名字
+create or replace procedure p
+is 
+   PL_SQL 程序块
+
+
+执行存储过程01 execute:执行
+exec p 
+
+
+执行存储过程02
+begin  
+   p;
+end;
+
+
+
+--带参数的存储过程
+-in 传入参数 
+-out 传出参数
+create or replace procedure p
+     (v_a in number , v_b number【默认为输入参数】 , v_ret out number , v_temp in out number)
+is
+
+begin
+    if(v_a > v_b) then
+        v_ret :=v_a;
+    else  
+        v_ret :=v_b;
+    end if 
+        v_temp := v_temp + 1;
+end;
+
+
+调用过程：
+declare 
+   v_a number := 3;
+   v_a number := 4;
+   v_ret number ;
+   v_temp number := 5;
+
+begin 
+   p(v_a , v_b , v_ret , v_temp);
+   dbms_output.put_line(v_ret);
+   dbms_output.put_line(v_temp);
+end;
+
+
+
+function：函数
+create or replace function sal_tax
+   (v_sal number)
+   return number
+is 
+begin
+   if(v_sal < 2000)
+       return 0.1;
+   elsif(v_sal < 275)
+       return 0.15;
+   else
+       return .0.20;
+    end if;
+end;
+
+
+
+重要概念：触发器
+create table emp2_log
+(
+uname varcher2(20);
+action varcher2(10);
+action date
+);
+
+
+trigger：触发器示例
+create or replace trigger trig
+  after inset or delete or update on emp2 for each row
+begin 
+   if inserting then
+        insert into emp_log values(USER ,'insert',sysdate);
+    slsif uptating then
+        insert into emp_log values(USER ,'uptate',sysdate);
+    elsif deleting then
+        insert into emp_log values(USER ,'delete',sysdate);
+    end if;
+ebd;
+
+   
+

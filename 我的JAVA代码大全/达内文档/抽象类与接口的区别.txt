@@ -1,0 +1,161 @@
+抽象类（abstract）:
+
+
+
+   
+人们认识事物的时候，会把具有相同特征和行为的事物归为一个抽象类。用abstract修饰，abstract可以修饰方法也可以修饰类，分别叫做抽象方法和抽象类。
+
+
+
+特点：
+
+
+
+1. 有抽象方法的类一定是抽象类，但是抽象类中不一定都是抽象方法，也可以有具体方法。
+
+
+
+2. 抽象类的第一个非抽象子类必须要实现其父类所有的抽象方法，其中也包括了父类继承的抽象方法。
+
+
+
+接口：
+
+
+
+  接口是一种特殊的抽象类。implements实现接口中的方法。
+
+
+
+接口编程的原则：
+
+
+
+1. 能用接口就用接口
+
+
+
+2. 用若干个小接口取代一个大接口
+
+
+
+区别：
+
+
+
+语法区别：
+1.抽象类有构造方法，接口中不能有
+
+2. 抽象类有普通成员变量，接口中没有
+
+3. 抽象类可以有非抽象方法，接口中不能有
+
+4. 抽象类可以用public、protected，接口中之能是public（默认为public）
+
+5. 抽象类包含静态方法，接口中没有
+
+6. 接口中的变量只能是public static final，抽象类中可以是任意类型修饰
+
+7. 一个类可以实现多个接口，但是只能继承一个抽象类。
+
+
+
+应用上的区别：
+接口更多的是在系统设计上发挥作用，主要用于定义模块之间的通信契约。
+
+抽象类在代码实现方面发挥作用，可以实现代码重写。
+
+
+
+例子：假如项目所有的Servlet类都要用相同的方式进行权限判断、记录访问日志和异常处理，那么就可以定义一个抽象基类，在抽象积累的service方法中完成权限判断、记录访问日志、异常处理的代码，各个子类完成各自业务逻辑
+
+
+
+
+
+
+
+
+
+? 
+
+
+ 
+ 
+ 
+
+
+
+public
+abstractclassBaseServlet { 
+
+
+
+  
+
+
+　　publicfinalvoidservice () 
+throwsIOExcetion,ServletException{
+
+
+　       记录访问日志 
+
+
+
+　　　　权限判断 
+
+
+
+　　if(具有权限){
+
+
+　　try{
+
+
+　　doService(); 
+
+
+
+}catch（Excetpion e）{ 
+
+
+
+    记录异常信息    
+
+
+}
+
+
+}　 
+
+
+
+}  
+
+
+
+protectedabstract
+voiddoService() 
+throwsIOExcetion,ServletException;//注意访问权限定义成protected，显得既专业，又严谨，因为他是专门给子类用的
+
+
+}
+
+
+public
+classMyServlet1 
+extendsBaseServlet{
+
+
+    protectedvoiddoService(){ 
+
+
+
+    本Servlet只处理具体业务逻辑代码 
+
+
+
+}
+
+
+} 

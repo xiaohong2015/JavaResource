@@ -1,0 +1,14 @@
+public class TestGame{ 
+	public static void main(String [ ] args){
+		Game[ ]  game = new Game[10];
+		game[0] = new Basketball( );
+		game[1] = new Folltball( );
+		game[2] = new Volleyball( );
+
+ 	for(int i = 0 ; i<game.length ; i++)
+		{
+			if(game[i]!=null)
+			game[ i ] .play();
+		}
+	}
+}

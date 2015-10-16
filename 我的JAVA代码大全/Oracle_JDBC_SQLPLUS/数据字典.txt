@@ -1,0 +1,11 @@
+数据字典表：
+
+select user_name from user_tables
+select view_name from user_views
+select constraint_name from user_constraints
+select index_name from user_indexes
+
+select constraint_name from user_constraints
+
+
+select table_name from dictionary【对数据字典表的描述】

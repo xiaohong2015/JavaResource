@@ -1,0 +1,2 @@
+del /f *.class
+exit

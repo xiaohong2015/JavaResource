@@ -1,0 +1,96 @@
+通过网页键入Oracle数据库：http://127.0.0.1:5560/issqlplus
+
+select_where;
+
+1、任何含有空值的数学表达式计算出来对的结果都是空值；
+
+2、字符串连接符||
+例如：  select ename||sal from emp;
+
+3、含有特殊字符如：单引号'，用两个单引号代替一个单引号(注意两个单引号不等于一个双引号)
+select ename || 'sadfa''dfsadf' from emp;
+
+4、distinct 去掉重复；
+
+5、where过滤条件;
+
+501、[>,<,>=,<=,<>,between hivalue.and lovalue.]
+
+502、in not null/is null;
+
+503、in(value1,value2,value3,....)
+
+504、日期处理sysdate(dd-mm-yy)
+
+505、条件1 or 条件2
+
+506、like匹配/not like 不匹配， _一个字符，%零个或多个（含有特殊字符%：'%\ %%'(默认转义字符为反斜杠)或者‘%$%%’escape（自己制定转义字符） '$'）
+
+6、升序asc降序desc;
+
+order by 字段名 asc/desc,  
+混合使用select ename,sal,deptno from emp order by deptno asc,ename desc;
+
+
+
+
+练习题
+  1.   查询职员表中工资大于5600 的员工姓名和工资 ；
+
+	select ename,sal from emp where sal>5600;
+
+  2.   查询职员表中员工号为1008 的员工的姓名和部门号码 ；
+	
+	select ename,deptno from emp where deptno=1008;
+
+  3.   选择职员表中工资不在6000 到8000 的员工的姓名和工资 ；
+	
+	select ename,sal from emp where sal not between 6000 and 8000;
+
+  4.   选择职员表中在20 和30 号部门工作的员工姓名和部门号 ；
+	
+	select ename,deptno from emp where deptno in(20,30);
+
+  5.   选择职员表中没有管理者的员工姓名及职位,  按职位排序 ；
+	
+	select ename,job from emp where mgr is null order by job;
+
+  6.   选择职员表中有奖金的员工姓名，工资和奖金，按工资倒序排列   
+	
+	select ename,sal,bonus from emp where bonus is not null order by sal desc;
+
+  7.   选择职员表中员工职位的第二个字母是a 的员工姓名 
+	
+	select eneme from emp where job like '_a%';
+  
+  8.   列出部门表中的部门名字和所在城市；  
+	
+	select dname,location from dept;
+ 
+  9.   显示出职员表中的不重复的职位；
+	
+	select distinct job from emp;
+ 
+  10.  连接职员表中的职员名字、职位、薪水，列之间用逗号连接，列头显示成OUT_PUT  
+    
+  提示1: 字符串连接符||        提示2 ：用别名控制列头显示   
+
+	select ename||','||job||','||sal OUT_PUT from emp;
+
+  11.  查询职员表emp 中员工号、姓名、工资，以及工资提高百分之20%后的结果  
+
+	select empno,ename,sal,sal*(1+0.2) new_sal from emp;
+ 
+  12.  查询员工的姓名和工资数,条件限定为工资数必须大于7200 ，并对查询结果按入职时间进行排列，早入职排在前面，晚入职排在后面。 
+
+	select ename,sal from emp where sal>7200 order by hirdate; 
+
+  13.  列出除了ACCOUNT 部门还有哪些部门。(dname<>'ACCOUNT ') 
+
+	select deptno,dname,loc from dept where dname<>'ACCOUNT' ;
+
+
+
+
+
+
