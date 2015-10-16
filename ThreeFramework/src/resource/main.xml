@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC 
+	"-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" 
+	"http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+	<include file="resource/base.xml"></include>
+	
+	<!-- user -->
+	<package name="user" extends="base" namespace="/user">
+		<action name="userLogin" class="com.tf.action.UserAction" method="userLogin">
+			<result name="success">/WEB-INF/page/background/main/index.jsp</result>
+		</action>
+		<action name="b*" class="com.tf.action.UserAction" method="back{1}">
+			<result>/WEB-INF/page/background/main/index.jsp</result>
+		</action>
+		<action name="*" class="com.tf.action.UserAction" method="{1}">
+			<result>/WEB-INF/page/foreground/main/index.jsp</result>
+		</action>
+	</package>
+</struts>

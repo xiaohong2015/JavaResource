@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<include file="resource/base.xml"></include>	
+	<package name="index" extends="base" namespace="/" >
+		
+		<!--前台主页   -->
+		<action name="index" >
+			<result>/WEB-INF/page/foreground/main/index.jsp</result>
+		</action>
+		
+		<!-- 后台主页 -->
+		<action name="back">
+			<result>/WEB-INF/page/background/main/index.jsp</result>
+		</action>
+		
+	</package>
+	
+</struts>    

@@ -1,0 +1,141 @@
+
+
+
+
+private HibernateTemplate hibernateTemplate;
+
+?
+
+使用HbernateTemplate
+ HibernateTemplate提供持久层访问模板化，使用HibernateTemplate无须实现特定接口，它只需要提供一个SessionFactory的引用，就可执行持久化操作。SessionFactoyr对象可通过构造参数传入，或通过设值方式传入。如下：
+//获取Spring上下文
+ApplicationContext ctx = new FileSystemXmlApplicationContext("bean.xml");
+ //通过上下文获得SessionFactory
+ SessionFactory sessionFactory = (SessionFactory) ctx.getBean(“sessionFactory”);
+ 然后创建HibernateTemplate实例。HibernateTemplate提供如下三个构造函数
+q HibernateTemplate()
+ q HibernateTemplate(org.hibernate.SessionFactory sessionFactory)
+ q HibernateTemplate(org.hibernate.SessionFactory sessionFactory, boolean allowCreate)
+第一个构造函数，构造一个默认的HibernateTemplate实例，因此，使用HibernateTemplate实例之前，还必须使用方法setSessionFactory(SessionFactory sessionFactory)来为HibernateTemplate传入SessionFactory的引用。
+ 第二个构造函数，在构造时已经传入SessionFactory引用。
+ 第三个构造函数，其boolean型参数表明：如果当前线程已经存在一个非事务性的Session，是否直接返回此非事务性的Session。
+ 对于在Web应用，通常启动时自动加载ApplicationContext，SessionFactory和DAO对象都处在Spring上下文管理下，因此无须在代码中显式设置，可采用依赖注入解耦SessionFactory和DAO，依赖关系通过配置文件来设置，如下所示：
+<?xml version="1.0" encoding="gb2312"?>
+ <!-- Spring配置文件的DTD定义-->
+ <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+ "http://www.springframework.org/dtd/spring-beans.dtd">
+ <!-- Spring配置文件的根元素是beans-->
+ <beans>
+ <!--定义数据源,该bean的ID为dataSource-->
+ <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+ <!-- 指定数据库驱动-->
+ <property name="driverClassName"><value>com.mysql.jdbc.Driver</value></property>
+ <!-- 指定连接数据库的URL--> 
+ <property name="url"><value>jdbc:mysql://wonder:3306/j2ee</value></property>
+ <!-- root为数据库的用户名-->
+ <property name="username"><value>root</value></property>
+ <!-- pass为数据库密码-->
+ <property name="password"><value>pass</value></property>
+ </bean>
+ <!--定义Hibernate的SessionFactory-->
+ <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+ <!-- 依赖注入数据源，注入正是上文定义的dataSource>
+ <property name="dataSource"><ref local="dataSource"/></property>
+ <!-- mappingResouces属性用来列出全部映射文件>
+ <property name="mappingResources">
+ <list>
+ <!--以下用来列出所有的PO映射文件-->
+ <value>lee/Person.hbm.xml</value>
+ </list>
+ </property>
+ <!--定义Hibernate的SessionFactory的属性 -->
+ <property name="hibernateProperties">
+ <props>
+ <!-- 指定Hibernate的连接方言-->
+ <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+ <!-- 不同数据库连接，启动时选择create,update,create-drop-->
+ <prop key="hibernate.hbm2ddl.auto">update</prop>
+ </props>
+ </property>
+ </bean>
+ <!-- 配置Person持久化类的DAO bean-->
+ <bean id="personDao" class="lee.PersonDaoImpl">
+ <!-- 采用依赖注入来传入SessionFactory的引用>
+ <property name="sessionFactory"><ref local="sessionFactory"/></property>
+ </bean>
+ </beans>
+ DAO实现类中，可采用更简单的方式来取得HibernateTemplate的实例。代码如下：
+public class PersnDAOImpl implements PersonDAO
+ {
+ //以私有的成员变量来保存SessionFactory。
+private SessionFactory sessionFactory;
+ //设值注入SessionFactory必需的setter方法
+public void setSessionFactory(SessionFactory sessionFactory)
+ {
+ this.sessionFactory = sessionFactory;
+ }
+
+ public List loadPersonByName(final String name)
+ {
+ HibernateTemplate hibernateTemplate =
+ new HibernateTemplate(this.sessionFactory);
+ //此处采用HibernateTemplate完成数据库访问
+}
+ }
+
+
+10.6.1 HibernateTemplate的常规用法
+
+
+HibernateTemplate提供非常多的常用方法来完成基本的操作，比如通常的增加、删除、修改、查询等操作，Spring 2.0更增加对命名SQL查询的支持，也增加对分页的支持。大部分情况下，使用Hibernate的常规用法，就可完成大多数DAO对象的CRUD操作。下面是HibernateTemplate的常用方法简介：
+
+
+q void delete(Object entity)：删除指定持久化实例
+q deleteAll(Collection entities)：删除集合内全部持久化类实例
+q find(String queryString)：根据HQL查询字符串来返回实例集合
+q findByNamedQuery(String queryName)：根据命名查询返回实例集合
+q get(Class entityClass, Serializable id)：根据主键加载特定持久化类的实例
+q save(Object entity)：保存新的实例
+q saveOrUpdate(Object entity)：根据实例状态，选择保存或者更新
+q update(Object entity)：更新实例的状态，要求entity是持久状态
+q setMaxResults(int maxResults)：设置分页的大小
+
+
+
+
+ 下面是一个完整DAO类的源代码：
+public class PersonDAOHibernate implements PersonDAO
+ {
+ //采用log4j来完成调试时的日志功能
+private static Log log = LogFactory.getLog(NewsDAOHibernate.class);
+ //以私有的成员变量来保存SessionFactory。
+private SessionFactory sessionFactory;
+ //以私有变量的方式保存HibernateTemplate
+ private HibernateTemplate hibernateTemplate = null;
+ //设值注入SessionFactory必需的setter方法
+public void setSessionFactory(SessionFactory sessionFactory)
+ {
+ this.sessionFactory = sessionFactory;
+ }
+ //初始化本DAO所需的HibernateTemplate
+ public HIbernateTemplate getHibernateTemplate()
+ {
+ //首先，检查原来的hibernateTemplate实例是否还存在
+ if ( hibernateTemplate == null)
+ {
+ //如果不存在，新建一个HibernateTemplate实例
+hibernateTemplate = new HibernateTemplate(sessionFactory);
+ }
+ return hibernateTemplate;
+ }
+ //返回全部的人的实例
+public List getPersons()
+ { 
+ //通过HibernateTemplate的find方法返回Person的全部实例
+return getHibernateTemplate().find("from Person");
+ }
+
+ public void savePerson(Person person)
+ { 
+ getHibernateT
+ 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="UpDown"
+  id="myeclipse.1413707162423"
+  context-root="/UpDown"
+  j2ee-spec="6.0"
+  archive="UpDown.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

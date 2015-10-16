@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+	"http://struts.apache.org/dtds/struts-2.1.dtd">
+
+<struts>
+	<constant name="struts.multipart.maxSize" value="10000000000"/> 
+	<constant name="struts.multipart.saveDir" value="C:\\Tomcat\webapps\AgriculturalScience\temp"/>
+	<constant name="struts.objectFactory" value="spring" />
+	<constant name="struts.i18n.encoding" value="UTF-8"/>
+	<constant name="struts.objectFactory.spring.autoWire.alwaysRespect" value="true"/>
+	<!-- 设置浏览器是否缓存静态内容,默认值为true(生产环境下使用),开发阶段最好关闭 -->   
+   <constant name="struts.serve.static.browserCache" value="false" />   
+   <constant name="struts.ognl.allowStaticMethodAccess" value="true"/>
+   
+   		<include file="resource/base.xml"></include>
+   		<include file="resource/index.xml"></include>
+		<include file="resource/resultExtend.xml"></include>
+</struts>    

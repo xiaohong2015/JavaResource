@@ -1,0 +1,154 @@
+js部分
+function check() {
+
+		var num = $("#searchIndex").val();
+		var allnum = $("#totalpage").val();
+		if (num > allnum || num < 1) {
+			alert("请输入一个介于0~" + allnum + "的整数");
+			$("#sure").attr('disabled', 'disabled');
+		} else {
+			$("#sure").removeAttr('disabled');
+
+		}
+
+	}
+	function sure() {
+		var num = $("#searchIndex").val();
+		if (num == "" || num == null) {
+
+			alert("请选择页码");
+			$("#sure").attr('disabled', 'disabled');
+			$("#searchIndex").focus();
+
+		} else {
+			$("#nowpage1").val(num);
+			$("#sure").removeAttr('disabled');
+			$("#form1").submit();
+		}
+
+	}
+	function jump(pagenum) {
+		$("#nowpage1").val(pagenum);
+		$("#form1").submit();
+
+	}
+
+	function $my(id) {
+
+		return document.getElementById(id);
+
+	}
+
+
+jsp部分
+<body>
+                       <div class="snPages" id="pagebottomxx">
+				<a href="javascript:jump('${page.prePage}')" title="上一页"
+					class="next"><b></b>上一页</a> <a
+					href="javascript:jump('${page.nextPage}')" title="下一页" class="next"><b></b>下一页</a>
+				<div>
+					跳转至<input type="text" id="searchIndex" value="" onkeyup="check()"/>页
+					<input type="button" value="确定" class="pagesubmit" id="sure"
+						onclick="sure()"/>
+				</div>
+				<input type="hidden" value="${page.totalPage}" id="totalpage" />
+
+				<form action="jump.action?goid=${goid}&item=${item}" method="post"
+					id="form1">
+					<input type="hidden" value="${page.currentPage}" id="nowpage1"
+						name="currentpage"/>
+				</form>
+
+			</div>
+</body>
+
+样式二
+
+  /* 获取当前页-bin*/
+	  function jump(num){
+		  
+		  $("#currentpage").val(num);
+		  var size=$("#size").val();
+		  $("#pagesize").val(size);
+		  $("#form2").submit();		  
+		  
+	  }	 		  	  
+     /*修改触发事件-bin */     	
+	 function modify(){
+		$(":checkbox").each(function(){
+			
+			if($(this).attr("checked")==false){
+				
+				$("#modify").attr("disabled","disabled");
+				
+			}else{
+				
+				$("#modify").removeAttr("disabled");
+				var str=$(":checkbox:checked").val();
+				$("#bid").val(str);
+				$("#form1").submit();			
+			}
+			
+		});
+		
+		
+	}
+	/* 导入文件并显示 -bin*/
+	function importEXL(){
+		window.location = "importEXL.do";
+	}
+	 /* 全选功能实现-bin */ 
+    function selectAll(){
+    	var str=$("#checkall").val();
+ 		var s="全选";
+ 		if(str==s){
+ 			
+ 			$(":checkbox").attr("checked",true);
+ 			$("#checkall").val("全不选");
+ 			
+ 		}else{
+ 			
+ 			$(":checkbox").removeAttr("checked");
+ 			$("#checkall").val("全选");
+ 			
+ 		}	
+		 
+	}
+	 /*选中删除 -----bin */
+   function deleteBook() {	
+		 
+			var ids = "";
+			$(":checkbox:checked").each(function() {
+				ids += $(this).val() + ",";
+			});		
+			if (ids.length > 0) {
+				ids = ids.substring(0, ids.length - 1);
+			}
+			$("#productId").val(ids);
+			$("#deleteForm").submit();					
+		
+	}
+
+<div class="pageContainer">
+	
+	 每页<input type="text" class="pageLength" value="${page.pageSize}" id="size"  size="2" name="length">条记录
+	|共<span style="color:red">${page.totalRecs}</span>条记录
+	|<span>当前第${page.currentPage}页</span>/共<span>${page.totalPage}页</span>
+	|<a  href="javascript:jump('1')">首页</a>
+	|<a  href="javascript:jump('${page.prePage }')">上一页</a>
+	|<a  href="javascript:jump('${page.nextPage }')">下一页</a>
+	|<a  href="javascript:jump('${page.totalPage}')">末页</a>
+	<form action="productManage.action" method="post" id="form2">
+	<input type="hidden" name="currentPage" id="currentpage" value="${page.currentPage }">
+	<input type="hidden" name="pageSize" id="pagesize" value="${page.pageSize}"/>	
+	<select name="pageSelect" id="pageSelect" onchange="jump(this.value)">
+	  <c:forEach begin="1" end="${page.totalPage}" varStatus="status">
+	    <c:set var="selFlag" value=""></c:set>
+	    <c:if test="${status.count==page.currentPage} }">
+	      <c:set var="selFloag" value="selected='selected'"></c:set>
+	    </c:if>
+	  <option value="${status.count}"${selFlag}>第${status.count}页</option>
+	  </c:forEach>
+	</select>
+	</form>
+</div>

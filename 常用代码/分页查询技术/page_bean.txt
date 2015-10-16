@@ -1,0 +1,108 @@
+public class Page {
+	
+   private Integer currentPage=1;//当前页
+   private Integer prePage; //上一页
+   private Integer nextPage;//下一页
+   private Integer totalRecs;//总条数
+   private Integer totalPage;//总页数
+   private Integer pageSize=2;//每页显示条数
+   private Integer start;//页面第一条
+   private Integer end;//页面最后条数
+   
+ public Integer getStart() {
+	 
+	 start=(this.getCurrentPage() - 1) * this.getPageSize()+1;
+	 return start;
+}
+public void setStart(Integer start) {
+	this.start = start;
+}
+public Integer getEnd() {
+	end=start+this.getPageSize()-1;
+	return end;
+}
+public void setEnd(Integer end) {
+	this.end = end;
+}
+//构造函数一：获取当前页和一页显示条数
+public Page(Integer currentPage, Integer pageSize) {
+	super();
+	this.currentPage = currentPage;
+	this.pageSize = pageSize;
+}
+public Page(String currentPagestr, String pageSizestr) {
+	
+	if(null!=currentPagestr){
+		
+		this.currentPage = Integer.valueOf(currentPagestr);
+		
+	}
+   if(null!=pageSizestr){
+		
+		this.pageSize = new Integer(pageSizestr);
+		
+	}
+	
+  }
+public Integer getCurrentPage() {
+	return currentPage;
+}
+public void setCurrentPage(Integer currentPage) {
+	this.currentPage = currentPage;
+}
+public Integer getPrePage() {
+	
+	if(this.getCurrentPage()==1){
+		
+		prePage=1;
+	}else{
+		
+		this.prePage=this.getCurrentPage()-1;
+	}
+	
+	return prePage;
+}
+public void setPrePage(Integer prePage) {
+	this.prePage = prePage;
+}
+public Integer getNextPage() {
+	
+	if((this.getCurrentPage().intValue())>= (this.getTotalPage().intValue())){
+		
+		nextPage=this.getTotalPage();
+		
+	}else{
+		
+		nextPage=this.getCurrentPage()+1;
+		
+	}
+	
+	return nextPage;
+}
+public void setNextPage(Integer nextPage) {
+	this.nextPage = nextPage;
+}
+public Integer getTotalRecs() {
+	
+	return totalRecs;
+}
+public void setTotalRecs(Integer totalRecs) {
+	this.totalRecs = totalRecs;
+}
+public Integer getTotalPage() {
+	
+	totalPage=new Double(Math.ceil(this.getTotalRecs()*1.0d/this.getPageSize())).intValue();
+	return totalPage;
+	
+}
+public void setTotalPage(Integer totalPage) {
+	this.totalPage = totalPage;
+}
+public Integer getPageSize() {
+	return pageSize;
+}
+public void setPageSize(Integer pageSize) {
+	this.pageSize = pageSize;
+}
+	
+}

@@ -1,0 +1,8 @@
+ public String home(HttpServletRequest request, HttpSession session) {
+        String currentpageString = request.getParameter("currentpage");
+        Page page = new Page(currentpageString, "4");
+        List<Book> showbooks = bookService.findDivPage(page);
+        request.setAttribute("showbooks", showbooks);
+        request.setAttribute("page", page);
+
+获取前台page信息

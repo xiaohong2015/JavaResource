@@ -1,0 +1,49 @@
+
+    public List<Book> findDivPage(Page page) {
+        String sql = "select id,class_id,name,image,stock,salse,state,uptime,publish_time,author,publisher,price,content,search_times from (select row_number()over(order by f.id)as n,id,class_id,name,image,stock,salse,state,uptime,publish_time,author,publisher,price,content,search_times  from f_book f)a where state=1 and n between '"
+                + page.getStart() + "' and '" + page.getEnd() + "'";
+        String sql1 = "select count(f.id) from f_book f";
+        page.setTotalRecs(bookDao.count(sql1));
+        return bookDao.findBySql(sql);
+    }
+
+
+//实现方法
+
+ public List<Book> findBySql(String sql) {
+
+        List<Book> books = new ArrayList<Book>();
+        SqlRowSet srs = jdbcTemplate.queryForRowSet(sql);
+        int id = 0, class_id = 0, stock = 0, salse = 0, search_times = 0;
+        double price = 0.0;
+        String name = null, image = null, state = null, uptimeString = null, publishTimeString = null, author, publisher = null, content = null;
+        Book book = null;
+        while (srs.next()) {
+            id = srs.getInt(1);
+            class_id = srs.getInt(2);
+            name = srs.getString(3);
+            image = srs.getString(4);
+            stock = srs.getInt(5);
+            salse = srs.getInt(6);
+            state = srs.getString(7);
+            uptimeString = DateFormate.dateFormat(new Date(srs.getDate(8).getTime()));
+            publishTimeString = DateFormate.dateFormat(new Date(srs.getDate(9).getTime()));
+            author = srs.getString(10);
+            publisher = srs.getString(11);
+            price = srs.getDouble(12);
+            content = srs.getString(13);
+            search_times = srs.getInt(14);
+            book = new Book(id, class_id, name, image, stock, salse, state, uptimeString,
+                    publishTimeString, author, publisher, price, content, search_times);
+            books.add(book);
+        }
+        return books;
+    }
+
+//求总条数
+public Integer count(String sql) {
+
+        Integer count = 0;
+        count = jdbcTemplate.queryForInt(sql);// 保证有数据
+        return count;
+    }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.1//EN"
+	"http://struts.apache.org/dtds/struts-2.1.dtd">
+
+<struts>
+	<include file="resource/base.xml"></include>
+	<package name="resultExtendAction" extends="base" namespace="/resultExtend">
+
+		<!--  后台   -->
+		<action name="list" class="com.as.action.ResultExtendAction" method="list">
+			<result name="success">/WEB-INF/page/background/main/index.jsp</result>
+		</action>
+		
+		<action name="save" class="com.as.action.ResultExtendAction" method="create">
+			<result name="success">/WEB-INF/page/background/main/index.jsp</result>
+		</action>
+		
+		<action name="delete" class="com.as.action.ResultExtendAction" method="delete">
+			<result name="success">/WEB-INF/page/background/main/index.jsp</result>
+		</action>
+		
+		<action name="modify" class="com.as.action.ResultExtendAction" method="modView">
+			<result name="success">/WEB-INF/page/background/main/index.jsp</result>
+		</action>
+		
+		<action name="query" class="com.as.action.ResultExtendAction" method="query">
+			<result name="success">/WEB-INF/page/background/main/index.jsp</result>
+		</action>
+		
+	</package>
+	
+</struts>    
