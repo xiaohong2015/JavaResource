@@ -1,0 +1,34 @@
+作者：蜜蜂
+email: chuweihua@netease.com
+日期：2001-7-4 13:37:44
+1    Jsp错误查找方法
+1.1    显示的错误行数为<= 1047  & > 1032
+1.1.1    确定在全局变量声明之前的行数（包括空格）
+例如：main.jsp
+<%@ page contentType="text/html;charset=gb2312"%>
+<%@ page import="lulusoft.common.*"%>
+<%@ page import="lulusoft.database.*"%>
+<%@ page import="lulusoft.ef2.BCDeliverProcess.*" %>
+<%@ page import="lulusoft.ef2.instock.CBCInStock" %>
+<%@ page import="lulusoft.web.common.*"%>
+<%@ include file="/web/web/CWebTool.jsp"%>
+
+<%!
+此处的行数为9
+1.1.2    计算包含文件的行数
+CwebTool.jsp的行数为1032行
+1.1.3    计算表达式
+x = 当前显示的错误行数 + 9 – 1032 
+X为main.jsp中的实际错误行数
+该表达式的有效范围为 当前显示的错误行数 <= 1047  & > 1032
+1.2    显示的错误行数为 >9 & < 260-(1047-1032)
+1.2.1    计算表达式
+X = 当前显示的错误行数 + (1047 - 1032)
+X为main.jsp中的实际错误行数
+例如变量声明部分最后一行的行数为260则x为>9 & x<15
+1.3    显示的错误行数为  > 主程序体的起始行数
+则显示的错误行数与实际错误行数相同
+
+如果提示的错误为编译后的java产生则在web-inf/jsp目录中找到相关java文件，找到提示的错误信息行即可。
+
+

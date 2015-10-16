@@ -1,0 +1,48 @@
+作者：iceant
+email: iceant@21cn.com
+日期：9/4/2001 6:43:55 PM
+// the bug has been fixed
+/*+-------------------------------
+    $REReplace.java 2001-9-4
+    $author pizer.chen
+    $history:
+        0.2 fixed a bug.
+        0.1 ...
++-------------------------------*/
+package com.wacos.util.ubb;
+
+import java.io.*;
+import java.util.*;
+import org.apache.regexp.*;
+/**
+ *
+ * @author  Pizer.chen -- iceant -- 陈鹏
+ * @version 0.2
+ */
+public class REReplace 
+{
+    /**
+     * replace the inStr with pattern1 & pattern2
+    **/
+    public static String replace(String pattern1,String pattern2,String inStr){
+        try {
+        	RE re = new RE(pattern1);
+            RE re2 = new RE("\\$([0-9])");
+            String tempPat2=pattern2;
+            int point=0;
+            while(re.match(inStr)){
+                while(re2.match(pattern2)){
+                    point = Integer.parseInt(re2.getParen(1));
+                    pattern2=re2.subst(pattern2,re.getParen(point),RE.REPLACE_FIRSTONLY);
+                }
+                inStr = re.subst(inStr,pattern2,RE.REPLACE_FIRSTONLY);
+                pattern2 = tempPat2;
+            }
+            return inStr;
+        }
+        catch (Exception e) {
+        	System.out.println(e);
+            return e.toString();
+        }  
+    }
+}    

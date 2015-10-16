@@ -1,0 +1,116 @@
+作者：jeru
+email: jeru@163.net
+日期：7/3/2001 10:00:19 AM
+2) Flow control and exception Handling 
+Objective 1)
+Write code using if and switch statements and identify legal argument types for these statements.
+
+·	Unreachable statements produce a compile-time error. 
+while (false) { x = 3; } // won’t compile
+for (;false;) { x =3; } // won’t compile
+if (false) {x = 3; } // will compile, to provide the ability to conditionally compile the code.
+while(1==2) {…} // fine
+·	A local variable in a block may be re-declared in another local block, if the blocks are disjoint.
+
+·	if takes a boolean arguments. Parenthesis required. else part is optional. else if structure provides multiple selective branching.
+·	switch takes an argument of byte, short, char or int.(assignment compatible to int)
+·	case value should be a constant expression that can be evaluated at compile time.
+·	Compiler checks each case value against the range of the switch expression’s data type.  The following code won’t compile.
+byte b;
+switch (b) {
+   case 200: // 200 not in range of byte
+   default:
+}
+·	We need to place a break statement in each case block to prevent the execution to fall through other case blocks. But this is not a part of switch statement and not enforced by the compiler.
+·	default case can be placed anywhere. It’ll be executed only if none of the case values match.
+·	switch can be nested. Nested case labels are independent, don’t clash with outer case labels. 
+·	Empty switch construct is a valid construct. But any statement within the switch block should come under a case label or the default case label.
+
+Objective 2)
+Write code using all forms of loops including labeled and unlabeled use of break and continue and state the values taken by loop counter variables during and after loop execution.
+
+·	3 constructs – for, while, do
+·	All loops are controlled by a boolean expression.
+·	In while and for, the test occurs at the top.  In do, test occurs at the bottom, so the body is executed at least once.
+·	In for, we can declare multiple variables in the first part of the loop separated by commas, also we can have multiple statements in the third part separated by commas.
+·	In the first section of for statement, we can have a list of declaration statements or a list of expression statements, but not both. We cannot mix them.
+·	All expressions in the third section of for statement will always execute, even if the first expression makes the loop condition false. There is no short –circuit here.
+
+·	break statement can be used with any kind of loop or a switch statement or just a labeled block.
+·	continue statement can be used with only a loop (any kind of loop).
+·	Loops can have labels. The break statement abandons processing of the current loop entirely, the continue statement only abandons the currently processing time around the loop.
+·	Names of the labels follow the same rules as the name of the variables.(Identifiers)
+·	Labels can have the same name, as long as they don’t enclose one another.
+·	There is no restriction against using the same identifier as a label and as the name of a package, class, interface, method, field, parameter, or local variable.
+·	In fact, labels may be applied to any statements, but they are only useful in the context of beak and continue in loop constructions.
+
+Objective 3)
+Write code that makes proper use of exceptions and exception handling clauses (try catch finally) and declares methods and overriding methods that throw exceptions.
+·	In any method or constructor (not class) that contains lines that might throw a checked exception, you must either handle the exception using a try/catch construct, or declare that the method throws the exception. Do not need both, but compiler wouldn’t compain that.
+·	Java.lang.RuntimeException and java.lang.Error need not be handled or declared.
+·	Use throw new xxxException() to throw an exception explicitly. If the thrown object is null, a NullPointerException will be thrown at the handler.
+·	If a method A() is declared as throwing an Exception by the throws clause, when you call A() in method B(), method B() has to either throws exception or catch the exception by A().
+
+·	An exception causes a jump to the end of try block. If the exception occurred in a method called from a try block, the called method is abandoned.
+·	If there’s a catch block for the occurred exception or a parent class of the exception, the exception is now considered handled.
+·	The try/catch clause must trap errors in the order their natural order of hierarchy. 
+·	At least one ‘catch’ block or one ‘finally’ block must accompany a ‘try’ statement. If all 3 blocks are present, the order is important. (try/catch/finally) 
+·	finally and catch can come only with try, they cannot appear on their own.
+·	Regardless of whether or not an exception occurred or whether or not it was handled, if there is a finally block, it’ll be executed always. (Even if there is a return statement in try block). 
+·	System.exit() and error conditions are the only exceptions where finally block is not executed.
+·	If there was no exception or the exception was handled, execution continues at the statement after the try/catch/finally blocks.
+·	If the exception is not handled, the process repeats looking for next enclosing try block up the call hierarchy. If this search reaches the top level of the hierarchy (the point at which the thread was created), then the thread is killed and message stack trace is dumped to System.err.
+·	If an exception handler re-throws an exception (throw in a catch block), same rules apply. Either you need to have a try/catch within the catch or specify the entire method as throwing the exception that’s being re-thrown in the catch block. Catch blocks at the same level will not handle the exceptions thrown in a catch block – it needs its own handlers.
+·	If there’s no code in try block that may throw exceptions specified in the catch blocks, compiler will produce an error. (This is not the case for super-class Exception)
+·	In other words, an overriding method may not throw checked exceptions that are not thrown by the overridden method. A method can return an Exception(?)
+
+
+
+
+
+
+
+
+Here is the exception hierarchy.
+
+Object
+   |
+   |
+Throwable   
+ |            |         
+ |            |  
+ |            | 
+ |        Error
+ | 
+ | 
+Exception-->ClassNotFoundException,
+      ClassNotSupportedException, 
+                     IllegalAccessException, 
+                     InstantiationException, 
+                     InterruptedException, 
+                     NoSuchMethodException, 
+                     RuntimeException, -----à  EmptyStackException,
+                    AWTException, 	        NoSuchElementException,
+                     IOException 		        ArithmeticException,
+		        ArrayStoreException,
+        ClassCastException, 
+        IllegalArgumentException, ---à  IllegalThreadStateException  
+        IllegalMonitorStateException,      NumberFormatException
+        IndexOutOfBoundsException,
+        NegativeArraySizeException, 
+        NullPointerException, 
+        SecurityException. 
+
+IndexOutOfBoundsException-->ArrayIndexOutOfBoundsException, StringIndexOutOfBoundsException 
+
+IOException-->	EOFException, 
+FileNotFoundException, 
+InterruptedIOException, 
+UTFDataFormatException, 
+MalformedURLException, 
+ProtocolException, 
+SockException, 
+UnknownHostException, 
+UnknownServiceException. 
+
+

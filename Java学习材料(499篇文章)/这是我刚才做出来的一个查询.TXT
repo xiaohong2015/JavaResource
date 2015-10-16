@@ -1,0 +1,54 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2000-11-8 16:12:32
+<html>
+<head>
+<title>jdbc test</title>
+</head>
+<body>
+<%@ page contentType="text/html;charset=gb2312"%>
+<%@ page import = "java.net.URL" %>
+<%@ page import = "java.sql.*" %>
+<%
+	String url   = "jdbc:odbc:admin";
+	Class.forName ("sun.jdbc.odbc.JdbcOdbcDriver");                 // 加载 jdbc-odbc 桥驱动程序
+	//DriverManager.setLogStream(System.out);
+	Connection con = DriverManager.getConnection (url, "sa", "super");   // 试图与某一驱动程序连接。 每个已注册驱动程序都将被加载，直到找到一个可以处理此 URL 的驱动程序
+	DatabaseMetaData dma = con.getMetaData ();                      // 获得 DatabaseMetaData 对象并显示一些有关连接的信息
+	
+	out.print("\nConnected to " + dma.getURL());
+	System.out.println("Driver       " +dma.getDriverName());
+	System.out.println("Version      " +dma.getDriverVersion());
+	System.out.println("\n");
+	
+	Statement stmt = con.createStatement ();                        // 创建一个 Statement 对象，使我们可以向驱动程序提交 SQL 语句
+	String query = "SELECT * FROM Information";
+	ResultSet rs = stmt.executeQuery (query);                       // 提交查询，创建 ResultSet 对象
+	int i;
+	ResultSetMetaData rsmd = rs.getMetaData ();                     // 获得 ResultSetMetaData。它将用于列标题
+	int numCols = rsmd.getColumnCount ();                           // 获得结果集中的列数
+	for (i=1; i<=numCols; i++) {                                    // 显示列标题
+		if (i > 1) out.print(",");
+		out.print(rsmd.getColumnLabel(i));
+	}
+	out.println("\n");
+	boolean more = rs.next ();                      // 显示数据并获取它，直到结果集末尾
+	while (more) {
+//		for (i=1; i<=numCols; i++) {                // 在每列中循环获得并显示列数据
+//			if (i > 1) out.print(",");
+//			out.print(rs.getString(i));
+//		}
+		//out.println(rs.getString("Comname"));
+		System.out.println(rs.getString("Comname"));
+	
+		//System.out.print(rs.getString("Comtypename"));
+		out.print("\n");
+		more = rs.next ();                          // 获取结果集的下一行
+	}
+	rs.close();                                     // 关闭结果集
+	stmt.close();                                   // 关闭语句
+	con.close();                                    // 关闭连接
+%>
+
+</body>
+</html>

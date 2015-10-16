@@ -1,0 +1,67 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:37:27
+　　四、 统一的网站界面 
+
+　　JSP支持服务器端的文件包含，即可以在一个JSP文件中插入多个其他文件，用来实现统一的网站界面。修改上述hi.jsp并另存为mypage.jsp： 
+
+＜%@ include file="top.htm" %＞ 
+＜% 
+String Msg = "This JSP test."; 
+out.print("Hello World!"); 
+%＞ 
+＜h2＞＜%=Msg%＞＜/h2＞ 
+＜%@ include file="bot.htm" %＞ 
+ 
+
+用可视化HTML编辑器，例如FrontPage、Dreamweave等设计网站的框架结构，将设计好的框架结构文件分割成两个部分，上面一半保存为top.htm, 下面一半保存为bot.htm，代码如下面所示： 
+
+＜html＞ 
+＜head＞ 
+＜meta http-equiv="Content-Type" content="text/html; charset=gb2312"＞ 
+＜title＞我的主页＜/title＞ 
+＜/head＞ 
+＜body＞ 
+＜table border="0" width="100%" cellpadding="4" cellspacing="0" align="center"＞ 
+＜tr＞ 
+＜td width="100%" colspan="2" bgcolor="#837ED1" align="center"＞＜font face="隶书" 
+color="#FFFF00" size=5＞主页标题＜/font＞ 
+＜/td＞ 
+＜/tr＞ 
+＜tr＞ 
+＜td bgcolor="#837ED1" width="15%" valign="top" align="center"＞＜br＞ 
+＜font color="#FFFFFF"＞选项＜/font＞＜p＞＜font color="#FFFFFF"＞选项＜/font＞＜/p＞ 
+＜p＞＜font color="#FFFFFF"＞选项＜/font＞＜/p＞ 
+＜p＞＜font color="#FFFFFF"＞......＜/font＞＜/p＞ 
+＜p＞　＜/p＞ 
+＜/td＞ 
+＜td width="85%" valign="top"＞ 
+---------------------------------------------------------------------------------------------------------------- 
+＜/td＞ 
+＜/tr＞ 
+＜/table＞ 
+＜/body＞ 
+＜/html＞ 
+ 
+
+在浏览器的地址栏中键入http://localhost:8080/mypage.jsp。 这样网站的界面就能统一起来，而设计者可以集中精力在功能模块上处理用户登录、连接数据库、发送email等等。每个JSP文件都有如下结构： 
+
+
+＜%@ include file="top.htm" %＞ 
+＜% 
+// 实现某些功能 
+%＞ 
+＜%@ include file="bot.htm" %＞ 
+ 
+
+　　维护网站的界面也相对比较容易，只要修改top.htm和bot.htm，就能影响到所有网页。 
+
+　　五、 服务器参数设置 
+
+　　JSWDK的Web服务器参数保存在\jswdk-1.0.1\webserver.xml中，用Windows写字板打开并编辑这个文件就可以修改缺省设置值。本节内容主要针对JSWDK，Linux下Tomcat的设置方法略有不同。 
+
+　　JSWDK缺省的文档目录是\jswdk-1.0.1\webpages，在此目录下可以建立子目录，例如\jswdk-1.0.1\webpages\test，就能在浏览器中用http://localhost/test访问这个目录，为了使得这个子目录能执行JSP程序，还必须在webserver.xml中的＜Service＞＜/Service＞节加入： 
+
+　　＜WebApplication id="test" mapping="/test" docBase="webpages/test" /＞ 
+
+　　并且，还必须建立\jswdk-1.0.1\webpages\test\WEB-INF目录，并从\jswdk-1.0.1\webpages\WEB-INF目录中复制过来以下四个文件：mappings.properties、mime.properties、servlets.properties以及webapp.properties。完成这些过程，才能通知JSWDK的Web服务器执行http://localhost/test 中的JSP程序。 

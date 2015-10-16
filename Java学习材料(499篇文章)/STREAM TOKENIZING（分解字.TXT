@@ -1,0 +1,61 @@
+作者：blackwhites
+日期：2000-10-23 16:59:32
+从sun网站看到的Stream Tokenizing
+In Tech Tips: June 23, 1998, an example of string tokenization was presented, using the class java.util.StringTokenizer. 
+
+There's also another way to do tokenization, using java.io.StreamTokenizer. StreamTokenizer operates on input streams rather than strings, and each byte in the input stream is regarded as a character in the range '\u0000' through '\u00FF'. 
+
+StreamTokenizer is lower level than StringTokenizer, but offers more control over the tokenization process. The class uses an internal table to control how tokens are parsed, and this syntax table can be modified to change the parsing rules. Here's an example of how StreamTokenizer works: 
+
+
+import java.io.*;
+import java.util.*;
+   
+public class streamtoken {
+  public static void main(String args[])
+  {
+    if (args.length == 0) {
+      System.err.println("missing input filename");
+      System.exit(1);
+    }
+   
+    Hashtable wordlist = new Hashtable();
+   
+    try {
+      FileReader fr = new FileReader(args[0]);
+      BufferedReader br = new BufferedReader(fr);
+   
+      StreamTokenizer st = new StreamTokenizer(br);
+      //StreamTokenizer st =
+      //    new StreamTokenizer(new StringReader(
+      //    "this is a test"));
+      st.resetSyntax();
+      st.wordChars('A', 'Z');
+      st.wordChars('a', 'z');
+      int type;
+      Object dummy = new Object();
+      while ((type = st.nextToken()) !=
+        StreamTokenizer.TT_EOF) {
+          if (type == StreamTokenizer.TT_WORD)
+            wordlist.put(st.sval, dummy);
+        }
+        br.close();
+      }
+      catch (IOException e) {
+        System.err.println(e);
+      }
+   
+      Enumeration enum = wordlist.keys();
+      while (enum.hasMoreElements())
+        System.out.println(enum.nextElement());
+   }
+} 
+
+In this example, a StreamTokenizer is created on top of a FileReader / BufferedReader pair that represents a text file. Note that a StreamTokenizer can also be made to read from a String by using StringReader as illustrated in the commented-out code shown above (StringBufferInputStream also works, although this class has been deprecated). 
+
+The method resetSyntax is used to clear the internal syntax table, so that StreamTokenizer forgets any rules that it knows about parsing tokens. Then wordChars is used to declare that only upper and lower case letters should be considered to form words. That is, the only tokens that StreamTokenizer recognizes are sequences of upper and lower case letters. 
+
+nextToken is called repeatedly to retrieve words, and each resulting word is found in the public instance variable "st.sval". The words are inserted into a Hashtable, and at the end of processing the contents of the table are displayed, using an Enumeration as illustrated in Tech Tips: June 23, 1998. So the action of this program is to find all the unique words in a text file and display them. 
+
+StreamTokenizer also has special facilities for parsing numbers, quoted strings, and comments. It's a useful alternative to StringTokenizer, and is especially applicable if you are tokenizing input streams, or wish to exercise finer control over the tokenization process
+

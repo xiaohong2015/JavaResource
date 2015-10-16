@@ -1,0 +1,116 @@
+作者：sager
+email: sagerk@263.net
+日期：2000-8-9 22:12:45
+Use JSP and Servlet to Upload file to server is becoming a 
+common task now. 
+Below is a simple example use the jspsmart free component which 
+implements it. 
+You can download the free package from JSPSMART 
+
+1. Html File 
+<html> 
+<body> 
+<script LANGUAGE="javascript" SRC="JSFunction.js"> 
+</script> 
+<script language="JavaScript"> 
+<!-- 
+function checkForm(){ 
+
+if (document.uploadform.adsImage.value==""){ 
+alert("You must choose what image file to upload!"); 
+return false; 
+} 
+document.uploadform.submit(); 
+} 
+function cancelUpload(){ 
+window.close(); 
+window.opener.focus(); 
+} 
+//--> 
+</script> 
+<form name="uploadform" method="post" 
+action="uploadImage.jsp" ENCTYPE="multipart/form-data" 
+target=_self> 
+<center> 
+<table border="1" width="65%"> 
+<tr> 
+<td colspan=2 nowrap align=center>广告图片上载</td> 
+
+</tr> 
+<tr> 
+<td width="15%" nowrap >广告图片:</td> 
+<td width="50%" nowrap><input type="file" 
+name="adsImage" size="20"></td> 
+</tr> 
+<tr> 
+<td align="center" colspan=2 > 
+<input type="button" value="upload" onclick="return 
+checkForm();" > 
+&nbsp;&nbsp;&nbsp; 
+<input type="button" value="Cancel" onclick="return 
+cancelUpload();"> 
+</td> 
+
+</tr> 
+</form> 
+</table> 
+<!-- 
+<a href="Javascript:window.close();">close this window</a> 
+--> 
+<script language="JavaScript"> 
+<!-- 
+this.focus(); 
+//--> 
+</script> 
+</body> 
+
+2. JSP File 
+<%@ page language="java" import="com.jspsmart.upload.*, 
+java.sql.*,java.util.* "%> 
+<%-- use SmartUpload bean --%> 
+<jsp:useBean id="mySmartUpload" scope="page" 
+class="com.jspsmart.upload.SmartUpload" /> 
+
+<% 
+
+//Initialization 
+mySmartUpload.init(config); 
+mySmartUpload.service(request,response); 
+
+//Set Restriction 
+mySmartUpload.setAllowedFilesList("gif,bmp,jpeg,jpg"); 
+mySmartUpload.setTotalMaxFileSize(51200); 
+
+
+
+// Upload 
+try{ 
+mySmartUpload.upload(); 
+} 
+catch(Exception e){ 
+out.println("<font color=red>Upload File Fail!</font> 
+<a href= 
+\"JavaScript:window.history.back();\">back</a><br>"); 
+out.println("<UI>Notes:</UI>"); 
+
+out.println("<UL>You must set correct File 
+Name.</UL>"); 
+out.println("<UL>You file size must be less than 
+50K.</UL>"); 
+out.println("<UL>You can only upload .Gif .jpeg .jpg and 
+.bmp files.</UL>"); 
+
+return; 
+
+} 
+//save file to disk 
+mySmartUpload.getFiles().getFile(0).saveAs("/" + 
+"FileName"); 
+
+　 
+
+%> 
+
+
+
+3. Servlet File (you can do it yourself) 

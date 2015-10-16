@@ -1,0 +1,56 @@
+作者：飞鸟
+email: flybird@chinaasp.com
+日期：2000-07-10 18:43:51
+[H1]在windows环境下安装tomcat[/H1]
+修订版
+
+[b]安装jdk1.3[/b]
+[b]注意:[/b] 如果你安装过1.3之前的java版本，请删除该版本的所有文件，并用rregedit删除 HKEY_LOCAL_MACHINE\software\javasoft下面所有内容。
+然后再安装jdk1.3
+请这里下载jdk1.3：
+[url]http://www.chinaasp.com/download/readFolder.asp?folder=JspDev&name=JSP%BF%AA%B7%A2%B0%FC[/url]
+然后注意如果你的系统是中文系统，系统注册表会有问题，请用用regedit打开注册表查javasoft, 
+位置为hkey_local_machine -> software -> javasoft -> 找到 “Java 运行时环境” 
+把这个东东 导出到文件 1.reg....
+然后用notepad编辑它，把"Java 运行时环境"替换成"Java Runtime Environment"然后导入。
+
+
+[b]下载tomcat
+[/b]win32版本 [url]http://jakarta.apache.org/builds/tomcat/release/v3.1/bin/jakarta-tomcat.zip[/url] 2.26mb
+
+[b]安装tomcat[/b]
+将jakarta-tomcat.zip包内文件解压缩到 x:\tomcat。x是驱动器名
+
+[b]设置环境变量[/b]
+win9x在autoexec.bat里面用set 语句来设定环境变量，如：set TOMCAT_HOME=d:\tomcat
+winnt/win2k可以选择我的电脑，右键点出菜单，选择属性，弹处对话框"系统特性", 选择"高级"tab,然后点按钮"环境变量"，即可以编辑系统的环境变量。
+TOMCAT_HOME 值:x:\tomcat (用TOMCAT_HOME指示tomcat的根目录)
+JAVA_HOME 值:x:\jdk1.3 (用JAVA_HOME指示jdk1.3安装目录)
+CLASSPATH 值:x:\jdk1.3\lib\tools.jar;x:\tomcat\classes;x:\tomcat\lib
+
+[b]测试tomcat
+[/b]运行 x:\tombat\bin\startup.bat
+然后在浏览器中键入 [url]http://localhost:8080/[/url]，如果看到tomcat 3.1的画面，那就说明你成功的配置了tomcat3.1
+
+[b]测试JSP
+[/b]现在我们建立目录 D:\myJSP
+里面放了一个文件：test.jsp,内容如下：
+<%@ page contentType="text/html;charset=gb2312" %> 
+<% 
+out.println("这是我的第一个jsp程序");
+%>
+修改 tomcat\conf\server.xml, 在这个文件的最后，你可以看到一些形如 
+<Context path="/test" docBase="webapps/test" debug="0" reloadable="true" > 
+</Context>
+等句子，我们在这句后面加上这句：
+<Context path="/myJSP" docBase="d:\myJSP" debug="0" reloadable="true" > 
+</Context>
+path是web的虚拟目录，docBase是硬盘上的路径。
+然后我们在浏览器地址栏输入: [url]http://localhost:8080/myJSP/test.jsp[/url]  
+（注意:tomcat区分大小写，如果写错大小写，将得到一个404错误）
+
+浏览器将显示如下内容：
+[#808080]这是我的第一个jsp程序[/#]
+
+www.chinaasp.com 飞鸟 [email]flybird@chinaasp.com[/email] 原创.
+ 

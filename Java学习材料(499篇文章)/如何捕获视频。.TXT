@@ -1,0 +1,103 @@
+作者：wflm
+email: wflm@263.net
+日期：6/22/2001 1:44:29 AM
+捕获当前屏幕图像。
+希望多多交流。8-）
+package com.borland.samples.welcome;
+
+/**
+ * Title:
+ * Description:
+ * Copyright:    Copyright (c) 2001
+ * Company:
+ * @author
+ * @version 1.0
+ */
+import java.awt.*;
+import java.awt.image.*;
+import com.sun.image.codec.jpeg.*;
+
+class ImageCanvas extends Canvas{
+  private Image image;
+  private Dimension prefSize;
+
+  public ImageCanvas(Image image){
+    this.image = image;
+    calculatePreferredSize();
+  }
+
+  public void setImage(Image image){
+    this.image = image;
+    calculatePreferredSize();
+    repaint();
+  }
+
+  private void calculatePreferredSize(){
+    prefSize = new Dimension(image.getWidth(this),image.getHeight(this));
+    System.out.println(image.getWidth(this));
+    setSize(prefSize);
+  }
+  public Dimension getPreferredSize() {
+     return prefSize;
+  }
+  public Dimension getMinimumSize() {
+     return prefSize;
+  }
+  public void update(Graphics g){
+     paint(g);
+  }
+  public void paint(Graphics g){
+     g.drawImage(image,0,0,null);
+  }
+}
+
+class ImageUtils{
+  public static Image getScreenImage(){
+    Robot robot;
+    try {
+      robot = new Robot();
+    }catch(Exception e) {
+      throw new RuntimeException("unable to construct Robot");
+    }
+    Dimension screenDims =Toolkit.getDefaultToolkit().getScreenSize();
+    Image screen =robot.createScreenCapture(new Rectangle(450,350,screenDims.width,screenDims.height)).getScaledInstance(400,300,Image.SCALE_SMOOTH);
+    MediaTracker tracker =new MediaTracker(new Label());
+    tracker.addImage(screen,1);
+    try {
+      tracker.waitForID(0);
+    }catch(InterruptedException e) { /** ... */ }
+    return screen;
+  }
+}
+
+public class ScreenCapture extends Frame{
+  private ImageCanvas canvas =new ImageCanvas(ImageUtils.getScreenImage());
+  public ScreenCapture(){
+    add(canvas);
+    setSize(400,300);
+    setVisible(true);
+    Thread imageThread =new UpdateThread();
+    imageThread.setDaemon(true);
+    imageThread.start();
+}
+  class UpdateThread extends Thread{
+   public void run(){
+      while(true){
+        try {
+          Thread.currentThread().sleep(1000);
+        }
+        catch (Exception ex) {
+
+        }
+        canvas.setImage(ImageUtils.getScreenImage());
+        validate();
+     }
+    }
+  }
+
+  public static void main(String[] args){
+   new ScreenCapture();
+
+  }
+}
+

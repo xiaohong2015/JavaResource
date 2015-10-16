@@ -1,0 +1,14 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 1:23:23 PM
+jsp调用oracle的存储过程  
+
+http://www.netqu.com 中华技术网会员 Wuxuehui 发布 
+
+假定存储过程名字为 sp_yourprocedurename，有两个参数 
+
+CallableStatement cstmt = con.prepareCall("{call sp_yourprocedurename(?,?}"); 
+cstmt.registerOutparameter(2,java.sql.Types.FLOAT); 
+cstmt.setint(1,parameter1); 
+cstmt.execute(); 
+out.println("Procedure output is :"+cstmt.getFloat(2)); 

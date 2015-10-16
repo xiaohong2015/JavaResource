@@ -1,0 +1,154 @@
+作者：luoxh
+email: luoxh@371.net
+日期：8/23/2001 9:21:02 AM
+Jakarta-Tomcat 简明中文版用户指南第一部分 
+
+本文档提供关于Tomcat的基础信息.主要内容如下:
+Tomcat二进制版本安装
+与Tomcat相关的脚本的主要内容
+与server.xml相关的主要内容,Tomcat的主要配置文件
+如何设置Tomcat与宿主web服务器一起工作的说明
+如何应用Tomcat配置一个现实中的web站点
+希望此文档足以使新用户可以开始使用Tomcat.如找不到某方面的内容请(按以下顺序)
+查找Tomcat faq
+查找Tomcat包清单
+向Tomcat用户邮件列表发出问题
+如此疑问的答案不存在,我们鼓励把对疑问的解答放入Tomcat faq或此文档.如对此文档有意见或建议,请发送到Tomcat的邮件列表.
+
+Getting Started
+Tomcat是一个带有jsp环境的servlet容器.servlet容器是一个根据用户的行为可以管理和激活servlet的运行时的shell.
+粗略地可以将servlet容器分为如下几类:
+
+独立的servlet容器
+内置有web服务器的一部分.指当使用基于Java的web服务器的情形,例如servlet容器是JavaWebServer的一个部分. 独立的servlet容器是Tomcat的默认模式.
+大多数的web服务器并非基于Java,因此,我们可以得出如下两种容器的模式.
+
+
+进程内的servlet容器
+servlet容器作为web服务器的插件和Java容器的实现.Web服务器插件在内部地址空间打开一个JVM(java virtual machine)使Java容器得以在内部运行.如有某个需要调用servlet的请求,,插件将取得对此请求的控制并将他传递(使用JNI)给Java容器.进程内容器对于多线程,单进程的服务器非常合适并且提供很好的运行速度,但伸缩性有所不足.
+
+
+进程外的servlet容器
+servlet容器运行于web服务器之外的地址空间且作为web服务器的插件和Java容器的实现的结合.web服务器插件和Java容器 JVM使用IPC机制(通常是TCP/IP)进行通讯.当一个调用servlet的请求到达时,插件将取得对此请求的控制并将其传递(使用IPC等)给Java容器,进程外容器的反应时间或进程外容器引擎不如进程内容器,但进程外容器引擎在许多其他可比的范围内更好(伸缩性,稳定性等).
+Tomcat既可作为独立的容器(主要是用于开发与调试)又可作为对现有服务器的附加(当前支持Apache,IIS和Netscape服务器).即任何时候配置Tomcat你都必须决定如何应用他,如选择第二或第三种模式,你还需要安装一个web服务器接口.
+Tomcat与Jserv有何区别?Tomcat是Jserv吗?
+这是个常见的误解.Jserv是Servlet API2.0兼容并与Apache一起使用的容器.Tomcat是一个完全重写的并与Servlet API2.2和JSP1.1兼容的容器.
+Tomcat使用了一些为Jserv而写的代码,特别是Jserv的Apache接口,但这是唯一的相同之处.
+怎样安装Tomcat的二进制版本?
+非常简单,只需:
+下载 zip/tar.gz 任何压缩文件,从http://jakarta.apche.org/download/binindex.html处.
+解压缩此文件到某目录(如:foo).将会生成一子目录,名为”tomcat”.
+转换到”tomcat”目录设置一新的环境变量(TOMCAT_HOME)指向你安装的tomcat的目录
+WIN32平台,键入:
+“set TOMCAT_HOME=foo\tomcat”
+Unix平台:
+如是bash/sh环境, 键入:”TOMCAT_HOME=foo/tomcat;export TOMCAT_HOME”
+如是tcsh环境, 键入:”setenv TOMCAT_HOME foo/tomcat”
+设置环境变量JAVA_HOME指向你JDK的目录,然后添加JAVA解释器到你的PATH环境变量.
+好了!现在可以运行TOMCAT并作为一个独立的Servlet容器(模式一)
+启动与关闭Tomcat
+使用”bin”目录中的脚本启动与关闭Tomcat.
+启动:
+uinx:bin/startup.sh
+win32:bin\startup
+关闭:
+unix:bin/shutdown.sh
+win32:bin\shutdown
+Tomcat目录结构
+假设你已将Tomcat解压,你已得到下列目录结构:
+目录名--描述 
+bin 
+包含启动/关闭脚本 
+conf 
+包含不同的配置文件,
+包括 server.xml(Tomcat的主要配置文件)和为不同的Tomcat配置的web应用设置缺省值的文件web.xml
+doc
+包含各种Tomcat文档 
+lib 
+包含Tomcat使用的jar文件.unix平台此目录下的任何文件都被加到Tomcat的classpath中 
+logs 
+Tomcat摆放日志文件的地方 
+src 
+ServletAPI源文件.先别高兴,这些只有些必须在Servlet容器内实现的空接口和抽象类 
+webapps 
+包含web项目示例 
+此外你可以Tomcat会创建如下目录:
+work
+Tomcat自动生成,放置Tomcat运行时的临时文件(如编译后的JSP文件).如在Tomcat运行时删除此目录.JSP页面将不能运行.
+classes
+你可以创建此目录来添加一些附加的类到类路径中.任何你加到此目录中的类都可在Tomcat的类路径中找到自身.
+Tomcat的脚本
+Tomcat是一个Java程序,因此在设置好几个环境变量后即可用命令行的方式运行.然而设置Tomcat使用的每个环境变量和如下的命令行参数乏味且易错.因此,Tomcat开发组提供了一些脚本使启动和关闭Tomcat变得轻松.
+注意:这些脚本仅仅是个便利的方法去启动和关闭Tomcat.你可修改他们来定制CLASSPATH,环境变量如PATH,LD_LIBRARY_PATH,等等,只要是生成一个正确的命令行即可.
+这些脚本是什么呢?下表列出对一般用户最重要的脚本.
+tomcat 
+主脚本.设置合适的环境变量,包括CLASSPATH,TOMCAT_HOME和JAVA_HOME和用适合的命令行参数启动Tomcat 
+
+startup 
+
+在后台启动Tomcat.”tomcat start”命令的替换方式 
+
+shutdown 
+
+关闭Tomcat.”tomcat stop”命令的替换方式 
+
+
+对用户最重要的脚本是tomcat(tomcat.bat/tomcat.sh).其他Tomcat相关的脚本作为一个简单的面向单任务的指向Tomcat脚本(设置不同的命令行参数等)的入口.
+
+
+仔细考察tomcat.bat/tomcat.sh,它按以下步骤运行:
+
+在Unix下的步骤：
+
+如未指定,推测 TOMCAT_HOME
+
+如未指定,推测 JAVA_HOME
+
+设置CLASS_PATH包含:
+
+1.${TOMCAT_HOME}/classes目录(如果存在)
+
+2.${TOMCAT_HOME}/lib的一切内容
+
+3.${JAVA_HOME}/lib/tools.jar(此jar文件包含工具javac,我们需要javac处理jsp文件.
+
+
+运行带有设定Java环境变量的命令行参数的java命令,调入tomcat.home,和org.apache.tomcat.startup.Tomcat 作为启始类.同时也传递命令行参数到org.apache.tomcat.startup.Tomcat ,例如:
+
+
+执行start/stop/run 等的操作
+
+此Tomcat进程使用指向server.xml的路径,
+
+例如server.xml放置于etc/server_1.xml并且用户意图在后台启动apache,键 入如下命令行:
+
+bin/tomcat.sh start –f /etc/server_1.xml
+
+在Win32下的步骤：(略)
+
+
+由此可见,win32版的tomcat.bat与Unix版的几乎一致.尤其在它不推测TOMCAT_HOME和JAVA_HOME的值,并且不将所有的jar文件放入类路径中.
+
+
+Tomcat的配置文件
+
+Tomcat的配置基于两个配置文件:
+
+1.server.xml - Tomcat的全局配置文件
+
+2.web.xml - 在Tomcat中配置不同的关系环境
+
+
+这一部分将讲述如何使用这些文件.我们不会包含web.xml的内部机制,这些内部机制深入到了Servlet API的细节,因此,我们将讨论涵盖servler.xml内容及web.xml在Tomcat关系环境中的用法.
+
+
+server.xml
+
+server.xml是Tomcat的主配置文件.完成两个目标:
+
+1 提供Tomcat组件的初始配置.
+
+2 说明Tomcat的结构,含义,使得Tomcat通过实例化组件完成起动及构建自身, 如在server.xml所指定的
+
+下表描述server.xml种的重要元素:
+

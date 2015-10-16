@@ -1,0 +1,69 @@
+作者：asp2001
+email: asp2001@163.net
+日期：2000-8-11 19:22:03
+JavaBean
+
+
+    JavaBean 是一种基于 Java 的软件组件。 JSP 对于在 Web 应用中集成 JavaBean 组件提供了完善的支持。这种支持不仅能缩短开发时间（可以直接利用经测试和可信任的已有组件，避免了重复开发），也为 JSP 应用带来了更多的可伸缩性。 JavaBean 组件可以用来执行复杂的计算任务，或负责与数据库的交互以及数据提取等。如果我们有三个 JavaBean ，它们分别具有显示新闻、股票价格、天气情况的功能，则创建包含所有这三种功能的 Web 页面只需要实例化这三个 Bean ，使用 HTML 表格将它们依次定位就可以了。 
+
+
+　 为说明在 JSP 环境下 JavaBean 的应用，我们创建了一个名为 TaxRate 的 Bean 。它有两个属性，即 Product （产品）和 Rate （税率）。两个 set 方法分别用来设置这两个属性，两个 get 方法则用于提取这两个属性。在实际应用中，这种 Bean 一般应当从数据库提取税率值，此处我们简化了这个过程，允许任意设定税率。下面是这个 Bean 的代码清单： 
+　 package tax;
+　 public class TaxRate {
+　 String Product;
+　 double Rate;
+　 public TaxRate() {
+　 this.Product = "A001";
+　 this.Rate = 5;
+　 }
+　 public void setProduct (String ProductName) {
+　 this.Product = ProductName;
+　 }
+　 public String getProduct() {
+　 return (this.Product);
+　 }
+　 public void setRate (double rateValue) {
+　 this.Rate = rateValue;
+　 }
+　 public double getRate () {
+　 return (this.Rate);
+　 }
+　 }
+　　 在 JSP 页面中应用上述 Bean 要用到 < jsp:useBean> 标记。依赖于具体使用的 JSP 引擎的不同，在何处配置以及如何配置 Bean 的方法也可能略有不同。本文将这个 Bean 的 .class 文件放在 c:\jswdk-1.0\examples\WEB-INF\jsp\beans\tax 目录下，这里的 tax 是一个专门存放该 Bean 的目录。下面是一个应用上述 Bean 的示例页面： 
+　 < HTML>
+　 < BODY>
+　 < %@ page language="java" %>
+　 < jsp:useBean id="taxbean" scope="application" class="tax.TaxRate" />
+　 < % taxbean.setProduct("A002");
+　 taxbean.setRate(17);
+　 %>
+　使用方法 1 ： < p>
+　产品 : < %= taxbean.getProduct() %> < br>
+　税率 : < %= taxbean.getRate() %>
+　 < p>
+　 < % taxbean.setProduct("A003");
+　 taxbean.setRate(3);
+　 %>
+　 < b> 使用方法 2 ： < /b> < p>
+　产品 : < jsp:getProperty name="taxbean" property="Product" />
+　 < br>
+　税率 : < jsp:getProperty name="taxbean" property="Rate" />
+　 < /BODY>
+　 < /HTML>
+　　 在 < jsp:useBean> 标记内定义了几个属性，其中 id 是整个 JSP 页面内该 Bean 的标识， scope 属性定义了该 Bean 的生存时间， class 属性说明了该 Bean 的类文件（从包名开始）。 
+　　 这个 JSP 页面不仅使用了 Bean 的 set 和 get 方法设置和提取属性值，还用到了提取 Bean 属性值的第二种方法，即使用 < jsp:getProperty> 标记。 < jsp:getProperty> 中的 name 属性即为 < jsp:useBean> 中定义的 Bean 的 id ，它的 property 属性指定的是目标属性的名字。 
+
+一旦你申明了JavaBean，你就可以存取它的特性来定制它。要取得一特性的值，如上所述，可使用<jsp:getProperty>标记。有了<jsp:getProperty>标记，你可以指定要使用的bean名称(从useBean的id)，以及你要取得值的特性。接着，真正的值就会放在输出里： 
+<jsp:getProperty id="localName" property="name" /> 
+
+要更改JavaBean的特性，你要使用<jsp:setProperty>标记.对这个标记，你也要辨认bean以及要修正的特性，除此之外，你还要提供新值.如果命名正确，这些可以直接经由规定的格式取得： 
+<jsp:setProperty id="localName" property="*" />; 
+
+要从一参数取得，你必须直接命名此特性以及参数: 
+<jsp:setProperty id="localName" property="address" param="parameterName" />; 
+
+或是直接以名称与值来设定: 
+<jsp:setProperty id="localName" property="serialNumber" value="string" /> or <jsp:setProperty id="localName" property="serialNumber" value= <%= expression %> />. 
+
+有关JavaBean的最后一点:要让网络服务器可以找到JavaBean，你要将它们的class类别放在特别位置。对JSWDK而言，最简单的地方是在安装目录里的类别目录，例如 \jswdk-1.0.1\classes。 
+

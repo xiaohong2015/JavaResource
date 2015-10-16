@@ -1,0 +1,178 @@
+作者：star2002
+email: star2002@263.net
+日期：2001-7-17 10:23:23
+Redhat7.0带的glibc2.2有问题，装不上Oracle8i
+glibc2.1版本（GNU C Library，18M）下载地址： 
+ftp://ftp.kernel.org/pub/software/libs/glibc/hjl/sdk/2.1/i386-glibc-2.1-linux.tar.gz
+下载后都放到了/backup目录
+
+
+1.安装glibc 2.1包 
+RedHat7.0安装的是glibc2.2。Oracle 8I不能使用glibc 2.2进行编译，而需要glibc2.1的SDK。 
+以root帐号登录
+[root@only_you /root] cd / 
+[root@only_you /] tar zxvf  /backup/i386-glibc-2.1-linux.tar.gz 
+隐藏/usr/bin 目录下的gcc,cc,ld，避免被Oracle installer使用 
+[root@only_you /] cd /usr/bin 
+[root@only_you bin] mkdir saved 
+[root@only_you bin] mv gcc cc ld saved 
+[root@only_you bin] ln -s  /usr/i386-glibc-2.1-linux/bin/i386-glibc21-linux-gcc gcc 
+[root@only_you bin] ln -s  gcc cc 
+[root@only_you bin] ln -s   /usr/i386-glibc-2.1-linux/bin/i386-glibc21-linux-ld ld 
+隐藏/usr/lib目录下的libc.so,libdl.so,libm.so和libpthread.so文件，避免被Oracle installer使用 
+[root@only_you bin] cd  ../lib 
+[root@only_you lib] mkdir saved 
+[root@only_you lib] mv libc.so (libdl.so libm.so libpthread.so  saved no these files--cgs)
+[root@only_you lib] mv libc.a libdl.a libm.a libpthread.a  saved 
+
+2.创建oracle帐号
+
+ 以root帐号登录,开启一个terminal窗口,创建oracle帐号
+  [root@only_you /root]useradd oracle  
+   [root@only_you /root]passwd oracle (设置oralce帐号的密码) 
+系统自动创建了/home/oracle目录，属主为oracle。我的Oracle就准备装在此目录下。安装文档上说要创建dba组，我看就免了。
+
+3.解压缩oracle8161_tar.gz
+以root帐号登录，执行： 
+[root@only_you /root] cd /backup 
+[root@only_you /backup] tar zxvf  oracle8161_tar.gz 
+在/backup/目录下生成Oralce8iR2目录，内含解包后的文件 
+
+4.设置oracle用户环境 
+
+使用oracle帐号登录，开启terminal窗口， 使用文本编辑器打开/home/oracle/.bash_profile最后加入如下环境变量的设置行：
+ORACLE_HOME=/home/oracle; export ORACLE_HOME  
+LD_LIBRARY_PATH=/home/oracle/lib; export  LD_LIBRARY_PATH  
+ORACLE_BASE=/home/oracle; export ORACLE_BASE  
+ORACLE_SID=ORCL; export ORACLE_SID  
+ORA_NLS33=/home/oracle/ocommon/nls/admin/data; export  ORA_NLS33 
+NLS_LANG=american_america.zhs16cgb231280;export NLS_LANG 
+#其中，zhs16cgb231280是简体中文的代码。也是数据库的字符集。 american_america是区域代码，关系不大。
+  Log out,重新以oracle帐号登录，键入env指令查看刚才设置的环境变量。 
+   [oracle@only_you oracle]env 
+
+5.创建oracle数据文件目录
+我想把数据文件放在/home/oracle/data目录下，于是
+[oracle@only_you oracle] mkdir data
+
+6.安装Oracle 8i 数据库软件 
+
+（1）用oracle帐号登录，进入Xwindows,开启terminal窗口 
+
+（2）[oracle@only_you oracle] cd /backup/Oracle8iR2 
+
+（3）[oracle@only_you Oralcle8iR2]./runInstaller 
+
+（4）出错，显示信息为
+
+     Xlib: connection to “:0.0” refused by server
+     Xlib: Client is not authorized to connect to server
+  说明xhost没有配置
+
+（5）设置xhost
+
+   开启一个新的terminal窗口 
+     [oracle@only_you oracle]su - (输入root密码) 
+     [root@only_you /root] xhost +
+  保留此窗口
+
+（6）在oracle用户窗口下继续安装
+
+[oracle@only_you Oralcle8iR2] ./runInstaller 
+在出现的基于JAVA的Oracle installer界面上，点击Next。 
+
+（7） 在File Locations界面上，检查Destination Path为/home/oracle，点击Next
+
+（8）在Unix Group Name窗口中，键入"oracle"，点击Next; 
+
+（9）一个窗口会弹出，要求以root身份运行/home/oracle/orainstRoot.sh
+
+（10）切换到刚才保留的root用户窗口
+   [root@only_you /root] cd /home/oracle
+   [root@only_you oracle]./orainstRoot.sh 
+
+（11）返回刚才弹出的窗口，点击Retry。 
+
+（12）在出现的"Available products"窗口上选择"Oracle8I enterprise edition8.1.6.1.0"，点击Next。 
+
+（13）下一个画面上选择Typical ，点击Next
+
+（14）在Privileged Operating System Groups界面上，点击Next
+
+（15）提示输入global database name，自己喜欢什么就写什么，我写了个wap ，验证ORACLE_SID为ORCL，点击Next 
+
+（16）提示输入db files localtion,输入/home/oracle/data，点击Next
+
+（17）在最后的Summary窗口上，点击Install 
+
+（18）现在正式开始安装了
+
+    我看的文章上说这是个漫长的过程，至少需要 1~2个小时。为了保持清醒，我冲了杯咖啡，开始上网。没想到不到20分钟就完成了。
+
+（19）在文件被拷贝和联接后，弹出一个要求运行root.sh的窗口
+    
+    切换到root用户窗口，
+       [root@only_you oracle]./root.sh 
+    在询问local bin directory时按下Enter键 
+
+（20）返回要求运行root.sh的窗口上，点击OK 
+
+（21）Oracle Net8 Configuration和Oracle Database Configuration Assistants启动， 安装Net8和创建数据库。 这一步又花了20分钟左右的时间。
+
+（22）Oracle Database Configuration Assistants结束后，在弹出的完成数据库创建窗 口上点击OK 
+
+（23）在End of Installation画面上，点击Exit ，在弹出的Do you reallywant to exit?窗口上点击yes
+
+    现在所有的Oralce 8i Enterprise就安装好了！ 之后可以使用Oracle数据库管理工具svrmgrl、sql*plus来对安装好的数据库进行测试！
+
+7．测试
+
+[oracle@only_you oracle] svrmgrl
+Oracle Server Manager Release 3.1.6.0.0 - Production
+Copyright (c) 1997, 1999, Oracle Corporation.  All Rights Reserved.
+Oracle8i Enterprise Edition Release 8.1.6.1.0 - Production
+With the Partitioning option
+JServer Release 8.1.6.0.0 - Production
+SVRMGR>connect internal
+Connected.
+SVRMGR> shutdown
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SVRMGR>startup
+ORACLE instance started.
+Total System Global Area                         56012784 bytes
+Fixed Size                                          69616 bytes
+Variable Size                                    38993920 bytes
+Database Buffers                                 16777216 bytes
+Redo Buffers                                       172032 bytes
+Database mounted.
+Database opened.
+SVRMGR> quit
+Server Manager complete.
+
+OK。用sqlplus试试
+
+[oracle@only_you oracle]$ sqlplus
+SQL*Plus: Release 8.1.6.0.0 - Production on Sun Apr 15 09:20:12 2001
+(c) Copyright 1999 Oracle Corporation.  All rights reserved.
+Enter user-name: scott
+Enter password: tiger
+Connected to:
+Oracle8i Enterprise Edition Release 8.1.6.1.0 - Production
+With the Partitioning option
+JServer Release 8.1.6.0.0 - Production
+SQL> select * from emp;
+应该出来一堆数据，有14条，没问题了。
+SQL>quit
+
+8．恢复以前的glibc
+
+[root@only_you oracle] cd /usr/bin
+[root@only_you bin] rm –f  gcc cc ld
+[root@only_you bin] mv ./saved/* .
+[root@only_you bin] rmdir saved
+[root@only_you bin] cd /usr/lib
+[root@only_you lib] mv ./saved/* .
+[root@only_you lib] rmdir saved
+ 

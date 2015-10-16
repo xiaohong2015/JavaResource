@@ -1,0 +1,111 @@
+作者：asp3000
+email: coolknight@263.net
+日期：2000-8-7 17:50:30
+jsp+beans实现读取数据库的例子
+Select.jsp
+
+<html>
+<head>
+<title>Select everything from a database</title>
+</head>
+<body>
+
+<jsp:useBean id="select" class="DataBaseSelect" scope="request">
+</bean>
+
+<% out.print(select.connect()); %>
+<br>
+<% out.print(select.select()); %>
+
+<p>Format results
+
+<br>
+<%@ page import="java.util.Vector" %>
+<% Vector aResult = select.getResult(); %>
+
+<table>
+<% for (int i=0; i < aResult.size(); i++) { %>
+   <tr>
+       <td>
+           <% out.print(aResult.elementAt(i)); %>
+       </td>
+   </tr>
+<% } %>
+</table>
+
+</body>
+</html>
+
+DataBaseSelect.java
+import java.sql.*;
+import java.util.Vector;
+
+/**
+ * DataBaseSelect.java
+ * Written by Morgan Catlin
+ *   August 19, 1999
+ * 
+ * Variables:
+ *   Vector result = where I put the results of a select query
+ * 
+ * Methods:
+ *   Vector getResult() = returns result
+ *   void setResult() = sets result
+ *   String connect() = connects to a database
+ *   String select() = selects information from a database
+ */
+
+public class DataBaseSelect {
+   
+   private Vector result;
+     
+   public DataBaseSelect() {
+      result = new Vector();
+   } // constructor DataBaseSelect
+   
+   public String connect() {
+      try {
+     Class.forName("a jdbc driver").newInstance();
+     return "Driver Loaded!";
+      } catch (Exception E) {
+     return "Unable to load driver.";
+      }
+   }
+   
+   public String select() {
+      try {
+     Connection C = DriverManager.getConnection("database connection string");
+     
+     Statement Stmt = C.createStatement();
+     
+     ResultSet myResult = Stmt.executeQuery("SELECT acolumn from atable");
+     
+     while (myResult.next()) {
+        result.addElement(myResult.getString(1));
+     }
+     
+         // Clean up
+         myResult.close();
+         Stmt.close();
+         C.close();
+     return "Connection Success!";
+      } catch (SQLException E) {
+     return "SQLException: " + E.getMessage();
+      }
+   }
+      
+   /**
+    * Accessor for result
+    **/
+   public Vector getResult() {
+      return result;
+   }
+   
+   /**
+    * Mutator for result
+    **/
+   public void setResult(Vector avector) {
+     result = avector;
+   }  
+   
+} // class DataBaseSelect

@@ -1,0 +1,139 @@
+作者：allsky
+email: zhangyan_@163.com
+日期：2001-4-24 14:44:14
+一.说明：   
+配置如下：Win2000 Server + IIS 5.0（Win2000自带）+ Tomcat 3.1 binary release.   
+我使用的Tomcat 3.1是编译过的版本，在这个版本里面没有配置IIS和NT Service   
+的说明，但是在Tocmcat 3.2 source版里面有比较详细的帮助文件。根据这些帮助文件 可以顺利的把Tomcat作为插件插入IIS。   
+
+二.启动tomcat   
+安装完tomcat之后（具体安装过程略），要启动Tomcat很简单，首先可以查看tomcat\bin\startup.bat文件，利用控制面板里面的系统－>高级->环境变量对话框，新建环境变量TOMCAT_HOME和JAVA_HOME，使它们各自指向TOMCAT和JDK的根目录即可。另外为保险起见，可以在path里面把二者的路径添加进去。然后开启一个DOS窗口执行startup.bat。 启动Tomcat后，会有一个DOS窗口显示启动情况。此时访问http://localhost:8080可以看到Tomcat的一些示例。   
+
+三.配置   
+下一步工作就是如何把Tomcat插入IIS,使二者协同工作。主要分以下几个步骤：   
+1、在Windows注册表中注册：   
+将下面的begin和end之间的Jakarta.reg文件装入机器，我的Tomcat装在c:\\jakarta-tomcat，你可根据自己的环境修改Jakarta.reg文件   
+Jakarta.reg:   
+---begin---   
+Windows Registry Editor Version 5.00   
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Apache Software Foundation\Jakarta Isapi Redirector\1.0]   
+"extension_uri"="/jakarta/isapi_redirect.dll"   
+"log_file"="c:\\jakarta-tomcat\\logs\\isapi.log"   
+"log_level"="debug"   
+"worker_file"="c:\\jakarta-tomcat\\conf\\workers.properties"   
+"worker_mount_file"="c:\\jakarta-tomcat\\conf\\uriworkermap.properties"   
+---end---   
+注：其中的路径需改成你的tomcat的安装路径。   
+
+
+2、打开IIS管理器，在"默认WEB站点”中建立一个虚拟目录jakarta，让它的路径指向isapi_redirect.dll所在目录。（在3.1 bin中可能没有这个dll，你可以从3.2的bin\iis\nt4\i386目录中拷贝一个过来。该虚拟目录应被设置为"可执行”。   
+3、利用IIS管理器，把isapi_redirect.dll设置为"默认WEB站点”的ISAPI筛选器，名称可以任起。   
+4、重启IIS，确认刚才添加的ISAPI筛选器前面标了一个绿色向上的箭头然后重启Tomcat（执行tomcat\bin\shutdown.bat可关闭Tomcat） 此时，IIS应该已经可以处理*.jsp文件了。由于Tomcat设置中，默认的Root是 tomcat\webapps\ROOT，所以你可以在这个目录中放置一个jsp文件（例如 index.jsp），然后访问http://localhost/index.jsp，看一下效果。 如果按照上面的方法还是无法使IIS处理jsp文件，可以尝试在IIS管理器－>默认WEB站点属性－>主目录－>配置中添加一个"应用程序映射”，把*.jsp文件映射到isapi_redirect.dll上。   
+
+四.作为NT的服务   
+作为NT service的设置比较简单。   
+首先从3.2拷贝过来jk_nt_service.exe，然后把下面的内容保存起来，起名   
+为wrapper.properties   
+#   
+# $Header: /home/cvs/jakarta-tomcat/src/etc/wrapper.properties,v 1.1   
+#2000/05/03 11:54:49 shachor Exp $   
+# $Revision: 1.1 $   
+# $Date: 2000/05/03 11:54:49 $   
+#   
+#   
+# jk_service.properties - a bootstrup file for the Tomcat NT service.   
+#   
+# This file provides jk_nt_service with the needed information to   
+# start tomcat at a different process.   
+#   
+# As a general note, the characters $( and ) are used internally to define   
+# macros. Do not use them!!!   
+#   
+# Whenever you see a set of lines such as:   
+# x=value   
+# y=$(x)\something   
+#   
+# the final value for y will be value\something   
+#   
+# Normaly all you will need to modify is the first two properties, i.e.   
+# wrapper.tomcat_home and wrapper.java_home. Most of the configuration   
+# is derived from these two.   
+#   
+#   
+# wrapper.tomcat_home should point to the location where you   
+# installed tomcat. This is where you have your conf, webapps and lib   
+# directories.   
+#   
+wrapper.tomcat_home=d:\tomcat   
+#   
+# wrapper.java_home should point to your Java installation. Normally   
+# you should have a bin and lib directories beneath it.   
+#   
+wrapper.java_home=d:\JBuilder35\jdk1.2.2   
+#   
+#------ ADVANCED MODE ------------------------------------------------   
+# Make sure that you read the how-to before making too many changes.   
+#---------------------------------------------------------------------   
+#   
+#   
+# Defining where the service is going to put the standard   
+# output of Tomcat. This is where System.out.println and   
+# System.err.println goes to.   
+#   
+wrapper.stdout=$(wrapper.tomcat_home)\jvm.stdout   
+wrapper.stderr=$(wrapper.tomcat_home)\jvm.stderr   
+#   
+# Additions to the path. put here directories where you store DLLs for   
+# native methods etc.   
+#   
+wrapper.ld_path=d:\   
+wrapper.ld_path=c:\   
+#   
+# Defining the classpath. All the rows that belongs to the class_path   
+# property are concatenated to create the classpath for Tomcat.   
+#   
+# If you have additional locations that you would like to add to the   
+# claspath you should add a new wrapper.class_path=<location> line.   
+#   
+wrapper.class_path=$(wrapper.tomcat_home)\classes   
+wrapper.class_path=$(wrapper.tomcat_home)\lib\xml.jar   
+wrapper.class_path=$(wrapper.tomcat_home)\lib\webserver.jar   
+wrapper.class_path=$(wrapper.tomcat_home)\lib\servlet.jar   
+wrapper.class_path=$(wrapper.tomcat_home)\lib\jasper.jar   
+#   
+# This is where Javac is located in JDK1.2.x   
+#   
+wrapper.class_path=$(wrapper.java_home)\lib\tools.jar   
+#   
+# and a tribute to JDK1.1.x   
+#   
+wrapper.class_path=$(wrapper.java_home)\lib\classes.zip   
+#   
+# This is the Java interpreter used for running Tomcat   
+#   
+wrapper.javabin=$(wrapper.java_home)\bin\java.exe   
+#   
+# This is Tomcat's startup class (the class that contains Tomcat's   
+# starting point.   
+#   
+wrapper.startup_class=org.apache.tomcat.startup.Tomcat   
+#   
+# This is the location where tomcat's server.xml configuration file   
+# is located.   
+#   
+wrapper.server_xml=$(wrapper.tomcat_home)\conf\server.xml   
+#   
+# The NT service uses AJP12 to shutdown Tomcat. The wrapper.shutdown_port   
+# tells the service the identity of the port that is used by AJP12.   
+#   
+wrapper.shutdown_port=8007   
+#   
+# This is the command line that is used to start Tomcat. You can *add* extra   
+
+# parameters to it but you can not remove anything.   
+#   
+wrapper.cmd_line=$(wrapper.javabin) -classpath $(wrapper.class_path) $(wrapp   
+er.startup_class) -config $(wrapper.server_xml) -home $(wrapper.tomcat_home)   
+
+保存后，只需修改里面的wrapper.tomcat_home和wrapper.java_home使它们各自指向tomcat根目录和JDK根目录即可。 然后运行jk_nt_service -I <服务名称> <wrapper.properties的路径> 服务名称可以随便起，例如tomcat或者jakarta等等都行。wrapper.properties的路径应为完整路径（包括wrapper.properties这个文件名）示例：jk_nt_service -I Jakarta d:\wrapper.properties 这样在控制面板－>服务里面，我们可以看到一个名为Jakarta的服务，可以 在这里启动或者中止它 

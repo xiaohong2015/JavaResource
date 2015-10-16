@@ -1,0 +1,403 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-1-5 18:10:04
+用 JSP 在客户端生成 JavaScript 代码来实现表单校验
+
+●○●○●○●○●○●○●○●○●○●○●○●○●○●○
+○　作者:刘湛　　　日期:2000-01-05　　　jeru@163.net　●
+●　http://www.cyberlabs.com/~jeru/　　　　　　　　　 ○
+○　欢迎访问爪哇人，获取更多资料　　　　　　　　　　　●
+●○●○●○●○●○●○●○●○●○●○●○●○●○●○
+
+今天费了一天时间就是做这个东西，原理很简单，就是用 JSP 在页面的开始部分生成一段代码，
+如 errorcheck.jsp 中所示，但程序太长，还是费了我不少时间来改写。
+
+主程序是名为 ErrorCheck.java ，有了这个 ErrorCheck 的 Bean，我们就再也不用为了表单校验去
+写那一大堆烦人的 JavaScript 代码了。ErrorCheck 类已帮我们生成了几乎所有你将会用到的校验方法，
+如是否为数字，长度的校验，是否为合法email等，你只需在 jsp 页面里调用相应的函数就可以了。
+
+目前一共有七个函数：
+
+一 检测是否为数字
+//输入输入框名和错误提示信息
+numericCheck(String inputName,String errorMsg);
+
+二 检测email是否合法
+//输入输入框名和错误提示信息
+emailCheck(String inputName,String errorMsg);
+
+三 检测电话号码是否合法
+//输入输入框名和错误提示信息
+telCheck(String inputName,String errorMsg);
+
+四 检测字串长度是否在规定范围那内
+//输入输入框名,错误提示信息,最小长度，最大长度
+lengthCheck(String inputName,String errorMsg,int min,int max);
+
+五 检测字串中是否不含禁止的字串
+//输入输入框名,错误提示信息,禁止字串
+denyStrCheck(String inputName,String errorMsg,String str);
+
+六 检测字串中是否含给定字串
+//输入输入框名,错误提示信息,指定字串
+stringCheck(String inputName,String errorMsg,String str);
+
+七 检测日期格式是否为 "yyyy-mm-dd"
+//输入输入框名和错误提示信息
+dateCheck(String inputName,String errorMsg);
+
+只要调用一下这个bean，然后用setFromName()设定你的表单名，再调用以上函数，
+最后 out.println(yourID.ErrorCheckScript()),就输出了一段 JavaScript 代码了，当然了，
+别忘了这个 <form name=myForm onsubmit="return errorCheck();">
+
+ok,just enjoy it,今天太累，不想多少，有任何意见请写信给我或在我主页上留言。
+
+注：我调试 errorcheck.jsp 的时候因服务器的问题不知为何不能用 usebean,setProperty 的方法，
+只好 new 了一下，我想你们是应该可以用useBean和setProperty的,自己改一下吧。
+
+===================================== errorcheck.jsp =====================================
+
+<%@ page language="java" import="dbclass.*" %>
+<%@ page contentType="text/html; charset=gb2312" %>
+<jsp:useBean id="cc" scope="page" class="dbclass.ErrorCheck" />
+
+<%
+ErrorCheck ec = new ErrorCheck();
+ec.setFormName("myForm");
+ec.numericCheck("number","The Number you input is invalid!");
+ec.emailCheck("email","The Email you input is invalid!");
+ec.telCheck("tel","The telephone you input is invalid!");
+ec.lengthCheck("strlen","The string you input in the fourth field in not between 6-8",6,8);
+ec.denyStrCheck("nojeru","The fifith field must not contain 'jeru'","jeru");
+ec.stringCheck("jeru","The sixth field must not null and contian 'jeru'","jeru");
+ec.dateCheck("date","The date you input is invalid,should be yyyy-mm-dd");
+out.println(ec.ErrorCheckScript());
+%>
+
+<html>
+<body style="font-size:9pt; font-family:Arial;">
+<h1>Errocheck Test</h1>
+<hr>
+<form name=myForm onsubmit="return errorCheck();">
+
+input a number:<br>
+<input type="text" name="number"><p>
+
+input a emial:<br>
+<input type="text" name="email"><p>
+
+input a telephone:<br>
+<input type="text" name="tel"><p>
+
+input a string (length should between 6-8):<br>
+<input type="text" name="strlen"><p>
+
+input a string (shoulde not contain "jeru"):<br>
+<input type="text" name="nojeru"><p>
+
+input a string (must contain "jeru"):<br>
+<input type="text" name="jeru"><p>
+
+input a date (yyyy-mm-dd):<br>
+<input type="text" name="date"><p>
+
+<br><input type="submit" name="submit" value="go">
+</form>
+</body>
+</html>
+
+===================================== ErrorCheck.java =====================================
+
+package dbclass;
+/**
+ * ErrorCheck v 1.0 
+ * 
+ * 这个类是用来在客户端生成 JavaScript 代码来校验表单的
+ * 原是版本是同事 Macro 用 PHP 写的，我感觉十分好用，再也
+ * 不用再为那些表单区写烦人的 javascript 代码拉，感谢他！
+ * 这次我用 Java 改写，封装成一个类，并修复了少许的 bug,加
+ * 多了一条校验的功能,它的扩展性很好，以后可能会继续完善。
+ *
+ * Mender : 
+ *	 Jeru Liu
+ * Homepage : 
+ *	 http://www.cyberlabs.com/~jeru/
+ * Email: jeru@163.net
+ * 
+ */
+
+import java.io.*;
+
+public class ErrorCheck	{
+	
+ /* public: the javascript string */
+ String errorCheckStr;	
+
+ /* public: the form name you used */
+ public String formName;
+
+ public void setFormName(String formName) {
+   this.formName = formName;
+ }
+
+ /***************************************************************************\
+  *        public: constructor functions
+  *        构造函数
+ \***************************************************************************/
+ public ErrorCheck()	{		
+   this.errorCheckStr = 
+     "<script ID=clientEventHandlersJS language=javascript>" + "\n" +
+     "<!--" + "\n";
+   this.neededFunction();	// load the needed functions
+   this.errorCheckStr += 
+     "function errorCheck() {" + "\n";		  
+  }
+
+  /***************************************************************************\
+   *        public: export javascript script
+   *        输出 JAVASCRIPT 脚本
+  \***************************************************************************/
+  public String ErrorCheckScript()	{
+    this.errorCheckStr += 
+      "}" + "\n" +
+      "-->" + "\n" +
+      "</script>" + "\n";
+    return this.errorCheckStr;
+  }	
+
+  /***************************************************************************\
+   *        public: check the numeric
+   *        检查录入框值是否是数字
+  \***************************************************************************/
+  public void numericCheck(String inputName, String errorMsg)	{
+    this.errorCheckStr +=
+      "  if(fucCheckNUM(document."+formName+"."+inputName+".value) == 0) {" + "\n" +
+      "    alert(\""+errorMsg+".\");" + "\n" +
+      "    document."+formName+"."+inputName+".focus();" + "\n" +
+      "    return(false);" + "\n" +
+      "  }" + "\n\n";		
+  }
+
+  /***************************************************************************\
+   *        public: check the length
+   *        检查录入框值的长度
+  \***************************************************************************/
+  public void lengthCheck(String inputName, String errorMsg, int MinLength, int MaxLength) {
+    this.errorCheckStr += 
+      "  if(fucCheckLength(document."+formName+"."+inputName+".value)<"+MinLength+" || " + "\n" +
+      "    fucCheckLength(document."+formName+"."+inputName+".value)>"+MaxLength+") {" + "\n" +
+      "    alert(\""+errorMsg+".\");" + "\n" +
+      "    document."+formName+"."+inputName+".focus();" + "\n" +
+      "    return(false);" + "\n" +
+      "  }" + "\n\n";
+  }	
+
+  /***************************************************************************\
+   *        public: check the email
+   *        检查录入框值是否是正确的EMAIL格式
+  \***************************************************************************/
+  public void emailCheck(String inputName, String errorMsg)	{
+    this.errorCheckStr +=
+      "  if(chkemail(document."+formName+"."+inputName+".value) == 0) {" + "\n" +
+      "    alert(\""+errorMsg+".\");" + "\n" +
+      "    document."+formName+"."+inputName+".focus();" + "\n" +
+      "    return(false);" + "\n" +
+      "  }" + "\n\n";		
+  }
+
+  /***************************************************************************\
+   *        public: check the telephone number
+   *        检查录入框值是否是电话号码
+  \***************************************************************************/
+  public void telCheck(String inputName, String errorMsg)	{
+    this.errorCheckStr +=
+      "  if(fucCheckTEL(document."+formName+"."+inputName+".value) == 0) {" + "\n" +
+      "    alert(\""+errorMsg+".\");" + "\n" +
+      "    document."+formName+"."+inputName+".focus();" + "\n" +
+      "    return(false);" + "\n" +
+      "  }" + "\n\n";				
+  }
+
+  /***************************************************************************\
+   *        public: check if the input value contian the prefered string 
+   *        检查录入框值是否是包含给定字串
+  \***************************************************************************/
+  public void stringCheck(String inputName, String errorMsg, String string)	{
+    this.errorCheckStr +=
+      "  if(document."+formName+"."+inputName+".value.indexOf(\""+string+"\") != 0) {" + "\n" +
+      "    alert(\""+errorMsg+".\");" + "\n" +
+      "    document."+formName+"."+inputName+".focus();" + "\n" +
+      "    return(false);" + "\n" +
+      "  }" + "\n\n";		
+  }
+
+  /***************************************************************************\
+   *        public: check if the input value contain the denyed string 
+   *        检查录入框值是否是包含给禁止的字串
+  \***************************************************************************/
+  public void denyStrCheck(String inputName, String errorMsg, String string)	{
+    this.errorCheckStr +=
+      "  if (document."+formName+"."+inputName+".value.length == 0 || " + "\n" +
+      "    document."+formName+"."+inputName+".value.indexOf(\""+string+"\") != -1) {" + "\n" +
+      "    alert(\""+errorMsg+".\");" + "\n" +
+      "    document."+formName+"."+inputName+".focus();" + "\n" +
+      "    return(false);" + "\n" +
+      "  }" + "\n\n";		
+  }
+
+  /***************************************************************************\
+   *        public: check the YYYY-MM-DD format date
+   *        检查录入框值是否是YYYY-MM-DD的日期格式
+  \***************************************************************************/
+  public void dateCheck(String inputName, String errorMsg)	{
+    this.errorCheckStr +=
+      "  if(chkdate(document."+formName+"."+inputName+".value) == 0) {" + "\n" +
+      "    alert(\""+errorMsg+".\");" + "\n" +
+      "    document."+formName+"."+inputName+".focus();" + "\n" +
+      "    return(false);" + "\n" +
+      "  }" + "\n\n";		
+  }
+
+	
+  public void neededFunction()	{
+    this.errorCheckStr += 						
+      "//函数名：fucCheckNUM" + "\n" +
+      "//功能介绍：检查是否为数字" + "\n" +
+      "//参数说明：要检查的数字" + "\n" +
+      "//返回值：1为是数字，0为不是数字" + "\n" +
+      "function fucCheckNUM(NUM) {" + "\n" +
+      "  var i,j,strTemp;" + "\n" +
+      "  strTemp=\"0123456789\";" + "\n" +
+      "  if ( NUM.length == 0) return 0;" + "\n" +
+      "  for (i=0;i<NUM.length;i++)	{" + "\n" +
+      "    j = strTemp.indexOf(NUM.charAt(i));" + "\n" +	
+      "    if (j==-1) {" + "\n" +
+      "      //说明有字符不是数字" + "\n" +
+      "      return 0;" + "\n" +
+      "    }" + "\n" +
+      "  }" + "\n" +
+      "  //说明是数字" + "\n" +
+      "  return 1;" + "\n" +
+      "}" + "\n\n" +		
+
+      "//函数名：fucCheckLength" + "\n" +
+      "//功能介绍：检查字符串的长度" + "\n" +
+      "//参数说明：要检查的字符串" + "\n" +
+      "//返回值：长度值" + "\n" +
+      "function fucCheckLength(strTemp) {" + "\n" +
+      "  var i,sum;" + "\n" +
+      "  sum=0;" + "\n" +
+      "  for(i=0;i<strTemp.length;i++) {" + "\n" +
+      "    if ((strTemp.charCodeAt(i)>=0) && (strTemp.charCodeAt(i)<=255))" + "\n" +
+      "      sum=sum+1;" + "\n" +
+      "    else" + "\n" +
+      "      sum=sum+2;" + "\n" +
+      "  }" + "\n" +
+      "  return sum;" + "\n" +
+      "}" + "\n\n" +
+
+      "//函数名：chkemail" + "\n" +
+      "//功能介绍：检查是否为Email Address" + "\n" +
+      "//参数说明：要检查的字符串" + "\n" +
+      "//返回值：0：不是  1：是" + "\n" +
+      "function chkemail(a)	{" + "\n" +
+      "  var i=a.length;" + "\n" +
+      "  var temp = a.indexOf('@');" + "\n" +
+      "  var tempd = a.indexOf('.');" + "\n" +
+      "  if (temp > 1) {" + "\n" +
+      "    if ((i-temp) > 3) {" + "\n" +					
+      "      if (tempd!=-1) {" + "\n" +
+      "        return 1;" + "\n" +
+      "      }" + "\n" +
+      "    }" + "\n" +
+      "  }" + "\n" +
+      "  return 0;" + "\n" +
+      "}" + "\n\n" +
+    
+      "//函数名：fucCheckTEL" + "\n" +
+      "//功能介绍：检查是否为电话号码" + "\n" +
+      "//参数说明：要检查的字符串" + "\n" +
+      "//返回值：1为是合法，0为不合法" + "\n" +
+      "function fucCheckTEL(TEL) {" + "\n" +
+      "  var i,j,strTemp;" + "\n" +
+      "  strTemp=\"0123456789-()#\";" + "\n" +
+      "  if (TEL.length == 0) return 0;" + "\n" +
+      "  for (i=0;i<TEL.length;i++) {" + "\n" +
+      "    j=strTemp.indexOf(TEL.charAt(i));" + "\n" +
+      "    if (j==-1) {" + "\n" +
+      "      //说明有字符不合法" + "\n" +
+      "      return 0;" + "\n" +
+      "    }" + "\n" +
+      "  }" + "\n" +
+      "  //说明合法" + "\n" +
+      "  return 1;" + "\n" +
+      "}" + "\n\n" +
+
+      "//函数名：chkdate	(YYYY-MM-DD)" + "\n" +
+      "//功能介绍：检查是否为日期" + "\n" +
+      "//参数说明：要检查的字符串" + "\n" +
+      "//返回值：0：不是日期  1：是日期" + "\n" +
+      "function chkdate(datestr) {" + "\n" +
+      "  var lthdatestr" + "\n" +
+      "  if (datestr != \"\")" + "\n" +
+      "    lthdatestr= datestr.length ;" + "\n" +
+      "  else" + "\n" +
+      "    lthdatestr=0;" + "\n" +
+      "  var tmpy=\"\";" + "\n" +
+      "  var tmpm=\"\";" + "\n" +
+      "  var tmpd=\"\";" + "\n" +
+      "  //var datestr;" + "\n" +
+      "  var status;" + "\n" +
+      "  status=0;" + "\n" +
+      "  if ( lthdatestr== 0)" + "\n" +
+      "    return 0;" + "\n" +
+      "  for (i=0;i<lthdatestr;i++) {" + "\n" +
+      "    if (datestr.charAt(i)== '-') {" + "\n" +
+      "      status++;" + "\n" +
+      "    }" + "\n" +
+      "    if (status>2) {" + "\n" +
+      "      return 0;" + "\n" +
+      "    }" + "\n" +
+      "    if ((status==0) && (datestr.charAt(i)!='-')) {" + "\n" +
+      "      tmpy=tmpy+datestr.charAt(i)" + "\n" +
+      "    }" + "\n" +
+      "    if ((status==1) && (datestr.charAt(i)!='-')) {" + "\n" +
+      "      tmpm=tmpm+datestr.charAt(i)" + "\n" +
+      "    }" + "\n" +
+      "    if ((status==2) && (datestr.charAt(i)!='-')) {" + "\n" +
+      "      tmpd=tmpd+datestr.charAt(i)" + "\n" +
+      "    }" + "\n" +
+      "  }" + "\n" +
+      "  year=new String (tmpy);" + "\n" +
+      "  month=new String (tmpm);" + "\n" +
+      "  day=new String (tmpd)" + "\n" +
+      "  if ((tmpy.length!=4) || (tmpm.length>2) || (tmpd.length>2)) {" + "\n" +
+      "    return 0;" + "\n" +
+      "  }" + "\n" +
+      "  if (!((1<=month) && (12>=month) && (31>=day) && (1<=day)) ) {" + "\n" +
+      "    return 0;" + "\n" +
+      "  }" + "\n" +
+      "  if (!((year % 4)==0) && (month==2) && (day==29)) {" + "\n" +
+      "    return 0;" + "\n" +
+      "  }" + "\n" +
+      "  if ((month<=7) && ((month % 2)==0) && (day>=31)) {" + "\n" +
+      "    return 0;" + "\n" +
+      "  }" + "\n" +
+      "  if ((month>=8) && ((month % 2)==1) && (day>=31)) {" + "\n" +
+      "    return 0;" + "\n" +
+      "  }" + "\n" +
+      "  if ((month==2) && (day==30)) {" + "\n" +
+      "    return 0;" + "\n" +
+      "  }" + "\n" +
+      "  return 1;" + "\n" +
+      "}" + "\n\n"; 
+
+  }
+
+  /*public static void main(String[] args) {
+    ErrorCheck ec = new ErrorCheck("testFrom");
+    String script = ec.ErrorCheckScript();
+    System.out.println(script);
+  } */	
+
+}

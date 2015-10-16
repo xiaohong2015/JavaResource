@@ -1,0 +1,150 @@
+作者：freehero
+email: jdxmoon@163.net
+日期：2000-11-29 18:03:36
+声明：本文档由freehero翻译，未经作者同意不能用于商业用途，您可以自由的复制和传播，文档只供您理解j2ee，因作者能力有限，建议您同时阅读英文文档，对于因为翻译的错误代来的后果作者不负任何责任，欢迎您来信讨论freehero@163.net   
+
+JavaTM 2 SDK,Enterprise Edition 介绍
+
+1。注意事项
+    如果你第一次使用JavaTM 2 SDK, Enterprise Edition (J2EE SDK) ，你应该遵从下面的步骤：
+    1。确认你安装了JavaTM 2 SDK, Enterprise Edition (J2EE SDK) 。
+    2。配置你的JavaTM 2 SDK, Enterprise Edition (J2EE SDK) 软件。
+    3。阅读  《开始j2ee》文档，开始建立年的ejb。
+2。支持的平台
+   SolarisTM Operating Environment, version 2.6
+   Windows NT, version 4.0
+3。支持的数据库和jdbc 驱动
+    这个版本支持jdbc api的1.0和2.0版本的数据库驱动。我们在以下数据库上做了很好的测试：
+    Oracle8 Server, version 8.05
+    Microsoft SQL Server, versions 6.5, 7.0
+    Cloudscape, version 3.0
+    更多的jdbc信息，请参阅jdbc data access api web页面（
+
+"http://www.java.sun.com/products/jdbc/index.html）。观看驱动提供商列表请看
+
+http://www.java.sun.com/products/jdbc/jdbc.driver.html。当你安装完驱动后，你要按照《配置指南》中
+
+有关jdbc 驱动的内容进行配置。如果你使用cloudscape 数据库，你不需要配置它的驱动，因为在本版本已经
+
+包括了它的驱动。
+
+4。本版本的内容包括：
+    服务：
+    EJB 
+    HTTP 
+    HTTP over SSL
+    COS naming 
+    Authentication 
+
+    工具：
+    Application Deployment Tool
+    一个打包j2ee组件和发布应用程序的工具。
+    Realm Tool
+    这个工具管理j2ee  server 的用户。
+    Verifier
+    这个工具核实j2ee组件文件。
+    Packager
+    这个工具打包j2ee组件。
+    Cleanup Script
+    删除所有发布的j2ee的应用程序。
+
+    Cloudscape 数据库
+    本版本包括一个用java语言写的关系型数据库——cloudscape 3.0。尽管本文档例子的代码是用
+
+cloudscape做测试的，但是你可以使用任何本版本支持的数据库。
+    
+    对企业的java apis
+    Enterprise JavaBeans API, version 1.1
+    Java Servlets, version 2.2
+    JavaServer Pages technology, version 1.1
+    JDBC Standard Extension, version 2.0
+    Java Naming and Directory InterfaceTM API, version 1.2 (CosNaming SPI)
+    RMI/IIOP
+    Java Transaction API, version 1.0
+    JavaMail API, version 1.1
+    Java Messaging Service, version 1.0 (API only, no implementation)
+
+5。需要的软件。
+    首先，你需要安装JDK 1.2 。The JavaTM 2 SDK, Standard Edition 提供了运行和建立j2ee应用程序的
+
+能力。如果你的client在另外一个机器上，client上也必须安装jdk1.2。
+    能支持j2ee的jdk1.2如下：
+    http://www.java.sun.com/products/jdk/1.2/download-solaris.htm
+    http://www.sun.com/solaris/java
+    ttp://www.java.sun.com/products/jdk/1.2/download-windows.html
+    其他版本的jdk1.2没有做过测试，并且不支持j2ee。
+    注意：jdk1.2中不能安装 The RMI-IIOP standard extension 。
+
+6。当前的缺陷。
+    本版本的目的是向你介绍j2ee技术，给你提供一个向我们反馈信息的机会，以便我们以后做的更好。本版
+
+本中有几个缺陷。
+    1。Container-Managed Persistence
+    实现基于container-managed persistence 的entity beans不能完全实现所有的把物体影射到关系型数
+据库的特性。
+    
+    entity bean 类只能影射到一个数据库中的表
+    一个container-managed field 只能影射到一个表中的字段
+    当容器装入container-managed fields 的时候，它回装入所有的container-managed fields 。当装入的
+
+数据非常大的时候，性能回受到影响。因为有些数据是商业方法所不需要的。
+    如果多个entity beans 的container-managed fields影射到数据库中同一个数据的时候，并且如果这些
+
+beans在同一个事务中被引用，他们可能会对数据的一致性造成影响。
+    在ejbCreate, ejbRemove, ejbLoad, and ejbStore 方法中包含sql语句的beans中，当用deploytool分布
+
+它们的时候，你只能修改表和字段的名字，不能修改作为参数传入的数目和它们的顺序。
+    在sql 语句中不能调用存储过程。
+    在Create Table语句中，你可以更改表的字段的sql类型，以便和实际的数据类型相符。
+    所有发生起来语句中的表名和字段的名字必须一致。
+    通常的sql语句只在Cloudscape, Oracle, and Microsoft SQL Server上做了测试，其他的数据库你应该
+
+自己测试。
+    
+    重复进行Result Set 时进行数据库调用
+    对于一些数据库的驱动而言，在重复进行Result Set 时不能连接数据库。在下面的例子中，the     
+
+stmt.executeUpdate 会失败。
+    String query = "SELECT DEPTNO FROM DEPT . . .";
+    String update = "UPDATE EMPLOYEE . . .";
+    ResultSet rs = stmt.executeQuery(query);
+    while (rs.next()) {
+       String s = rs.getString("DEPTNO");
+       // The following statement will FAIL:
+       stmt.executeUpdate(update);
+    . . .
+    }
+    你可以通过以下几种方法绕开此限制：
+    1。使用一个包含次sql的存储过程。
+    2。把重复的语句定义成一个子查询，例如：
+       String update = "UPDATE EMPLOYEE
+       SET DEPTNO =
+         (SELECT DEPTNO FROM DEPT
+         WHERE LOC = `ATLANTA')
+       WHERE TITLE = `ENGINEER'";
+    3。把第二个sql语句放在另外一个方法中，然后调用另外一个方法，在这种情况下，必须注意另外一个的
+
+方法事RequiresNew类型的事务。同时一应该注意第二个sql语句运行在另外的事务中。这样，如果第二个事物
+
+失败的话，你应该使第一个事物
+回滚。
+
+    强壮性和内存问题
+    我们预期在j2ee的server运行在内存小于128m的系统中，或者deploy的j2ee应用程序数目大于16的时候，
+
+或者几千个jeb实例化的时候，系统会出现问题。如果你的内存溢出，shutdown并且重新启动j2ee server。
+    
+    通常的分布环境
+    在这个版本中，每一个develper应该工作在自己的j2ee sdk环境中。多个developer不能共享一个j2ee 
+
+server。
+    
+    已知的bug
+    分布的bug
+    1。在寻找一个 web resource collectin 时键入url后应该键入回车以便确认数据已经发送
+    2。当gui界面中的edit菜单被选中的情况：典型的情况时：树型结构看起来象是已经被选中，实际上另外
+
+一个组件被选中了。因此，edit操作会对另外一个组件进行操作。
+    3。   
+
+    

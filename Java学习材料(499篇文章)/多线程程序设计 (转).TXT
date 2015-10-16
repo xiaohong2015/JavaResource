@@ -1,0 +1,180 @@
+作者：jeru
+日期：2001-3-7 11:11:58
+多线程程序设计 
+
+
+◆ 多线程简介 
+
+　　线程（thread）是操作系统分配 CPU 时间的基本实体。每一个应用程序至少有一个线程，也可以拥有多个线程。线程是程序中的代码流。多个线程可以同时运行，并能共享资源。 
+
+　　线程与进程不同，每个进程都需要操作系统为其分配独立的地址空间。而同一进程中的各个线程是在同一块地址空间中工作。 
+
+　　在 Java 程序中，一些动态效果（如动画的实现、动态的字幕等）常利用多线程技术来实现。 
+
+　　在 Java 语言中可以非常方便地使用多线程。和 Visual C++ 相比，Java 的多线程既容易学习，又容易使用。 
+
+◆ 创建多线程的两种办法： 
+
+　　（1）建立类 Thread 的子类 
+
+　　（2）实现接口 Runnable 
+
+　　第二个办法比第一个使用得更为广泛。本讲座重点讲解第二个办法。 
+
+◆ 接口 
+
+
+　　Java 语言取消了 C++ 的多重继承（“多重继承”常常使 C++ 程序员陷入混乱之中）。Java 增加了“接口”（interface）的概念，使 Java 在取消多重继承后，并未使功能下降。 
+
+　　“接口”（interface）是一种特殊的类。当你定义一个类时，可以“实现”（implements）一个（或多个）接口。语法如下： 
+
+　　class 类名 extends 超类名 implements 接口名 
+
+◆ 例 1.5.1 一个最简单的多线程小应用程序 
+
+import java.applet.*; 
+import java.awt.*; 
+public class k04a extends Applet implements Runnable 
+{ 
+　　private Thread m_k04a = null; 
+　　public k04a() 
+　　{ 
+　　} 
+　　public void paint(Graphics g) 
+　　{ 
+　　　　g.drawString("Running: " + Math.random(), 10, 20); 
+　　} 
+　　public void start() 
+　　{ 
+　　　　m_k04a = new Thread(this); 
+　　　　m_k04a.start(); 
+　　} 
+　　public void stop() 
+　　{ 
+　　　　m_k04a.stop(); 
+　　　　m_k04a = null; 
+　　} 
+　　public void run() 
+　　{ 
+　　　　while (true) 
+　　　　{ 
+　　　　　　try 
+　　　　　　{ 
+　　　　　　　　repaint(); 
+　　　　　　　　Thread.sleep(200); 
+　　　　　　} 
+　　　　　　catch (InterruptedException e) 
+　　　　　　{ 
+　　　　　　　　stop(); 
+　　　　　　} 
+　　　　} 
+　　} 
+} 
+
+
+◆ 控制线程的生命周期 
+
+　　（1）start()方法 启动一个线程 
+
+　　（2）run()方法 定义该线程的动作 
+
+　　（3）sleep()方法 使线程睡眠一段时间，单位为毫秒 
+
+　　（4）suspend()方法 使线程挂起 
+
+　　（5）resume()方法 恢复挂起的线程 
+
+　　（6）yield()方法 把线程移到队列的尾部 
+
+　　（7）stop()方法 结束线程生命周期并执行清理工作 
+
+　　（8）destroy()方法 结束线程生命周期但不做清理工作 
+
+　　其中最常用的是start(),run(),sleep(),stop()。 
+
+◆ try —— catch 语句 
+
+　　用于对“异常”的处理。和“错误”相比，“异常”是比较轻微的。它是指程序在运行中发生的意外情况。（try - catch 语句在 C++ 中也有）。 
+
+　　在执行 try 后面的语句时，如果发生异常，则执行 catch 后面的语句。 
+
+◆ 例 1.5.2 流动的标题 
+
+　　该程序在运行时，三个标题在由下而上不断变换。 
+
+HTML 文件中的写法：（三个图片要事先做好） 
+
+ 
+
+JAVA 源程序： 
+
+import java.awt.*; 
+import java.applet.Applet; 
+
+public class testani extends Applet implements Runnable 
+{ 
+　　Thread runner; 
+　　Image imgs[]; 
+　　int high, y1, y2, y3; 
+　　public void init() 
+　　{ 
+　　　　high = size().height; 
+　　　　y1 = high; 
+　　　　y2 = high*2; 
+　　　　y3 = high*3; 
+　　　　imgs = new Image[10]; 
+　　　　for(int i=0;i<3;i++) 
+　　　　　　imgs[i]=getImage(getCodeBase(),getParameter("image"+(i+1))); 
+　　} 
+　　public void start() 
+　　{ 
+　　　　runner = new Thread(this); 
+　　　　runner.start(); 
+　　} 
+　　public void stop() 
+　　{ 
+　　　　runner.stop(); 
+　　　　runner = null; 
+　　} 
+　　public void run() 
+　　{ 
+　　　　while (runner != null) 
+　　　　{ 
+　　　　　　try 
+　　　　　　{ 
+　　　　　　　　Thread.sleep(100); 
+　　　　　　　　repaint(); 
+　　　　　　　　y1--; 
+　　　　　　　　if(y1==0) 
+　　　　　　　　{ 
+　　　　　　　　　　Thread.sleep(3000); 
+　　　　　　　　　　y2=high; 
+　　　　　　　　} 
+　　　　　　　　y2--; 
+　　　　　　　　if(y2==0) 
+　　　　　　　　{ 
+　　　　　　　　　　Thread.sleep(3000); 
+　　　　　　　　　　y3=high; 
+　　　　　　　　} 
+　　　　　　　　y3--; 
+　　　　　　　　if(y3==0) 
+　　　　　　　　{ 
+　　　　　　　　　　Thread.sleep(3000); 
+　　　　　　　　　　y1 = high; 
+　　　　　　　　} 
+　　　　　　} 
+　　　　　　catch (InterruptedException e){} 
+　　　　} 
+　　} 
+　　public void paint(Graphics g) 
+　　{ 
+　　　　g.drawImage(imgs[0], 0, y1, this); 
+　　　　g.drawImage(imgs[1], 0, y2, this); 
+　　　　g.drawImage(imgs[2], 0, y3, this); 
+　　} 
+　　public void update(Graphics g) 
+　　{ 
+　　　　paint(g); 
+　　} 
+} 
+ 

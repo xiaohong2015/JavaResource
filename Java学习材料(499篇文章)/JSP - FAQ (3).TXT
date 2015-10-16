@@ -1,0 +1,236 @@
+作者：jspfuns
+日期：2000-8-10 17:50:50
+18) What do the differing levels of bean storage (page, session, app) mean? TOC 
+
+
+
+From: Joe Shevland <J_Shevland@TurnAround.com.au>
+
+The spec is not clear on what the Application level scope actually means, but the general discussion has it that an Application is a single JSP whose beans persist from call to call - unlike those beans which have the "page" scope. That said, the 0.92 spec still stores "application" beans at the servlet level so they can actually be used by multiple servlets.
+
+(From Gabriel Wong <gabrielw@EZWEBTOOLS.COM>)
+In purely Servlet terms, they mean:
+
+page - NO storage 
+session - servletrequest.getSession(true).putValue("myobjectname",myobject); 
+application - getServletConfig().getServletContext().setAttribute("myobjectname",myobject); 
+request - The storage exists for the lifetime of the request, which may be forwarded between jsp's and servlets. 
+19) Where can I find the mailing list archives? TOC 
+
+
+
+Archives of the JSP mailing list are available at http://archives.java.sun.com/archives/jsp-interest.html
+
+These archives are searchable.
+
+20) What are the important steps in using JDBC in JSP? TOC 
+
+
+
+1) Instantiate an instance of the JDBC driver you're trying to use (jdbc-odbc bridge name from memory so pls check):
+
+Class.forName( "sun.jdbc.odbc.JdbcOdbcDriver" ).newInstance();
+This determines if the class is available and instantiates a new instance of it, making it available for the next step.
+
+2) Ask the DriverManager for a Connection object based on the JDBC URL you are using:
+
+Connection connDB = DriverManager.getConnection( "jdbc:odbc:MyDSN",
+"username", "password" );
+DriverManager searches through any registered drivers (instantiating a new instance above is enough to register a driver with the DriverManager, as each implementation is required to) and, based on the JDBC URL you are using, returns the appropriate implementation of Connection.
+
+3) Create a Statement object to retrieve a ResultSet
+
+Statement smentDB = connDB.createStatement();
+ResultSet rsDB = connDB.executeQuery( "SELECT * FROM Foo" );
+or
+rsDB = connDB.executeUpdate( "UPDATE Foo SET Bar = NULL" );
+4) Close down connections to free resources:
+
+rsDB.close();
+smentDB.close();
+connDB.close();
+Note smentDB.close() closes the rsDB object, and connDB will close smentDB, cascading down, so you can really just: connDB.Close(). Also note there's no exception handling given here.
+
+With the release of the JDBC 2.0 API, there is a CachedResultSet capability which would provide some assistance in making your pages perform better:
+
+From: DIGNE Marc <jmdigne@MEUDON.NETCABLE.TM.FR>
+
+I tested the JDBC CachedRowSet http://developer.java.sun.com/developer/earlyAccess/crs/index.html
+
+"JDBCTM CachedRowSet is an implementation of the Rowset interface. The Rowset interface is part of the JDBC 2.0 Standard Extension API.
+
+CachedRowSet provides a disconnected, serializable, scrollable container for tabular data. A CachedRowSet object can be thought of as a disconnected set of rows that are being cached outside of a data source.
+
+Data contained in a CachedRowSet may be updated and then resynchronized with the underlying tabular data source. "
+
+21) How does variable scope work in JSP? TOC 
+
+
+
+From: Alexander Yavorskiy <Alexander_Yavorskiy@VANTIVE.COM>
+
+Hi,
+An interesting observation about the variables declared in JSP pages.
+
+Any variable declared inside <% .... %> is local to the page and is not visible to outside functions, even those declare on the same JSP.
+
+Example:
+
+<%
+int evilVariable = "666";
+%>
+...
+function testFunction() {
+// do not see evilVariable from here
+}
+Why? evilVariable eventually becomes a local variable in the service() method of the resulting servlet and so is not accessible by other methods of that servlet.
+
+Any variable declared inside <%! %> become global for any function declared in the servlet.
+
+Example:
+<%!
+int evilVariable = "666";
+%>
+...
+function testFunction() {
+int x = evilVariable; //can get to it
+}
+Why? evilVariable declared this way becomes a private member variable of the resulting servlet and so is accessible by all other methods of that servlet.
+
+Conclusion
+
+It is important to understand this difference because in servlet environment there will only be a single(!!!) instance of the resulting servlet running and serving all requests for a particular page. Thus, potentially all of the member variables of that servlet will be share across the requests as opposed to variables local to the service() method that will be recreated for each request. So, we should be careful about putting none constant variables in <SERVER></SERVER>. At the same time, it might be useful to do so in some situations.
+
+22) How do I forward to an HTML page? TOC 
+
+
+
+The method forward() in the Servlet API works for JSP pages, but this is only true for resources with _active_ content, like JSP pages.
+
+If you wish to forward to an HTML page, you have to use a different method:
+
+From: Volker Stiehl <stiehl@ZNNBG.SIEMENS.DE>
+
+In order to access HTML files you have to use the new "resource abstraction" feature of 2.1.
+Try the following:
+
+URL url = getServletContext().getResource("/abc/xyz.html");
+out.println(url.getContent());
+23) Are there any white papers or documents explaining how JSP fits? TOC 
+
+
+
+From: "Craig R. McClanahan" <cmcclanahan@mytownnet.com>
+
+http://www.software.ibm.com/ebusiness/pm.html
+
+It is titled "The Web Application Programming Model", and provides a nice overview of the basic architecture IBM proposes for web applications (essentially the "Model 2" approach from the JSP specification). There are few IBM-specific product references in this document -- simply translate their term "dynamic server pages" into JSP, and generalize "WebSphere" to any useful combination of web server, servlet engine, and app server components. There are more IBM-specific references in several of the other white papers, but they still provide a useful overview of the technology basis for large scale web-based application development and deployment. The white paper index is at:
+
+http://www.software.ibm.com/ebusiness/library.html
+
+24) How to I create dynamic GIFs for my JSP? TOC 
+
+
+
+From: Matti Kotsalainen <matti@RAZORFISH.COM>
+
+If you want to create GIFs, use ACME labs excellent free gifencoder(http://www.acme.com/), and then do something like this:
+
+Frame frame = null;
+Graphics g = null;
+FileOutputStream fileOut = null;
+try {
+//create an unshown frame
+frame = new Frame();
+frame.addNotify();
+//get a graphics region, using the frame
+Image image = frame.createImage(WIDTH, HEIGHT);
+g = image.getGraphics();
+//manipulate the image
+g.drawString("Hello world", 0, 0);
+//get an ouputstream to a file
+fileOut = new FileOutputStream("test.gif");
+GifEncoder encoder = new GifEncoder(image, fileOut);
+encoder.encode();
+} catch (Exception e) {
+;
+} finally {
+//clean up
+if (g != null) g.dispose();
+if (frame != null) frame.removeNotify();
+if (fileOut != null) {
+try { fileOut.close(); }
+catch (IOException ioe) { ; }
+}
+}
+25) Do you know where I could get some code that would encode something to the HTML DTD standard? TOC 
+
+
+
+As a matter of fact...
+
+(NB: This is an implementation of the HTMLEncode function that ASP has)
+
+From: Eric Lunt <elunt@YAHOO.COM>
+
+Somewhere in my net-travels I picked up this version which performs pretty well:
+
+/**
+* Returns an HTML rendition of the given <code>String</code>. This was
+* written by <a href=mailto:kimbo@biddersedge.com>Kimbo Mundy</a>.
+* @param text A <code>String</code> to be used in an HTML page.
+* @return A <code>String</code> that quotes any HTML markup
+* characters. If no quoting is needed, this will be
+* the same as <code>text</code>.
+*/
+public static String asHTML(String text) {
+if (text == null)
+return "";
+StringBuffer results = null;
+char[] orig = null;
+int beg = 0, len = text.length();
+for (int i = 0; i < len; ++i){
+char c = text.charAt(i);
+switch (c){
+case 0:
+case '&':
+case '<':
+case '>':
+case '"':
+if (results == null){
+orig = text.toCharArray();
+results = new StringBuffer(len+10);
+}
+if (i > beg)
+results.append(orig, beg, i-beg);
+beg = i + 1;
+switch (c){
+default: // case 0:
+continue;
+case '&':
+results.append("&");
+break;
+case '<':
+results.append("<");
+break;
+case '>':
+results.append(">");
+break;
+case '"':
+results.append(""");
+break;
+}
+break;
+}
+}
+if (results == null)
+return text;
+results.append(orig, beg, len-beg);
+return results.toString();
+}
+26) What is page compilation? TOC 
+
+
+
+See (30)
+

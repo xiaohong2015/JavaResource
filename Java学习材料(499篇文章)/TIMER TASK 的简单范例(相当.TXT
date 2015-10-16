@@ -1,0 +1,37 @@
+作者：jeru
+email: jeru@163.net
+日期：8/5/2001 5:22:16 PM
+Scheduling a Timer Task to Run at a Certain Time
+============================================== 
+ Date timeToRun = 
+   new Date(System.currentTimeMillis()+
+   numberOfMillisecondsInTheFuture);
+ Timer timer = new Timer();
+     
+ timer.schedule(new TimerTask() {
+         public void run() {
+             // Task here
+         }
+     }, timeToRun);
+============================================
+
+Scheduling a Timer Task to Run Repeatedly
+
+============================================= 
+ // delay for 5 sec. 
+ 
+ int delay = 5000;   
+ 
+ 
+ // repeat every sec.
+ 
+ int period = 1000;  
+ Timer timer = new Timer();
+     
+ timer.scheduleAtFixedRate(new TimerTask() {
+         public void run() {
+             // Task here
+         }
+ }, delay, period);
+ 
+ 

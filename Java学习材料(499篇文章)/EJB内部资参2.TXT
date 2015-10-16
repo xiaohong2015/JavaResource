@@ -1,0 +1,220 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-1-12 18:10:03
+使用EJB你就不用你自己写支持分布式的对象的框架了 
+
+
+Java Beans是个功能的部件，而不是一个可运行的程序， 不需要也不能发布它， 
+但它又必须有一个可依赖的环境来运行 
+EJB则是可发布的部件、发布到一个容器中， 装配成更大的系统 
+
+EJB和Applet和Servlet相似， Applet的容器是Browser, Servlet的容器是 
+支持Java的Web Server， 而EJB的容器是Application Server 
+EJB1.1　 (2.0的规范已经发布了，请到sun去download) 
+
+软件生产工业化 
+
+多层应用简单化 
+事务处理 
+并发安全 
+
+Enterprise beans当前两个类型(2.0中有新内容， 我自己还没理解，不多讲了) 
+
+
+Session Beans(又包括stateful 和stateless) 业务过程相关的逻辑，比如各种 
+计算，查询 
+entity beans 数据相关的逻辑， 比如修改帐号的余额 
+
+EJB的规范定义了一些你的Bean可以实现标准的接口。 这些接口强迫你实现其中 
+特定方法。EJB的容器使用这些方法来管理你的Bean以及传递事件 
+
+最基本的接口javax.ejb.EnterpriseBean 
+public interface javax.ejb.EnterpriseBean extends java.io.Serializable 
+
+{} 
+这个接口中没有方法，起到标示你的Bean是个Enterprise bean. 
+
+sesssion beans 和entity beans有许多接口都是从这个特定的接口继承来的（所 
+以你的bean并不直接实现EnterpriseBean接口）。所有的session beans都从jav 
+ax.ejb.SessionBean继承，同理所有的EntityBean都从javax.ejb.EntityBean继 
+承。 
+
+remote object 由MiddleSoftware提供的工具生成 
+
+remote interface 远程接口---客户端的应用调用的接口 
+java.ejb.EJBObject 
+public interface EJBObject extends java.rmi.Remote { 
+public abstract javax.ejb.EJBHome getEJBHome() throws java.rmi.RemoteE 
+xception; 
+public abstract javax.ejb.Handle getHandle() throws java.rmi.RemoteExc 
+eption; 
+//一个EJB的持续引用， 存储起来重新构造 
+public abstract java.lang.Object getPrimaryKey() throws java.rmi.Remot 
+eException; 
+//只用在Entity Beans 
+public abstract boolean isIdentical(javax.ejb.EJBObject param1) throws 
+java.rmi.RemoteException; 
+public abstract void remove() throws java.rmi.RemoteException, javax.e 
+jb.RemoveException; 
+} 
+
+
+
+home object --　EJB object factory, 由工具生成，是EJB container的一部分 
+
+创建EJB objects 
+发现已经存在的EJB objects (for entity beans) 
+删除EJB objects 
+
+home interface --本地接口, 
+定义创建的方法，查找的方法和析构的方法 
+
+
+package javax.ejb; 
+
+import java.rmi.Remote; 
+import java.rmi.RemoteException; 
+
+// Referenced classes of package javax.ejb: 
+//　　　　　　RemoveException, EJBMetaData, HomeHandle, Handle 
+
+public interface EJBHome 
+　　extends Remote 
+{ 
+　　public abstract EJBMetaData getEJBMetaData() 
+　　　　throws RemoteException; 
+
+　　public abstract HomeHandle getHomeHandle() 
+　　　　throws RemoteException; 
+
+　　public abstract void remove(Object obj) 
+　　　　throws RemoteException, RemoveException; 
+
+　　public abstract void remove(Handle handle) 
+　　　　throws RemoteException, RemoveException; 
+
+} 
+
+
+session bean 
+
+package javax.ejb; 
+
+import java.rmi.RemoteException; 
+
+// Referenced classes of package javax.ejb: 
+//　　　　　　EJBException, EnterpriseBean, SessionContext 
+
+public interface SessionBean 
+　　extends EnterpriseBean 
+{ 
+　　public abstract void ejbActivate() 
+　　　　throws EJBException, RemoteException; 
+
+　　public abstract void ejbPassivate() 
+　　　　throws EJBException, RemoteException; 
+
+　　public abstract void ejbRemove() 
+　　　　throws EJBException, RemoteException; 
+
+　　public abstract void setSessionContext(SessionContext sessionconte 
+xt) 
+　　　　throws EJBException, RemoteException; 
+
+} 
+
+setSessionContext(SessionContext sessioncontext) 
+session context 是session bean 和container交互的通道， 通常的实现: 
+
+import javax.ejb.*; 
+public class MyBean implements SessionBean 
+{ 
+private SessionBean sessiontext; 
+public void setSessionContext(SessionContext sessioncontext) 
+　　　　 throws EJBException, RemoteException 
+　　　　{ 
+　　　　 this.sessiontext = sessiontext; 
+　　　　} 
+　　　　 
+　　　　...... 
+} 
+
+
+public void ejbCreate(...) 
+
+至少实现一个 
+
+home object实现相应参数的一个create方法 
+比如 
+你的bean中有一个ejbCreate(int i)时 
+home object中有 
+public void create(int i) 
+
+
+钝化和激活 ---仅用于stateful session bean 
+　　public abstract void ejbPassivate() 
+　　public abstract void ejbActivate() 
+　　 
+当太多的session bean被事例化时,container做钝化和激活操作， 释放和打开资 
+源 
+
+
+
+
+
+//stateless session bean 
+
+对于所有的客户端是相同的，所有的信息通过参数传递或从数据库等外部得到 
+初始化的唯一方式是无参数的 ejbCreate()方法 
+home object 有相应的无参数create（）方法 
+
+
+客户端调用过程： 
+
+1、Look up a home object. 
+2、Use the home object to create an EJB object. 
+3、Call business methods on the EJB object. 
+4、Remove the EJB object. 
+
+Look up a home object 
+your client code must use the JNDI. J2EE products exploit directory se 
+rvices to stroe location infromation for resources that your applicati 
+on code uses in an enterprise deployment. These resources could be EJB 
+home objects, enterprise bean enviroment properties, database deriver 
+s, message service drivers, and other resources. By using directory se 
+rvices, you can writer application code that does not depend on specif 
+ic machine names or locations. This is all part of EJB's location tran 
+sparency, and it keeps your code portable. If later you decide thata r 
+esources should be located elsewhere, your code will not need to be re 
+built because the directory service can simply be updated to reflect t 
+he new resource locations. This greatly enhances maintenance of a mult 
+i-tier deployment that may evolve over time. 
+
+There are two common steps that must be taken to find any resource in 
+a J2EE deployment: 
+1. Associate the resource with a "nickname" in your deployment descrip 
+tor. Your J2EE product will bind the nickname to the resource. 
+2. Clients of the resource can use the nickname with JNDI to look up t 
+he resource across a deployment. 
+
+目前的主要的分布式应用框架 
+
+1、 Miscrosoft's Distribute interNet Appplications Architecture(DNA) 
+相关的平台和技术 
+NT 
+DCOM 
+MSMQ 
+MTS 
+Microsoft Wolfpack 
+Microsoft SQL Server 
+Microsoft Internet Information Server 
+Microsoft Management Console 
+2、SUN's J2EE 
+J2EE是规范而不是产品， 不至于让用户绑定到一个卖家（Microsoft） 
+支持高端的Unix平台 
+内置的CORBA支持 
+
+3、The Object Management Group's CORBA Standard 
+Common Object Request Broker Architecture (CORBA) 
+Internet Inter-ORB Protocol (IIOP) 
+ 

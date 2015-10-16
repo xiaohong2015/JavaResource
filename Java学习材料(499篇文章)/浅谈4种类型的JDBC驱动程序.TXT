@@ -1,0 +1,24 @@
+作者：麻麻雀
+email: water@sz.china.com
+日期：2000-12-8 9:40:20
+在网上下载JDBC驱动程序，常看见Type4字样，开始以为是厂商自己的标准，近来翻看资料，原来是SUN定义的JDBC标准。
+
+Type1   JDBC-ODBC桥
+作为JDK1.1后的一部分，是sun.jdbc.odbc包的一部分
+Application--->JDBC-ODBC Bridge(Type1 jdbc driver)---->JDBC-ODBC Library--->ODBC Driver-->Database
+适用于快速的原型系统，没有提供JDBC驱动的数据库如Access
+
+Type2   JAVA to Native API
+利用开发商提供的本地库来直接与数据库通信。
+Application--->JDBC Driver(Type2 jdbc driver)---->Native Database library---->Database
+比Type1性能略好。
+
+Type3   Java to net
+Application--->Jdbc Driver(Type3 jdbc driver)----->java middleware--->JDBC Driver---->Database
+具有最大的灵活性，通常由那些非数据库厂商提供，是四种类型中最小的。
+
+Type4 JAVA to native dababase
+Application--->Jdbc driver(type4 jdbc driver)----->database engine--->database
+最高的性能，通过自己的本地协议直接与数据库引擎通信，具备在Internet装配的能力。
+
+

@@ -1,0 +1,36 @@
+作者：jspfuns
+日期：2000-8-25 21:24:30
+  通常，会话管理是通过服务器将 Session ID 作为一个 cookie 存储在用户的 Web 浏览器中来唯一标识每个用户会话。如果浏览器不支持 cookies，或者将浏览器设置为不接受 cookies，我们可以通过 URL 重写来实现会话管理。 
+
+　　实质上 URL 重写是通过向 URL 连接添加参数，并把 session ID 作为值包含在连接中。然而，为使这生效，你需要为你的 servlet 响应部分的每个连接添加 session ID 。 
+
+　　 把 session ID 加到一个连接可以使用一对方法来简化：response.encodeURL() 使 URL 包含 session ID，如果你需要使用重定向，可以使用 response.encodeRedirectURL () 来对 URL 进行编码。 
+
+　　encodeURL () 及 encodeRedirectedURL () 方法首先判断 cookies 是否被浏览器支持；如果支持，则参数 URL 被原样返回，session ID 将通过 cookies 来维持。 
+
+　　来看下面的例子，两个 JSP 文件：hello1.jsp 和 hello2.jsp，及它们之间的影响。我们在 hello1.jsp 中简单的创建一个会话，并在 session 中存储一个对象实例。接着用户可以点击页面的连接到达 hello2.jsp。在 hello2.jsp 中，我们从 session 中获取原先放置的对象并显示它的内容。注意，我们在 hello1.jsp 中调用了 encodeURL() 方法来获得 hello2.jsp 的链接，使得在浏览器停用 cookies 的情况下，session ID 自动添加到 URL，hello2.jsp 仍能得到 session 对象。 
+
+　　首先在启用 cookies 的情况下运行。然后关闭对 cookie 的支持，重启浏览器，再运行一次。每次你都可以看到会话管理在起作用，并能在页之间传递信息。 
+
+注意，如果你想让这个例子能在关闭了 cookies 的浏览器中工作，你的 JSP 引擎必须支持 URL 重写。 
+
+
+hello1.jsp
+
+
+<%@ page session="true" %>
+<%
+Integer num = new Integer(100);
+session.putValue("num",num);
+String url =response.encodeURL("hello2.jsp");
+%>
+<a href='<%=url%>'>hello2.jsp</a>
+
+hello2.jsp
+
+
+<%@ page session="true" %>
+<%
+Integer i= (Integer)session.getValue("num");
+out.println("Num value in session is "+i.intValue());
+%>

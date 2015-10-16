@@ -1,0 +1,107 @@
+作者：Eazily
+email: Eazily@yeah.net
+日期：2001-7-14 21:37:38
+提高Java代码可重用性的三个措施 
+
+本文介绍了三种修改现有代码提高其可重用性的方法，它们分别是：改写类的实例方法，把参数类型改成接口，选择最简单的参数接口类型。 
+
+措施一：改写类的实例方法 
+
+通过类继承实现代码重用不是精确的代码重用技术，因此它并不是最理想的代码重用机制。换句话说，如果不继承整个类的所有方法和数据成员，我们无法重用该类里面的单个方法。继承总是带来一些多余的方法和数据成员，它们总是使得重用类里面某个方法的代码复杂化。另外，派生类对父类的依赖关系也使得代码进一步复杂化：对父类的改动可能影响子类；修改父类或者子类中的任意一个类时，我们很难记得哪一个方法被子类覆盖、哪一个方法没有被子类覆盖；最后，子类中的覆盖方法是否要调用父类中的对应方法有时并不显而易见。 
+
+任何方法，只要它执行的是某个单一概念的任务，就其本身而言，它就应该是首选的可重用代码。为了重用这种代码，我们必须回归到面向过程的编程模式，把类的实例方法移出成为全局性的过程。为了提高这种过程的可重用性，过程代码应该象静态工具方法一样编写：它只能使用自己的输入参数，只能调用其他全局性的过程，不能使用任何非局部的变量。这种对外部依赖关系的限制简化了过程的应用，使得过程能够方便地用于任何地方。当然，由于这种组织方式总是使得代码具有更清晰的结构，即使是不考虑重用性的代码也同样能够从中获益。 
+
+在Java中，方法不能脱离类而单独存在。为此，我们可以把相关的过程组织成为独立的类，并把这些过程定义为公用静态方法。 
+
+例如，对于下面这个类： 
+class Polygon { 
+. 
+. 
+public int getPerimeter() {...} 
+public boolean isConvex() {...} 
+public boolean containsPoint(Point p) {...} 
+. 
+. 
+} 
+
+我们可以把它改写成： 
+class Polygon { 
+. 
+. 
+public int getPerimeter() {return pPolygon.computePerimeter(this);} 
+public boolean isConvex() {return pPolygon.isConvex(this);} 
+public boolean containsPoint(Point p) {return pPolygon.containsPoint(this, 
+p 
+);} 
+. 
+
+} 
+
+其中，pPolygon是： 
+class pPolygon { 
+static public int computePerimeter(Polygon polygon) {...} 
+static public boolean isConvex(Polygon polygon) {...} 
+static public boolean 
+containsPoint(Polygon polygon, Point p) {...} 
+} 
+
+从类的名字pPolygon可以看出，该类所封装的过程主要与Polygon类型的对象有关。名字前面的p表示该类的唯一目的是组织公用静态过程。在Java中，类的名字以小写字母开头是一种非标准的做法，但象pPloygon这样的类事实上并不提供普通Java类的功能。也就是说，它并不代表着一类对象，它只是Java语言组织代码的一种机制。 
+
+在上面这个例子中，改动代码的最终效果是使得应用Polygon功能的客户代码不必再从Polygon继承。Polygon类的功能现在已经由pPolygon类以过程为单位提供。客户代码只使用自己需要的代码，无需关心Polygon类中自己不需要的功能。但它并不意味着在这种新式过程化编程中类的作用有所削弱。恰恰相反，在组织和封装对象数据成员的过程中，类起到了不可或缺的作用，而且正如本文接下来所介绍的，类通过多重接口实现多态性的能力本身也带来了卓越的代码重用支持。然而，由于用实例方法封装代码功能并不是首选的代码重用手段，所以通过类继承达到代码重用和多态性支持也不是最理想的。 
+
+措施二：把参数类型改成接口 
+
+正如Allen Holub在《Build User Interfaces for Object-Oriented Systems》中所指出的，在面向对象编程中，代码重用真正的要点在于通过接口参数类型利用多态性，而不是通过类继承： 
+
+“……我们通过对接口而不是对类编程达到代码重用的目的。如果某个方法的所有参数都是对一些已知接口的引用，那么这个方法就能够操作这样一些对象：当我们编写方法的代码时，这些对象的类甚至还不存在。从技术上说，可重用的是方法，而不是传递给方法的对象。” 
+
+在“措施一”得到的结果上应用Holub的看法，当某块代码能够编写为独立的全局过程时，只要把它所有类形式的参数改为接口形式，我们就可以进一步提高它的可重用能力。经过这个改动之后，过程的参数可以是实现了该接口的所有类的对象，而不仅仅是原来的类所创建的对象。由此，过程将能够对可能存在的大量的对象类型进行操作。 
+
+例如，假设有这样一个全局静态方法： 
+static public boolean contains(Rectangle rect, int x, int y) {...} 
+
+这个方法用于检查指定的点是否包含在矩形里面。在这个例子中，rect参数的类型可以从Rectangle类改变为接口类型，如下所示： 
+
+static public boolean contains(Rectangular rect, int x, int y) {...} 
+
+而Rectangular接口的定义是： 
+
+public interface Rectangular {Rectangle getBounds();} 
+
+现在，所有可以描述为矩形的类（即，实现了Rectangular接口的类）所创建的对象都可以作为提供给pRectangular.contains()的rect参数。通过放宽参数类型的限制，我们使方法具有更好的可重用性。 
+
+不过，对于上面这个例子，Rectangular接口的getBounds方法返回Rectangle，你可能会怀疑这么做是否真正值得。换言之，如果我们知道传入过程的对象会在被调用时返回一个Rectangle，为什么不直接传入Rectangle取代接口类型呢？之所以不这么做，最重要的原因与集合有关。让我们假设有这样一个方法： 
+
+static public boolean areAnyOverlapping(Collection rects) {...} 
+
+该方法用于检查给定集合中的任意矩形对象是否重叠。在这个方法的内部，当我们用循环依次访问集合中的各个对象时，如果我们不能把对象cast成为Rectangular之类的接口类型，又如何能够访问对象的矩形区域呢？唯一的选择是把对象cast成为它特有的类形式（我们知道它有一个方法可以返回矩形），它意味着方法必须事先知道它所操作的对象类型，从而使得方法的重用只限于那几种对象类型。而这正是前面这个措施力图先行避免的问题！ 
+
+措施三：选择最简单的参数接口类型 
+
+在实施第二个措施时，应该选用哪一种接口类型来取代给定的类形式？答案是哪一个接口完全满足过程对参数的需求，同时又具有最少的多余代码和数据。描述参数对象要求的接口越简单，其他类实现该接口的机会就越大——由此，其对象能够作为参数使用的类也越多。从下面这个例子可以很容易地看出这一点： 
+
+static public boolean areOverlapping(Window window1, Window window2) {...} 
+
+这个方法用于检查两个窗口（假定是矩形窗口）是否重叠。如果这个方法只要求从参数获得两个窗口的矩形坐标，此时相应地简化这两个参数是一种更好的选择： 
+
+static public boolean areOverlapping(Rectangular rect1, Rectangular rect2) 
+{ 
+...} 
+
+上面的代码假定Window类型实现了Rectangular接口。经过改动之后，对于任何矩形对象我们都可以重用该方法的功能。 
+
+有些时候可能会出现描述参数需求的接口拥有太多方法的情况。此时，我们应该在全局名称空间中定义一个新的公共接口供其他面临同一问题的代码重用。 
+
+当我们需要象使用C语言中的函数指针一样使用参数时，创建唯一的接口描述参数需求是最好的选择。例如，假设有下面这个过程： 
+static public void sort(List list, SortComparison comp) {...} 
+
+该方法运用参数中提供的比较对象comp，通过比较给定列表list中的对象排序list列表。sort对comp对象的唯一要求是要调用一个方法进行比较。因此，SortComparison应该是只带有一个方法的接口： 
+public interface SortComparison { 
+boolean comesBefore(Object a, Object b); 
+} 
+
+SortComparison接口的唯一目的在于为sort提供一个它所需功能的钩子，因此SortComparison接口不能在其他地方重用。 
+
+总而言之，本文三个措施适合于改造现有的、按照面向对象惯例编写的代码。这三个措施与面向对象编程技术结合就得到了一种可在以后编写代码时使用的新式代码编写技术，它能够简化方法的复杂性和依赖关系，同时提高方法的可重用能力和内部凝聚力。 
+
+当然，这里的三个措施不能用于那些天生就不适合重用的代码。不适合重用的代码通常出现在应用的表现层。例如，创建程序用户界面的代码，以及联结到输入事件的控制代码，都属于那种在程序和程序之间千差万别的代码，这种代码几乎不可能重

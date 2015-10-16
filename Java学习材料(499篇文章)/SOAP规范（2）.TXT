@@ -1,0 +1,202 @@
+作者：bdsc
+email: bdscca@yahoo.ca
+日期：2001-7-13 17:05:30
+4.4.1 SOAP 错误代码
+在描述这个规范中定义的错误时，这一节中定义的Faultcode值必须用在faultcode元素中。这些faultcode值得名域标志符为"http://schemas.xmlsoap.org/soap/envelope/"。定义这个规范之外的方法时推荐（不要求）使用这个名域。
+
+缺省的SOAP faultcode值以可扩展的方式定义，允许定义新的SOAP faultcode值，并与现有的faultcode值向后兼容。使用的机制类似于HTTP中定义的1xx, 2xx, 3xx等基本的状态类（见[5]第10节），不过，它们定义为XML合法名（见 [8] 第3节 ），而不是整数。字符"."（点）作为faultcode的分隔符，点左边的错误代码比右边的错误代码更为普通。如：
+
+Client.Authentication
+
+这篇文档中定义的faultcode值是：
+
+名称 含义 
+VersionMismatch 处理方发现SOAP封装元素有不合法的名域（见4.1.2节） 
+MustUnderstand 处理方不理解或者不服从一个包含值为"1"的mustUnderstand属性的 SOAP头元素的直接子元素。（见4.2.3节） 
+Client Client错误类表示消息的格式错误或者不包含适当的正确信息。例如，消息可能缺少正确的认证和支付信息。一般地，它表示消息不能不作修改就重发。参见4.4节SOAP Fault detail子元素的描述。 
+Server Server错误类表示由于消息的处理过程而不是消息的内容本身使得消息消息不能正确的处理。例如，处理消息时可能要与其它处理器通信，但它没有响应。这个消息可能在迟一点的时间处理成功。 SOAP Fault子元素的详细信息参见4.4节 
+
+5. SOAP编码
+SOAP编码格式基于一个简单的类型系统，概括了程序语言，数据库和半结构化数据等类型系统的共同特性。一个类型或者是一个简单的（标量的）类型，或者是由几个部分组合而成的复合类型，其中每个部分都有自己的类型。以下将详细描述这些类型。这一节定义了类型化对象的序列化规则。它分两个层次。首先，给定一个与类型系统的符号系统一致的Schema（译者注：这里的schema不是符合XML语法的schema，而仅仅表示广义的用于表示消息结构的定义方式），就构造了XML语法的Schema。然后，给定一个类型系统的Schema和与这个Schema一致的特定的值，就构造了一个XML文档实例。反之，给定一个依照这些规则产生的XML文档实例和初始的Schema，就可以构造初始值的一个副本。
+
+这一节中定义的元素和属性的名域标志符为"http://schemas.xmlsoap.org/soap/encoding/"。下面的例子都假定在上一层的元素中声明了名域。
+
+鼓励使用这一节中描述的数据模型和编码方式，但也可以在SOAP中使用其他的数据模型和编码方式。（见4.1.1节）
+
+5.1 XML中的编码类型规则
+XML允许非常灵活的数据编码方式。SOAP定义了一个较小的规则集合。这一节在总的层次上定义了这些编码规则，下一节将描述特定类型的编码规则的细节。这一节定义的编码规则可以与第7节中所述的RPC调用和应答映射结合使用。
+
+下面的术语用来描述编码规则:
+
+一个"value"是一个字符串，类型（数字，日期，枚举等等）的名或是几个简单值的组合。所有的值都有特定的类型。 
+一个"simple value"没有名部分， 如特定的字符串，整数，枚举值等等。 
+一个"compound value"是相关的值的结合，如定单，股票报表，街道地址等等。 
+在"compound value"中，每个相关的值都潜在的以名，序数或这两者来区分。这叫作"accessor"。复合值的例子有定单和股票报表等等。数组也是复合值。在复合值中，多个accessor有相同的名是允许的，例如RDF就是这样做的。 
+一个"array"是一个复合值，成员值按照在数组中的位置相互区分。 
+一个"struct"也是一个复合值，成员值之间的唯一区别是accessor名，accessor名互不相同。 
+一个"simple type"是简单值的类，如叫做"string" "integer"的类，还有枚举类等等。 
+一个"compound type"是复合值的类。复合类型的例子有定单类，它们有相同的accessor名（shipTo, totalCost等），但可能会有不同的值（可能以后被设置为确定的值）。 
+在复合类型中，如果类型内的accessor名互不相同，但是可能与其他类型中的accessor名相同，即，accessor名加上类型名形成一个唯一的标志符，这个名叫作"局部范围名"。如果名是直接或间接的基于URI的一部分，那么不管它出现在什么类型中，这个名本身就可以唯一标志这个accessor，这样的名叫作"全局范围名"。 
+给定了schema中相关的值的序列化信息，就可能确定某些值只与某个accessor的一个实例有关。其它情况下则无法确定。当且仅当一个accessor引用一个值，这个值才能被视为"single-reference"，如果有不止一个accessor引用它，那么就将它视为"multi-reference"。注意，可能一个确定的值在一个schema中是"single-reference"，而在另一个schema中是"multi-reference"。 
+在语句构成上，一个元素可能是"independent" 或 "embedded"。一个独立的元素指出现在序列化最顶层的任何元素。所有其它元素都是嵌入元素。 
+虽然用xsi:type属性可以使值的结构和类型变为自描述的，但是序列化规则允许值的类型仅仅参照schema而定。这样的schema可能使用"XML Schema Part 1: Structures" [10]和"XML Schema Part 2: Datatypes" [11]中描述的符号系统，也可能使用其它符号系统。注意，虽然序列化规则可以用于除了数组和结构之外的复合类型，但是许多schema仅仅包含数组和结构类型。
+
+序列化规则如下:
+
+所有的值以元素内容的形式表示。一个multi-reference值必须表示为一个独立元素的内容，而一个single-reference值最好不要这样表示（也可以这样表示）。 
+对于每个具有值的元素，值的类型时必须用下述三种方式之一描述：(a)所属元素实例有xsi:type属性 (b)所属元素是一个有SOAP-ENC:arrayType 属性（该属性可能是缺省的）的元素的子元素，或者(c)所属元素的名具有特定的类型，类型可以由schema确定。 
+一个简单值表示为字符数据，即没有任何子元素。每个简单值必须具有一个类型，这个类型或者是XML Schemas Specification, part 2 [11]有的类型，或者具有源类型（参见5.2节）。 
+一个复合值编码成一个元素的序列，每个accessor用一个嵌入元素表示，该元素的元素名和accessor的名一致。如果accessor的名是局部于其所属的类型的，则该元素的元素名不是合格的，否则对应的元素名是合格的。(参见5.4节) 
+一个multi-reference的简单值或复合值编码成一个独立的元素，这个元素包含一个局部的无需校验的属性，属性名为"id"，类型为"ID"（依照XML Specification [7]）。值的每个accessor对应一个空元素，该元素有一个局部的，无需校验的属性，属性名为"href"，类型为" uri-reference "（依照XML Schema Specification [11]），"href"属性的值引用了相对应的独立元素的URI标志符。 
+字符串和字符数组表示为multi-reference的简单类型，但是特殊的规则使它们在普通的情况下能被更有效的表示（参见5.2.1节和5.2.3节）。字符串和字符数组值的accessor可能有一个名字为"id"，类型为"ID"（依照XML Specification [7]）的属性。如果这样，所有这个值的所有其它accessor编码成一个空元素，这个元素有一个局部的，无需校验的属性，属性名为"href"，类型为" uri-reference "（依照XML Schema Specification [11]），"href"属性的值引用了包含这个值的元素的URI标志符。 
+编码时允许一个值有多个引用，就像多个不同的值有多个引用一样，但这仅在从上下文可以知道这个XML文档实例的含义没有改变时才可使用。 
+数组是复合值（参见5.4.2节）。SOAP数组定义为具有类型"SOAP-ENC:Array"或从它衍生的类型.
+
+SOAP数组可以时一维或多维，它们的成员以序数位置相互区分。一个数组值表示为反映这个数组的一系列元素，数组成员按升序出现。对多维数组来说，右边的这一维变化最快。每个成员元素命名为一个独立元素。（见规则2）
+
+SOAP数组可以是single-reference 或multi-reference值，因此可以表示为嵌入元素或独立元素的内容。
+
+SOAP数组必须包含一个"SOAP-ENC:arrayType"属性，它的值指定了包含元素的类型和数组的维数。"SOAP-ENC:arrayType"属性的值定义如下： 
+  arrayTypeValue = atype asize
+  atype          = QName *( rank )
+  rank           = "[" *( "," ) "]"
+  asize          = "[" #length "]"
+  length         = 1*DIGIT
+  
+"atype"结构是被包含元素的类型名，它表示为QName并且作为类型限制在XML元素声明的"type"属性中出现（这意味着被包含元素的所有值都要与该类型一致，即在SOAP-ENC:arrayType中引用的类型必须是每个数组成员的类型或超类型）。在arrays of arrays or "jagged arrays"的情况下，类型组件编码为"innermost"类型且在从第一层开始的嵌套数组的每一层中，类型名后都跟随一个rank结构。多维数组编码时从第一维起，每一维之间用逗号隔开。
+
+"asize"结构包含一个以逗号分隔的列表，数值0，1或其它整数表示数组每一维的长度。整数0表示没有指定详细的大小，但是可能在检查数组实际成员的大小后确定。
+
+例如，一个5个成员的整型数组的arrayTypeValue值为"int[][5]"，它的atype值是int[]"，asize值是"[5]"。同样，一个3个成员的两维整型数组的arrayTypeValue值为"int[,][3]"，它的atype值是int[,]"，asize值是"[3]"。
+
+一个SOAP数组成员可能包含一个"SOAP-ENC:offset"属性表示这一项在整个数组中的位置偏移值。这被用来指示一个部分储值数组（见5.4.2.1节）的位置偏移值。同样，一个数组成员可能包含一个"SOAP-ENC:position"属性表示这一项在整个数组中的位置，这被用来描述稀疏数组（见5.4.2.2节）的成员。"SOAP-ENC:offset" 和"SOAP-ENC:position"属性值的定义如下：
+
+
+
+arrayPoint = "[" #length "]"
+偏移值和位置从0开始 
+
+NULL值或缺省值可能通过省略accssor元素来表示。NULL值也可能通过一个包含值为'1'的xsi:null属性的accssor元素来表示，其它的依赖于应用程序的属性和值也可能用来表示NULL值。 
+注意，规则2允许独立的元素和数组成员名不同于值类型的元素。
+
+5.2 简单类型
+SOAP采用了"XML Schema Part 2: Datatypes"规范[11]"Built-in datatypes"节中的所有类型作为简单类型，包括值和取值范围。例如：
+
+类型  举例 
+int 58502  
+float 314159265358979E+1 
+negativeInteger  -32768 
+string Louis "Satchmo" Armstrong 
+
+在XML Schema规范中声明的数据类型可以直接用在元素schema中，也可以使用从这些类型衍生的新类型。一个schema和对应的具有这些类型的元素的数据实例的例子如下所示： 
+
+<element name="age" type="int"/>
+<element name="height" type="float"/>
+<element name="displacement" type="negativeInteger"/>
+<element name="color">
+  <simpleType base="xsd:string">
+    <enumeration value="Green"/>
+    <enumeration value="Blue"/>
+  </simpleType>
+</element>
+
+<age>45</age>
+<height>5.9</height>
+<displacement>-450</displacement>
+<color>Blue</color> 
+
+所有简单值必须编码为元素的内容，它的类型或者在"XML Schema Part 2: Datatypes"规范[11]中定义过，或者是基于一个用XML Schema规范提供的机制能推衍生出的类型。
+
+如果一个简单值编码为独立元素或异质数组成员，那么有一个对应于数据类型的元素声明将会很方便。因为"XML Schema Part 2: Datatypes"规范[11]包括了类型定义，但是不包括对应的元素声明，SOAP-ENC schema和名域为每个简单数据类型声明了一个元素，如
+
+<SOAP-ENC:int id="int1">45</SOAP-ENC:int>
+5.2.1 字符串
+字符串数据类型的定义在"XML Schema Part 2: Datatypes"规范[11]中。注意，这不同于许多数据库和程序语言中的"string"类型，特别的，字符串数据类型可能禁止某些在那些语言中允许的字符。（这些值必须用xsd:string之外的数据类型表示）
+
+一个字符串可能编码为一个single-reference 或 multi-reference值。
+
+包含字符串值的元素可能有一个"id"属性。附加的accessor元素可能有对应的"href"属性。
+
+例如，同一字符串的两个accessor可能以如下形式出现：
+
+<greeting id="String-0">Hello</greeting>
+<salutation href="#String-0"/>
+但是，如果两个accessor参考同一字符串实例（或字符串的子类型），这不是一个实质问题，它们可以编码为两个single-reference值，如下所示：
+
+<greeting>Hello</greeting>
+<salutation>Hello</salutation>
+这个例子的schema片断如下所示：
+
+<element name="greeting" type="SOAP-ENC:string"/>
+<element name="salutation" type="SOAP-ENC:string"/>
+
+在这个例子中，SOAP-ENC:string类型用作元素的类型，这是声明数据类型是"xsd:string"且允许"id" 和"href"属性的元素的简便方法。精确定义参见SOAP编码schema。Schemas可以使用这些源自SOAP编码schema的声明，但也可以不这样做。
+
+5.2.2 Enumerations
+"XML Schema Part 2: Datatypes"规范 [11] 定义了"enumeration."机制。SOAP数据模型直接采用了这种机制。但是，由于程序语言和其它语言在定义枚举时通常有些不同，所以我们在这里详细阐述了它的概念并描述了一个列表成员的可能取的值是如何编码的。
+
+"Enumeration"作为一个概念表示不同的名字的集合。一个特定的枚举就是对应于特定的基类型的不同的值的列表。例如，颜色集合("Green", "Blue", "Brown")可以定义为基于字符串类型的枚举，("1", "3", "5")可能是一个基于整型数的枚举，等等。"XML Schema Part 2: Datatypes" [11]支持除了布尔型以外所有简单类型的枚举。"XML Schema Part 1: Structures"规范[10]的语言可以用来定义枚举类型。如果schema由另一个没有特定基类型适用的符号系统生成，就使用"string"。在下面schema的例子中，"EyeColor"定义为字符串，可能的值是"Green", "Blue", 或"Brown"的枚举，数据实例按照schema显示如下。
+
+<element name="EyeColor" type="tns:EyeColor"/>
+<simpleType name="EyeColor" base="xsd:string">
+   <enumeration value="Green"/>
+   <enumeration value="Blue"/>
+   <enumeration value="Brown"/>
+</simpleType>
+
+<Person>
+   <Name>Henry Ford</Name>
+   <Age>32</Age>
+   <EyeColor>Brown</EyeColor>
+</Person>
+
+5.2.3 字符数组
+一个字符数组可能编码为single-reference 或multi-reference值。字符数组的编码规则与字符串的编码规则类似。
+
+特别的，包含字符数组的元素值可能由一个"id"属性，附加的accssor元素可能有相应的"href"属性。
+
+推荐使用定义在XML Schemas [10][11]中的'base64'编码（使用在2045 [13]中定义的base64编码算法）表示模糊字符数组。不过，由于行长度（line length）的限制，通常在MIME中应用base64编码，SOAP中一般不应用base64编码。但是提供了"SOAP-ENC:base64"子类型使之能用于SOAP。
+
+<picture xsi:type="SOAP-ENC:base64">
+   aG93IG5vDyBicm73biBjb3cNCg==
+</picture>
+
+5.3 多态accessor 
+许多语言允许能够多态访问多种类型值的accessor，每种类型在运行时可用。一个多态accessor实例必须包含一个"xsi:type"属性描述实际值的类型。
+
+例如，一个名为"cost"类型值为"xsd:float"的多态accessor编码如下：
+
+<cost xsi:type="xsd:float">29.95</cost>
+与之对比，类型值不变的accessor编码如下：
+
+<cost>29.95</cost>
+5.4 Compound types复合类型
+SOAP定义了与下列常在程序语言中出现的结构性模式对应的类型：
+
+结构 
+一个"struct"是一个复合值，它的成员值的唯一区别是accessor名称，任意两个accessor名称都不相同。 
+数组 
+一个"array"是一个复合值，它的成员值的唯一区别是序数位置。 
+SOAP也允许结构和数组之外的其它数据的序列化，例如Directed-Labeled-Graph Data Model之类的数据中，单个节点有许多不同的accssor，有些不止出现一次。SOAP序列化规则不要求底层的数据模型在accssor之间区分次序，但如果有这样的次序的话，这些accssor必须按照这个顺序编码。
+
+5.4.1 复合值，结构和值引用
+复合值的成员编码为accessor元素。当accessor由名区分时（如结构），accessor名即作为元素名。名局部于类型的accessor有不受限的名，其它的accessor则有受限的名。
+
+下面的例子是类型为"Book"的结构：
+
+<e:Book>
+   <author>Henry Ford</author>
+   <preface>Prefatory text</preface>
+   <intro>This is a book.</intro>
+</e:Book>
+
+以下是描述上面结构的schema片断：
+
+<element name="Book">
+<complexType>
+  <element name="author" type="xsd:string"/>
+  <element name="preface" type="xsd:string"/>
+   <element name="intro" type="xsd:string"/>
+</complexType>
+</e:Book>
+

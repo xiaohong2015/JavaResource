@@ -1,0 +1,80 @@
+作者：javabean白痴
+email: cape@163.net
+日期：2001-7-24 16:43:01
+JUNIT Getting Started
+
+概念：
+关于JUNIT的概念可以参见Thinking in Java 2的第一章里的Extreme programming
+
+以junit3.5为例
+将classpath指向junit.jar
+
+HelloWorld:
+
+在junit3.5下(或者其他地方)建立一个工作目录mypro,然后建立项目目录hello
+其中有文件:HelloWorld.java
+
+package mypro.hello;
+
+public class HelloWorld{
+    public String sayHello(){
+        return "Hello World";
+        }
+
+public static void main(String[] args){
+    HelloWorld world=new HelloWorld();
+    System.out.println(world.sayHello());
+    }
+}
+
+编译,运行.
+
+现在写测试类,来测试HelloWorld类里的sayHello方法
+//在hello目录里建立一个test目录用来放测试类,其中有HelloWorldTest.java
+
+package mypro.hello;
+
+//import mypro.hello.*;         推荐测试类和原来的被测试类(HelloWorld)同包
+import junit.framework.*;
+
+public class HelloWorldTest extends TestCase{
+    public HelloWorldTest(String name){
+        super(name);
+        }
+
+    public static void main(String args[]){
+        junit.textui.TestRunner.run(HelloWorldTest.class);
+        }
+
+    public void testSayHello(){
+        HelloWorld world=new HelloWorld();
+        assert(world!=null);                                          //当结果是-1时,assert将报错
+        assertEquals("Hello World",world.sayHello());
+        }
+}
+
+
+HelloWorldTest继承了TestCase类,写法固定,main可以不要.
+主要是testSayHello()实现了对SayHello方法的测试.
+
+Assert,的参数是-1时junit会报错,assertEquals的参数不匹配时,junit会报错.详见JUNIT的API文档.
+编译后,可以java HelloWorldTest来得到结果   //因为有main
+更经常的运行方式: java  junit.swingui.TestRunner  mypro.hello.HelloWorldTest   //图形界面
+                             java junit.textui.TestRunner mypro.hello.HelloWorldTest           //字符界面
+
+
+制造一个错误:
+把HelloWorld里的return “Hello World” 改成return “Hell0 World”
+编译后
+
+运行测试,看到结果报告错误.
+
+
+
+
+更进一步执行多个测试,一个测试成为Test Case,而一组Test Case构成Test suite
+看junit里money例子和AllTests.java文件.
+    
+注意事项:
+   1.将测试类和被测试类放在同一个目录里(即同包之内)将会是很方便的.
+   2.命名规则:一般被测试类写作XXXXTest,而其中的方法写作testXXX

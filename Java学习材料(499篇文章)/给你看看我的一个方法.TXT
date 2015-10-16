@@ -1,0 +1,27 @@
+作者：diego lynn
+email: Hello.Diego@elong.com
+日期：2001-6-29 15:32:06
+    /**
+     * <p>获取表列表的 sql 语句
+     */
+    private String getTableName( HttpPresentationComms inComms, String inTableResult ) throws HttpPresentationException
+    {
+        String _sql = I_EMPTY_STRING;
+        String _tempString = I_EMPTY_STRING;
+
+        String[] _relationship = inComms.request.getParameterValues( "relationship" );
+        _sql = "select TABLENAME from (" + inTableResult + ") where SQLLEVEL = '0' ";
+
+        for ( int i=0; i<_relationship.length-1; i++ )
+        {
+            if ( _relationship[i].equals("and") )
+                _tempString = "intersect";
+            else if ( _relationship[i].equals("or") )
+                _tempString = "union";
+
+            _sql += _tempString + " select TABLENAME from (" + inTableResult + ") where SQLLEVEL = '" +
+                    (i+1) + "' ";
+        }
+
+        return _sql;
+    }

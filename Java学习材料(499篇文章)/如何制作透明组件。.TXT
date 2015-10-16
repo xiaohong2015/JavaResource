@@ -1,0 +1,28 @@
+作者：wflm
+email: wflm@263.net
+日期：6/22/2001 1:41:12 AM
+懒得写说明了，大家应该能看懂。这是一个透明面板的例子，可仿此法制作其它透明组件。有问题给我来信。8-）
+
+希望与大家分享经验。
+
+package com.borland.samples.welcome;
+
+import java.awt.*;
+public class MyPanel extends Panel {
+  private Image bi; // offscreen image
+  private Graphics big; // Graphics for the offscreen image
+  public void update(Graphics g) {
+    paint(g);
+  }
+  public void paint(Graphics g) {
+    if (bi == null) { // you can't do this from the constructor
+      bi = createImage(getSize().width,getSize().height);
+      big = bi.getGraphics();
+    }
+    Rectangle area = g.getClipBounds(); // this is the area that needs to be (re)painted (no need to repaint everything)
+    big.setClip(area);
+    big.clearRect(area.x, area.y, area.width, area.height); // fills the area with the background color		// the next statement will call the paint methods for the other panels/components you have added to this panel		// and draw them to the offscreen image
+    super.paint(big);// now draw the offscreen image to the panel
+    g.drawImage(bi,area.x, area.y, area.x+area.width, area.y+area.height,area.x, area.y, area.x+area.width, area.y+area.height,this);
+}
+}

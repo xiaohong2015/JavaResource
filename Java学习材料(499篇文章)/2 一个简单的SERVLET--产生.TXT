@@ -1,0 +1,36 @@
+作者：shiholly
+日期：2001-2-7 11:19:51
+Servlet 教程 
+ 
+2. 一个简单的Servlet--产生存文本
+
+    下面是一个产生存文本的简单servlet的实例。 
+2.1 HelloWorld.java 
+import java.io.*; 
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+public class HelloWorld extends HttpServlet { 
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+throws ServletException, IOException {
+PrintWriter out = response.getWriter(); 
+out.println("Hello World"); 
+} 
+} 
+2.2 编译和安装Servlet 
+    注意，安装servlet的方法会因web服务器不同而不同。详细请参考您使用的web服务器所带的安装文档。Java Web 服务器即Java Web Server(JWS)2.0上带有联机实例。在JWS里，servlet程序必须JWS放在安装目录的servlets目录下才能运行。如果web服务器由多人使用并且没有好的虚拟服务器的下层结构来自动避免冲突，你也可以像我一样在servlets目录下创建一个独立包（我取名叫hall）即在servlets目录下创建一个hall子目录，并把你写的servlet放在该目录下。这里我把HelloWorld.java放在hall目录下。其他大多数服务器的安装都大同小异，本教程的servlet和JSP例子都在BEA Weblogic和IBM的WebSphere 3.0测试通过。其中WebSphere对于虚拟服务器有一套优秀的机制，所以没有必要为了名字的冲突而单独使用包。 
+    如果你以前从未用过包，那么有两种在包内编译类文件的方法可以使用。 
+    一种方法就是在CLASSPATH里设置好指向包含有你的servlet文件的目录，这样就可以在该目录下正常编译。举个例子，如果你在Windows下的servlet的目录是C:\JavaWebServer\servlets，包名（即子目录）是hall, 那么在dos窗口设置如下： 
+DOS> set CLASSPATH=C:\JavaWebServer\servlets;%CLASSPATH% 
+DOS> cd C:\JavaWebServer\servlets\hall 
+DOS> javac YourServlet.java 
+    第一步、设置路径。最好一步到位，免得以后每次都要重新打开一个dos窗口。Windows 95/98系统下在autoexec.bat文件里加入"set CLASSPATH=..."表达式，将CLASSPATH指向servlet.jar和jsp.jar。在NT下，开始菜单-设置-控制面板，选择“系统”，选择“环境”，然后输入变量名和变量值。注意如果你的包名是 name1.name2.name3的格式，还应该设置CLASSPATH指向包的顶层（即name1）。 
+    第二种方法是转到包的上层目录，然后执行"javac directory\YourServlet.java" (注意Windows下是反斜杆)或者unix下"javac directory/YourServlet.java" (注意Unix下是正斜杆)。再举个例子，比如你在windows下的servlet目录是C:\JavaWebServer\servlets，包名也就是子目录名是hall，那么执行下列操作： 
+DOS> cd C:\JavaWebServer\servlets 
+DOS> javac hall\YourServlet.java 
+    注意Windows下，大部分JDK 1.1版本的javac都要求反斜杆，后来在JDK 1.2里得到了修正，但是由于很多web服务器是根据JDK1.1来配的，所以为了方便起见许多servlet作者还是坚持反斜杆。 
+    javac的-d选项可以用来指定将.class文件和源码文件放在不同的地方。 
+2.3 运行Servlet servlet
+    一般是放在JWS安装目录下的servlets目录下，并通过 http://host/servlet/ServletName调用。注意这里的servlets目录中的servlets带有"s"，而URL地址栏里的则没有。上面的例子放在hall包里，所以这样调用：http://host/servlet/hall.HelloWorld。其他服务器在servlet放置目录和调用上可能会稍有不同。大部分服务器都允许你定义servlet目录的映射，因此一个servlet也可以通过http://host/any-path/any-file.html调用。具体得看不同服务器，详细可以查看服务器自带的文档。 
+ 
+ 
+译自http://www.apl.jhu.edu/~hall/java/Servlet-Tutorial/ 

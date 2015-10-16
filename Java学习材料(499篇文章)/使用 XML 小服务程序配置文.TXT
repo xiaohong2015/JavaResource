@@ -1,0 +1,99 @@
+作者：87zd
+日期：2000-12-1 21:07:13
+使用 XML 小服务程序配置文件配置小服务程序
+这种替代的小服务程序配置方法涉及到创建一个 XML 小服务程序配置文件（该配置文件是一个 XML 文档，它的名称为 servlet_instance_name.servlet），它包括：
+
+小服务程序类文件的文件名 
+小服务程序说明 
+小服务程序初始化参数 
+包含小服务程序可以调用的 JavaServer Pages（JSPs）的 URL（统一资源定位器）的页面列表。该页面列表可以包括一个缺省页面、一个出错页面、一个或多个已装入的目标页面（如果它们的名称出现在 HTTP 请求中）。 
+在 Application Server 版本 3 中，.servlet 文件存储在应用程序的类路径中。
+
+当 Application Server 接收到一个对小服务程序实例的请求时，它将在其 .servlet 文件中获得该小服务程序的配置信息。为了调用 JSP，XML 小服务程序配置文件的 page-list 元素和 PageListServlet 类（将在下一章节中讨论）消除对所调用 JSPs 的 URL 硬编码。如果引用的页面发生更改时，您只需更新 .servlet 文件，而无需更新小服务程序代码和重新编译该小服务程序。每当 .servlet 文件发生更改时，Application Server 就会自动装入此小服务程序实例。 
+
+WebSphere Application Studio 提供了用于生成小服务程序的向导。这些向导为每个 Studio 生成的小服务程序创建一个 XML 小服务程序配置文件（即 .servlet 文件)。如果您不能访问 Studio，并且希望手工实现 XML 小服务程序配置，则请：
+
+创建一个扩展 PageListServlet 类的小服务程序。 
+使用 XMLServletConfig类创建小服务程序实例的 XML 小服务程序配置文件 
+展开经编译的小服务程序及其 XML 小服务程序配置文件于 Application Server 上。 
+使用 PageListServlet 类
+PageListServlet 是小服务程序的超级类，这些小服务程序装入 XML 小服务程序配置文件的 <page-list> 元素中包含的页面。该页面列表使您能避免对所调用 JSP 的 URI 进行硬编码。该列表可以包含一个缺省页面、出错页面和其它根据 HTTP 请求而调用的 JavaServer Page。 
+
+PageListServlet 包含一种 callPage() 方法，该方法调用了一个 JavaServer Page，并将其作为对页面列表中某个页面的 HTTP 请求的响应。当输入 XML 配置文件的 page-list 元素中的页面名称时，PageListServlet.callPage() 方法接收 HttpServletRequest 对象和 HttpServletResponse 对象。 
+
+调用 PageListServlet.callPage() 方法后并不退出。紧跟 callPage() 方法调用之后的所有小服务程序代码将在调用后运行。当您架构您的小服务程序代码时请考虑这一点。 
+
+SimplePageListServlet 是一个扩展 PageListServlet 类和使用其 callPage() 方法来调用 JSP 的小服务程序示例：
+
+public class SimplePageListServlet extends com.ibm.servlet.PageListServlet {
+   public void service(HttpServletRequest req, HttpServletResponse resp)
+       throws ServletException, IOException
+   {
+      try{
+         setRequestAttribute("testVar", "test value", req);
+         setRequestAttribute("otherVar", "other value", req);
+
+         String pageName = getPageNameFromRequest(req);
+         callPage(pageName, req, resp);
+      }
+      catch(Exception e){
+         handleError(req, resp, e);
+      }
+   }
+}
+
+使用 XMLServletConfig 类
+使用 XMLServletConfig 类创建 XML 小服务程序配置文件（servlet_instance_name.servlet）。如下为一个配置文件： 
+
+<?xml version="1.0" ?>
+<servlet>
+  <code>SimplePageListServlet</code>
+  <description>Shows how to use PageListServlet class</description>
+  <init-parameter name="name1" value="value2"/>
+  <page-list>
+    <default-page>
+      <uri>/index.jsp</uri>
+    </default-page>
+    <error-page>
+      <uri>/error.jsp</uri>
+    </error-page>
+    <page>
+      <uri>/TemplateA.jsp</uri>
+      <page-name>page1</page-name>
+    </page>
+    <page>
+      <uri>templateB.jsp</uri>
+      <page-name>page2</page-name>
+    </page>
+  </page-list>
+</servlet>
+
+元素 <servlet> 是 XML 配置文件的基本元素。每个 XML 配置文件必须是良好格式的 XML 文档。这些文件未根据文档类型定义（DTD）进行验证。
+
+为了使 Application Server 能使用 XML 小服务程序配置文件装入小服务程序实例，该配置文件中至少必须包含 code 元素。对于 PageListServlet，XML 配置文件则至少必须包含 code 元素和 page-list 元素。虽然其中没有 DTD，但仍建议按元素在示例中显示的顺序来显示所有元素。这些元素（也称为标记）为：
+
+servlet 
+基本元素。该元素是由 XMLServletConfig 类自动生成的。 
+
+code 
+小服务程序（无 .class 扩展名）的类名, 即使该小服务程序位于 JAR 文件中 
+
+描述 
+用户定义的小服务程序描述 
+
+init-parameter 
+该元素的属性指定了一个作为初始化参数的“名称-值”对。一个小服务程序可以有多个初始化参数，每个参数都有它自己的 init-parameter 元素。 
+
+page-list 
+它根据 HTTP 请求中的路径信息来标识要调用的 JavaServer Page。page-list 元素可以包含下列子元素： 
+
+default-page：如果 HTTP 请求中未包含路径信息，那么该元素中会包含一个 uri 元素，此元素指出了装入页面的位置 
+error-page：如果 handleError() 方法将请求属性设置为“error”，那么该元素中会包含一个 uri 元素，此元素指出了装入页面的位置 
+page：如果 HTTP 请求中包含了页面名称的话，那么该元素中会包含一个 uri 元素，此元素指出了要装入页面的位置。一个 page-list 元素中可以包含多个 page 元素。 
+您可以编写一个使用 XMLServletConfig 类来生成小服务程序配置文件的 Java 程序。XMLServletConfig 类提供了关于设置和获取文件元素及其内容的方法。
+
+展开服务器上的小服务程序和 .servlet 文件
+为了在 Application Server 上使用经编译的小服务程序和其 XML 小服务程序配置文件：
+
+将经编译的小服务程序和其 .servlet 文件放置在应用程序类路径中。如果该小服务程序有一个软件包名，请确保该小服务程序被放置在该类路径的正确子目录下。 
+请确保在页面列表中引用的 JavaServer Page（JSP 文件）位于该应用程序的文档根目录中。 

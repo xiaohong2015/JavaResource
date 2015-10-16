@@ -1,0 +1,284 @@
+作者：whitefox
+email: whitefox.jiang@corp.elong.com
+日期：2000-07-20 09:44:02
+SSL與數位認證
+
+
+--------------------------------------------------------------------------------
+
+
+[ 本文重點 | SSL安全資料傳輸 | SSL運作步驟與設定 | 金鑰(key)產生與管理 ]
+
+[ Microsoft Certificate Server | 用戶端認證(Client Certificate) ]
+
+　
+
+
+--------------------------------------------------------------------------------
+
+　
+
+本文重點
+
+介紹熱門的SSL與數位認證方法，包括SSL安全連線的伺服器認證、SSL運作步驟與設定、金鑰（key）產生與管理，以及IIS 4.0的Microsoft Certificate Server之伺服器認證、用戶端認證等方法。
+
+Windows NT Option Pack中文版軟體所包含的「Microsoft Certificate Server」，可自行建立一個認證中心（Certificate Authority），以管理數位認證的授與、廢除及更新，數位認證用於公開金鑰加解密之應用，譬如SSL的伺服器認證與用戶端認證，讓您透過Intranet或 Internet 安全地傳送資料。
+
+SSL安全資料傳輸
+
+SSL（Secure Sockets Layer）
+
+SSL（Secure Sockets Layer）加密方法，可以對資料傳輸做安全上的保護。
+
+當使用者傳送私有資料（譬如信用卡或銀行帳號）到網站時，可能害怕資料傳送當中被攔截。SSL（Secure Sockets Layer）3.0協定，提供了傳輸安全上的保護，於使用者傳送資料前先做「加密」成亂碼，網站接收資料後再「解密」出原來的資料。資料傳送當中即使被攔截，也只是看到一堆亂碼，看不到原來的資料。
+
+使用SSL安全方法時，使用者產生一把對稱金鑰（session key ），將待傳送的資料「加密」成亂碼，網站接收資料後再使用同一把對稱金鑰「解密」出原來的資料。
+
+為了將使用者產生的這一把加解密用的對稱金鑰安全地傳給伺服器，SSL於使用者傳送這一把對稱金鑰前，先使用伺服器的公開金鑰（public key）將對稱金鑰「加密」成亂碼，網站接收資料後再使用伺服器的私密金鑰（private key）「解密」出原來的對稱金鑰。
+
+本文針對與SSL相關的伺服器認證（Server Certificates）、SSL運作的步驟與設定、金鑰（key）產生與管理，詳細介紹如下：
+
+伺服器認證（Server Certificates）
+
+使用SSL安全方法時，為了確保使用者拿到的伺服器公開金鑰（public key）為正確的，伺服器必須由具公信力的認證中心（Certificate Authority，簡稱CA），核發伺服器認證（Server Certificates）。
+
+一個認證就像一個印鑑證明，證明這個印章屬於您所有，不是別人假造的。
+
+伺服器認證包括提供網站內容者的組織、和認證中心的名稱，以及伺服器的公開金鑰。
+
+認證中心CA
+
+使用SSL安全方法連線時，必須先取得伺服器認證。
+
+伺服器認證是否成功，取決於使用者是否信任認證中心核發的伺服器認證資料是否為正確有效。
+
+譬如一個使用者與您的網站伺服器建立連線時，即使看到您伺服器的認證，可能仍然猶豫是否要將信用卡資料提供給您，尤其是您的公司是新的或沒有甚麼知名度時，會更加地猶豫不決。
+
+基於這個理由，有時認證係由具有公信力的第三者認證中心（Certificate Authority，簡稱CA）所核發。認證中心有責任確認認證的資料是否為正確有效。
+
+有許多的第三者認證中心，提供IIS核發伺服器認證（server certificate）的服務，如下：
+
+Verisign Inc.：http://www.verisign.com 
+GTE CyberTrust Solutions：http://www.cybertrust.gte.com 
+Thawte Consulting：http://www.thawte.com 
+CertiSign Certificado Digital Ltda.：http://www.certisign.com.br 
+BelSign NV-SA：http://www.belsign.be 
+Keywitness Canada：http://www.keywitness.ca 
+BankGate CA：http://www.bankgate.com 
+可連線到http://www.microsoft.com/security/ 取得最新提供IIS伺服器認證（server certificate）服務的認證中心CA名單。
+
+另外一個替代方式，取決於您公司與網站伺服器使用者的關係如何，您能夠自己充當認證中心，核發伺服器認證（Server Certificates）給自己。譬如，於大公司的企業內網路當中，處理員工的薪資和福利時，公司管理當局可以決定是否自己維護一個認證伺服器（certificate server）以核發伺服器認證給自己的伺服器。
+
+使用Windows NT Option Pack中的Microsoft Certificate Server，可以建立一個認證伺服器，自己充當認證中心，核發伺服器認證。
+
+SSL運作步驟與設定
+
+SSL運作的步驟
+
+SSL運作的步驟如下：
+
+使用者的瀏覽器使用「https」通訊方式與網站伺服器建立連線。 
+網站伺服器傳送包括伺服器公開金鑰的伺服器認證（Server Certificates）給使用者。 
+使用者的瀏覽器產生一把加解密用的對稱金鑰（session key），使用伺服器的公開金鑰（public key）將對稱金鑰「加密」成亂碼，傳送給網站伺服器。 
+網站伺服器使用伺服器的私密金鑰（private key），以「解密」出瀏覽器產生的對稱金鑰。 
+網站伺服器與瀏覽器使用這一把對稱金鑰，將資料做加解密以相互傳送資料。 
+伺服器加入SSL功能
+
+於伺服器加入SSL（Secure Sockets Layer）的功能，可以確保資料傳輸的安全性。要如何於伺服器加入SSL功能呢？有以下數個步驟：
+
+產生一對Key（金鑰）：第一步驟，首先使用 [識別碼管理員]（Key Manager）於NT上建立一對新的Key（金鑰），將產生一個認證申請檔案（certificate request file），預設為NewKeyRq.txt檔。您再將此認證申請檔案傳給認證中心（Certificate Authority，簡稱CA），或使用 [識別碼管理員]（Key Manager）傳送。CA可由具有公信力的第三者扮演，Microsoft Certificate Server也可扮演此CA的角色。CA核準後將核發伺服器認證（server certificate），傳送給您一個認證檔案（certificate file）。 
+安裝伺服器認證檔案：當您收到CA核發的伺服器認證檔案時，使用 [識別碼管理員]（Key Manager）安裝這個檔案。 
+於IIS設定安全傳輸port 443和啟動SSL：執行 IIS 4.0的 [Internet 服務管理員] ，選擇要使用SSL的網站，如預設的Web站台，按下滑鼠右鍵，選擇 [內容]，選擇 [目錄安全] ，按下 [安全通訊] 的 [編輯] 按鈕，選擇 [存取這個資源時，必須使用安全通道] 。若如此設定，則整個設定的站台，如上預設的Web站台，都必須使用「https:// 」的SSL方式。 
+設定須使用SSL的方法
+
+這個方法設定「整個」的網站、目錄、或檔案須使用SSL的方法將傳送的資料做加解密。
+
+於 [Internet 服務管理員] ，選擇一個網站（Web site）、目錄、或檔案，按下滑鼠右鍵開啟 [內容] 。 
+選擇 [目錄安全] 或 [檔案安全] 頁，於 [安全通訊] 下按下 [編輯] 按鈕（若未產生一對key，須先按下 [識別碼管理員]（Key Manager）產生之）。 
+於 [安全通訊] 對話盒當中 ，選擇 [存取這個資源時，必須使用安全通道]。 
+使用者的瀏覽器使用「https://」通訊方式與網站伺服器建立連線。 
+設定加解密金鑰的長度
+
+加解密資料所用的對稱金鑰（session key）長度愈長，愈不容易被破解。
+
+您能夠設定網站伺服器需要使用128位元長度的對稱金鑰（session key），而非預設的40位元的長度。若您設定為至少128位元長度，則想要與伺服器建立安全連線的使用者，必須採用能夠產生128位元對稱金鑰的瀏覽器。
+
+基於美國法律的限制，128位元金鑰長度僅僅可以使用於美國和加拿大。
+
+您必須先從認證中心取得伺服器認證（Server Certificates），才可以建立安全的SSL連線。
+
+設定加解密金鑰長度的方法，如下：
+
+於 [Internet 服務管理員] ，選擇一個網站（Web site）、目錄、或檔案，按下滑鼠右鍵開啟 [內容] 。 
+選擇 [目錄安全] 或 [檔案安全] 頁，於 [安全通訊] 下按下 [編輯] 按鈕（若未產生一對key，須先按下 [識別碼管理員]（Key Manager）產生之）。 
+於 [安全通訊] 對話盒當中 ，選擇 [存取這個資源時，必須使用安全通道] 後，按下 [加密設定] 按鈕。 
+於 [加密設定] 對話盒當中 ，選擇 [需要128位元加密] 後按下 [確認] 按鈕。 
+金鑰（key）產生與管理
+
+識別碼管理員（Key Manager）
+
+SSL所使用的一對金鑰（key），包括公開金鑰（public key）和私密金鑰（private key），可以使用NT的「識別碼管理員」（Key Manager）來產生、匯入（import）、和匯出（export）這一對唯一的金鑰（key），以供申請伺服器認證（Server Certificates）之用。
+
+您也可以使用「識別碼管理員」（Key Manager），來申請和安裝伺服器認證（Server Certificates），以及為遠端的伺服器產生一對金鑰（key）。
+
+一個domain name只能安裝一個伺服器認證（Server Certificates）。
+
+一對金鑰（key）只能使用於一個伺服器認證（Server Certificates）。
+
+一對金鑰（key）只能使用於一個domain name，但是多個IP address可因共用同一個domain name而共用同一對金鑰（key）。
+
+執行「識別碼管理員」（Key Manager）有兩個方法，當您 於 [Internet 服務管理員] 選擇一個網站（Web site）、目錄、或檔案時，方法如下：
+
+按下工具列的 [識別碼管理員]（Key Manager）圖示。 
+按下滑鼠右鍵開啟 [內容] ，選擇「 [目錄安全] 」或 [檔案安全] 頁，於 [安全通訊] 下按下 [編輯] 按鈕，再按下 [識別碼管理員]（Key Manager）按鈕。 
+產生金鑰（key）方法
+
+產生一對金鑰（key）的方法如下：
+
+於 [Internet 服務管理員] 按下工具列的 [識別碼管理員]（Key Manager）圖示。 
+於 [識別碼] 選單選擇 [建立識別碼]，依照指示即可產生一對金鑰（key）。 
+可以選擇將所產生的一對金鑰（key）儲存成一個檔案以傳送給認證中心，或向Microsoft Certificate Server線上自動申請伺服器認證。
+
+產生一對金鑰（key）時，可向認證中心提出伺服器認證（Server Certificates）的申請。若您接收到認證中心提供的一個與Microsoft Certificate Server相容的application plug-in，即可線上自動申請伺服器認證。
+
+您應該將 [識別碼管理員]（Key Manager）所產生的一對金鑰（key），當做您家裏的金鑰一般地好好保存起來，不要掉了或讓別人拿到。
+
+建議您將金鑰（key）做一份備份到磁碟片，並將此磁碟片放置於安全的地方。當您更新或重新安裝IIS時可能刪除而共用同一對金鑰（key）和伺服器認證（Server Certificates），此時就需要使用這個金鑰（key）備份磁碟片了。
+
+備份金鑰方法如下：
+
+於 [識別碼管理員]（Key Manager）選擇待備份的金鑰。 
+於 [識別碼] 選單選擇 [匯出識別碼] 和 [備份檔] 等，依照指示即可備份金鑰（key）到一個磁碟片的檔案。 
+安裝伺服器認證
+
+產生金鑰（key）向認證中心申請伺服器認證（Server Certificates）後，將獲得核發的認證。您可以將所核發的認證，複製儲存到一個檔案，再使用 [識別碼管理員]（Key Manager）安裝認證到網站伺服器。
+
+安裝伺服器認證，方法如下：
+
+將認證中心核發的認證，儲存成一個文字檔案，附檔名為.txt。 
+於 [Internet 服務管理員] 按下工具列的 [識別碼管理員]（Key Manager）圖示，選擇待安裝認證的金鑰（key）。 
+於key選單選擇Install Key Certificate，於「Open 」對話盒當中選擇認證的.txt檔案，按下Open ，輸入認證檔案密碼後，按下OK按鈕即可以安裝好伺服器認證。 
+新增或編輯金鑰（key）的指定IP
+
+同一個domain name的多個IP address可共用同一對金鑰（key）。您也可以指定一對金鑰（key）只能使用於一個IP address。
+
+使用的是新增或編輯金鑰（key）的指定IP address方法，如下：
+
+於 [Internet 服務管理員] 按下工具列的 [識別碼管理員]（Key Manager）圖示，選擇待設定的金鑰（key）。 
+於 [識別碼] 選單選擇 [內容] ，於 [伺服器連接] 對話盒當中選擇 [新增] 或 [編輯]。 
+於 [編輯連接] 對話盒輸入IP address（可由...按鈕選擇之）。 
+若未指定一個IP Address，則同一個domain name當中的多個IP address將都使用此金鑰（key）。
+
+金鑰設定IP address的原則如下：
+
+一個IP address不能設定多個伺服器認證（Server Certificates）。 
+一個IP address不能設定多個網站。但是一個網站能設定多個IP address。 
+一個網站不能設定多個SSL ports。 
+Microsoft Certificate Server
+
+Windows NT Option Pack中Microsoft Certificate Server，讓您的網站成為一個認證中心（Certificate Authority，簡稱CA），可以：
+
+核定伺服器認證（server certificate）：給需求建立SSL安全連線的網站。 
+核定用戶端認證（Client Certificate）：給每位使用者以讓伺服器自動驗證使用者的身份。 
+伺服器認證
+
+為了使用SSL確保資料傳輸的安全性，伺服器首先必須從認證中心（Certificate Authority，簡稱CA）獲得一個伺服器認證（server certificate）。
+
+Microsoft Certificate Server，可扮演核發伺服器認證（server certificate）的認證中心（Certificate Authority，簡稱CA）。
+
+要如何使用Windows NT Option Pack中的Microsoft Certificate Server核發伺服器認證，於伺服器加入SSL功能呢？步驟如下：
+
+第一步驟：產生一對Key和提出伺服器認證申請。 
+第二步驟：於瀏覽器安裝認證中心認證（Certificate Authority Certificate），將Microsoft Certificate Server的認證中心於瀏覽器登記為「可信任」的認證中心，接受此認證中心所核發之所有認證。 
+第三步驟：重新啟動IIS。 
+產生一對Key和提出伺服器認證申請
+
+第一步驟，首先於NT上建立一個新的金鑰（Key），方法為執行Windows NT Option Pack中的 [Internet 服務管理員] ，於 [識別碼管理員]（Key Manager）按下滑鼠左鍵。
+
+滑鼠按下「WWW」，於 [識別碼] 選單選擇 [建立識別碼]，選擇「自動將您的要求傳送到線上授權單位」為「Microsoft Certificate Server」，即線上向Microsoft Certificate Server提出伺服器認證申請。
+
+輸入金鑰（key）名稱、密碼、和長度。
+
+輸入申請公司名稱（Organization）、部門（Organizational Unit）、伺服器URL網址（Common Name）。
+
+輸入國別（Country）、省份（State/Province）、城市（City/Locality） ，最後按下「完成」按鈕，即可以產生一個新的金鑰（Key），並將此一對新Key傳給認證中心Microsoft Certificate Server。 
+
+即可產生即可產生一對金鑰（key）。
+
+出現 [伺服器連接的畫面] ，按下 [新增] 按鈕，選擇「未指定IP Address」和「未指定PORT」，最後按下 [確認] 按鈕。
+
+請確認所產生的新金鑰（Key）位於「WWW」下。
+
+選擇 [電腦] 選單的 [立即確認變更] ，並確認所做的變更。
+
+產生新的金鑰（Key）和提出伺服器認證申請後，將從Microsoft Certificate Server取得伺服器認證（server certificate）並自動安裝之。
+
+於瀏覽器登記「可信任」的認證中心
+
+伺服器取得並安裝伺服器認證後，第二步驟於瀏覽器安裝認證中心認證（Certificate Authority Certificate），將Microsoft Certificate Server的認證中心於瀏覽器登記為「可信任」的認證中心，接受此認證中心所核發之所有認證。
+
+安裝認證中心認證方法，為使用者使用IE瀏覽器，輸入Microsoft Certificate Server的網頁http://localhost/CertSrv，其中localhost為Microsoft Certificate Server安裝的URL位址。選擇Certificate Enrollment Tools的Install Certificate Authority Certificates以安裝認證中心認證。
+
+於瀏覽器安裝認證中心認證，將認證中心於瀏覽器登記為「可信任」的認證中心後，可於IE瀏覽器「檢視」選單的「Interrnet選項」的「內容」頁中的「機構」按鈕當中，查到已經安裝的可信任認證中心資料。
+
+重新啟動IIS
+
+第三步驟，重新啟動IIS，於DOS下的WINNT\system32\inetsrv下執行命令「iisca」，並執行命令「net stop iisadmin /y」以停止World Wide Web Publishing Service，再執行命令「net start w3svc」以開啟World Wide Web Publishing Service（或重新開機），如下：
+
+C:\WINNT\system32\inetsrv> iisca
+
+List of valid Certifiying Authorities ( CA ) successfuly transferred to IIS
+
+C:\WINNT\system32\inetsrv> net stop iisadmin /y
+
+下面的服務關係到 IIS Admin Service 服務。
+
+停止 IIS Admin Service 服務也會停止這些服務。
+
+World Wide Web Publishing Service
+
+World Wide Web Publishing Service 服務正在停止..
+
+World Wide Web Publishing Service 服務已經成功停止。
+
+.....
+
+IIS Admin Service 服務已經成功停止。
+
+C:\WINNT\system32\inetsrv> net start w3svc
+
+World Wide Web Publishing Service 服務正在啟動 ............
+
+World Wide Web Publishing Service 服務已經啟動成功。
+
+如此即可使用SSL了。
+
+檢查已經安裝的認證中心資料
+
+若要檢查已經安裝的認證中心資料，可使用IE瀏覽器來查看。
+
+當IE瀏覽器使用SSL的「https://」，安裝認證中心所核發之認證後，可於IE瀏覽器「檢視」選單的「Internet選項」的「內容」頁中的「機構」按鈕當中，查到已經安裝的認證中心資料。
+
+用戶端認證（Client Certificate）
+
+用戶端認證（Client Certificate），讓網站伺服器自動辨識使用者的身份，以讓使用者簽入一個受限制管制的網站，不需要輸入「密碼」即可自動簽入。
+
+用戶端認證（Client Certificate）包括使用者個人資料、和核發的認證中心、有效期間、序號、以及建立安全連線的金鑰檔案等資訊加密而成。
+
+申請和安裝用戶端認證（Client Certificate）
+
+每個使用者，可以使用Microsoft Certificate Server，來申請和安裝用戶端認證（Client Certificate）。
+
+申請和安裝用戶端認證的方法如下：
+
+首先使用瀏覽器瀏覽Microsoft Certificate Server的用戶端認證申請網頁： 
+http://localhost/CertSrv/CertEnroll/ceenroll.asp
+
+其中localhost為Microsoft Certificate Server安裝的URL位址。
+
+或瀏覽Microsoft Certificate Server的網頁http://localhost/CertSrv，選擇Certificate Enrollment Tools的Request a Client Authentication Certificate。
+
+輸入申請用戶端認證時所須的個人詳細資料。 
+填好後，按下Submit Request按鈕以提出用戶端認證（Client Certificate）的申請，將顯示下載Microsoft Certificate Server所核發的用戶端認證。 
+按下Download按鈕將下載Microsoft Certificate Server所核發的用戶端認證，並自動安裝完成。 
+安裝認證中心所核發之用戶端認證後，可於IE瀏覽器「檢視」選單的「Interrnet選項」的「內容」頁中的「個人」按鈕當中，查到已經安裝的用戶端認證資料。按下「個人」按鈕，顯示已經安裝的用戶端認證資料，可看到申請用戶端認證時所填的個人詳細資料。

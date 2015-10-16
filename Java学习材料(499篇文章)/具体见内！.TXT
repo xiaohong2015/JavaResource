@@ -1,0 +1,35 @@
+作者：我心激扬
+email: ldzsl@china.com
+日期：2000-11-7 17:03:14
+A:在server.xml
+这是它的例程配置
+        <Context path="/examples" docBase="webapps/examples" debug="0" reloadable="true" > 
+        </Context>
+所以我就
+        <Context path="这里是要设的别名，我用/jsp" docBase="这里是你的要设的目录名" debug="0" reloadable="true" > 
+        </Context>
+
+还有apache+tomcat的连接，我没有连成功，所以，我是把哪个连接文件加在apache的http.conf
+
+文件后面
+这是连接文件的例程配置
+Alias /examples "C:\tomcat\webapps\examples"
+<Directory "C:\tomcat\webapps\examples">
+    Options Indexes FollowSymLinks
+</Directory>
+ApJServMount /examples/servlet /examples
+<Location /examples/WEB-INF/ >
+    AllowOverride None
+    deny from all
+</Location>
+所以我做的改动是
+Alias /jsp "这里是你的要设的目录名"
+<Directory "这里是你的要设的目录名">
+    Options Indexes FollowSymLinks
+</Directory>
+ApJServMount /jsp/servlet /jsp
+<Location /jsp/WEB-INF/ >
+    AllowOverride None
+    deny from all
+</Location>
+

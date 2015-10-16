@@ -1,0 +1,113 @@
+作者：asp3000
+email: coolknight@263.net
+日期：2000-8-8 12:01:15
+jsp文件操作之写入篇(本站文章)
+
+转载请注明来源
+来源 jsp中国论坛 http://jspbbs.yeah.net
+
+WriteOver.Jsp
+
+<html>
+<head>
+<title>Write over a file</title>
+</head>
+<body bgcolor="#000000">
+
+<jsp:useBean id="writer" class="WriteOver" scope="request">
+<jsp:setProperty name="writer" property="path" value="/path/to/afile.txt" />
+<jsp:setProperty name="writer" property="something" value="Something already set as a property in WriteOver" />
+</jsp:useBean>
+
+<h3>Write to the file</h3>
+
+<p>
+
+<% writer.setSomething("Something to write to the file"); %>
+<% out.print(writer.getSomething()); %>
+
+<% out.print(writer.writeSomething()); %>
+
+</p>
+</body>
+</html>
+
+
+import java.io.*;
+
+/**
+* WriteOver.java 
+* Written by  Morgan Catlin Email: mfcatlin@csclub2.stthomas.edu
+*   August 19, 1999
+* 
+* Variables:
+*   String path = path to file to write to (ie. /you/afile.txt)
+*   String something = something to write to the file
+* 
+* Methods:
+*   void setPath() = sets path
+*   String getPath() = returns path
+*   void setSomething() = sets something
+*   String getSomething() = returns something
+*   String writeSomething() = writes something to the path, 
+*      returns a message that indicates success or failure(an Exception)
+*/
+
+public class WriteOver {
+   
+   private String path;
+   private String something;
+   
+   public WriteOver() {
+      path = null;
+      something = "Default message";
+   } // constructor WriteOver
+   
+   /**
+    * Mutator for the path property
+    */
+   public void setPath(String apath) {
+      path = apath;
+   } // mutator setPath
+   
+   /**
+    * Accessor for the path property
+    */
+   public String getPath() {
+      return path;
+   } // accessor getPathClient
+   
+   /**
+    * Mutator for the something property
+    */
+   public void setSomething(String asomething) {
+      something = asomething;
+   } // mutator setSomething
+   
+   /**
+    * Accessor for the something property
+    */
+   public String getSomething() {
+      return something;
+   } // accessor getSomething
+      
+   /**
+    * This method writes something to the path
+    */
+   public String writeSomething() {
+      try {
+　　　　 
+　　　　 File f = new File(path);
+　　　　 PrintWriter out = new PrintWriter(new FileWriter(f));
+　　　　 
+　　　　 out.print(this.getSomething() + "\n");
+　　　　 out.close();
+　　　　 return "Alles ist Gut.";
+      } catch (IOException e) {
+　　　　 return e.toString();
+      }　　　　 
+   } // method writeSomething 
+} // class WriteOver
+转载请注明来源
+来源 jsp中国论坛 http://jspbbs.yeah.net 
+

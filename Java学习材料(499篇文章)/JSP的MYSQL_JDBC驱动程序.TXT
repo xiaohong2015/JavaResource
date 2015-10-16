@@ -1,0 +1,105 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 1:16:41 PM
+作者：jjx,转载请指明出处 如有不当之处，敬请指出 
+
+mm.mysql是个类型4(即纯java),符合jdbc 2规范的mysql jdbc驱动程序。当前版本为2.0 pre 5(beta) 
+
+你可以从http://www.worldserver.com/mm.mysql/下载最新的驱动程序 
+
+本文只是简单描述一下mm.mysql的安装和使用 
+
+安装 
+1、下载mm.mysql 
+2、解压到某驱动器，如c: 
+3、修改classpath,加入mm.mysql的路径，如你原来的classpath可能是: 
+.;c:\jdk1.2.2\lib\tools.jar;c:\jdk1.2.2\lib\dt.jar; 
+修改后可能是 
+.;c:\jdk1.2.2\lib\tools.jar;c:\jdk1.2.2\lib\dt.jar;C:\mm.mysql.jdbc-2.0pre5; 
+
+编程 
+
+1、用DriverManager登记mm.mysql 
+mm.mysql的class名为org.gjt.mm.mysql.Driver,登记时必须写成 
+Class.forName("org.gjt.mm.mysql.Driver").newInstance(); 
+
+2、jdbc url参数说明 
+url格式：jdbc:mysql://[hostname][:port]/dbname[?param1=value1][&para;m2=value2]... 
+参数名 取值 缺省 
+user 数据库用户名 无 
+password 数据库用户口令 无 
+autoReconnect 当数据库连接丢失时是否自动连接，取值true/false false 
+maxReconnects 如果autoReconnect为true,此参数为重试次数，缺省为3次 3 
+initialTimeout 如果autoReconnect为true,此参数为重新连接前等待的秒数 2 
+maxRows 设置查询时返回的行数，0表示全部 0 
+useUnicode 是否使用unicode输出，true/false false 
+characterEncoding 如果useUnicode,该参数制定encoding类型，建议使用8859_1 无 
+
+提示 
+同时使用useUnicode,characterEncoding,能解决数据库输出时的中文问题 
+如:jdbc:mysql://localhost/test?user=root&useUnicode=true;characterEncoding=8859_1 
+
+实际例子，举一个简单的例子 
+这个jsp例子使用一个库，该库只有一个表（地址簿) 
+
+create database addressbook 
+use addressbook 
+create table addressbook (id int auto_increment primary key,name varchar(30),address varchar(255),phone varchar(20)); 
+
+插入记录 
+insert into addressbook (name,address,phone) values ('jjx','zhejiang yuyao','0574-2222222'); 
+
+jsp代码：代码中使用了absolute,ResultSet.TYPE_SCROOL_SENSITIVE等的目录是为了测试mm.mysql是否符合jdbc 2.0的规范 
+<%@ page import="java.sql.*" %> 
+<% 
+out.println("通讯录！"); 
+
+try { 
+Class.forName("org.gjt.mm.mysql.Driver").newInstance(); 
+
+} 
+catch (Exception E) { 
+out.println("Unable to load driver."); 
+
+} 
+
+try { 
+Connection C = DriverManager.getConnection("jdbc:mysql://localhost/addressbook?user=root&password=jjx&useUnicode=true&characterEncoding=8859_1"); 
+Statement s=C.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY); 
+ResultSet rs=s.executeQuery("select * from addressbook"); 
+out.println("<table border=1>"); 
+int i=1; 
+for (i=10;i<20;i++) 
+{ 
+if (rs.absolute(i)) 
+{ 
+out.println("<tr><td>"); 
+out.println(rs.getString(1)); 
+out.println("</td>"); 
+out.println("<td>"); 
+out.print(rs.getString(2)); 
+out.println("</td>"); 
+out.println("<td>"); 
+out.print(rs.getString(3)); 
+out.println("</td></tr>"); 
+} 
+else 
+{ 
+break; 
+} 
+
+} 
+out.println("</table>"); 
+rs.close(); 
+s.close(); 
+C.close(); 
+
+
+} 
+catch (SQLException E) { 
+out.println("SQLException: " + E.getMessage()); 
+out.println("SQLState: " + E.getSQLState()); 
+out.println("VendorError: " + E.getErrorCode()); 
+} 
+
+%>

@@ -1,0 +1,62 @@
+作者：diego lynn
+日期：2001-3-25 10:26:21
+Version 1.0  
+
+ARCHITECTURE  
+
+JavaTM Web Start is designed on the premise the most people still want applications for many activities. Most users are not dreaming of giving up their favorite traditional word processor, spreadsheet application, or email client for some HTML-based interface in a browser. The application interface has a number of benefits that are very appealing: 
+
+
+The user interface is very rich and responsive 
+
+Applications are easy to launch from Start Menu, Desktop, or by other means - and do not necessarily require the Web browser to be running 
+
+The speed and responsiveness of the application does not depend on the connection speed 
+
+Applications work offline, for example, in a plane when traveling 
+However, traditional applications also have a number of problems. In particular, applications are often complicated to install, and even worse to upgrade. 
+
+For companies that maintain hundreds or even thousands of desktop computers for their employees, keeping software up-to-date on these computers is typically a major headache. These problems have encouraged many companies to look into using HTML-based applications because of their simple and cost-effective deployment. 
+
+Java Web Start technology, the innovative technology for deploying applications based on the Java 2 platform, enables you to launch full-featured applications via any browser, on any platform, from anywhere on the Web, in a secure fashion. It provides the best of both worlds: The ease of deployment and use of HTML, as well as the power and flexibility of a full-fledged application. 
+
+The figure below shows how Java Web Start technology works both from a user and technical perspective: 
+
+ 
+The yellow arrow shows the user experience. A single click on a link launches a full-featured Java technology-based application, which may never have been present on the local computer before. 
+
+What really happens behind the scenes is shown by the gray arrows: 
+
+
+When the user clicks on a download link, the link instructs the browser to invoke Java Web Start technology. Java Web Start technology presents a splash screen. 
+
+Java Web Start technology queries the Web to determine if all the resources needed for the application are already downloaded. If they are, and the most recent version of the application is present, the application will be launched immediately (step 3). 
+If the resources are not present or an update is available, Java Web Start will download the needed resources. Thus, the initial download and subsequent updates of an application happen transparently. 
+
+The steps described above are very similar to how other helper applications such as Real Audio or Acrobat Reader work. Java Web Start technology makes the Java 2 platform available to the browser, so you can launch any web-based application simply and securely. 
+
+The only prerequisite is to download and install Java Web Start software on the client machine. This is a one-time download and, once done, installing and upgrading applications might be a thing of the past. 
+
+When to use Java Web Start Technology:
+Given the nature of many productivity tools and traditional client-side applications, providing an HTML-based front-end to the application or service is not adequate. 
+
+For example, Web-based e-mail has been widely successful. It is a convenient tool when the volume of e-mail is relative low. Because most corporate users of e-mail and many individuals receive high volumes of e-mail, typically dozens a day, using an HTML-based interface would prove cumbersome and ineffective. 
+
+With Java Web Start technology, which works with virtually all Web servers, the application service providers (ASP), either internally to the company or externally on the Web, can easily supply a full-featured application to users. Initially, using the application version is slower, since it needs to be downloaded. This will typically take in the order of minutes, which is high compared to the order of seconds for HTML. However, this is only a "first-time activation" cost. For subsequent uses, the application is cached locally and launches as quickly as any other local application. 
+
+Therefore, many services can be greatly improved by providing a full-fledged application interface. The first-time activation cost is higher than with HTML, but that time is later saved by the enhanced features and better user experience, especially for power users. 
+
+Java Web Start technology is an ideal companion to HTML-based clients. A service can provide a simple and easily accessible interface using HTML, while also providing a rich experience for power users using Java Web Start technology. The ease-of-use for users is virtually identical -- except for the first-time activation cost -- and the management and server side requirements for both solutions are the same. 
+
+Features of Java Web Start Technology: 
+Applications written on the Java 2 platform for deployment with Java Web Start are always up-to-date and available. Every application runs in a dedicated Java Runtime Environment (JRE), independent of a specific browser or computer platform technology. Java Web Start supports: 
+
+Multiple JREs 
+Code-signing 
+Sandboxing 
+Versioning and incremental updates 
+Desktop integration 
+Offline operation 
+Automatic installation of JREs and optional packages Application launcher 
+Java Web Start technology provides a rich set of features that give easy access to the latest versions of applications for the end-user, easy management and deployment of applications for the IT department, and easy development for the application vendors. 
+ 

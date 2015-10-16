@@ -1,0 +1,167 @@
+作者：urus
+日期：00-5-22 下午 11:41:54
+废话不多说！
+
+测试环境为 jdk1.2.2  jswdk-1.0  winnt4.0中文版。
+
+1。java是大小写敏感的，用过其他编程语言的人最容易犯这个错误，尤其是刚上手的时候。我刚开始调试jsp的时50%以上的编译错误是都是因为这个。
+
+2。java的调用过程都是要加括号的，一开始比较容易忽视，如title=request.getParameter("title").trim();
+
+3。jsp中对应asp中的request.form()和request.querystring()的解决方法。
+jsp中取得参数没有form和queryString之分，都是通过request.getParameter("XXXX")来取得。虽然jsp也有request.getQueryString()方法，但测试结果是 test.jsp?id=1&page=20  得到 id=1&page=20。
+   如果url和form有相同的参数名称呢？下面是一段测试代码：
+<form method="POST" action="query.jsp?id=2">
+  <input type="text" name="id" value="1" size="60">
+</form>
+name都是id，结果是url的参数优先得到，jsp的这种处理方式和asp相比我觉的各有所长。
+
+4。头疼的汉字处理问题。
+在其他的文章里曾说到在中文NT环境下如下语句输出会得到乱码，
+<%="你好"%> 及 out.print("你好");等。解决方法是只要对字符串变量进行编码就可以得到正确结果,如下代码可以得到正确的输出：
+<%  String title="你好";
+  byte[] tmpbyte=title.getBytes("ISO8859_1");
+  title=new String(tmpbyte);
+  out.print(title); %>
+或者<%=title%>
+
+关于sql语句汉字问题，例句为 select * from test where title='谁是傻瓜'
+在jdbc-odbc驱动下连db2，不管是原句还是对sql语句进行编码后都死活通不过。
+换了ibm的jdbc直接驱动后，对sql语句编码后程序可以通过。
+
+这个问题的产生大概是中文NT的原因，在其他环境下可能就没汉字处理问题了，据说ibm的web sphere对中文支持的很好，这也给jsp的开发带来一定的通用性问题。据说对字符串编码是一种通用的解决方法，不过没有这么多环境来测试。
+
+5。在asp中经常使用到字符串判断语句如 if state="真是傻瓜" then.....
+   在java中String变量不是一个简单的变量而是一个类实例，不同的方法会得到不同的结果
+a.
+String  str1="我是傻瓜";
+String  str2="我是傻瓜"; (or String  str2="我是"+"傻瓜"; )
+if (str1==str2)
+  out.print("yes");
+else  
+  out.print("no");
+结果是"yes"。
+大概是编译优化，str1,str2指向同一个类实例；
+
+b.
+String str1,str2,str3;
+str1="我是傻瓜";
+str2="我是";
+str3=str2+"傻瓜";
+if (str1==str3)
+  out.print("yes");
+else
+  out.print("no");
+结果是"no"。
+
+String str1=new String("我是傻瓜");
+String str2=new String("我是傻瓜");
+if (str1==str2)
+  out.print("yes");
+else
+  out.print("no");
+结果是"no"。
+
+String str1=new String("我是傻瓜");
+String str2=new String("我是傻瓜");
+if (str1.compareTo(str2)==0)
+  out.print("yes");
+else
+  out.print("no");
+结果是"yes"。
+
+所以在jsp中判断字符串要使用compareTo方法，用惯传统语言还真一下子适应不过来，熟悉java的朋友应该没这个问题。
+
+6。如何判断数据库为空？
+   result = stmt.executeQuery(sql);
+   if (result.next()) 
+      ......
+   result执行后游标出于一个未明的状态，不能进行状态判断，也不能取值，一定要next()一下才可以用。
+   
+
+7。在jsp中实现分页。
+page是关键字，不能当变量。
+conn.jsp
+<%
+	String sDBDriver = "COM.ibm.db2.jdbc.app.DB2Driver";
+	String sConnStr = "jdbc:db2:faq";
+	Connection conn = null;
+	Statement stmt = null;
+	ResultSet rs=null; 
+   	try {
+       		Class.forName(sDBDriver);    
+	}
+   	catch(java.lang.ClassNotFoundException e) 	{
+		out.print("faq(): " + e.getMessage());
+	}
+	
+	try{
+   	conn = DriverManager.getConnection(sConnStr,"wsdemo","wsdemo1");        
+   	stmt = conn.createStatement();
+	}catch(SQLException e){
+		out.print(e.toString());
+	}
+%>
+
+query.jsp
+
+<%@ page language="java" import="java.sql.*"  %>
+<%@ page contentType="text/html; charset=gb2312" %>
+<%@ include file="conn.jsp" %>
+<%
+.......
+int pages=0;
+int pagesize=10;
+ResultSet result = null;
+ResultSet rcount = null;
+
+pages = new Integer(request.getParameter("pages")).intValue();
+
+if (pages>0)
+{
+
+String sql=" state='我不傻'";
+int count=0;
+try {
+rcount = stmt.executeQuery("SELECT count(id) as id from user where "+sql);
+catch(SQLException ex) {
+  out.print("aq.executeQuery: " + ex.getMessage());
+  }
+if(rcount.next())
+  count = rcount.getInt("id");
+rcount.close();
+
+if (count>0)
+{ 
+sql="select * from user where  "+sql;
+try {
+result = stmt.executeQuery(sql);
+    } 
+catch(SQLException ex) {
+  out.print("aq.executeQuery: " + ex.getMessage());
+  }
+
+int i;
+String name;
+//  result.first();
+//  result.absolute((pages-1)*pagesize);
+//  此方法jdbc2.0支持。编译通过，但执行不过，不知是不是跟驱动有关，只好用下面的笨办法。
+for(i=1;i<=(pages-1)*pagesize;i++)
+  result.next();
+for(i=1;i<=pagesize;i++) {
+  if (result.next()) {
+  name=result.getString("name");
+  out.print(name);
+  }
+result.close();
+int n= (int)(count/pagesize);
+if (n*pagesize<count) n++;
+if (n>1)
+ {
+ for(i=1;i<=n;i++)
+   out.print("<a href=query.jsp?pages="+i+">"+i+"&nbsp;</a>");
+ }
+}
+}
+%>
+              www.guanshui.com版权所有    Urus 2000-5-22

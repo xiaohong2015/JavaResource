@@ -1,0 +1,163 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-16 11:35:11
+5.3 JSP 语法
+    JSP 文件（扩展名为 .jsp）可以包含指令（或称为指示语句）、Class-wide 变量和方法、直接插入的 Java 代码（scriptlet）、访问 JavaBean、变量数据的 HTML 模型、变量数据的 Java 表达式的组合。
+1．JSP 指令
+    使用 JSP 指令（在<%@ 和 %>内的）来指定所使用的脚本语言、Servlet 实现的接口、Servlet 扩展的类、Servlet 导入的软件包。JSP 指令的一般语法形式为：<%@ 指令名 ="值" %>。其中有效的指令名为： 
+    (1) language：文件中所使用的脚本语言。此时对于 Java 程序设计语言来说，仅 java 为有效值和缺省值。该指令作用于整个文件。当多次使用该指令时，只有第一次使用是有效的。示例如下：<%@ language ="java" %>。
+    (2) Method：由嵌入的 Java 代码（scriptlet）生成的方法的名称。生成的代码会成为指定方法名的主体。缺省的方法是service。当多次使用该指令时，只有第一次使用是有效的。示例如下：<%@ method ="doPost" %>。
+    (3) Import：Servlet 导入的 Java 语言软件包名或类名列表，该列表是用逗号分隔的。在 JSP 文件中，可以多次指定该指令来导入不同的软件包。示例如下：<%@ import ="java.io.*,java.util.Hashtable" %>。
+    (4) content_type ：生成的响应的 MIME 类型。缺省值为 text/html。当多次使用该指令时，只有第一次使用是有效的。 该指令可用以指定在其中对页面进行编码的字符集。示例如下：<%@ content_type ="text/html; charset=gb2312" %>。
+    (5) mplements：用于生成 Servlet 实现的 Java 语言接口列表，该列表是用逗号分隔的。可以在一个 JSP 文件中多次使用该命令，以实现不同的接口。示例如下：<%@ implements = "javax.servlet.http.HttpSessionContext" %>。
+    (6) extends：Servlet 扩展的 Java 语言类的名称。该类必须是有效的，且不能是一个 Servlet 类。该指令作用于整个 JSP 文件。当多次使用该指令时，只有第一次使用是有效的。示例如下：<%@ extends ="javax.servlet.http.HttpServlet" %>。
+    2．class-wide 变量和方法
+    使用 <SCRIPT> 和 </SCRIPT> 标记来说明 Servlet 类的 class-wide 变量和 class-wide 方法。一般语法如下：
+<script runat=server>。
+ // class-wide 变量和方法的代码
+ </script>
+属性 runat=server 是必需的，它表明该标记是用于服务器端处理的。指定 class-wide 变量和方法的示例如下：
+<script runat=server> 
+// class-wide 变量
+init i = 0;
+String foo = "Hello"; 
+// class-wide 方法
+private void foo() {
+  	// 该方法的代码 
+}
+</script>
+
+    3．访问 JavaBean
+    JSP 对 JavaBean 的支持使您能通过 Web 站点重复使用组件。JavaBean 可以是类文件或串行化 Bean，也可由 Servlet 动态生成。请使用 <BEAN> 标记来创建一个 Bean 实例，以使从 JSP 文件的任何地方都可对该实例进行访问。标记 <BEAN> 的语法为：
+<bean name="Bean_name" varname="local_Bean_name"
+   type ="class_or_interface_name" introspect="yes|no"
+   beanName="ser_filename" create="yes|no"
+   scope="request|session|userprofile" >
+   <param property_name="value">
+</bean>
+    其中的属性及其含义如下： 
+    (1) name：用于在相应的范围（由 scope 属性指定）内查找 Bean 的名称。例如，这可能是用于存储 Bean 的会话（session）关键值。该值是分大小写的。 
+    (2) varname：用于在 JSP 文件中的任何地方引用 Bean 的名称。该属性是可选的。缺省值为 name 属性值。该值是分大小写的。
+    (3) type：Bean 的类文件名。该名称用于以代码说明 Bean 实例。缺省值为 Object 类型。该值是分大小写的。 
+    (4) Introspect：当该值为真时，JSP 处理器检查将所有的请求属性，并调用与请求属性匹配的 set 属性方法集（该属性是在 BeanInfo 中传递的）。该属性的缺省值为是。
+    (5) BeanName：Bean 的 .class 文件名、Bean 软件包名或包含 Bean 的串行化文件（.ser 文件）的文件名。（该名称是给 Bean 实例程序的）。仅当 Bean 不在指定的范围中，且创建属性被设置成是时，才使用该属性。该值是分大小写的。文件路径必须在应用服务器的Java 类路径中指定，除非文件在 applicationserver_root\servlets 目录下。 
+     (6) Create：当该值为真时，如果处理器在指定的范围内没有找到 Bean，则 JSP 将创建一个 Bean 实例。缺省值为真。 
+     (7)Scope：Bean 的生命期。该属性是可选的，其缺省值为 request 。有效值为： 
+	  = request - 由 Servlet 将 Bean 设置成请求的上下文，该 Servlet 使用 JSP API 中描述的 API 调
+用 JSP 文件。如果 Bean 不是请求上下文的一部分，则将创建该 Bean，并将其存储在请求上下文中，除非创建属性已设置为否。 
+ = session - 如果当前对话中存在 Bean，则 Bean 已被重用。如果不存在 Bean，且创建属性设置
+为是，则它已被创建并作为会话的一部分存储起来。 
+ = userprofile - 由 Servlet 请求对象检索、造型成指定的类型，并进行内省的用户简要表文件。（在
+IBM WebShere应用服务器中，缺省类型为 com.ibm.servlet.personalization.userprofile.UserProfile）。
+    (8) param：属性和值配对的列表。属性是在 Bean 中用内省自动设置的。只在实例化 Bean 时，才对属性进行设置。 
+    除了使用 <param> 属性来设置 Bean 属性外，还可以使用其它三种方法：第一，在请求包含 Bean 的 Web 页面（JSP 文件）的 URL 时，指定查询参数。必须将内省属性设置成“是”。其示例如下：http://www.myserver.com/signon.jsp?name=jones&password=d13x，其中 Bean 属性名将设置为 jones。第二种方法，将属性指定成由 HTML <FROM> 标记提交的参数。必须将 mothod 属性设置成 post。将 action 属性设置成调用 Bean 的 JSP 文件的 URL。必须将 introspect 属性设置成“是”。其示例如下： 
+<form action="http://www.myserver.com/SearchSite" method="post">
+  <input type="text" name="Search for: ">
+  <input type="submit">
+</form> 
+第三中方法是使用 JSP 语法设置 Bean 属性。
+    在指定了 <BEAN> 标记后，就可以从 JSP 文件中的任何地方访问 Bean。这里有三种访问 Bean 属性的方法：使用 JSP scriptlet、使用 JSP 表达式、使用 <INSERT> 标记（如同 变量数据的 HTML 模板语法中所说明的）。请参阅JSP示例（DisplayData.jsp 文件）以获取三个访问 Bean 方法的每个方法示例。
+    4．直接插入的 Java 代码（scriptlet）
+    可以在 JSP 文件的 <% 和 %> 标记间直接嵌入任何有效的 Java 语言代码。这样嵌入的代码称为 scriptlet。如果没有指定 method 指令，则生成的代码将成为 service 方法的主体。用于 Servlet 的 scriptlet 可以使用一个预定义的变量集，该变量集符合基本的 Servlet、输出和输入类：
+    (1) request：由 javax.servlet.http.HttpServletRequest 定义的 Servlet 请求类 
+	 (2) responses：由 javax.servlet.http.HttpServletRequest 定义的 Servlet 响应类 
+	 (3) out：由 java.io.PrintWriter 定义的输出转录程序类 
+	 (4) in：由 java.io.BufferedReader 定义的输入阅读程序类 
+其示例如下：
+<%
+foo = request.getParameter("Name");
+out.println(foo);
+%>
+    5．变量数据的 HTML 模板语法
+    当页面被返回给浏览器时，应用服务器HTML 模板语法使您能将变量字段放在 HTML 页面上，并使 Servlet 和 JavaBean 可利用数据库的值动态地替换变量。该功能是 JSP 的一个 IBM 扩展，它使引用变量数据变得十分容易。该语法只能用于 JSP 文件中。HTML 模板语法包括：
+    = 基本 HTML 模板语法；
+    = 替代 HTML 模板语法；
+	= <REPEAT>标记。 
+    这些标记通过 HTML 编写工具被设计成传递交互操作的标记。每一个标记有一个相应的结束标记。每一个标记是分大小写的，它们的一些属性也是分大小写的。IBM WebSphere Studio 使开发 JSP 文件以包含 HTML 模板语法变得更为容易。 
+    (1) 基本 HTML 模板语法
+<INSERT> 标记是用于指定变量字段的基本标记。一般的语法为：
+<insert requestparm=pvalue requestattr=avalue bean=name
+  property=property_name(optional_index).subproperty_name(optional_index)
+  default=value_when_null>
+</insert>
+    其中的属性及其含义如下： 
+   = requestparm：要在请求对象内进行访问的参数。该属性是分大小写的，并且不能与Bean 和property属性一起使用。
+   = Requestattr：要在请求对象内进行访问的属性。属性应使用 setAttribute 方法设置。该属性是分大小写的，并且不能与 Bean 和property属性一起使用。 
+   = Bean：由 <BEAN> 标记在 JSP 文件中说明的 JavaBean 名。请参阅访问 JavaBean 以获得 <BEAN> 标记的解释。该属性的值是分大小写的。当指定了 Bean 属性，但未指定property属性时，在替换中将使用完整的 Bean 。例如，如果 Bean 是类型 String 且未指定属性，则将替代 string 的值。
+   = Property：访问替换的 Bean 的属性。该属性的值是分大小写的，并且是属性的独立场所名。该属性不能与 requestparm 属性一起使用。 
+   = Default：当 Bean 属性值为空时，显示可选的字符串。如果字符串包含多个字，则该字符串必须包含在一对双引号中（例如 "HelpDesk number"）。该属性的值是分大小写的。如果未指定值，则当属性值为空时，用空字符串替代。 
+基本语法的示例如下：
+<insert bean=userProfile property=username></insert>
+<insert requestparm=company default="IBM Corporation"></insert>
+<insert requestattr=ceo default="Company CEO"></insert>
+<insert bean=userProfile property=lastconnectiondate.month></insert> 
+在大多数情况下，property属性的值就是属性名。但是，可以通过指定property属性的全格式来访问属性的某一属性（子属性）。这个全格式也提供选择项给您来指定索引属性的一个索引。该可选的索引可以是一个常数（例如 2）或如重复设置 HTML 标记中描述的索引。使用属性标记的全格式示例如下： 
+<insert bean=staffQuery property=address(currentAddressIndex)></insert>
+<insert bean=shoppingCart property=items(4).price></insert>
+<insert bean=fooBean property=foo(2).bat(3).boo.far></insert>
+    (2) 替代 HTML 模板语法
+    HTML 标准不允许在 HTML 标记中嵌入 HTML 标记。因而，就无法在另一个 HTML 标记中嵌入<INSERT>标记。作为代替，请使用 HTML 模板替代语法。要使用替代语法： 
+   = 请使用<INSERT>和</INSERT>来包含 HTML 标记，在该标记中指出替代内容。 
+   = 指定 Bean 和property属性： 
+   &frac34; 要指定 Bean 和属性特性，请使用下列格式：$(bean=b property=p default=d)，其中 b、p 和 d 
+作为描述基本语法的值。 
+   &frac34; 要指定 requestparm 属性，请使用下列格式：$(requestparm=r default=d)，其中 r 和 d 作为
+描述基本语法的值。 
+   &frac34; 要指定 requestattr 属性，请使用下列格式：$(requestattr=r default=d)，其中 r 和 d 作为描述
+基本语法的值。 
+替代 HTML 模板语法的示例如下：
+<insert>
+  <img src=$(bean=productAds property=sale default=default.gif)>
+</insert>
+<insert>
+  <a href="http://www.myserver.com/map/showmap.cgi?country=$(requestparm=country default=usa)
+  &city$(requestparm=city default="Research Triangle Park")&email=
+     $(bean=userInfo property=email)>Show map of city</a>
+</insert>
+
+   (3) <REPEAT>标记
+    <REPEAT>标记的语法为：
+<repeat index=name start=starting_index end=ending_index>
+</repeat>
+其中： 
+    = index：是用于标识该重复数据块的一个可选的名称。该值是分大小写的。 
+    = Start：是用于该重复数据块的一个可选的开始索引值。缺省值为 0 。 
+    = End：是用于该重复数据块的一个可选的结束索引值。最大值是 2,147,483,647。如果结束属性的值小于开始属性的值，则忽略结束属性。 
+    下面的示例 1、2 和 3 显示了如何使用<REPEAT>标记。如果所有的索引属性拥有 300 个或更少的元素，则这些示例将产生相同的输出。如果拥有的元素多于 300 个，示例 1 和示例 2 将显示所有的元素，而示例 3 将只显示前 300 个元素。示例 1 用缺省开始和结束索引显示了隐式索引：使用最小索引属性数的 bean 限制了循环重复的次数。 
+<table>
+<repeat>
+  <tr><td><insert bean=serviceLocationsQuery property=city></insert></tr></td>
+  <tr><td><insert bean=serviceLocationsQuery property=address></insert></tr></td>
+  <tr><td><insert bean=serviceLocationsQuery property=telephone></insert></tr></td>
+</repeat>
+</table>
+示例 2 显示了索引、开始索引和结束索引： 
+<table>
+<repeat index=myIndex start=0 end=2147483647>
+  <tr><td><insert bean=serviceLocationsQuery property=city(myIndex)></insert></tr></td>
+  <tr><td><insert bean=serviceLocationsQuery property=address(myIndex)></insert></tr></td>
+  <tr><td><insert bean=serviceLocationsQuery property=telephone(myIndex)></insert></tr></td>
+</repeat>
+</table>
+示例 3 用隐式开始索引显示了显式索引和结束索引。虽然指定了索引属性，仍可对索引过的属性城市进行隐式索引，因为不需要（i）。
+<table>
+<repeat index=myIndex end=299>
+  <tr><td><insert bean=serviceLocationsQuery property=city></insert></tr></td>
+  <tr><td><insert bean=serviceLocationsQuery property=address(myIndex)></insert></tr></td>
+  <tr><td><insert bean=serviceLocationsQuery property=telephone(myIndex)></insert></tr></td>
+</repeat>
+</table>
+可以嵌套<REPEAT>数据块。独立索引每个数据块。该能力对交叉两个 bean 上的交错属性或含有子属性的属性非常有用。在示例中，将两个<REPEAT>数据块嵌套，用以显示用户购物手推车上每一张压缩光盘上的歌曲列表。
+<repeat index=cdindex>
+  <h1><insert bean=shoppingCart property=cds.title></insert></h1>
+    <table>
+  <repeat>
+    <tr><td><insert bean=shoppingCart property=cds(cdindex).playlist></insert>
+    </td></tr>
+    </table>
+</repeat>
+</repeat>
+    6．变量数据的 Java 表达式
+    当处理 JSP 文件时，要指定分解一个 Java 语言表达式，请使用 JSP 表达式标记 <%= 和 %>。该表达式被评估和转换成一个字符串，并加以显示。原语类型，如 int 和 float 都自动转换成字符串表示法。在该示例中，foo 是在 <SCRIPT> 中加以说明的 class-wide 变量，示例请见 Class-wide 变量和方法： 
+    <p>翻译欢迎辞<%= foo %>.</p> 
+    当获得 JSP 文件时，文本为：翻译欢迎辞 Hello。

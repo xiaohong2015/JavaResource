@@ -1,0 +1,42 @@
+作者：飞天蜘蛛
+日期：2000-07-18 08:31:50
+Sun Java Web服务器远程可执行命令漏洞
+ 
+
+
+漏洞发布时间：2000-7-13 17:41:00
+漏 洞 描 述:
+
+在Solaris and Windows NT的Sun Java Web Server默认安装设置下。通过公告版的样板程序的漏洞，可以远程执行任意命令。
+
+漏洞测试方法如下：
+
+下面的例子将显示如何上载和执行该代码，而在服务器上显示"Hello World"。
+
+输入下面的JSP代码将打印出"Hello World":
+
+<% String s="Hello World"; %>
+<%=s %>
+
+通过下面的公告版连接Post这段代码:
+
+http://jws.site/examples/applications/bboard/bboard_frames.html
+
+检验是否该代码真正的上载了:
+
+http://jws.site/board.html
+
+通过执行下面的连接编译和执行该代码:
+
+http://jws.site/servlet/com.sun.server.http.pagecompile.jsp.runtime.JspServlet/board.html
+
+解 决 方 法:
+
+仔细按照Java Web Server手册中的"How to secure a web site that uses the Java Web Server" 一章进行设置，或者参考下面连接:
+http://www.sun.com/software/jwebserver/faq/jwsca-2000-02.html
+或者简单的移除默认安装的这些样板文件。 
+
+
+
+
+ 

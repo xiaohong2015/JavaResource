@@ -1,0 +1,185 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:36:02
+　　这一节涉及到两个页面，一个donewuser.jsp文件用来实现记录添加操作，另一个文件listuser.jsp文件用来显示所有的已经注册的用户信息。这两个页面都涉及到了JavaBean的具体调用，还是来看看文件吧，对于文件中关键代码，都会添加上注释，以方便大家理解。
+
+　　donewuser.jsp文件
+
+　　说明：用户注册操作页面，并根据用户注册成功否显示相应的反馈信息，这个页面主要的特点就是使用了lyf.adduser这个JavaBean的addNewUser()方法来进行记录的添加。
+
+$#@60;%@ page contentType="text/html;charset=gb2312"%$#@62;
+$#@60;% response.setHeader("Expires","0"); %$#@62;
+$#@60;!--生成一个JavaBean:lyf.adduser的实例，id为adduser，生存范围为page--$#@62;
+$#@60;jsp:useBean id="adduser" class="lyf.adduser" scope="page"/$#@62;
+
+　　$#@60;!--设置JavaBean中各个属性的值，这会调用JavaBean中各个属性的set方法，以便JavaBean得到正确的属性值，”*”代表进行所有属性的匹配--$#@62;
+
+$#@60;jsp:setProperty name="adduser" property="*"/$#@62;
+$#@60;html$#@62;
+$#@60;head$#@62;
+$#@60;meta http-equiv="Content-Language" content="zh-cn"$#@62;
+$#@60;meta http-equiv="Content-Type" content="text/html; charset=gb2312"$#@62;
+$#@60;meta name="GENERATOR" content="Microsoft FrontPage 3.0"$#@62;
+$#@60;meta name="ProgId" content="FrontPage.Editor.Document"$#@62;
+$#@60;title$#@62;用户添加$#@60;/title$#@62;
+$#@60;/head$#@62;
+$#@60;body bgcolor="#FFEBBD"$#@62;
+$#@60;div align="center"$#@62;$#@60;center$#@62;
+$#@60;%
+
+　　//调用lyf.adduser的checkUser()方法检查是否有重复的用户名
+
+　　//如果有重复就显示对应的信息
+
+if(!adduser.checkUser())
+{
+
+　　//页面文字输出信息，使用jsp内置对象out的println方法，相当于asp中的response.write方法
+
+out.println("对不起，这个用户名"+adduser.getUsername()+"已经被申请了，请重新选择！");
+
+　　//return代表返回，运行时候碰到return就不会进行下面的处理了，功能相当于asp中的response.end
+
+return;
+}
+%$#@62;
+$#@60;%
+
+
+　　//如果没有用户名重复的问题，调用lyf.adduser的addNewUser()方法来将用户数据添加到数据库中，并根据数据添加成功否来显示对应的信息
+
+if(adduser.addNewUser()){
+%$#@62;
+$#@60;H2$#@62;添加用户成功！$#@60;/P$#@62;
+$#@60;%}else{%$#@62;
+$#@60;H2$#@62;添加用户失败，请和管理员联系！$#@60;/P$#@62;
+$#@60;%}%$#@62;
+$#@60;/BODY$#@62;
+$#@60;/HTML$#@62;
+
+　　listuser.jsp文件
+
+　　说明：用户信息列表页面，用于显示注册的所有用户信息，对数据进行了分页显示。
+
+　　为了方便大家使用，采用了通用的分页代码，如果是JDBC2.0以上或者其他支持TYPE_SCROLL_INSENSITIVE游标的数据库驱动程序，可以有更简洁的分页方法。
+
+　　和前面jsp页面类似的语句就不讲解了，$#@60;%@ page import="java.sql.ResultSet" %$#@62;代表在这个页面中导入java.sql.ResultSet的这个类库，因为Jsp页面中间要声明ResultSet；oracle.jdbc.driver.*类库是Oracle专用的Jdbc驱动程序，让Jsp页面可以用来进行Oracle的数据库操作。
+
+$#@60;%@ page contentType="text/html;charset=gb2312"%$#@62;
+$#@60;% response.setHeader("Expires","0"); %$#@62;
+$#@60;%@ page import="java.sql.ResultSet" %$#@62;
+$#@60;%@ page import="oracle.jdbc.driver.*" %$#@62;
+$#@60;!--生成一个JavaBean:lyf.db的实例--$#@62;
+$#@60;jsp:useBean id="db" class="lyf.db" scope="request"/$#@62;
+$#@60;jsp:setProperty name="db" property="*"/$#@62;
+$#@60;%
+
+　　java.lang.String strSQL; //SQL语句
+
+int intPageSize; //一页显示的记录数
+int intRowCount; //记录总数
+int intPageCount; //总页数
+int intPage; //待显示页码
+java.lang.String strPage;
+int i,j,k;
+　　//设置一页显示的记录数
+intPageSize = 15;
+　　//取得待显示页码
+strPage = request.getParameter("page");
+if(strPage==null){//表明在QueryString中没有page这一个参数，此时显示第一页数据
+intPage = 1;
+}
+else{//将字符串转换成整型
+intPage = java.lang.Integer.parseInt(strPage);
+if(intPage$#@60;1) intPage = 1;
+}
+
+
+　　//获取记录总数
+strSQL = "select count(*) from user";
+ResultSet result = db.executeQuery(strSQL); //执行SQL语句并取得结果集
+result.next(); //记录集刚打开的时候，指针位于第一条记录之前
+intRowCount = result.getInt(1);
+result.close(); //关闭结果集
+　　//记算总页数
+intPageCount = (intRowCount+intPageSize-1) / intPageSize;
+　　//调整待显示的页码
+if(intPage$#@62;intPageCount) intPage = intPageCount;
+strSQL="select * from user order by id desc";
+　　//执行SQL语句并取得结果集
+result = db.executeQuery(strSQL);
+　　//将记录指针定位到待显示页的第一条记录上
+i = (intPage-1) * intPageSize;
+for(j=0;j$#@60;i;j++) result.next();
+%$#@62;
+$#@60;html$#@62;
+$#@60;head$#@62;
+$#@60;meta http-equiv="Content-Language" content="zh-cn"$#@62;
+$#@60;meta http-equiv="Content-Type" content="text/html; charset=gb2312"$#@62;
+$#@60;meta name="GENERATOR" content="Microsoft FrontPage 3.0"$#@62;
+$#@60;meta name="ProgId" content="FrontPage.Editor.Document"$#@62;
+$#@60;title$#@62;用户列表$#@60;/title$#@62;
+$#@60;/head$#@62;
+$#@60;body bgcolor="#FFEBBD"$#@62;
+$#@60;div align="center"$#@62;$#@60;center$#@62;
+$#@60;table border="1"
+borderColorDark="#FFFFFF" borderColorLight="#000000" cellspacing="0" height="22"
+width="100%"$#@62;
+$#@60;tr bgcolor="#FFEBAD"$#@62;
+$#@60;td height="1" width="691" class="main"$#@62; 
+第$#@60;%=intPage%$#@62;页 共$#@60;%=intPageCount%$#@62;页 
+$#@60;a href="listuser.jsp?page=0"$#@62;首页$#@60;/a$#@62; 
+$#@60;%if(intPage$#@62;1){%$#@62;$#@60;a href="listuser.jsp?page=$#@60;%=intPage-1%$#@62;"$#@62;上一页$#@60;/a$#@62;$#@60;%}%$#@62;
+$#@60;%if(intPage$#@60;=1){%$#@62;上一页$#@60;%}%$#@62; 
+$#@60;%if(intPage$#@60;intPageCount){%$#@62;$#@60;a href="listuser.jsp?page=$#@60;%=intPage+1%$#@62;"$#@62;下一页$#@60;/a$#@62;$#@60;%}%$#@62;
+$#@60;%if(intPage$#@62;=intPageCount){%$#@62;下一页$#@60;%}%$#@62; 
+$#@60;a href="listuser.jsp?page=$#@60;%=intPageCount%$#@62;"$#@62;尾页$#@60;/a$#@62;
+第$#@60;input type="text" class="main" name="page" size="3" value="$#@60;%=intPage%$#@62;" tabindex="1"$#@62;页$#@60;input type="submit" class="main" value="go" name="B1" tabindex="2"$#@62;$#@60;class="main"$#@62;
+$#@60;/td$#@62;$#@60;/tr$#@62;$#@60;/table$#@62;$#@60;/form$#@62;
+
+
+$#@60;table border="1" width="100%" cellspacing="0" bordercolorlight="#000000"
+bordercolordark="#FFFFFF" class="main"$#@62;
+$#@60;tr bgcolor="#FFEBAD"$#@62;
+$#@60;td $#@62;
+$#@60;div align="left"$#@62;用户名$#@60;/div$#@62;
+$#@60;/td$#@62;
+$#@60;td $#@62;
+$#@60;p align="center"$#@62;Email
+$#@60;/td$#@62;
+$#@60;td $#@62;
+$#@60;p align="center"$#@62;主页
+$#@60;/td$#@62;
+$#@60;td$#@62;
+$#@60;p align="center"$#@62;登记时间
+$#@60;/td$#@62;
+$#@60;td$#@62;
+$#@60;p align="center"$#@62;说明
+$#@60;/td$#@62;
+$#@60;/tr$#@62;
+$#@60;%
+　　//显示数据
+i = 0;
+while(i$#@60;intPageSize && result.next()){
+%$#@62;
+$#@60;tr bgcolor="#FFEBAD"$#@62;
+$#@60;td$#@62;
+$#@60;div align="left"$#@62;$#@60;%=result.getString("username") %$#@62;$#@60;/div$#@62;$#@60;/td$#@62;
+$#@60;td$#@62;$#@60;div align="center"$#@62;$#@60;%=result.getString("email") %$#@62;$#@60;/a$#@62;$#@60;/div$#@62;$#@60;/td$#@62;
+$#@60;td$#@62;$#@60;div align="center"$#@62;$#@60;font color="#0000CC"$#@62;$#@60;%=result.getString("homepage") %$#@62;$#@60;/font$#@62;$#@60;/div$#@62;$#@60;/td$#@62;
+$#@60;td$#@62;$#@60;div align="center"$#@62;$#@60;font color="#FF6666"$#@62;$#@60;%=result.getDate("regtime") %$#@62;$#@60;/font$#@62;$#@60;/div$#@62;$#@60;/td$#@62;
+$#@60;td$#@62;$#@60;div align="center"$#@62;$#@60;font color="#0000FF"$#@62;$#@60;%=result.getString("signs") %$#@62;$#@60;/font$#@62;$#@60;/div$#@62;$#@60;/td$#@62;$#@60;/tr$#@62;
+$#@60;%
+i++;
+}
+%$#@62;
+$#@60;/table$#@62;
+$#@60;% result.close(); //关闭结果集%$#@62;
+$#@60;/body$#@62;
+$#@60;/html$#@62;
+　　
+　　先运行程序newuser.jsp文件，进行用户注册操作，然后运行listuser.jsp文件，看看是否已经添加到数据库中。对于具体jsp文件和class文件放在什么目录下的问题，请看具体jsp服务器软件的参考，一个最简单的方法就是用Jbuilder4.0直接运行，因为它自带了Tomcat服务器软件。
+
+　　好了，到这里Jsp+JavaBean的介绍就基本上结束了，通过上面的学习，大家应该对JavaBean如何应用于JSP程序中有了一个基本的了解，剩下的就是在具体程序中去应用和发挥了。
+
+　　后说一点的是，为了方便大家，上面的所有程序代码可以在我的网站“JSP爱好者http://jspbbs.yeah.net”下载。

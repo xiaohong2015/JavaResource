@@ -1,0 +1,138 @@
+作者：jspfuns
+日期：2000-8-10 17:29:28
+<html>
+<head>
+<title>My First Jsp GuestBook</title>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+</head>
+<body bgcolor="#CCCCFF" vlink="#000000" alink="#666666">
+
+<div align="center">
+<p><font size="7"><b><font size="+6">Jsp GuestBook</font></b></font></p>
+<form method="post" action="index.jsp">
+<table width="75%" align="center" border=1>
+<tr>
+<td width="30%">
+<div align="right">Name:</div>
+</td>
+<td width="70%">
+<input type="text" name="name">
+</td>
+</tr>
+<tr>
+<td width="30%">
+<div align="right">E-mail:</div>
+</td>
+<td width="70%">
+<input type="text" name="email">
+</td>
+</tr>
+<tr>
+<td width="30%">
+<div align="right">Site Url:</div>
+</td>
+<td width="70%">
+<input type="text" name="url" value="http://">
+</td>
+</tr>
+<tr>
+<td width="30%">
+<p>What do you want to</p>
+<p>say?</p>
+</td>
+<td width="70%">
+<textarea name="body" rows="5" cols="30"></textarea>
+</td>
+</tr>
+<tr>
+<td width="30%"> </td>
+<td width="70%"> </td>
+</tr>
+<tr>
+<td width="30%"> </td>
+<td width="70%">
+<table width="75%">
+<tr>
+<td>
+<input type="submit" name="send" value="Send" >
+</td>
+<td>
+<input type="reset" name="reset" value="Reset">
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</form>
+<hr>
+<%@ page contentType="text/html;charset=gb2312"%>
+<%@ page language="java" import="java.sql.*"%>
+<jsp:useBean id="sqlbean" scope="page" class="jsp.sql_data" />
+<%! String name,email,url,body,sql; %>
+<%! int id; %>
+
+<%
+name = null;
+name = request.getParameter("name");
+//name = new String(request.getParameter("name").getBytes("8859_1"));
+%>
+<%= name%>
+<%
+if (name != null&&name !="")
+{
+
+name = new String(request.getParameter("name").getBytes("8859_1"));
+email = new String(request.getParameter("email").getBytes("8859_1"));
+url = new String(request.getParameter("url").getBytes("8859_1"));
+body = new String(request.getParameter("body").getBytes("8859_1"));
+ResultSet RSet = sqlbean.executeQuery("SELECT * FROM guestbook");
+RSet.last();
+id = RSet.getRow()+1;
+RSet.close();
+sqlbean.sqlclose();
+sql = "insert into guestbook (Recordid,Name,Email,Url,Body) values('"+id+"','"+name+"','"+email+"','"+url+"','"+body+"')";
+sqlbean.executeQuery(sql); 
+sqlbean.sqlclose();
+
+}else{
+out.print("<b><font color=red> Please enter your name,email and body!!!</font></b>");
+}
+%>
+<p><font size="4"><b><a href="./index.jsp#see">See My Guestbook</a></b></font></p>
+<p> </p>
+<% 
+ResultSet RS = sqlbean.executeQuery("SELECT * FROM guestbook ORDER BY RecordID DESC");
+
+while (RS.next()){
+name = new String(RS.getString("Name").getBytes("8859_1"));
+email = new String(RS.getString("Email").getBytes("8859_1"));
+url = new String(RS.getString("Url").getBytes("8859_1"));
+body = new String(RS.getString("Body").getBytes("8859_1"));
+%>
+<table border=1 width=80%>
+<tr>
+<td width=30%>Name:</td><td width=70%><%= name %>
+</tr>
+<tr>
+<td width=30%>Email:</td><td width=70%><a href="mailto:<%= email %>"><%= email %></a></td>
+</tr>
+<tr>
+<td width=30%>SiteUrl:</td><td width=70%><a href="<%= url %>"><%= url %></a></td>
+</tr>
+<tr>
+<td width=30%>Body:</td><td width=70%><%= body %></td>
+</tr>
+</table>
+<hr>
+<%
+}
+RS.close();
+sqlbean.sqlclose();
+
+%>
+
+
+</div>
+</body>
+</html>

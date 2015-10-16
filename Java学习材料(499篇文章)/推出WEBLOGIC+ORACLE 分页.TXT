@@ -1,0 +1,93 @@
+作者：javaboy
+日期：2001-4-10 15:31:31
+import java.sql.*;
+import java.util.*;
+import weblogic.db.jdbc.*;
+
+public class bandlistBean {
+  private String driver;
+  private String dbURL;
+  private Bean2 b=new Bean2();
+  
+public bandlistBean(){
+   globalBean globalstr = new globalBean();
+   driver = globalstr.getDBDriver();
+   dbURL = globalstr.getDBURL();
+}
+
+public String getKey(String href,int recordPerPage,int startRecord) {
+  Connection conn = null;
+  QueryDataSet dSet = null;
+  String shortkeystr ="";
+  try{
+   Class.forName(driver).newInstance();
+   conn=DriverManager.getConnection(dbURL);
+   String countsql = "Select count(*) as count from TABLE where yijlmbm=1 and riq=to_char(sysdate,'yyyymmdd')";
+   dSet = new QueryDataSet(conn,countsql);
+   dSet.fetchRecords();
+   Record countRecord = dSet.getRecord(0);
+   int dSetAllSize = countRecord.getValue("count").asInt();
+
+   int pages = dSetAllSize/recordPerPage;
+   if(dSetAllSize%recordPerPage !=0) pages++;
+   for(int i=0;i<pages;i++) {
+   if(startRecord == i*recordPerPage) {
+    shortkeystr = shortkeystr + "<Font size=+1>";   //    被选中页数字字体增大
+    shortkeystr = shortkeystr + href + "?startRecord=" + Integer.toString(i*recordPerPage) + ">";
+    shortkeystr = shortkeystr + Integer.toString(i+1) + "</a></Font>" + "\n";
+     }else {
+   shortkeystr = shortkeystr + href + "?startRecord=" + Integer.toString(i*recordPerPage) + ">";
+   shortkeystr = shortkeystr + Integer.toString(i+1) + "</a>" + "\n";
+   }
+   }
+  }catch(Exception e) { System.out.println("Exception:"+e);}
+    finally{
+    if (dSet!= null) try {dSet.close();}catch(Exception e){}
+    if (conn!= null) try {conn.close();}catch(Exception e){}
+    }
+    return shortkeystr;
+    }
+
+public String getYjlmList(String href1,String href2,String href3,int recordPerPage,int startRecord) {
+     String newsstr = "";
+     Connection conn = null;
+     QueryDataSet dSet = null;
+     String zy="";
+      try {
+      Class.forName(driver).newInstance();
+      conn=DriverManager.getConnection(dbURL);
+      String sqlstr = "Select xinxibm,biaot,weight from xinx where yijlmbm=1 and riq=to_char(sysdate,'yyyymmdd') order by xinxibm desc";
+      dSet = new QueryDataSet(conn,sqlstr);
+       dSet.fetchRecords(startRecord,recordPerPage);
+      int dSetSize = dSet.size();
+
+      for(int x=0;x<dSetSize;x++){
+      Record curRecord = dSet.getRecord(x);
+      String xinxibm = new Integer(curRecord.getValue("xinxibm").asInt()).toString().trim();
+      String biaot = b.x2u(curRecord.getValue("biaot").asString().trim());
+      String weight = new Integer(curRecord.getValue("weight").asInt()).toString().trim();
+      if(weight.compareTo("1")==0){
+          zy="重要新闻";
+          }else{
+        zy="普通新闻";
+        }
+     newsstr = newsstr + "<tr><td bgcolor='#E1DFD2'>" + href1 + "?Item=";
+     newsstr = newsstr + xinxibm + ">" ;
+     newsstr = newsstr + biaot + "</a></td>";
+     newsstr = newsstr + "<td bgcolor='#E1DFD2'>" + href2 + "?Item1=";
+     newsstr = newsstr + xinxibm +">普通新闻</a>";
+     newsstr = newsstr + "&nbsp;&nbsp;" + href3 + "?Item1=";
+     newsstr = newsstr + xinxibm + ">头条新闻</a></td>";
+     newsstr = newsstr + "<td bgcolor='#E1DFD2' >" + zy + "</td></tr>";
+      }
+      dSet.close();
+      conn.close();
+      }catch(Exception e) {}
+      finally{
+      if (dSet!= null) try {dSet.close();}catch(Exception e){}
+      if (conn!= null) try {conn.close();}catch(Exception e){}
+      }
+      return newsstr;
+   }
+
+}

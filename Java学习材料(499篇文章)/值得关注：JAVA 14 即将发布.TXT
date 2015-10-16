@@ -1,0 +1,73 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：7/27/2001 11:25:16 AM
+[TABLE][TR][TD]dW at JavaOne: 下一波 -- Java 1.4[/TD][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index_eng.shtml][B]英文原文[/B][/url][/TD][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][/TABLE][TABLE][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][TD][TABLE][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][TD][TABLE][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD][B]内容：[/B][/TD][/TR][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD][TABLE][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#1]JSR 在 1.4 版本中的删除部分[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#2]XML API 发展得太快[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#3]用户有一个参数选择[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#4]断言培训[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#5]记录新世界[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#6]"N" 代表“新的”[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#7]数据库的库到达内核[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#8]进入所需的认证路径[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#9]利用 WebStart 的快速开始[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#10]"Tiger" 的眼睛[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#11]超越 JSR[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#12]考虑转向 1.4[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#resources]参考资料[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#author1]关于作者[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#rating]对本文的评价[/url][/TD][/TR][/TABLE][/TD][/TR][/TABLE][TABLE][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD][B]相关内容：[/B][/TD][/TR][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD][TABLE][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-secure/index.shtml]一个识别用户的三向解决方案[/url][/TD][/TR][TR][TD][url href=http://www-106.ibm.com/developerWorks/java/library/j-genjava.html]使用类属在编译时找出更多的错误[/url][/TD][/TR][TR][TD][url href=http://www.cn.ibm.com/developerWorks/java/j-merlin/index.shtml]Merlin 的魔力：Swing 的新 Spinner 组件[/url][/TD][/TR][/TABLE][/TD][/TR][/TABLE][TABLE][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][/TABLE][/TD][/TR][/TABLE]即将发布版本的性能和新功能一览 
+[url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#author1]John Zukowski[/url] ([email]jaz@zukowski.net[/email])
+总裁，JZ Ventures, Inc
+2001 年 6 月[BLOCKQUOTE]JavaOne 2001 会议进行了几个议程，来描述新近发布的 Java beta 版本 1.4 的新功能。在这篇文章中，我们集中讨论会议中的某些议程以及新版本的性能。[/BLOCKQUOTE][/i] and not [i][/i].  Use  and not .              use 
+ and not 
+   Use all lower case for tags.            -->
+Graham Hamilton 是 J2SE Merlin 发行规范制定的带头人，他对最近发布的 Java 1.4 beta 的新性能提供了一个概述。在他的议程和其他议程的详细内容中，开发人员能够充满自信地开始把他们的开发工作移向 Merlin 的世界，预计在年底完成的这个版本的发行工作。
+Eenie、meenie、minee、mo: JSR 在 1.4 版本中的删除部分 
+质量第一，数量第二，1.4 版将为 Java 平台带来一些期待已久的性能。 用于 Merlin 的 Java 规范要求 (JSR-059) 通过 Java Community Process (JCP) 整合了一些其他的 JSR。假如调试稳定的话，这些 JSR 将逐步进入已发布的版本。这些 JSR 包括:
+[UL][LI]JSR-005 XML 语法分析 [LI]JSR-010 参数选择 API [LI]JSR-031 XML 数据绑定 [LI]JSR-041 一个简单的断言工具 [LI]JSR-047 记录 API [LI]JSR-051 新的 IO API [LI]JSR-054 JDBC 3.0 [LI]JSR-055 认证路径 API [LI]JSR-056 网络启动 API [LI]JSR-057 JavaBeans 的长期持续性 [LI]JSR-063 XML 处理 [/LI][/UL]
+[TABLE][TR][TD]
+[B]IBM 参考资料[/B] 
+为了让您获得更多的会议背景知识，请利用这些丰富的[url href=http://www-106.ibm.com/developerWorks/java/library/j-j1preview/j1resources.html]参考资料[/url] -- 论文、案例研究、工具和 developerWorks、alphaWorks 及所有 IBM 的教程 -- 按类似会议议程的组分类。
+[/TD][/TR][/TABLE]
+某些功能尚未发布，要么因为没有准备，要么因为 JCP 社团觉得 JSR 不适合于广泛的 Java 开发社团。没有包含的 JSR 有:
+[UL][LI]JSR-014 在 Java 编程语言中增加类属类型 [LI]JSR-031 XML 数据绑定规范 [LI]JSR-051 printf/scanf 性能 [LI]JSR-076 J2SE 的 RMI 安全性 [LI]JSR-078 RMI 自定义远程参考 [/LI][/UL]
+
+XML API 发展得太快 
+对 Merlin 的 XML 支持实际上正在倒退。因为 XML 技术仍在不断发展中，我们在 1.4 版中采用目前稳定的 JAXP API; 以后的 XML API 会像现在的 JAXP API 一样作为标准扩展提供。
+这意味着 Merlin 可以提供 SAX 1.0/2.0、DOM 1.0/2.0 和 XSLT 支持，但不提供 XML 消息传递 (JAXM)、XML 注册表 (JAXR) 或许多会议中提及的其它 JAX 的支持。XMLEncoder/XMLDecoder 可用于长期的 JavaBeans 持续性。
+用户有一个参数选择 
+新的参数选择 API 增加了方便存储和恢复用户配置数据和应用程序配置数据的能力。为了用轻便和线程安全机制替换 Properties 类，Sun 工程师 Josh Bloch 提供了一个新库的预览，它提供了类似于 Windows 注册表的特定执行的后备存储器。
+语言级的断言培训 
+会议上，Bloch 还忙于描述植入 1.4 版的唯一的语言级功能，这样断言工具有了一个新的 assert 关键字。
+断言能在代码里增加布尔检查，它一经要求就可以启动来确保程序的正确。比如您有一个 [I]if-else[/I] 程序块，其中整数只能是 "1"、"2" 或 "3"，最后的 [I]else[/I] 程序块可能不检查 "3"。你可以增加一个断言以保证是 "3"，如清单 1 所示。
+缺省情况下，断言是被禁用的，但是可以通过专门命令行开关来启动断言，让您确保在用户产生问题时的环境正确。
+[B]清单 1. 使用 assert 关键字[/B] [TABLE][TR][TD][PRE]if (foo == 1) {} else if (foo == 2) {} else {   assert (foo == 3);}[/PRE][/TD][/TR][/TABLE]
+记录新世界 
+1.4 版中的新的记录工具由 Graham Hamilton 在星期四上午的单独议程中介绍。工具通过单个系统范围的记录管理器，用自定义的格式器，提供不同记录级别的处理。这个有用的小 API 可存储，比方说，多达 500 条在 foobar.xml 文件中用 XML 格式化的信息（请参阅清单 2）。
+[B]清单 2. 记录工具处理自定义记录级别[/B] [TABLE][TR][TD][PRE]Logger logger = Logger.getLogger("com.ibm.utils");logger.log(Level.WARNING, "message", exception);[/PRE][/TD][/TR][/TABLE]
+这个新工具确实使得广受好评的开放源代码的 log4j 包的前途未卜。当然，它仍然被版本 1.4 以前的 Java 语言版本使用。
+"N" 代表 “新的” 
+在 Merlin 中，名字最简单的包是新的 I/O 库，它在 java.nio 包中。（是的， [I]n[/I] 代表“新的”。）
+Sun 工程师 Mark Reinhold 在 6 月 4 日的议程中描述了新库的功能。您会得到简单的缓冲区，这些缓冲区是为原始类型、字符集编码器和解码器以及类 Perl 的规则表达式和模式匹配工具而设的。但新库最有趣的功能是内存映射文件和非模块化的 I/O。
+数据库的库到达内核 
+当使用 Kestrel 发行版（版本 1.3）时，在标准 Java 平台和几个扩展 API 上有一些库。而 Merlin 中，所有扩展数据库 API 都被认为是内核 API。
+最后，与别的比较，CachedRowSet 是标准的。星期三的会议阐述了这些新功能，主持那个会议的人都叫 John -- Sun 公司的 Jonathan Bruce 和 Jon Ellis，以及 Merant 的 John Goodson。
+注意：为了支持 JDBC 3.0，在内核库中需要添加一小部分 Java 事务处理 API (JTA)。
+进入所需的认证路径 
+新的认证路径 API 是加在 Merlin 中的一系列安全变化中的一部分。由于新的和更宽松的美国出口限制，以前可选择的和大多数国家没有的安全 API 如今在 Java 平台上已经是成为标准了。
+在标准 Merlin 内核中，您会得到 Java 加密扩展 (JCE)、Java 安全套接字扩展 (JSSE) 和 Java 认证和授权服务 (JAAS) API。您还会得到在 Java 普通安全性服务应用程序界面 (GSS-API) 下的 Kerberos V5 支持。
+利用 WebStart 的快速开始 
+Merlin 将网络启动的 Java WebStart 产品添加入 deliverables 的标准集合。虽然您还能标记小应用程序以摆脱 Java 沙盒（如果想在浏览器里保留小应用程序），WebStart 却允许您启动成熟的应用程序，让用户在客户端高速缓存程序，而不必每次运行程序时都下载。
+几个议程介绍了产品的最主要部分。Sun 高级工程师 Rene Schmidt 阐述了最技术性的有关产品性能的概述，其它议程将此技术与象 JavaServer Pages 和 Java 插件这样的其它客户端选项进行比较。
+"Tiger" 的眼睛 
+Java 1.4 在 Java 平台上添加了一些新性能。接下来是代号名为 "tiger" 的 Java 1.5 平台。假设版本发布周期为 18 个月的话，我们期待 2003 年的某个时候能见到新版本中出现类似类属的功能。
+Gilad Bracha 简介了目前可用的原型执行情况，其本质主要是添加了类型安全集合，并取消了（从集合中）取回元素时需要执行造型的需要。（请参阅[url href=http://www.cn.ibm.com/developerWorks/java/j-j1merlin/index.shtml#resources]参考资料[/url]，在 developerWorks 上有最近关于类属的文章。）
+类属的类型检查被移到了编译时间中，不再实时进行，这真是件好事情。如清单 3 所示，它们让代码变得更加简洁了。
+[B]清单 3. 类属代码变简洁了[/B] [TABLE][TR][TD][PRE]public static void main (String args[]) {...   List<String> list = Arrays.asList(args);   String head = list.get(0);...}[/PRE][/TD][/TR][/TABLE]
+对 "Tiger" 的另一期待是 scanf/printf 格式化工具，它没有被包含在 Merlin I/O 变化中。
+超越 JSR 
+所有 1.4 库的变化并不都通过单独的 JSR 产生。像 Hamilton 总结的那样，很多新变化只在个别议程中谈到，或在其它议程中偶尔提及。
+例如，Java 1.4 将支持 IPv6，但这需要支持它的操作系统（如 Windows XP 或 Solaris 8）。同时，Bloch 主办了一个关于 Collections Framework 的 BOF，这个 Collections Framework 描述了新库的功能：在 Collections 类中的 3 个新的执行方法、1 个标记接口和 6 个新的支持方法。
+考虑转向 1.4 
+如果是一个尖端和前沿的项目，并期待在 6 至 9 个月内发布，请考虑转向 Java 1.4 平台。这个即将到来的版本包含了开发商期盼的几个功能。如想了解如何使用这些新功能的详细信息，请阅读我很快就会在 developerWorks Java 技术专区上的开设的全新 [I]Merlin 的魔力[/I]专栏。
+顺便提一下，如果你在寻找会议的幻灯片，Sun 好像正努力要从 250 万没有参加会议的 Java 开发商那儿赚点钱。你可能要等到 2001 年 6 月 17 日去浏览 http://java.sun.com/learning 获取信息。
+当然你要为每个议程支付约 30 美元，也可以花 1,500 美元获取整个会议的信息。学生享受 40% 的折扣。
+参考资料 [UL][LI]欲知更多 Merlin 版本变化的信息，请参阅附带在开发商套件中的[url href=http://java.sun.com/j2se/1.4/docs/relnotes/features.html]新的功能和增强的概览[/url]文档。
+
+[LI]欲知安全性和 Java 平台的详细信息，请参阅 Joseph Sinclair 的文章：“[url href=http://www.cn.ibm.com/developerWorks/java/j-secure/index.shtml]一个识别用户的三向解决方案[/url]”（developerWorks，2001 年 6 月）。
+
+[LI][url href=http://www-106.ibm.com/developerWorks/java/library/jw-log4j/index.html]Log4j[/url] 提供快速高效的记录服务。
+
+[LI]欲知更多开放源代码 API 的详细信息，请查看 [url href=http://jakarta.apache.org/log4j/docs/index.html]log4j 主页[/url]，它是 Apache Jakarta 项目的一部分。
+
+[LI]在这篇 2001 年 3 月 developerWorks 的文章中，Keith Turner 研究了使用[url href=http://www-106.ibm.com/developerWorks/java/library/j-genjava.html]类属[/url]在编译时找出更多的错误。
+
+[LI]IBM Education 提供您关于 Java 语言尖端实现的[url href=http://www-106.ibm.com/developerWorks/cgi-bin/click.cgi?url=http://www-3.ibm.com/servlet/com.ibm.ls.lsow.servlets.SearchByChapterServlet?CATALOG_ID=6%26CHAPTER_ID=55%26ROW_COLOR1=C8D8F8%26ROW_COLOR2=FFFFFF&origin=j]课堂和卫星指导[/url]。 [/LI][/UL]
+[TABLE][TR][TD]关于作者 
+John Zukowski 为 [url href=http://www.jzventures.com/]JZ Ventures, Inc.[/url] 做战略性的 Java 咨询。他最新的著作是 Apress 的 [url href=http://www.amazon.com/exec/obidos/ASIN/1893115925/johnzukowshomefo/][I]Java Collections[/I][/url] 和 [url href=http://www.amazon.com/exec/obidos/ASIN/189311578X/johnzukowshomefo/][I]Definitive Guide to Swing for Java 2[/I][/url] （第 2 版）。可通过 [email]jaz@zukowski.net[/email] 联系 John。 [/TD][/TR][/TABLE][/TD][/TR][/TABLE]

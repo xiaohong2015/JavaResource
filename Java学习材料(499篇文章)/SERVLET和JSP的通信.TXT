@@ -1,0 +1,33 @@
+作者：jspfuns
+日期：2000-8-9 11:28:38
+以下的代码片段演示了一个servlet，它例示(instantiates)一个bean并且用由浏览器发送的Form数据将它初始化。此后bean被加入request,而这一要求被送到JSP页面（Bean1.jsp）,JSP通过request取得并做进一步处理。
+
+public void doPost (HttpServletRequest request,
+HttpServletResponse response) {
+
+try {
+govi.FormBean f = new govi.FormBean();
+String id = request.getParameter("id");
+f.setName(request.getParameter("name"));
+f.setAddr(request.getParameter("addr"));
+f.setAge(request.getParameter("age"));
+//use the id to compute 
+//additional bean properties like info 
+//maybe perform a db query, etc.
+// . . .
+f.setPersonalizationInfo(info);
+request.setAttribute("fBean",f);
+getServletConfig().getServletContext().getRequestDispatcher
+("/jsp/Bean1.jsp").forward(request, response);
+} catch (Exception ex) {
+. . .
+}
+}
+
+在将它从通过useBean操作中的缺省的请求范围，即scope首次执行后，即可在JSP文件的Bean1.jsp处理fBean。 
+
+<jsp:useBean id="fBean" class="govi.FormBean" scope="request"/>
+<jsp:getProperty name="fBean" property="name" />
+<jsp:getProperty name="fBean" property="addr" />
+<jsp:getProperty name="fBean" property="age" />
+<jsp:getProperty name="fBean" property="personalizationInfo" /> 

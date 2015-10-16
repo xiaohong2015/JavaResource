@@ -1,0 +1,119 @@
+作者：msdn
+日期：00-6-9 上午 11:13:08
+<jsp:setProperty>
+Sets a property value or values in a Bean. 
+
+JSP Syntax
+<jsp:setProperty 
+        name="beanInstanceName" 
+        { 
+            property= "*"   | 
+            property="propertyName" [ param="parameterName" ]   | 
+            property="propertyName" value="{string | <%= expression %>}" 
+        } 
+/> 
+Examples
+<jsp:setProperty name="mybean" property="*" /> 
+<jsp:setProperty name="mybean" property="username" /> 
+<jsp:setProperty name="mybean" property="username" value="Steve" /> 
+Description
+The <jsp:setProperty> element sets the value of one or more properties in a Bean, using the Bean's setter methods. You must declare the Bean with <jsp:useBean> before you set a property value with <jsp:setProperty>. Because <jsp:useBean> and <jsp:setProperty> work together, the Bean instance names they use must match (that is, the value of name in <jsp:setProperty> and the value of id in <jsp:useBean> must be the same). 
+
+You can use <jsp:setProperty> to set property values in several ways: 
+
+By passing all of the values the user enters (stored as parameters in the request object) to matching properties in the Bean 
+By passing a specific value the user enters to a specific property in the Bean 
+By setting a Bean property to a value you specify as either a String or an expression that is evaluated at runtime 
+Each method of setting property values has its own syntax, as described in the next section. 
+
+Attributes and Usage
+name="beanInstanceName" 
+The name of an instance of a Bean that has already been created or located with a <jsp:useBean> element. The value of name must match the value of id in <jsp:useBean>. The <jsp:useBean> element must appear before <jsp:seProperty> in the JSP file. 
+
+property="*" 
+Stores all of the values the user enters in the viewable JSP page (called request parameters) in matching Bean properties. The names of the properties in the Bean must match the names of the request parameters, which are usually the elements of an HTML form. A Bean property is usually defined by a variable declaration with matching getter and setter methods (for more information, see the JavaBeans API Specification available at http://java.sun.com/beans). 
+
+The values of the request parameters sent from the client to the server are always of type String. The String values are converted to other data types so they can be stored in Bean properties. The allowed Bean property types and their conversion methods are shown in TABLE 1-1. 
+
+How <jsp:setProperty> Converts Strings to Other Values  
+
+Property Type 
+ 
+
+String Is Converted Using 
+ 
+
+
+boolean or Boolean 
+ 
+
+java.lang.Boolean.valueOf(String) 
+ 
+
+
+byte or Byte 
+ 
+
+java.lang.Byte.valueOf(String) 
+ 
+
+
+char or Character 
+ 
+
+java.lang.Character.valueOf(String) 
+ 
+
+
+double or Double 
+ 
+
+java.lang.Double.valueOf(String) 
+ 
+
+
+integer or Integer 
+ 
+
+java.lang.Integer.valueOf(String) 
+ 
+
+
+float or Float 
+ 
+
+java.lang.Float.valueOf(String) 
+ 
+
+
+long or Long 
+ 
+
+java.lang.Long.valueOf(String) 
+ 
+ 
+
+
+You can also use <jsp:setProperty> to set the value of an indexed property in a Bean. The indexed property must be an array of one of the data types shown in TABLE 1-1. The array elements are converted using the conversion methods shown in the table. 
+
+If a request parameter has an empty or null value, the corresponding Bean property is not set. Likewise, if the Bean has a property that does not have a matching request parameter, the property value is not set. 
+
+property="propertyName" [ param="parameterName" ] 
+Sets one Bean property to the value of one request parameter. In the syntax, property specifies the name of the Bean property and param specifies the name of the request parameter by which data is being sent from the client to the server. 
+
+If the Bean property and the request parameter have different names, you must specify both property and param. If they have the same name, you can specify property and omit param. 
+
+If a parameter has an empty or null value, the corresponding Bean property is not set. 
+
+property="propertyName" value="{string | <%= expression %>}" 
+Sets one Bean property to a specific value. The value can be a String or an expression that is evaluated at runtime. If the value is a String, it is converted to the Bean property's data type according to the conversion rules shown above in TABLE 1-1. If it is an expression, its value must have a data type that matches the the data type of the value of the expression must match the data type of the Bean property. 
+
+If the parameter has an empty or null value, the corresponding Bean property is not set. You cannot use both the param and value attributes in a <jsp:setProperty> element. 
+
+See Also
+<jsp:useBean> 
+<jsp:getProperty> 
+Tips
+When you use property="*", the Bean properties are not necessarily set in the order in which they appear in the HTML form or the Bean. 
+In Sun's JSP 1.0 or JSP 1.1 Tomcat, the Bean properties are set in the order in which they are presented to the JSP container by the Beans introspector. If the order in which the properties are set is important to how your Bean works, use the syntax form property="propertyName" [ param="parameterName" ]. Better yet, rewrite your Bean so that the order of setting properties is not important. 
+

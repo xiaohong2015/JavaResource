@@ -1,0 +1,44 @@
+作者：风之彩
+日期：2001-6-8 17:27:03
+熟悉JSP服务器
+
+本“JSP由浅入深” 系列教程是面向中级和高级用户的，它需要HTML和Java的基础。你应该会将HTML网页连接到一起，并且会利用Java来进行编程。如果你还没有这个基础，建议你还是先打好基础为好。这个系列教程将通过编制简单的例子到复杂的例子来教会你JSP。本系列教程是采用循序渐进的方法来进行阐述的，即由浅入深。为了使你能够获得最大的进步，建议你再学习的过程中将所有的例子自己进行调试。开始的例子可能会很简单，所以开始的时候你要特别耐心，不要认为太简单而跳过。如果你仔细地调试例子，那么你就会很快地熟悉JSP的本质方法。
+
+好吧，开始我们的第一个教程：熟悉JSP服务器。
+
+如果你没有一个JSP网络服务器，那么你在开始教程之前还是先下载它吧。以下的几个服务器可以免费下载或者进行开发：
+
+Blazix (1.5 Megabytes, JSP, Servlets and EJBs) 
+来自www.blazix.com/blazix.html
+
+ServletExec (3.8 Megabytes, JSP and Servlets) 
+来自www.unifyeware.com/servletExec/
+
+JRun (11 Megabytes, JSP, Servlets and EJBs)
+来自www.jrun.com/
+
+WebLogic(44 Megabytes, JSP, Servlets and EJBs)
+来自www.beasys.com/
+
+WebSphere (105 Megabytes, JSP, Servlets and EJBs)
+来自www-4.ibm.com/sofeware/webservers/
+
+如果你还没有服务器，那我建议你下载Blazix，因为它包含了标签库（可以用于以后关于标签库的教程）。Blazix同样也是很小的并且它可以很容易地下载，而且可以运行于所有的操作系统，包括处于主流的Windows98。还有一个优点，就是它的安装的速度更块。
+
+为了真正学习JSP，最重要的是，你要在一个真实的服务器来调试教程的例子。最好的方法是通过自己的实践来学习JSP的技巧。如果你现在还没有服务器，那就先下载一个安装它就行了。
+
+装上网络服务器以后，你应该学会以下关于网络服务器的的一些知识：应该在哪里放置文件？怎样访问来自浏览器的文件（是以http:开头的，而不是file:开头）？
+
+你首先要创建以下的简单文件，比如：
+
+<HTML>
+
+<BODY>
+
+Hello, world
+
+</BODY>
+
+</HTML>
+
+怎样放置文件并在浏览器（以http://）中浏览它，这个步骤对应不同的网络服务器是不同的，所以你需要参看网络服务器的文档并找出答案。

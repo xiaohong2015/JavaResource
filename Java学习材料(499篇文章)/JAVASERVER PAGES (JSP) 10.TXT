@@ -1,0 +1,190 @@
+作者：whitefox
+email: whitefox.jiang@corp.elong.com
+日期：2000-7-4 19:45:50
+8.2 The jsp:useBean Action
+This action lets you load in a JavaBean to be used in the JSP page. This is a a very useful capability because it lets you exploit the reusability of Java classes without sacrificing the convenience that JSP adds over servlets alone. The simplest syntax for specifying that a bean should be used is: 
+
+<jsp:useBean id="name" class="package.class" />
+
+This usually means "instantiate an object of the class specified by class, and bind it to a variable with the name specified by id." However, as we'll see shortly, you can specify a scope attribute that makes the bean associated with more than just the current page. In that case, it is useful to obtain references to existing beans, and the jsp:useBean action specifies that a new object is instantiated only if there is no existing one with the same id and scope. Now, once you have a bean, you can modify its properties via jsp:setProperty, or by using a scriptlet and calling a method explicitly on the object with the variable name specified earlier via the id attribute. Recall that with beans, when you say "this bean has a property of typeX called foo", you really mean "this class has a method called getFoo that returns something of type X, and another method called setFoo that takes an X as an argument." The jsp:setProperty action is discussed in more detail in the next section, but for now note that you can either supply an explicit value, give a param attribute to say that the value is derived from the named request parameter, or just list the property to indicate that the value should be derived from the request parameter with the same name as the property. You read existing properties in a JSP expression or scriptlet by calling the appropriate getXxx method, or more commonly, by using the jsp:getProperty action. 
+
+Note that the class specified for the bean must be in the server's regular class path, not the part reserved for classes that get automatically reloaded when they change. For example, in the Java Web Server, it and all the classes it uses should go in the classes directory or be in a jar file in the lib directory, not be in the servlets directory. 
+
+Here is a very simple example that loads a bean and sets/gets a simple String parameter. 
+
+BeanTest.jsp
+You can also download the source or try it on-line. 
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>Reusing JavaBeans in JSP</TITLE>
+<LINK REL=STYLESHEET
+      HREF="My-Style-Sheet.css"
+      TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<CENTER>
+<TABLE BORDER=5>
+  <TR><TH CLASS="TITLE">
+      Reusing JavaBeans in JSP</TABLE>
+</CENTER>
+<P>
+
+<jsp:useBean id="test" class="hall.SimpleBean" />
+<jsp:setProperty name="test" 
+                 property="message" 
+                 value="Hello WWW" />
+             
+<H1>Message: <I>
+<jsp:getProperty name="test" property="message" />
+</I></H1>
+             
+</BODY>
+</HTML>
+
+SimpleBean.java
+Here's the source code for the bean used in the BeanTest JSP page. You can also download the source. 
+
+package hall;
+
+public class SimpleBean {
+  private String message = "No message specified";
+
+  public String getMessage() {
+    return(message);
+  }
+
+  public void setMessage(String message) {
+    this.message = message;
+  }
+}
+
+Here's a typical result:  
+
+8.3 More jsp:useBean Details
+The simplest way to use a bean is to use
+   <jsp:useBean id="name" class="package.class" /> 
+to load the bean, then use jsp:setProperty and jsp:getProperty to modify and retrieve bean properties. However, there are two other options. First, you can use the container format, namely 
+  <jsp:useBean ...> 
+    Body 
+  </jsp:useBean>
+to indicate that the Body portion should be executed only when the bean is first instantiated, not when an existing bean is found and used. As discussed below, beans can be shared, so not all jsp:useBean statements result in a new bean being instantiated. Second, in addition to id and class, there are three other attributes that you can use: scope, type, and beanName. These attributes are summarized in the following table. 
+
+Atribute  Usage  
+id  Gives a name to the variable that will reference the bean. A previous bean object is used instead of instantiating a new one if one can be found with the same id and scope.  
+class  Designates the full package name of the bean.  
+scope  Indicates the context in which the bean should be made available. There are four possible values: page, request, session, and application. The default, page, indicates that the bean is only available on the current page (stored in the PageContext of the current page). A value of request indicates that the bean is only available for the current client request (stored in the ServletRequest object). A value of session indicates that the object is available to all pages during the life of the current HttpSession. Finally, a value of application indicates that it is available to all pages that share the same ServletContext. The reason that the scope matters is that a jsp:useBean entry will only result in a new object being instantiated if there is no previous object with the same id and scope. Otherwise the previously existing object is used, and any jsp:setParameter elements or other entries between the jsp:useBean start and end tags will be ignored.  
+type  Specifies the type of the variable that will refer to the object. This must match the classname or be a superclass or an interface that the class implements. Remember that the name of the variable is designated via the id attribute.  
+beanName  Gives the name of the bean, as you would supply it to the instantiate method of Beans. It is permissible to supply a type and a beanName, and omit the class attribute.  
+
+8.4 The jsp:setProperty Action
+You use jsp:setProperty to give values to properties of beans that have been referenced earlier. You can do this in two contexts. First, you can use jsp:setProperty after, but outside of, a jsp:useBean element, as below: 
+
+<jsp:useBean id="myName" ... />
+...
+<jsp:setProperty name="myName" 
+                 property="someProperty" ... />
+
+In this case, the jsp:setProperty is executed regardless of whether a new bean was instantiated or an existing bean was found. A second context in which jsp:setProperty can appear is inside the body of a jsp:useBean element, as below: 
+
+<jsp:useBean id="myName" ... >
+  ...
+  <jsp:setProperty name="myName" 
+                   property="someProperty" ... />
+</jsp:useBean>
+
+Here, the jsp:setProperty is executed only if a new object was instantiated, not if an existing one was found. 
+
+There are four possible attributes of jsp:setProperty: 
+
+Attribute  Usage  
+name  This required attribute designates the bean whose property will be set. The jsp:useBean element must appear before the jsp:setProperty element.  
+property  This required attribute indicates the property you want to set. However, there is one special case: a value of "*" means that all request parameters whose names match bean property names will be passed to the appropriate setter methods.  
+value  This optional attribute specifies the value for the property. String values are automatically converted to numbers, boolean, Boolean, byte, Byte, char, and Character via the standard valueOf method in the target or wrapper class. For example, a value of "true" for a boolean or Boolean property will be converted via Boolean.valueOf, and a value of "42" for an int or Integer property will be converted via Integer.valueOf. You can't use both value and param, but it is permissible to use neither. See the discussion of param below.  
+param  This optional attribute designates the request parameter from which the property should be derived. If the current request has no such parameter, nothing is done: the system does not pass null to the setter method of the property. Thus, you can let the bean itself supply default values, overriding them only when the request parameters say to do so. For example, the following snippet says "set the numberOfItems property to whatever the value of the numItems request parameter is, if there is such a request parameter. Otherwise don't do anything." 
+<jsp:setProperty name="orderBean"
+                 property="numberOfItems"
+                 param="numItems" />
+If you omit both value and param, it is the same as if you supplied a param name that matches the property name. You can take this idea of automatically using the request property whose name matches the property one step further by supplying a property name of "*" and omitting both value and param. In this case, the server iterates through available properties and request parameters, matching up ones with identical names. 
+ 
+
+Here's an example that uses a bean to create a table of prime numbers. If there is a parameter named numDigits in the request data, it is passed into the bean's numDigits property. Likewise for numPrimes. 
+
+JspPrimes.jsp
+To download the JSP source, right click on the source code link. You can also download the source code for the NumberedPrimes bean referenced by the jsp:useBean element. Browse the source code directory for other Java classes used by NumberedPrimes. The best way to try it out on-line is to start with the HTML page that acts as a front end to it. 
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+<TITLE>Reusing JavaBeans in JSP</TITLE>
+<LINK REL=STYLESHEET
+      HREF="My-Style-Sheet.css"
+      TYPE="text/css">
+</HEAD>
+
+<BODY>
+
+<CENTER>
+<TABLE BORDER=5>
+  <TR><TH CLASS="TITLE">
+      Reusing JavaBeans in JSP</TABLE>
+</CENTER>
+<P>
+
+<jsp:useBean id="primeTable" class="hall.NumberedPrimes" />
+<jsp:setProperty name="primeTable" property="numDigits" />
+<jsp:setProperty name="primeTable" property="numPrimes" />
+
+Some <jsp:getProperty name="primeTable" property="numDigits" /> 
+digit primes: 
+<jsp:getProperty name="primeTable" property="numberedList" />
+
+</BODY>
+</HTML>
+
+Here's a typical result:  
+
+8.5 The jsp:getProperty Action
+This element retrieves the value of a bean property, converts it to a string, and inserts it into the output. The two required attributes are name, the name of a bean previously referenced via jsp:useBean, and property, the property whose value should be inserted. Here's an example; for more examples, see Sections 8.2 and 8.4. 
+
+<jsp:useBean id="itemBean" ... />
+...
+<UL>
+  <LI>Number of items: 
+      <jsp:getProperty name="itemBean" property="numItems" />
+  <LI>Cost of each:
+      <jsp:getProperty name="itemBean" property="unitCost" />
+</UL>
+
+8.6 The jsp:forward Action
+This action lets you forward the request to another page. It has a single attribute, page, which should consist of a relative URL. This could be a static value, or could be computed at request time, as in the two examples below. 
+
+<jsp:forward page="/utils/errorReporter.jsp" />
+<jsp:forward page="<%= someJavaExpression %>" />
+
+8.7 The jsp:plugin Action
+This action lets you insert the browser-specific OBJECT or EMBED element needed to specify that the browser run an applet using the Java plugin. 
+
+9. Comments and Character Quoting Conventions
+There are a small number of special constructs you can use in various cases to insert comments or characters that would otherwise be treated specially. Here's a summary: 
+
+Syntax  Purpose  
+<%-- comment --%>
+ A JSP comment. Ignored by JSP-to-scriptlet translator. Any embedded JSP scripting elements, directives, or actions are ignored.  
+<!-- comment -->
+ An HTML comment. Passed through to resultant HTML. Any embedded JSP scripting elements, directives, or actions are executed normally.  
+<\%
+ Used in template text (static HTML) where you really want "<%".  
+%\>
+ Used in scripting elements where you really want "%>".  
+\'
+ A single quote in an attribute that uses single quotes. Remember, however, that you can use either single or double quotes, and the other type of quote will then be a regular character.  
+\"
+ A double quote in an attribute that uses double quotes. Remember, however, that you can use either single or double quotes, and the other type of quote will then be a regular character.  
+%\>
+ %> in an attribute.  
+<\%
+ <% in an attribute.  

@@ -1,0 +1,35 @@
+作者：风之彩
+日期：2001-6-8 17:32:08
+上面的教程我们已经学会了如何在JSP网页中通过在<%= and %>字符系列之间嵌入Java表达式。但是通过将Java表达式放置到HTML进行大量的编程工作是很困难的。
+
+JSP另外允许你编写Java代码块嵌入到JSP中。具体做法是：将Java代码段放置于<% and %>字符之间。其实跟表达式是一样的，只不过在开始的地方没有等号而已。
+
+代码块就是我们熟知的“scriptlet”。如果单单是scriptlet，对于HTML起不了任何作用。而每次scriptlet包含了被执行的Java代码的时候，JSP就被调用。
+
+下面的代码是对上一节JSP教程进行修改后的代码，我们增加了一个scriptlet：
+
+<HTML>
+
+<BODY>
+
+<%
+
+// This is a scriptlet. Notice that the "date"
+
+// variable we declare here is available in the
+
+// embedded expression later on.
+
+System.out.println( "Evaluating date now" );
+
+java.util.Date date = new java.util.Date();
+
+%>
+
+Hello! The time is now <%= date %>
+
+</BODY>
+
+</HTML>
+
+如果你运行上面的例子，你将会注意到“System.out.println”输出在服务器日志中。这是一个方便的方法来作一些简单的调试。有些服务器在IDE中有调试JSP的功能，你可以参见服务器文档来查看是否有这种功能。

@@ -1,0 +1,14 @@
+作者：罗亭
+email: tingluo@263.net
+日期：7/30/2001 12:08:16 PM
+/** 各位手脚要快点,我试过，支持ant */
+
+JBuilder4 开发人员指南中文版本(PDF)  
+
+URL： 
+
+http://www.inprises.com/control/jbuilderch/01.pdf 
+http://www.inprises.com/control/jbuilderch/02.pdf 
+........ 
+....... 
+http://www.inprises.com/control/jbuilderch/39.pdf 

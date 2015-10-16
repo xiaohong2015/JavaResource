@@ -1,0 +1,160 @@
+作者：Eazily
+email: Eazily@yeah.net
+日期：6/12/2001 2:50:16 PM
+form处理、动态内容和bean通信
+
+　　列表4展示了一个具体的JSP JavaBean--LoginJSPBean，用来实现特定的页面处理
+
+　　列表4。LoginJSPBean 
+
+
+package lbm.examples; 
+
+import lbm.jsputil.*; 
+import java.util.*; 
+
+public class LoginJSPBean extends AbstractJSPBean { 
+
+public static final String PAGE_CODE = "login"; 
+
+private String _voterId; 
+private String _password; 
+private Voter _voter = null; 
+
+public LoginJSPBean() { 
+} 
+
+public void setVoterId (String newVoterId) { 
+_voterId = newVoterId; 
+} 
+
+public String getVoterId() { 
+if (_voterId == null) return ""; 
+else return _voterId; 
+} 
+
+public void setPassword (String newPassword) { 
+_password = newPassword; 
+} 
+
+public String getPassword() { 
+if (_password == null) return ""; 
+else return _password; 
+} 
+
+public Voter getVoter () { 
+return _voter; 
+} 
+
+protected void beanProcess () throws java.io.IOException { 
+if (_voterId == null || _voterId.equals("")) { 
+addErrorMsg("Voter must be entered"); 
+} 
+
+if (_password == null || _password.equals("")) { 
+addErrorMsg("Password must be entered"); 
+} 
+
+if (getState() != ERR) { 
+file://If all the fields are entered, try to login the voter 
+Voter voter = VoteDB.login(_voterId, _password); 
+if (voter == null) { 
+addErrorMsg("Unable to authenticate the Voter. Please try again."); 
+} 
+else { 
+_voter = voter; 
+
+if (_voter.getVotedForCandidate() != null) { 
+// if the voter has already voted, send the voter to the last page 
+redirect("confirmation.jsp"); 
+} 
+else { 
+// go to the Vote page 
+redirect("vote.jsp"); 
+} 
+} 
+} 
+} 
+
+protected void beanFirstPassProcess() throws java.io.IOException { 
+} 
+
+protected void beanFooterProcess() throws java.io.IOException { 
+} 
+
+protected String getJSPCode() { 
+return PAGE_CODE; 
+} 
+} 
+ 
+
+
+　　观察LoginJSPBean类中的set和get方法。就象上面提及的，它们用作动态的匹配，并且用来在form字段（request参数）和bean属性间传送值。
+
+　　列表4中的beanProcess()方法，展示了form处理的一些基本点。这个方法发生在页面输出前，在第二和全部后来的页面调用期间执行。这意味着它将仅在用户按下登录按钮并且提交form后执行。
+
+　　你首先要验证voteId和password的输入，产生的错误将通过addErrorMsg方法记录下来。这个方法设置AbstractJSPBean类的errorMsg属性。该属性可被JSP用来显示用户的错误：
+
+　　　＜jsp:getProperty name="_loginJSPBean" property="errorMsg"/＞ 
+
+　　如果数据的输入成功通过，beanProcess()方法将会调用数据库来验证用户。最后，它通过调用AbstractJSPBean类中实现的redirect()方法，将请求重定向到相应的页面。
+
+　　以下我们将讨论VoteJSPBean类中的一些方法。它们将可以解释该架构的一些其它方面，例如JSP JavaBean之间的通信和应用的流程控制。
+
+　　列表5。VoteJSPBean类中的beanFirstPassProcess() 
+
+
+protected void beanFirstPassProcess() throws java.io.IOException { 
+// get the Voter from Login page 
+_voter = null; 
+
+LoginJSPBean loginJSPBean = 
+(LoginJSPBean) getSharedSessionBean().getJSPBean(LoginJSPBean.PAGE_CODE); 
+
+if (loginJSPBean != null) { 
+_voter = loginJSPBean.getVoter(); 
+} 
+
+if (_voter == null) { 
+// voter is not logged in yet. Send it to Login page 
+setState(NEW); 
+redirect("login.jsp"); 
+} 
+} 
+ 
+
+
+以上的方法使用了AbstractJSPBean类中_sharedSessionBean对象。SharedSessionBean类通过使用一个简单的方法，让所有的JSP JavaBean对象在一个HTTP session中进行通信。它保存有一个session内的全部JSP JavaBean中的一个Map。Map是Java Collections框架的一个接口，它是Java 1.2推出的。对熟悉Java 1.1的人来说，它与Hashtable非常类似。一个JSP JavaBean的主键是它的PAGE_CODE，它作为一个常数存储在每个JSP JavaBean类中。
+
+　　在这个例子中，beanFirstPassProcess()方法首先定位到LoginJSPBean对象。接着，它由LoginJSPBean对象中得到Voter对象，并且存储一个到它的引用，以便以后使用。如果Voter为null，这意味着用户没有首先登录就进入Voter页面，因此它重定向到登录页面。这是一个应用流程控制的简单例子。你可以设计更复杂的方法，例如使用一个智能的调度程序，不过这些讨论已经超出了本文的范围。
+
+　　列表6。VoteJSPBean类的getCandidateList()方法
+
+
+public String getCandidateList () { 
+StringBuffer candidateList = new StringBuffer(); 
+Candidate candidate; 
+
+Iterator candidates = VoteDB.getCandidates(); 
+while (candidates.hasNext()) { 
+candidate = (Candidate) candidates.next(); 
+
+candidateList.append("＜input type=radio name=\"candidateName\" value=\""); 
+candidateList.append(candidate.getName()); 
+candidateList.append("\"＞ "); 
+candidateList.append(candidate.getName()); 
+candidateList.append("＜br＞\n"); 
+} 
+
+return candidateList.toString(); 
+} 
+ 
+
+
+　　以上的getCandidateList()方法被vote.jsp调用，通过以下的方法：
+
+　　　＜jsp:getProperty name="_voteJSPBean" property="candidateList"/＞ 
+
+　　根据由数据库得到的内容不同，该方法提供不同的动态HTML内容输出。它需要开发JavaBean的Java编程者懂得一些HTML知识。
+
+　　你也可以使用一个利用HTML的独立库来格式化HTML，它可以接受一个预定义的输入。例如Iterator，然后以预定义的格式产生HTML输出。另一个方法是使用标签库。

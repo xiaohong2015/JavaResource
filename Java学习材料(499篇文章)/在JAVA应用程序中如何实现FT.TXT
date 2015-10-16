@@ -1,0 +1,103 @@
+作者：jeru
+email: jeru@163.net
+日期：8/6/2001 9:50:36 AM
+在JAVA应用程序中如何实现FTP的功能 
+大连捷通电脑技术有限公司 
+王 淼 
+
+---- 在JAVA的编程中，您也许会遇到FTP方面的编程，本文就来演示如何实现它。 
+
+---- 本程序是由JBUILDER2.0来开发的，为了节约篇幅我只列出主要的三个部份。FtpList 部分是用来显示FTP服务器上的文件（附图略）。GetButton部分为从FTP服务器下传一个文件。PutButton 部分为向FTP服务器上传一个文件。别忘了在程序中还要引入两个库文件（import sun.net.*，import sun.net.ftp.*）。以下是这三部分的JAVA源程序。 
+
+---- 1）显示FTP服务器上的文件 
+
+void ftpList_actionPerformed(ActionEvent e) {
+	String server=serverEdit.getText();
+//输入的FTP服务器的IP地址
+    String user=userEdit.getText();    
+//登录FTP服务器的用户名
+    String password=passwordEdit.getText();
+//登录FTP服务器的用户名的口令
+    String path=pathEdit.getText();
+//FTP服务器上的路径
+  	 try {
+	   FtpClient ftpClient=new FtpClient();
+//创建FtpClient对象
+	   ftpClient.openServer(server);
+//连接FTP服务器
+	   ftpClient.login(user, password);
+//登录FTP服务器
+       if (path.length()!=0) ftpClient.cd(path);
+	   TelnetInputStream is=ftpClient.list();
+	   int c;
+	   while ((c=is.read())!=-1) {
+System.out.print((char) c);}
+       is.close();
+       ftpClient.closeServer();//退出FTP服务器
+    } catch (IOException ex) {;}
+  }
+
+
+
+
+2）从FTP服务器上下传一个文件
+
+
+ void getButton_actionPerformed(ActionEvent e) {
+	String server=serverEdit.getText();
+    String user=userEdit.getText();
+    String password=passwordEdit.getText();
+    String path=pathEdit.getText();
+    String filename=filenameEdit.getText();
+  	try {
+	   FtpClient ftpClient=new FtpClient();
+	   ftpClient.openServer(server);
+	   ftpClient.login(user, password);
+       if (path.length()!=0) ftpClient.cd(path);
+	   ftpClient.binary();
+	   TelnetInputStream is=ftpClient.get(filename);
+	   File file_out=new File(filename);
+       FileOutputStream os=new 
+       FileOutputStream(file_out);
+       byte[] bytes=new byte[1024];
+	   int c;
+	   while ((c=is.read(bytes))!=-1) {
+	      os.write(bytes,0,c);
+	   }
+       is.close();
+       os.close();
+       ftpClient.closeServer();
+    } catch (IOException ex) {;}
+  }
+
+
+3）向FTP服务器上上传一个文件
+
+ void putButton_actionPerformed(ActionEvent e) {
+	String server=serverEdit.getText();
+    String user=userEdit.getText();
+    String password=passwordEdit.getText();
+    String path=pathEdit.getText();
+    String filename=filenameEdit.getText();
+  	try {
+	   FtpClient ftpClient=new FtpClient();
+	   ftpClient.openServer(server);
+	   ftpClient.login(user, password);
+       if (path.length()!=0) ftpClient.cd(path);
+	   ftpClient.binary();
+	   TelnetOutputStream os=ftpClient.put(filename);
+	   File file_in=new File(filename);
+       FileInputStream is=new FileInputStream(file_in);
+       byte[] bytes=new byte[1024];
+	   int c;
+	   while ((c=is.read(bytes))!=-1){
+	os.write(bytes,0,c);}
+       is.close();
+       os.close();
+       ftpClient.closeServer();
+    } catch (IOException ex) {;}
+  }
+}
+
+
+---- 本程序在WIN95/98/NT,Jbuilder2.0 的环境下编译通过。  

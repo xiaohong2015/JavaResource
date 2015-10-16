@@ -1,0 +1,128 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:21:41
+　　7、事务
+
+　　你可以编辑config/default.properties 文件控制事务发生和超时设置。distributed.transaction.recovery 属性这个属性控制分布事物是否发生。这些事物可以发生的话，下面的条件必须满足：
+
+　　跨库操作时的事物范围。
+
+　　J2EE程序通过jdbc2.0 JTA驱动访问数据库
+
+　　当故障发生的时候，事物的各个的组成部分可以按照符合两段提交协议的方式提交或回滚。
+
+　　事物发生的时候，server重新启动后事物可以提交或回滚。
+
+　　distributed.transaction.recovery的值为true或者false。J2EE安装后默认为false。
+
+　　distributed.transaction.recovery=false
+
+　　transaction.time属性
+
+　　在应用container-managed 事物的ejb中，你可以控制事物超时的间隔通过设置transaction.timeout的值。例如：
+
+　　　transaction.timeout=5
+
+　　在设置以后，如果事物在5秒内没有完成，J2EE事物管理器将回滚它。当J2EE第一次安装的时候，timeout的值时0代表没有超时。
+
+　　只有使用container-managed 管理事物的ejb受到timeout的影响。至于在bean-managed和JTA　transactions 中你可以引用 UserTransaction 的 setTransactionTimeout方法。同时你也可以在其他组建中引用setTransactionTimeout方法：比如servlets和jsp。
+
+　　8、端口
+
+　　J2EE需要tcp/ip端口。修改config目录下的相应文件可以修改端口号。下表是端口号和相应的文件。
+
+　　EJB 9191 ejb.properties http.port=9191 
+
+　　HTTP 8000 web.properties port=8000 
+
+　　HTTPS 7000 web.properties https.port=7000 
+
+　　Naming and Directory 1050 orb.properties port=1050 
+
+　　9191 端口用于提供client下载需要的stub类
+
+　　8000 提供http服务
+
+　　7000 提供https服务
+
+
+　　1050 基于orb的jndi名字服务使用的端口
+
+　　9、日志文件
+
+　　J2EE server有几个日志文件。默认这些文件在logs目录下。编辑config/default.properties 文件中的 log.directory 属性可以更改默认目录。
+
+　　log.directory=logs 
+
+　　同时你也可以编辑default.properties 文件更改日志文件的名字。例如：你可以修改log.output 属性的值来修改the output.log 文件的名字。
+
+　　一般来说，日志文件决定于启动J2EE的模式。（single还是multiple VM (virtual machine) 模式） Single VM 日志文件默认的情况是Single VM 模式。在这种情况下，日志文件位于
+
+　　　$J2EE_HOME///ejb
+
+　　logs是在default.properties 文件中log.directory 属性指定的。host元素是计算机名称。生成下列文件。
+
+　　system.out
+
+　　system.err
+
+　　event.log
+
+　　output.log
+
+　　error.log
+
+
+　　system.out 和system.err文件包括ejb中 System.out 和 System.err的输出。如果你运行J2EE -verbose数，输出被写到stdout（标准输出） 和stderr（标准错误。输出）。system.out 和 system.err日志文件不建。只有config/auth.properties 文件中audit属性值为true时audit.lo才创建。
+
+　　Multiple VM 日志
+
+　　如果你用J2EE -mutiVM启动server，ejb和http服务在自己的虚拟机以单独的服务启动。每一个depploy的应用程序也在自己的虚拟机中运行。日志文件和上述的一样，但是存放的目录不同。目录如下：
+
+　　EJB $J2EE_HOME//ejb/ejbd 
+
+　　HTTP $J2EE_HOME//ejb/httpd 
+
+　　deployed application $J2EE_HOME//ejb/ 
+
+　　web server日志
+
+　　编辑web.properties文件中的内容，可以改变由web server创建的日志文件的名字。
+
+　　10、安全
+
+　　未授权用户
+
+　　 对于J2EE来说，当有未授权的用户试图调用ejb container的时候，J2EE必须存在一般意义上的未授权用户存在。在J2EE中这个用户名字是guest，密码是guest123。你可以在auth.properties 文件中修改用户名和密码。 
+
+　　default.principal.name=guest
+
+　　default.principal.password=guest123
+
+　　Keystore密码
+
+　　如果用户使用公钥访问https，认证信息放在/.keystore 文件中。同时user-home是System.getProperty("user.home")的返回值。keystore是一个典型的密码文件。默认的密码是changeit。可以在web.properties 文件中修改keystore.password 属性的值来改变密码。
+
+　　ANYONE 角色
+
+　　在application deployment工具的security面板中，默认的情况下方法分配给ANYONE 角色。这样的结果 是所有的用户和组都可以调用它。如果你没有影射到一个特定的角色，每一个用户和用户都可以调用它。可以在auth.properties 文件中设置anyone.role.name 的值来改变默认anyone角色。
+
+　　钝化发生的条件：内存限制
+
+　　当ejb container开始钝化一个ejb的时候，它把ejb保存在附属存储中并且试图重新分配内存。默认的情况下，如果内存使用超过128m的时候钝化开始发生。可以编辑config/default.properties 文件中passivation.threshold.memory 属性的值来修改默认值。
+
+　　passivation.threshold.memory=128000000
+
+值必须是一个正的整数。当你减少这个值的时候钝化现象回经常发生。
+
+　　jndi name server host
+
+　　如果jndi name server和J2EE server不在同一个机器上，你必须改变config/orb.properties 文件中host属性的值。
+
+　　host=localhost
+
+　　HTTP 文档根
+
+　　默认的情况下，http和https服务的文档是public_html。你可以编辑web.properties 文件中documentroot属性的值来改变它。
+
+　　documentroot=public_html/ 

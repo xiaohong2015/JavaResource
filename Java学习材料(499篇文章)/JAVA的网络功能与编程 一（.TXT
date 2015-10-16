@@ -1,0 +1,650 @@
+作者：jtwww
+日期：2000-11-6 16:07:55
+Java的网络功能与编程
+徐迎晓
+(上海大学计算中心25＃)
+                       
+摘  要：Java语言是Internet上最热门的编程语言，本文针对
+
+       Java的网络功能，对Java从网络上获取图象、声音、
+
+       HTML文档及文本文件等编程方法作了初步的介绍，同
+
+       时介绍了动态获取网络上资源的方法作了介绍。文中
+
+       提供了大量简明易懂的实例。
+
+关键词：Java；Internet；网络
+
+
+
+    Java语言是Internet上新兴的编程语言，对Java的特性以及基
+
+本的编程方法已有很多文章作过介绍。但是，广大Java爱好者更希望
+
+了解Java更深一步的编程方法，本文就Java的网络功能及其编程方法
+
+作一初步的介绍。
+
+    为了方便初次接触Java的读者，本文先就Java编程的一些常识
+
+作简单介绍。
+
+
+
+    一、Java编程简介
+
+
+
+    1. 编程环境：
+
+
+
+    对于大部分读者，以下的配置是较为经济的一种选择：
+
+操作系统 Win95
+
+编译软件 JDK1.01
+
+浏览软件 Netscape2.0以上（32位）
+
+
+
+    2. 编程方法：
+
+
+
+    先用文本编辑器如Edit、NotePad等输入Java程序，以.java为
+
+文件名后缀存盘。
+
+    再执行命令行：“Javac 文件名”来编译Java程序。编译后生成
+
+后缀为.class的字节码文件。
+
+    最后，如果是Java Applitcation，则执行命令行：“Java 字
+
+节码文件名”来运行Java程序。
+
+    如果是Java Applet，则用文本编辑器输入调用该Java Applet
+
+的HTML 文档， 以 .htm 为文件名后缀存盘。 再执行命令行：
+
+“appletviewer HTML文件名”来运行Java Applet。或用Netscape
+
+打开该HTML文档。
+
+
+
+    3. 关于本文中程序的说明
+
+
+
+    为了使程序能够最简洁地体现其所代表的编程方法，本文中的程
+
+序一般采用最简单的形式，省略了线程等内容。因此，本文的程序不
+
+是“好”的程序，但最容易为初学者理解。
+
+    本文的所有程序经编译后，生成的字节码文件及对应的HTML文档
+
+已上载到http://www.shu.edu.cn/~xyx/test/jvnet， 均可正确
+
+运行。连入Internet的读者可用浏览器打开该地址，查看运行效果。
+
+    连入Internet的读者也可以在本地硬盘输入并编译本文的程序，
+
+用Netscape的File/Open File菜单打开HTML文档，体会编程方法并
+
+查看运行效果。如果读者想将Java Applet 放到自己的主机上或其他
+
+ftp服务器上，在Netscape中用http协议或ftp协议调用，出于安全
+
+性限制，应作如下修改：
+
+   如果读者在某个WWW主机上有帐号，可以做个人Homepage（一般
+
+在用户根目录创建WWW或public_html目录即可，Homepage的地址为
+
+http://HostName/~个人帐号），可将本文程序中对应的
+
+http://www.shu.edu.cn/~xyx/部分修改为读者自己的Web结点地址，
+
+然后将编译后生成的字节码文件及对应的HTML文档上载到自己的结点上。
+
+    如果读者的计算机连入了Internet，也可以找一个可以上载的
+
+ftp结点，如：ftp://ftp.shnet.edu.cn/incoming，将本文程序中
+
+对应的http://www.shu.edu.cn/~xyx/部分修改为ftp结点的地址，
+
+将编译后生成的字节码文件及对应的HTML文档上载到该结点上，以查
+
+看运行效果。
+
+    如果读者的计算机没有联网，也可以在单机上运行Web 服务软
+
+件如Webstar for Win95，将本文程序中对应的http: //www. shu
+
+.edu.cn/~xyx/部分修改为“http://本地IP地址”的形式，来模拟
+
+网络编程。
+
+
+
+    二、Java网络功能及获取网络上资源的一般步骤
+
+
+
+    Java程序可以获取网络上结点的图象、声音、HTML文档及文本
+
+等资源，并可以对获得的资源进行处理。例如Java程序可以每隔一
+
+定时间读取某结点提供的最新数据，并以图表的形式显示出来。
+
+    在编程处理上，一般先生成一个URL类型的对象，然后用 Java
+
+中相应的方法（method）获取该对象所代表的资源。下面分别介绍
+
+Java网络功能的几个例子，并由此介绍几种不同的编程方法。
+
+
+
+    三、从网络上获取图象
+
+
+
+    Java Applet可以直接从网络上结点获取图象并显示出来。 为
+
+了了解其编程方法和从本地显示图象的编程有何不同，我们先不考虑
+
+网络功能，来看一个简单的图象显示的例子：
+
+
+
+●程序1
+
+import java.applet.*;
+
+import java.awt.*;
+
+public class imag0 extends Applet{
+
+  Image image;
+
+  public void init() {
+
+image=getImage(getDocumentBase(),"test.gif");
+
+  }
+
+  public void paint(Graphics g) {
+
+     g.drawImage(image, 0, 0,this);
+
+  }
+
+}
+
+
+
+    这是一个最简单的获取并显示图象的例子， 在该例中， 先用
+
+getImage(getDocumentBase(),图象文件名)从HTML文档所在位置调
+
+用图象test.gif，并由此生成一个Image类型的对象image， 然后用
+
+drawImage(image, 0, 0,this)在屏幕上将图象显示出来。
+
+    如果想从网络上其他结点获取图象，关键是创建对应于网络上
+
+其他结点的Image类型的对象，一旦获得Image类型的对象获得了，
+
+便可以对其进行任何可能的图象操作。
+
+    Java提供了如下方法可以创建对应于其他结点的图象：
+
+getImage(new URL(字符串))
+
+    其使用格式可有两种：
+
+
+
+    String  url = "结点URL";
+
+    Image image;
+
+    try {
+
+      image = getImage(new URL(url));
+
+    } 
+
+catch(Exception e){
+
+System.out.println("Can't open the URL ");
+
+    }
+
+
+
+或
+
+
+
+URL imgur=null;
+
+Image image;
+
+try {
+
+            imgur=new URL("结点URL ");
+
+     }
+
+     catch (MalformedURLException e) {
+
+            System.out.println("Can't open the URL ");
+
+     }
+
+     image=getImage(imgur);
+
+
+
+    前一种格式用“new URL(url)”生成 URL 对象， 并直接作为
+
+getImage的参数，后一种格式先用“new URL(url)”生成一个 URL
+
+对象，再传给getImage。两种格式本质上是一样的。两种格式中，
+
+生成URL对象的部分都包含在
+
+
+
+try{
+
+获取URL对象
+
+                           }
+
+catch (MalformedURLException e) {
+
+出错提示
+
+                           }
+
+中。
+
+    例如要调用http://www.shu.edu.cn/~xyx/img/shnet.jpg结点
+
+的图象，第一种格式完整的程序如下：
+
+●程序2
+
+import java.applet.*;
+
+import java.net.*;
+
+import java.awt.*;
+
+public class imag extends Applet{
+
+  Image image;
+
+  public void init() {
+
+    String  url = "http://www.shu.edu.cn/~xyx/img/shnet.jpg";
+
+    try {
+
+      image = getImage(new URL(url));
+
+    } catch(Exception e){}
+
+  }
+
+
+
+  public void paint(Graphics g) {
+
+     g.drawImage(image, 0, 0,this);
+
+  }
+
+}
+
+
+
+    第二种格式完整的程序如下：
+
+●程序3
+
+import java.applet.*;
+
+import java.net.*;
+
+import java.awt.*;
+
+public class imag2 extends Applet{
+
+  Image image;
+
+  URL imgur=null;
+
+  public void init() {
+
+     try {
+
+      imgur=new URL("http://www.shu.edu.cn/~xyx/img/shnet.jpg");
+
+         }
+
+        catch (MalformedURLException e) {
+
+
+
+                System.out.println("Can't open the URL ");
+
+      }
+
+      image=getImage(imgur);
+
+  }
+
+  public void paint(Graphics g) {
+
+     g.drawImage(image, 0, 0,this);
+
+  }
+
+}
+
+
+
+    将上述两个程序分别以imag.java和imag2. java 存盘， 执行
+
+javac imag.java和javac imag2.java，将得到编译后生成的imag
+
+.class和imag2.class，最后创建调用这两个Java Applet的HTML文
+
+档，如imag.class对应的HTML文档可如下：
+
+< html >
+
+< head >
+
+< title >Example < /title >
+
+< /head >
+
+< center >
+
+< applet code=imag.class width=550 height=250 >
+
+< /applet >
+
+< /html >
+
+
+
+    将该HTML文档存入test.html文件，用Netscape打开， 如果你
+
+的计算机连入了Internet，便可以看到Java Applet 所显示的从网
+
+络上获得的图象了。（对于本文中其他不同的Java Applet， 对应
+
+的HTML文档只要修改其中相应的“code=imag.class”即可。）
+
+
+
+    四、从网络上获取声音
+
+
+
+    Java从网络上获取声音文件并播放声音的编程方法有两类，一
+
+是利用Java提供的play(URL)及play(URL,String) 直接播放网络
+
+上的声音文件，另一类是通过getAudioClip(URL)或getAudioClip
+
+(URL,String)先从网络上获取声音文件，并生成AudioClip 类型的
+
+对象，然后对该对象进行操作。
+
+    前者的使用格式是：
+
+
+
+String  Audur = "结点URL";
+
+        try {
+
+     play(new URL(Audur));    
+
+        } catch(Exception e){} 
+
+
+
+或
+
+
+
+String  Audur = "结点URL";
+
+        try {
+
+           play(new URL(Audur),声音文件名);
+
+        } catch(Exception e){}
+
+    后者使用的格式是：
+
+String Audur = "结点URL";
+
+AudioClip  loopClip;
+
+    try {
+
+           loopClip = getAudioClip(new URL(Audur));
+
+        }
+
+catch(Exception e){
+
+System.out.println("Can't open the URL ");
+
+                  }
+
+
+
+或
+
+
+
+String Audur = "结点URL";
+
+    AudioClip  loopClip;
+
+    try {
+
+           loopClip = getAudioClip(new URL(Audur) ,声音文件名);
+
+                    }
+
+catch(Exception e){
+
+System.out.println("Can't open the URL ");
+
+}
+
+
+
+    上面的四种格式都是将生成URL对象部分－－“new URL(url)”
+
+直接作为play或getAudioClip的参数；和前面处理图象的例子一样，
+
+也可以先用“new URL(url)”获取一个URL对象， 再传给 play 或
+
+getAudioClip。如对第一种play(URL)的格式， 也可采用如下的编
+
+程格式：
+
+URL  Audur =null;
+
+        try {
+
+   Audur=new URL("结点URL ");
+
+        } catch(Exception e){
+
+System.out.println("Can't open the URL ");
+
+     }
+
+    play(Audur);
+
+    下面对前述四种从网络上获取并播放声音文件的格式各举一简单的例子，
+
+以作编程时参考：
+
+                         ●程序4   格式一
+
+import java.applet.*;
+
+import java.awt.*;
+
+import java.net.*;
+
+public class sound1 extends Applet 
+
+
+
+{   AudioClip  loopClip;
+
+    public void paint(Graphics g) {
+
+    String  Audur = "http://www.shu.edu.cn/~xyx/java/Animator/audio/bark.au";
+
+        try {
+
+     play(new URL(Audur));    
+
+        } catch(Exception e){} 
+
+    }
+
+}
+
+
+
+                             ●程序5   格式二
+
+import java.applet.*;
+
+import java.awt.*;
+
+import java.net.*;
+
+public class sound2 extends Applet 
+
+{   AudioClip  loopClip;
+
+     public void paint(Graphics g) {
+
+        String  Audur = "http://www.shu.edu.cn/~xyx/java/Animator/audio/";
+
+        try {
+
+           play(new URL(Audur),"bark.au");
+
+        } catch(Exception e){}
+
+    }
+
+}
+
+
+
+                             ●程序6   格式三
+
+import java.applet.*;
+
+import java.awt.*;
+
+import java.net.*;
+
+public class sound extends Applet{
+
+   AudioClip  loopClip;
+
+   public void init() {
+
+     String  Audur = "http://www.shu.edu.cn/~xyx/java/Animator/audio/bark.au";
+
+        try {
+
+           loopClip = getAudioClip(new URL(Audur));
+
+        } catch(Exception e){}
+
+    }
+
+
+
+   public void paint(Graphics g){
+
+        loopClip.loop();
+
+   }
+
+}
+
+
+
+●程序7  格式四
+
+import java.applet.*;
+
+import java.awt.*;
+
+import java.net.*;
+
+public class sound0 extends Applet{
+
+   AudioClip  loopClip;
+
+   URL auur;
+
+   public void init() {
+
+     try {
+
+            auur=new URL("http://www.shu.edu.cn/~xyx/java/Animator/audio/");
+
+      }
+
+      catch (MalformedURLException e) {
+
+                System.out.println("Can't open the URL ");
+
+      }
+
+      loopClip = getAudioClip(auur,"bark.au");
+
+
+
+    }
+
+
+
+   public void paint(Graphics g){
+
+        loopClip.loop();
+
+   }
+
+}
+
+
+

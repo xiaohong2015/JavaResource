@@ -1,0 +1,338 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：2001-6-15 13:27:17
+[b]用 Java 保存位图文件
+教程 -- 其中包括将图像对象写入位图文件的全部代码[/b]
+
+[b]作者 Jean-Pierre Dubé[/b]
+[BLOCKQUOTE][I][b]摘要[/b]
+虽然 Java 提供了几种打开图像的机制，但保存图像并不是它的强项。这篇技巧将讲述如何将图像保存在 24 位位图文件中。另外，Jean-Pierre 还提供了将图像文件写入位图文件所需的全部代码。 [i][/i][/I][/BLOCKQUOTE]这篇技巧是 [url href=http://www.cn.ibm.com/developerWorks/java/jw-tips/tip043/index.shtml]Java 技巧 43[/url] 的补充，那篇技巧说明了在 Java 应用程序中加载位图文件的过程。本月我再提供一篇教程，说明如何将图像保存在 24 位位图文件中，其中还包含将图像对象写入位图文件的代码片断。 
+如果您在 Microsoft Windows 环境中工作，那么创建位图文件的功能将为您提供许多方便。例如，在我的上一个项目中，我必须将 Java 与 Microsoft Access 对接。Java 程序允许用户在屏幕上绘图。这幅图随后被打印到 Microsoft Access 报表中。由于 Java 不支持 OLE，我的唯一选择就是创建该图的一个位图文件，并通知 Microsoft Access 报表在何处能找到这个位图文件。如果您写过向剪贴板发送图像的应用程序，则这个技巧可能对您有用 -- 尤其是当您将这个信息传递给另一个应用程序时。 
+[b]位图文件的格式[/b]
+位图文件格式支持 4 位 RLE（行程长度编码）以及 8 位和 24 位编码。因为我们只处理 24 位格式，所以下面我们查看一下该文件的结构。 
+位图文件分为三个部分。我已将它们列在下面。 
+[b]第 1 部分：位图文件的标头[/b]
+标头包含位图文件的类型大小信息和版面信息。结构如下（摘自 C 语言结构定义）： 
+typedef struct tagBITMAPFILEHEADER {
+   UINT bfType;
+   DWORD bfSize;
+   UINT bfReserved1;
+   UINT bfReserved2;
+   DWORD bfOffBits;
+}BITMAPFILEHEADER;
+
+下面是对这个清单中的代码元素的说明： 
+[UL][LI]bfType：指定文件类型，其值始终为 BM。 
+[LI]bfSize：指定整个文件的大小（以字节为单位）。 
+[LI]bfReserved1：保留 -- 必须为 0。 
+[LI]bfReserved2：保留 -- 必须为 0。 
+[LI]bfOffBits：指定从 BitmapFileHeader 到图像首部的字节偏移量。 [/LI][/UL]
+现在您已经明白位图标头的用途就是标识位图文件。读取位图文件的每个程序都使用位图标头来进行文件验证。 
+[b]第 2 部分：位图信息标头[/b]
+随后的标头称为[i]信息标头[/i]，其中包含图像本身的属性。 
+下面说明如何指定 Windows 3.0（或更高版本）设备独立位图 (DIB) 的大小和颜色格式: 
+typedef struct tagBITMAPINFOHEADER {
+    DWORD biSize;
+    LONG biWidth;
+    LONG biHeight;
+    WORD biPlanes;
+    WORD biBitCount;
+    DWORD biCompression;
+    DWORD biSizeImage;
+    LONG biXPelsPerMeter;
+    LONG biYPelsPerMeter;
+    DWORD biClrUsed;
+    DWORD biClrImportant;
+} BITMAPINFOHEADER;
+
+以上代码清单的每个元素说明如下： 
+[UL][LI]biSize：指定 BITMAPINFOHEADER 结构所需的字节数。 
+[LI]biWidth：指定位图的宽度（以象素为单位）。 
+[LI]biHeight：指定位图的高度（以象素为单位）。 
+[LI]biPlanes：指定目标设备的位面数。这个成员变量的值必须为 1。 
+[LI]biBitCount：指定每个象素的位数。其值必须为 1、4、8 或 24。 
+[LI]biCompression：指定压缩位图的压缩类型。在 24 位格式中，该变量被设置为 0。 
+[LI]biSizeImage：指定图像的大小（以字节为单位）。如果位图的格式是 BI_RGB，则将此成员变量设置为 0 是有效的。 
+[LI]biXPelsPerMeter：为位图指定目标设备的水平分辨率（以“象素/米”为单位）。应用程序可用该值从最符合当前设备特征的资源群组中选择一个位图。 
+[LI]biYPelsPerMeter：为位图指定目标设备的垂直分辨率（以“象素/米”为单位）。 
+[LI]biClrUsed：指定位图实际所用的颜色表中的颜色索引数。如果 biBitCount 设为 24，则 biClrUsed 指定用来优化 Windows 调色板性能的参考颜色表。 
+[LI]biClrImportant：指定对位图的显示有重要影响的颜色索引数。如果此值为 0，则所有颜色都很重要。 [/LI][/UL]
+现在已定义了创建图像所需的全部信息。 
+[b]第 3 部分：图像[/b]
+在 24 位格式中，图像中的每个象素都由存储为 BRG 的三字节 RGB 序列表示。每个扫描行都被补足到 4 位。为了使这个过程稍复杂一点，图像是自底而上存储的，即第一个扫描行是图像中的最后一个扫描行。下图显示了标头 (BITMAPHEADER) 和 (BITMAPINFOHEADER) 以及部分图像。各个部分由垂线分隔： 
+0000000000 4D42 B536 0002 0000 0000 0036 0000 | 0028
+0000000020 0000 0107 0000 00E0 0000 0001 0018 0000
+0000000040 0000 B500 0002 0EC4 0000 0EC4 0000 0000
+0000000060 0000 0000 0000 | FFFF FFFF FFFF FFFF FFFF
+0000000100 FFFF FFFF FFFF FFFF FFFF FFFF FFFF FFFF
+*
+
+[b]现在，我们开始检视代码[/b]
+现在我们已经知道了 24 位位图文件的结构，下面就是您期待已久的内容：用来将图像对象写入位图文件的代码。 
+import java.awt.*;
+import java.io.*;
+import java.awt.image.*;
+
+public class BMPFile extends Component {
+
+  //--- 私有常量
+  private final static int BITMAPFILEHEADER_SIZE = 14;
+  private final static int BITMAPINFOHEADER_SIZE = 40;
+
+  //--- 私有变量声明
+
+  //--- 位图文件标头
+  private byte bitmapFileHeader [] = new byte [14];
+  private byte bfType [] = {'B', 'M'};
+  private int bfSize = 0;
+  private int bfReserved1 = 0;
+  private int bfReserved2 = 0;
+  private int bfOffBits = BITMAPFILEHEADER_SIZE + BITMAPINFOHEADER_SIZE;
+
+  //--- 位图信息标头
+  private byte bitmapInfoHeader [] = new byte [40];
+  private int biSize = BITMAPINFOHEADER_SIZE;
+  private int biWidth = 0;
+  private int biHeight = 0;
+  private int biPlanes = 1;
+  private int biBitCount = 24;
+  private int biCompression = 0;
+  private int biSizeImage = 0x030000;
+  private int biXPelsPerMeter = 0x0;
+  private int biYPelsPerMeter = 0x0;
+  private int biClrUsed = 0;
+  private int biClrImportant = 0;
+
+  //--- 位图原始数据
+  private int bitmap [];
+
+  //--- 文件部分
+  private FileOutputStream fo;
+
+  //--- 缺省构造函数
+  public BMPFile() {
+
+  }
+
+
+  public void saveBitmap (String parFilename, Image parImage, int
+parWidth, int parHeight) {
+
+     try {
+        fo = new FileOutputStream (parFilename);
+        save (parImage, parWidth, parHeight);
+        fo.close (); 
+     }
+     catch (Exception saveEx) {
+        saveEx.printStackTrace ();
+     }
+
+  }
+
+
+  /*
+   * saveMethod 是该进程的主方法。该方法
+   * 将调用 convertImage 方法以将内存图像转换为
+   * 字节数组；writeBitmapFileHeader 方法创建并写入
+   * 位图文件标头；writeBitmapInfoHeader 创建 
+   * 信息标头；writeBitmap 写入图像。
+   *
+   */
+  private void save (Image parImage, int parWidth, int parHeight) {
+
+     try {
+        convertImage (parImage, parWidth, parHeight);
+        writeBitmapFileHeader ();
+        writeBitmapInfoHeader ();
+        writeBitmap ();
+     }
+     catch (Exception saveEx) {
+        saveEx.printStackTrace ();
+     }
+  }
+
+
+  /*
+   * convertImage 将内存图像转换为位图格式 (BRG)。
+   * 它还计算位图信息标头所用的某些信息。
+   *
+   */
+  private boolean convertImage (Image parImage, int parWidth, int parHeight) {
+
+     int pad;
+     bitmap = new int [parWidth * parHeight];
+
+     PixelGrabber pg = new PixelGrabber (parImage, 0, 0, parWidth, parHeight,
+                                         bitmap, 0, parWidth);
+
+     try {
+        pg.grabPixels ();
+     }
+     catch (InterruptedException e) {
+        e.printStackTrace ();
+        return (false);
+     }
+
+     pad = (4 - ((parWidth * 3) % 4)) * parHeight;
+     biSizeImage = ((parWidth * parHeight) * 3) + pad;
+     bfSize = biSizeImage + BITMAPFILEHEADER_SIZE +
+BITMAPINFOHEADER_SIZE;
+     biWidth = parWidth;
+     biHeight = parHeight;
+
+     return (true);
+  }
+
+  /*
+   * writeBitmap 将象素捕获器返回的图像转换为
+   * 所需的格式。请记住：扫描行在位图文件中是
+   * 反向存储的！
+   *
+   * 每个扫描行必须补足为 4 个字节。
+   */
+  private void writeBitmap () {
+
+      int size;
+      int value;
+      int j;
+      int i;
+      int rowCount;
+      int rowIndex;
+      int lastRowIndex;
+      int pad;
+      int padCount;
+      byte rgb [] = new byte [3];
+
+
+      size = (biWidth * biHeight) - 1;
+      pad = 4 - ((biWidth * 3) % 4);
+      if (pad == 4) // <==== 错误修正
+         pad = 0; // <==== 错误修正
+      rowCount = 1;
+      padCount = 0;
+      rowIndex = size - biWidth;
+      lastRowIndex = rowIndex;
+
+      try {
+         for (j = 0; j < size; j++) {
+            value = bitmap [rowIndex];
+            rgb [0] = (byte) (value & 0xFF);
+            rgb [1] = (byte) ((value >> 8) & 0xFF);
+            rgb [2] = (byte) ((value >> 16) & 0xFF);
+            fo.write (rgb);
+            if (rowCount == biWidth) {
+               padCount += pad;
+               for (i = 1; i <= pad; i++) {
+                  fo.write (0x00);
+               }
+               rowCount = 1;
+               rowIndex = lastRowIndex - biWidth;
+               lastRowIndex = rowIndex;
+            }
+            else
+               rowCount++;
+            rowIndex++;
+         }
+
+         //--- 更新文件大小
+         bfSize += padCount - pad;
+         biSizeImage += padCount - pad;
+      }
+      catch (Exception wb) {
+         wb.printStackTrace ();
+      }
+
+   } 
+
+  /*
+   * writeBitmapFileHeader 将位图文件标头写入文件中。
+   *
+   */
+  private void writeBitmapFileHeader () {
+
+     try {
+        fo.write (bfType);
+        fo.write (intToDWord (bfSize));
+        fo.write (intToWord (bfReserved1));
+        fo.write (intToWord (bfReserved2));
+        fo.write (intToDWord (bfOffBits));
+
+     }
+     catch (Exception wbfh) {
+        wbfh.printStackTrace ();
+     }
+
+  }
+
+  /*
+   *
+   * writeBitmapInfoHeader 将位图信息标头
+   * 写入文件中。
+   *
+   */
+
+  private void writeBitmapInfoHeader () {
+
+     try {
+        fo.write (intToDWord (biSize));
+        fo.write (intToDWord (biWidth));
+        fo.write (intToDWord (biHeight));
+        fo.write (intToWord (biPlanes));
+        fo.write (intToWord (biBitCount));
+        fo.write (intToDWord (biCompression));
+        fo.write (intToDWord (biSizeImage));
+        fo.write (intToDWord (biXPelsPerMeter));
+        fo.write (intToDWord (biYPelsPerMeter));
+        fo.write (intToDWord (biClrUsed));
+        fo.write (intToDWord (biClrImportant));
+     }
+     catch (Exception wbih) {
+        wbih.printStackTrace ();
+     }
+
+  }
+
+
+  /*
+   *
+   * intToWord 将整数转换为单字，返回值
+   * 存储在一个双字节数组中。
+   *
+   */
+  private byte [] intToWord (int parValue) {
+
+     byte retValue [] = new byte [2];
+
+     retValue [0] = (byte) (parValue & 0x00FF);
+     retValue [1] = (byte) ((parValue >> 8) & 0x00FF);
+
+     return (retValue);
+
+  }
+
+  /*
+   *
+   * intToDWord 将整数转换为双字，返回值
+   * 存储在一个 4 字节数组中。
+   *
+   */
+  private byte [] intToDWord (int parValue) {
+
+     byte retValue [] = new byte [4];
+
+     retValue [0] = (byte) (parValue & 0x00FF);
+     retValue [1] = (byte) ((parValue >> 8) & 0x000000FF);
+     retValue [2] = (byte) ((parValue >> 16) & 0x000000FF);
+     retValue [3] = (byte) ((parValue >> 24) & 0x000000FF);
+
+     return (retValue);
+
+  }
+
+}
+
+[b]小结[/b]
+这就是所要做的全部工作。我确信您将会发现这个类很有用，因为到 JDK 1.1.6 为止，Java 不支持用任何常用的格式保存图像。JDK 1.2 将支持创建 JPEG 图像，但不支持创建位图。所以这个类仍将填补 JDK1.2 中的空白。 
+如果您使用这个类并发现了改进它的方法，请通知我！下面的个人简历中有我的电子邮件地址。 
+[TABLE][TR][TD][b]作者简介[/b]
+jeanpierre.dube Jean-Pierre Dubé 是一名自由 Java 咨询者。他于 1988 年注册创办了 Infocom公司。从那时起，Infocom 已承接并开发了几套应用程序，涉及的领域包括制造业、文档管理和大规模输电线管理。他有丰富的 C 语言、Visual Basic 和 Java（最近）编程经验，他的公司现在主要使用 Java 语言。 Infocom 最近的一个项目是一种图形 API，其测试版很快就会面市。 [/TD][/TR][/TABLE]

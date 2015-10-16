@@ -1,0 +1,30 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-16 11:30:30
+3.5 VisualAge for Java 
+如果您熟悉 Java 程序设计，可以使用VisualAge for Java(VAJ)来创建和定制 JavaBean。在您使用Studio的向导构建Servlet时很可能需要复杂的JavaBean，这些JavaBean一般可使用VAJ来开发。也可使用VAJ来修改与完善由 Studio 向导生成的 Java Servlet 和 Bean。
+VAJ是一个全功能的Java开发环境，包含一个智能化集成开发环境，内含丰富的Java类库、高性能Java编译器和虚拟机，集成了包括向导和调试器在内的多种工具，支持JavaBeans的开发，通过先进的版本控制技术和贮存（Repository）机制支持团队开发(team development)。
+VAJ的工作台为你提供各种视图，每个视图作为笔记薄（Notebook）中的一页
+l	项目－在工作区中所有项目及所含包、类的树状视图
+l	包－所有包、类、方法的树状视图
+l	类－工作区中的所有类的列表
+l	接口－工作区的所有接口及其方法的列表
+l	所有问题－所有出错元素及相应错误信息的列表
+项目页允许你为一个元素作标签，这样只需简单的一次单击就可定位到它。另外，当你保存文件时，将进行编译和错误标志，更正错误无需长时间编译，从而体现了应用的快速开发。使用VAJ的工作台进行Java 编程的步骤如下：
+l	创建项目（和包）
+l	创建类（可使用向导）
+l	添加方法（可使用向导）
+l	在源代码页中编辑方法，在菜单上单击保存－将进行快速编译
+l	单击“运行”按钮测试代码
+使用VAJ的导入／导出功能可以将有关文件（JAR、class、java）导入或导出VAJ的开发环境。值得关注的是，WebSphere可在整个VAJ中运行，允许你在VAJ环境中编写和调试servlet和JSP。对于VAJ2.0来说，需要下列步骤：
+l	安装VisualAge for Java update
+l	载入JSP 执行监视器，改正语法错误
+l	在com.ibm.servlet包中启动SERunner web服务
+而VAJ3.0已经和WebSphere Application Server、WebSphere Studio、DB2 Universal Database紧密集成，从而成为IBM电子商务应用框架的关键点。VAJ3.0的新的特性主要包括：
+l	WebSphere 测试环境 
+l	JSP/Servlet 开发环境
+l	存贮过程构建器
+l	SQLJ工具
+l	EJB 开发环境（VAJ3.0企业版）
+l	Domino企业存取构建器（VAJ3.0企业版）
+l	XML元数据交换(XML Metadata Interchange、XMI)工具包（VAJ3.0企业版-技术预演）

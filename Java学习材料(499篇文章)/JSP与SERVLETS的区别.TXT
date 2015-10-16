@@ -1,0 +1,19 @@
+作者：hxfwsk
+email: hxfwsk@hotmail.com
+日期：2001-7-6 10:41:58
+JSP和SERVLET到底在应用上有什么区别，很多人搞不清楚。我来胡扯几句吧。简单的说，SUN首先发展出SERVLET，其功能比较强劲，体系设计也很先进，只是，它输出HTML语句还是采用了老的CGI方式，是一句一句输出，所以，编写和修改HTML非常不方便。 
+  后来SUN推出了类似于ASP的镶嵌型的JSP，把JSP TAG镶嵌到HTML语句中，这样，就大大简化和方便了网页的设计和修改。新型的网络语言如ASP，PHP，JSP都是镶嵌型的SCRIPT语言。 
+  从网络三层结构的角度看，一个网络项目最少分三层：data layer,business layer, presentation layer。当然也可以更复杂。SERVLET用来写business layer是很强大的，但是对于写presentation layer就很不方便。JSP则主要是为了方便写presentation layer而设计的。当然也可以写business layer。写惯了ASP，PHP，CGI的朋友，经常会不自觉的把presentation layer和business layer混在一起。就象前面那个朋友，把数据库处理信息放到JSP中，其实，它应该放在business layer中。 
+  根据SUN自己的推荐，JSP中应该仅仅存放与presentation layer有关的东东，也就是说，只放输出HTML网页的部份。而所有的数据计算，数据分析，数据库联结处理，统统是属于business layer，应该放在JAVA BEANS中。通过JSP调用JAVA BEANS，实现两层的整合。 
+  实际上，微软前不久推出的DNA技术，简单说，就是ASP+COM/DCOM技术。与JSP+BEANS完全类似，所有的presentation layer由ASP完成，所有的business layer由COM/DCOM完成。通过调用，实现整合。 
+为什么要采用这些组件技术呢？因为单纯的ASP/JSP语言是非常低效率执行的，如果出现大量用户点击，纯SCRIPT语言很快就到达了他的功能上限，而组件技术就能大幅度提高功能上限，加快执行速度。 
+  另外一方面，纯SCRIPT语言将presentation layer和business layer混在一起，造成修改不方便，并且代码不能重复利用。如果想修改一个地方，经常会牵涉到十几页CODE，采用组件技术就只改组件就可以了。 
+综上所述，SERVLET是一个早期的不完善的产品，写business layer很好，写presentation layer就很臭，并且两层混杂。 
+  所以，推出JSP+BAEN，用JSP写presentation layer,用BAEN写business layer。SUN自己的意思也是将来用JSP替代SERVLET。 
+  可是，这不是说，学了SERVLET没用，实际上，你还是应该从SERVLET入门，再上JSP，再上JSP+BEAN。 
+  强调的是：学了JSP，不会用JAVA BEAN并进行整合，等于没学。大家多花点力气在JSP+BEAN上。 
+在补充几句： 
+  我们可以看到，当ASP+COM和JSP+BEAN都采用组件技术后，所有的组件都是先进行编译，并驻留内存，然后快速执行。所以，大家经常吹的SERVLET/JSP先编译驻内存后执行的速度优势就没有了。 
+反之，ASP+COM+IIS+NT紧密整合，应该会有较大的速度优势呈现。而且，ASP+COM+IIS+NT开发效率非常高，虽然BUG很多。 
+  那么，为什么还用JSP+BEAN？因为JAVA实在前途远大。微软分拆后，操作系统将群雄并起，应用软件的开发商必定要找一个通用开发语言进行开发，JAVA一统天下的时机就到了。如果微软分拆顺利，从中分出的应用软件公司将成为JAVA的新领导者。目前的JAVA大头SUN和IBM都死气沉沉，令人失望。希望新公司能注入新活力。不过，新公司很有可能和旧SUN展开JAVA标准大战，双方各自制定标准，影响JAVA夸平台。 
+  另外，现在的机器速度越来越快，JAVA的速度劣势很快就可以被克服。 

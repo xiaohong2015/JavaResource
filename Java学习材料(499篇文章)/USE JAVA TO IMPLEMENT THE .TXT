@@ -1,0 +1,229 @@
+作者：iceant
+email: iceant@21cn.com
+日期：9/4/2001 2:25:47 PM
+UBB & JAVA
+    ----Use Java to implement the UBB future.
+
+[Author] pizer.chen -- iceant -- 陈鹏
+[email ] iceant@21cn.com
+[icq   ] 77777369
+
+These days,I write some publish system,just like BBS/news etc.
+The client asked me ,whether they can insert the image and href url to the plain text when they published them.
+so i write this.
+I use xml file for dynamic UBB extends.
+U can make the UBB rule of yourself.
+The only thing that u need to do is modify the UBB.xml config file.
+
+Best Regards
+===============
+                                                                    pizer.chen/2001-9-4
+
+===========================
+    Resource Link
+===========================
+It is based on xml & RegularExpressions tech.
+about xml & regularExpression u can find them here:
+
+http://www.w3.org/XML/     
+http://xml.apache.org
+http://www.meurrens.org/ip-Links/java/regex/navi.html
+http://www.savarese.org/oro/
+http://jakarta.apache.org/oro
+about ubb u can find them here:
+http://www.ubbdesign.com
+
+========================
+it used :
+    jakarta-regexp-1.2              (download form http://jakarta.apache.org)
+    dom4j-0.6(over 0.6 version)     (download form http://sourceforge.net)
+    jdk(over 1.2 version)           (download form http://java.sun.com)
+
+==========================
+        UBB.XML
+it must be stored in CLASSPATH
+==========================
+the regularExpression & replace string map file.
+<!--============================-->
+
+<?xml version="1.0" encoding="UTF-8"?>
+<UBB-map>
+	<map ubb-code="\[b\](.+?)\[\/b\]" map-to="&lt;b&gt;$1&lt;/b&gt;"/>         <!--<b>$1</b>-->
+	<map ubb-code="\[i\](.+?)\[\/i\]" map-to="&lt;i&gt;$1&lt;/i&gt;"/>         <!--<i>$1</i>-->
+	<map ubb-code="\[h1\](.+?)\[\/h1\]" map-to="&lt;h1&gt;$1&lt;/h1&gt;"/>     <!--<h1>$1</h1>-->
+	<map ubb-code="\[url +href=(http\:\/\/.+?)\](.+?)\[\/url\]" map-to="&lt;a href=&quot;$1&quot; target=&quot;_blank&quot;&gt;$2&lt;/a&gt;"/>        <!--<a href="$1" target="_blank">$2</a>-->
+    <!--...-->
+</UBB-map>
+
+=========================
+
+        UBB.java
+
+=========================
+
+/*
+ * UBB.java
+ *
+ * Created on 2001年9月3日, 下午4:01
+ */
+
+package com.wacos.util.ubb;
+
+import org.dom4j.*;
+import org.dom4j.io.*;
+import java.io.*;
+import java.util.*;
+import org.apache.regexp.*;
+/**
+ *
+ * @author  Pizer.chen -- iceant -- 陈鹏
+ * @version 0.1
+ */
+public class UBB {
+    
+    private static final String XML_CONFIG_FILE = "UBB.xml";
+    private static org.dom4j.Document doc = null;
+     
+    /** Creates new UBB */
+    public UBB() {
+    }
+    
+    public static String parse(String inStr){
+        try{
+            List list = getUBBCodeList();
+            String ubbCode="";
+            String mapStr="";
+            Attribute attribute=null;
+            for (Iterator iter = list.iterator(); iter.hasNext(); ) {
+                attribute = (Attribute) iter.next();
+                ubbCode = attribute.getValue();
+                mapStr= getMapValue(ubbCode);
+                inStr=REReplace.replace(ubbCode,mapStr,inStr);
+            }
+            return inStr;
+        }catch(Exception err){
+            System.out.println(err);
+            return err.toString();
+        }
+    }
+
+    /**
+     * parse the xml file to Document object
+    **/
+    private static Document xml2Document(){
+        try{
+            InputStream is = Thread.currentThread().getContextClassLoader()
+                            .getResourceAsStream(XML_CONFIG_FILE);
+            SAXReader reader = new SAXReader();
+            Document document = reader.read(is);
+            return document;
+        }catch(Exception err){
+            System.out.println(err);
+            return null;
+        }
+    }
+
+    /**
+     * use xpath to get the map-to value of the ubb-code.
+    **/
+    private static String getMapValue(String ubbCode){
+        try{
+            if(doc==null){
+                doc=xml2Document();
+            }
+            Node node = doc.selectSingleNode("//map[@ubb-code='"+ubbCode+"']");
+            return node.valueOf( "@map-to" );
+        }catch(Exception err){
+            System.out.println(err);
+            return err.toString();
+        }
+    }
+    /**
+     * get the <map ubb-code="..." map-to=".."> ubb-code List
+    **/
+    private static List getUBBCodeList(){
+        try{
+            if(doc==null){
+                doc=xml2Document();
+            }
+            return doc.selectNodes( "//map/@ubb-code" );
+        }catch(Exception err){
+            System.out.println(err);
+            return null;
+        }
+    }
+    /**
+     * get the <map ubb-code="..." map-to=".."> map-to List
+    **/
+    private static List getUBBMapList(){
+        try {
+            if(doc==null){
+                doc=xml2Document();
+            }
+            return doc.selectNodes("//map//@map-to");
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
+    }
+}
+
+========================
+
+     REReplace.java
+
+========================
+package com.wacos.util.ubb;
+
+import java.io.*;
+import java.util.*;
+import org.apache.regexp.*;
+
+public class REReplace 
+{
+    /**
+     * replace the inStr with pattern1 & pattern2
+    **/
+    public static String replace(String pattern1,String pattern2,String inStr){
+        try {
+        	RE re = new RE(pattern1);
+            int point=0;
+            while(re.match(inStr)){
+                RE re2 = new RE("\\$([0-9])");
+                while(re2.match(pattern2)){
+                    point = Integer.parseInt(re2.getParen(1));
+                    pattern2=re2.subst(pattern2,re.getParen(point),RE.REPLACE_FIRSTONLY);
+                }
+                inStr = re.subst(inStr,pattern2);
+            }
+            return inStr;
+        }
+        catch (Exception e) {
+        	System.out.println(e);
+            return e.toString();
+        }  
+    }
+
+}
+
+
+=============================
+        UBBTest
+=============================
+package com.wacos.util.ubb;
+
+public class UBBTest 
+{
+	public static void main(String[] args) 
+	{
+		try{
+            String test ="a[b][i]test[/i][/b][h1]H1 Font[/h1]\r\n [url href=http://www.21cn.com]测试[/url]hehe..";
+
+            System.out.println(UBB.parse(test));
+        }catch(Exception err){
+            System.out.println(err);
+        }
+	}
+}
+

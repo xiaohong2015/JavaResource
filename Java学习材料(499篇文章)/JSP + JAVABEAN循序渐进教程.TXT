@@ -1,0 +1,126 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:33:33
+JavaServer Pages+JavaBeans的数据库操作应用
+
+　　上面已经讲了一个简单的JavaBean应用的计数器例子，当然在实际程序过程中，涉及的更多的还是和数据库相关的操作，所以在这一节我们将重点阐述JavaServer Pages和JavaBeans如何对数据库进行操作。这里我们选取了一个比较有代表性比较实用的例子，那就是用户注册管理，因为这在网上使用比较的频繁，不管是注册Email、有奖调查、购买物品或者加入社区等等都会涉及到一个用户注册的问题；另外一方面，它又比较有代表性，涉及到了数据库的记录增加，记录显示等常见操作，所以我们就拿用户注册开刀了。
+
+　　程序采用Oracle Jdeveloper3.1开发，运行环境为Wiin2000+Tomcat3.1，数据库系统采用了Oracle8.16i。
+
+　　首先我们建立一个数据库demodb，其字段如下面所示
+
+username VARCHAR2(20) 用户名
+password VARCHAR2(20) 密码
+email VARCHAR2(30) Email地址
+homepage VARCHAR2(50) 主页
+signs VARCHAR2(200) 签名
+regtime DATE 注册时间
+
+　　接着我们建立几个JavaBeans和JavaServer Pages文件
+
+db.java文件(封装数据库连接及一些底层操作)
+adduser.java文件(进行用户数据的读取以及添加操作)
+newuser.jsp文件(用户新增页面，用于输入用户注册信息)
+donewuser.jsp文件(进行用户注册信息添加)
+listuser.jsp文件(所有的注册用户信息列表)
+
+　　为了方便大家看代码，在很多地方都进行了详细的注释和讲解，至于JavaBean中涉及到Java语法结构的东西，请大家参考Java书籍。
+
+　　db.java文件
+
+　　说明：这个JavaBean封装数据库连接及一些底层操作，派生出的类可以直接调用这些方法，另外提供了一个toChinese方法，主要用来进行中文数据的处理。
+
+　　// Copyright (c) 2000 http://jspbbs.yeah.net
+package lyf;
+/**
+* A Class class.
+* $#@60;P$#@62;
+* @author liuyufeng
+*/
+
+　　//声明类库文件
+import oracle.jdbc.driver.*;
+import java.net.*;
+import java.sql.*;
+import java.lang.*;
+import java.io.*;
+import java.util.*;
+public class db br> 　　//成员变量初始化
+Connection conn = null; //数据库连接
+ResultSet rs = null; //记录集
+String Username=""; //用户名
+String Password=""; //密码
+String Email=""; //email
+String Homepage=""; //主页
+String Signs=""; //签名
+　　//db的构建器
+public db() {
+try {
+　　//注册数据库驱动程序为Oracle驱动
+Class.forName(new oracle.jdbc.driver.OracleDriver());
+}
+catch(java.lang.ClassNotFoundException e) {
+　　//这样写是为了方便调试程序，出错打印mydb()就知道在什么地方出错了
+System.err.println("mydb(): " + e.getMessage());
+}
+}
+
+　　//executeQuery方法用于进行记录的查询操作
+
+　　//入口参数为sql语句，返回ResultSet对象
+public ResultSet executeQuery(String sql) {
+rs = null;
+try {
+　　//建立数据库连接，使用Oracle的一种thin连接方式，demo为主机名字，demodb为数据库，后面的两个demo为用户名和密码
+conn = DriverManager.getConnection("jdbc:oracle:thin:@demo:1521:demodb","demo","demo");
+Statement stmt = conn.createStatement();
+　　//执行数据库查询操作
+rs = stmt.executeQuery(sql);
+}
+catch(SQLException ex) {
+System.err.println("db.executeQuery: " + ex.getMessage());
+}
+return rs;
+}
+
+　　//executeUpdate方法用于进行add或者update记录的操作
+
+　　//入口参数为sql语句，成功返回true，否则为false
+public boolean executeUpdate(String sql) {
+boolean bupdate=false;
+rs = null;
+try {
+　　//建立数据库连接，其它参数说明同上面的一样
+conn = DriverManager.getConnection("jdbc:oracle:thin:@demo:1521:demodb","demo","demo");
+Statement stmt = conn.createStatement();
+int rowCount = stmt.executeUpdate(sql);
+　　//如果不成功，bupdate就会返回0
+if(rowCount!=0)bupdate=true;
+}
+catch(SQLException ex) {
+　　//打印出错信息
+System.err.println("db.executeUpdate: " + ex.getMessage());
+}
+return bupdate;
+}
+
+　　//toChinese方法用于将一个字符串进行中文处理
+
+　　//否则将会是???这样的字符串
+public static String toChinese(String strvalue) {
+try{
+if(strvalue==null)
+{
+return null;
+}
+else
+{
+strvalue = new String(strvalue.getBytes("ISO8859_1"), "GBK");
+return strvalue;
+}
+}catch(Exception e){
+return null;
+}
+}
+
+} 

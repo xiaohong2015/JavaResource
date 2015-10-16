@@ -1,0 +1,147 @@
+作者：javajava
+email: franzy@163.net
+日期：2000-12-11 20:46:01
+package franzy;
+
+import org.w3c.dom.Element;
+import oracle.xml.parser.v2.XMLElement;
+import oracle.xml.parser.v2.XMLDocument;
+//import com.biztunnel.util.tools.ToolKit;
+
+public class Agency
+{
+    private String agencyID;
+    private String agencyOther;
+    private String a_dtype;
+    private Element element;
+
+    public static final String AGENCYCODE_OTHER = "Other";
+    public static final String AGENCYCODE_COMMERCEONE = "CommerceOne";
+    public static final String AGENCYCODE_ISO = "ISO";
+    public static final String AGENCYCODE_EAN = "EAN";
+    public static final String AGENCYCODE_ASSIGNEDBYSUPPLIER = "AssignedBySupplier";
+    public static final String AGENCYCODE_ASSIGNEDBYBUYER = "AssignedByBuyer";
+    public static final String AGENCYCODE_ANSI = "ANSI";
+    public static final String AGENCYCODE_GBABA = "GBABA";
+    private static final String AGENCY_ATTRIBUTE_A_DTYPE="%Agency-Dtypes;";
+
+    /**
+     * Creates a Agency Element according to the outer element
+     */
+    private void init()
+    {
+        this.element=new XMLElement("Agency");
+        agencyID = null;
+        agencyOther = null;
+        a_dtype = this.AGENCY_ATTRIBUTE_A_DTYPE;
+    }
+
+    public Agency(Element newElement)
+    {
+        init();
+
+        //Element newElement = (Element)newElement1.getLastChild();
+        if(!newElement.getNodeName().equals("Agency"))
+        //if(!newElement1.getLastChild().getNodeName().equals("Agency"))
+        {
+            System.out.println("not it!!!");
+
+        }
+        //get attribute
+        this.setAgencyID(newElement.getAttribute("AgencyID "));
+        this.setAgencyOther(newElement.getAttribute("AgencyOther "));
+        this.agencyID = newElement.getAttribute("a-dtype");
+    }
+
+    /**
+     * Create an empty Agency element according to the buginfo.dtd
+     */
+    public Agency()
+    {
+        //initialize the empty node
+        this.init();
+    }
+
+    /**
+     * convert this element to W3c Element format
+     */
+    public Element getElement()
+    {
+      if(this.getAgencyID()!=null)
+      {
+          this.element.setAttribute("AgencyID",this.getAgencyID());
+      }
+      if(this.getAgencyOther()!=null)
+      {
+          this.element.setAttribute("AgencyOther",this.agencyOther);
+      }
+      if(this.getA_dtype()!=null)
+      {
+          this.element.setAttribute("a-dtype",this.a_dtype);
+      }
+      return this.element;
+    }
+
+
+    public void setAgencyID(String newAgencyID)
+    {
+        agencyID = newAgencyID;
+    }
+
+    public String getAgencyID()
+    {
+        return agencyID;
+    }
+
+    public void setAgencyOther(String newAgencyOther)
+    {
+        agencyOther = newAgencyOther;
+    }
+
+    public String getAgencyOther()
+    {
+        return agencyOther;
+    }
+
+    public String getA_dtype()
+    {
+        return a_dtype;
+    }
+
+    public void setFixedA_dtype(boolean isSet)
+    {
+        if(isSet)
+        {
+            a_dtype = this.AGENCY_ATTRIBUTE_A_DTYPE;
+        }
+        else
+        {
+            a_dtype = null;
+        }
+    }
+
+    public static void main(String[] args)
+    {
+        try
+        {
+            //test 1
+            Agency element= new Agency();
+            element.setFixedA_dtype(true);
+            element.setAgencyID(Agency.AGENCYCODE_ASSIGNEDBYBUYER);
+            element.setAgencyOther("other");
+            XMLDocument doc = new XMLDocument();
+            doc.appendChild(element.getElement());
+            System.out.println(ToolKit.getXmlString(doc));
+
+            //test 2
+            Agency element1= new Agency(element.getElement());
+            System.out.println(element1.getA_dtype());
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+}
+
+有问题来找我

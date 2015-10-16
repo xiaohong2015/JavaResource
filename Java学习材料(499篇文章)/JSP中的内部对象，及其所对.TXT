@@ -1,0 +1,4 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：7/27/2001 11:59:53 AM
+很多人都会问，JSP中的SESSION对象怎么用啊，什么的问题，在我看来，这并不是什么问题，因为SERVLET API中都有详细说明的。这张表格列出Jsp中的内部对象，及其所对应的JAVA对象。具体使用的时候就可以直接查找相应的SERVLET API啦。[TABLE][TR][TD]request [/TD][TD]javax.servlet.http.HttpServletRequest [/TD][/TR][TR][TD]response[/TD][TD]javax.servlet.http.HttpServletResponse[/TD][/TR][TR][TD]out[/TD][TD]javax.servlet.jsp.JspWriter[/TD][/TR][TR][TD]page[/TD][TD]javax.servlet.jsp.JspPage[/TD][/TR][TR][TD]pageContext[/TD][TD]javax.servlet.jsp.PageContext[/TD][/TR][TR][TD]session[/TD][TD]javax.servlet.http.HttpSession[/TD][/TR][TR][TD]application[/TD][TD]javax.servlet.ServletContext[/TD][/TR][TR][TD]config[/TD][TD]javax.servlet.ServletConfig[/TD][/TR][/TABLE]

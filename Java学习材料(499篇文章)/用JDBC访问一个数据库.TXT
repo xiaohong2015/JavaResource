@@ -1,0 +1,154 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 1:06:45 PM
+发布者:flyfox 
+
+在这个练习里你将学习使用JDBC访问数据库和插入一个记录到数据库的基础知识。 
+
+在这个练习里，你将写RegistrationServlet类的register方法。这个类和你在Servlet1A练习里用的一样。在这个练习里，你将使用数据库的功能。这个练习将展示实现用户需求的步骤。 
+
+第一部分：理解regsiter()方法在RegistrationServlet中的工作原理 
+
+在这个练习里，你将在com.ibm.waslab.JDBC包上工作。扩展RegistrationServlet类，理解register()。这个方法抛一个SQLException。完整的方法声明是： 
+
+public synchronized void register(Properties formInput) 
+
+throws SQLException{ 
+
+
+
+} 
+
+register()方法在servlet取得控制时从doPost()方法里被调用。register()方法实际上写一个新的记录到数据库。我们将在第二部分写register()方法。同时，我们需要确信一些设置步骤已经完成。 
+
+1．打开init()方法，在super.init()的调用后面输入以下的代码： 
+
+//Load JDBC driver for DB2 
+
+try 
+
+{ 
+
+Class.forName(JKToysDBInfo.gerDriver()); 
+
+} 
+
+catch (ClassNotFoundException e) 
+
+{ 
+
+erroLog(“JDBC Driver not found”+e); 
+
+} 
+
+
+
+保存init()方法。记住，在驱动器管理可以得到一个连接以前，一个正确的数据库驱动器必须被servlet装载。每一个servlet只在servlet的init()方法里作一次。这个方法并不真地建立一个连接，它只是允许连接被建立。 
+
+
+
+注意：在这个情况下，我们装载DB2 app驱动器。这个驱动器是在数据库装在servlet将要运行的同一台机器上时使用的。如果你在访问另一台机器上的数据库，你要使用net驱动器： 
+
+COM.ibm.db2.jdbc.net.DB2Driver 
+
+当用net驱动器得到一个连接，你需要在getConnection()里使用的URL里提供更多的信息。数据库所在的机器名或URL，和DB2 Java Gateway侦听的端口号。一个有效的URL参数看上去是这样的： 
+
+jdbc:db2://servrid:8888/databasename 
+
+第二部分 
+
+1．现在，回去，重新打开register（）方法。代码的第一行创建一个数据库连接： 
+
+Connection conn=DriverManager.getConnection(URL,USER,PASSWORD); 
+
+你用驱动器管理器的静态方法getConnection()，把数据库的URL，一个有效的用户ID和口令传递给它。url,userid和password在类被装载时从一个属性文件里得到(看静态变量声明)。 
+
+2．现在到了有挑战性的部分了。我们要作的第一件事是找到已经被分配掉的最后一个客户号码，这样我们可以分配给正在注册的新客户一个新的客户号码（比以前的最高的还要高）。我们要存储这个新的客户号码在一个int变量名为nextId。为了做到这个，你会需要确信使用Statement类和ResultSet类。以下的SQL； 
+
+“SELECT MAX(CUSTNO) FORM”+DBOWNER+”.CUSTOMER” 
+
+将允许你获得当前最高的客户号。试试自己写这个代码，基于课程笔记的例子。如果你需要帮助，看答案页。 
+
+3．接着你将用一个prepared statement对象来把客户属性对象里的信息插入数据库。输入以下的行： 
+
+//Insert record in the database 
+
+PreparedStatement insertStatement= 
+
+conn.prepareStatement(“INSERT INTO”+DBOWNER+”.CUSTOMER(FNAME,LNAME,ADDR,CITY,STATE,AGE,ZIP,CUSTNO)”+”VALUES(?,?,?,?,?,?,?,?)”); 
+
+上面的行要求连接创建一个prepared statement对象叫insertStatement。SQL语句作为参数被传递。数据库行的每一列的值用问号代表。每一个问号必须被一个正确类型的值代替。输入以下行： 
+
+insertStatement.setString(1,formInput.getProperty(“FNAME”)); 
+
+insertStatement.setString(2,formInput.getProperty(“LNAME”)); 
+
+insertStatement.setString(3,formInput.getProperty(“ADDR”)); 
+
+insertStatement.setString(4,formInput.getProperty(“CITY”)); 
+
+insertStatement.setString(5,formInput.getProperty(“STATE”)); 
+
+insertStatement.setString(6,formInput.getProperty(“AGE”)); 
+
+insertStatement.setString(7,formInput.getProperty(“ZIP”)); 
+
+insertStatement.setInt(8,nextId); 
+
+4．insertStatement执行对数据库的更新。输入下面两行： 
+
+insertStatement.executeUpdate(); 
+
+如果有错误出现在创建连接时，语句或访问数据库，这个方法会抛出一个SQLException。 
+
+5．最后你需要存储客户号码到formInput属性对象。输入下面行： 
+
+formInput.put(“CUSTNO”,new Integer(nextId).toString()); 
+
+6．保存方法。应该没有错误。 
+
+7．接着你将需要为JKRegister servlet编辑WebSphere配置文件。(编辑”[x:]\IBMVJava\ide\project_resources\IBM WebSphere Test Environment\properties\server\servlet\servletservice\serrvlets.properties”.) 
+
+改变看上去这样的行： 
+
+servlet.JKRegister.code=com.ibm.waslab.servlet1.RegistrationServlet 
+
+为这样： 
+
+servlet.JKRegister,code=com.ibm.waslab.JDBC.RegistrationServlet 
+
+8．如果你的webserver在运行，关掉它。在VAJ，启动SERunner。打开你的web浏览器，到JK Toys网站的注册页面。在表格里输入注册信息，按注册按钮。你的新的servlet将被调用。登录进JKToys站点确信注册已经发生。你的新的客户号码应该能在数据库找到。 
+
+
+
+在这个练习你作了什么 
+
+在这个练习，你编写了Registration Servlet的register方法。这个方法用JDBC来创建一个新的客户号码，注册一个新的客户到数据库。现在你有了在你的servlets里访问数据库的基本知识。 
+
+
+
+答案 
+
+以下的代码创建一个SQL语句，执行在前一页里定义的SQL查询。 
+
+
+
+//Get next customer number 
+
+Statement sqlStatement=conn.createStatement(); 
+
+ResultSet result=sqlStatement.executeQuery(“SELECT MAX(CUSTNO) FROM”+DBOWNER+”.CUSTOMER”); 
+
+查询的结果被放在ResultSet对象叫result里面。结果的集合包含一个游标，最初指向返回的第一行前面。为了得到查询的值游标必须用next()往前移动。用这个方法，游标只能向前移动。下面几行移动游标到返回的值，增加1。 
+
+int nextId=0; 
+
+if(result.next()= =true) 
+
+{ 
+
+nextId=result.getInt(1)+1; 
+
+} 
+
+if检查确定是否有行被返回。如果没有，结果为false。我们不处理错误的情况，但是它可以简单地用把nextId设置为1来处理。我们还可以用ResultSet的方法getInt(String)，列的名字为”CUSTNO”，但是因为我们知道只有一列会被返回，我们选择用getInt(int)..  

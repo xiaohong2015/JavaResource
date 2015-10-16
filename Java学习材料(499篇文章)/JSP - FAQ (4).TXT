@@ -1,0 +1,181 @@
+作者：jspfuns
+日期：2000-8-10 17:54:16
+27) How are servlets and JSP pages related? TOC 
+
+
+
+JSP pages are focused around HTML (or XML) with Java codes and JSP tags inside them. When a web server that has JSP support is asked for a JSP page, it checks to see if it has already compiled the page into a servlet. Thus, JSP pages become servlets and are transformed into pure Java and then compiled, loaded into the server and executed. Different JSP implementations do this in more or less efficient ways.
+
+28) Any good web sites for up to date activities in the Java/JSP/Servlet world? TOC 
+
+
+
+The following web sites contain information about JSP:
+
+An IBM Tutorial on JSP: http://www.software.ibm.com/developer/education/java/online-courses.html 
+An IBM Red Book : http://www.redbooks.ibm.com/abstracts/sg245423.html 
+Other IBM Information: http://www.software.ibm.com/webservers/appserv/doc/v20dcadv/doc/index.html 
+JSP-Resource Information - http://www.jspin.com/ is quite comprehensive on sites and articles. 
+JSP Tags is a site for Taglibs - http://jsptags.com/ 
+The following web sites focus on JSP solutions
+
+Servlets Taverne - http://www.interpasnet.com/JSS/
+Oi Servlet World - http://i.am/servletforme
+Web Development with JSP - http://www.burridge.net/jsp/
+
+29) How do I force a user to log in? TOC 
+
+
+
+From: Andre Richards <AndreRic@MWEB.CO.ZA>
+
+I did as follows:
+
+
+On every page which must be authenticated, I check for a user ID in the session object - if it doesn't exit, I do a redirect to a login page, passing the url the user was trying to access as a parameter.
+
+On the login page, if the user successfully logs in, I create a session for him/her, and add the user ID to the session. I then redirect back to the original page the user tried to access. This way, even if the user bookmarks a page, he/she will be asked to login once the session has become invalid.
+
+Some code:
+On every page I add the following:
+
+HttpSession session = request.getSession(true);
+if (session.getValue("CustomerID") == null) {
+response.sendRedirect (response.encodeRedirectUrl
+("Login.jsp?Origin=SharePortfolio.jsp"));
+}
+else {
+// the rest of the page ...
+In Login.jsp once the user has provided the correct logon credentials:
+
+session.putValue("CustomerID", CustomerID);
+response.sendRedirect(response.encodeRedirectUrl(request.getParameter("Origin")));
+
+
+--------------------------------------------------------------------------------
+
+
+Another developer has a different approach:
+
+From: Christopher Cobb <ccobb@usgs.gov>
+
+
+After researching several approaches, I have finally settled on the following approach. I would like to hear how others
+are solving this problem. (FAQ maintainers note: This syntax won't work with JSP 1.0)
+
+1. User accesses GuardedPage.jsp via
+
+http://localhost/path/to/GuardedPage.jsp
+2. GuardedPage.jsp includes a login checking page:
+
+<!--#include file="/admin/" file="LoginChecker.jsp" -->
+Every page that needs to be login-protected should include this file (which, depending on how your site is set up, may be
+every page.)
+
+3. LoginChecker.jsp accesses a bean that does the login checking:
+
+<USEBEAN lifespan="session" name ="loginChecker" type="package.LoginChecker">
+<setfromrequest beanproperty = "*">
+</USEBEAN>
+4. The LoginChecker bean has a property 'loggedIn'. (It also has properies for Username and Password, and a
+processRequest() method, which are used later).
+
+LoginChecker.jsp checks the value of the loggedIn property. If it is not true (i.e., the user is not logged in), a login
+page is displayed:
+
+<excludeif property ="loginChecker:loggedIn" value = "true">
+
+<FORM action="/servlet/DBAccess/path/to/GuardedPage.jsp" method="post">
+Username: <input name="userName" size="15" maxlength="15" >
+Password: <input type="password" name="password" size="15" maxlength="15">
+<input type="submit" name="loginUser" value="Submit">
+</FORM>
+
+</excludeif>
+The first time through, this bean will be 'empty' and the loggedIn property will not be set. The login form will therefore
+be displayed.
+
+5. There is a little trick in the action clause above. When the user types in his login info and presses submit, the
+invoked URL is
+
+/servlet/DBAccess/path/to/GuardedPage.jsp
+The action passes through the servlet DBAccess, then continues on to our original page. This servlet does nothing more
+than attach an open database connection to the current session:
+
+session.putValue("open.connection", connection);
+The servlet then picks up the trailing part of the URL with:
+
+String trailingURL = request.getPathInfo();
+It then calls forward() to pass control back to the requested page. In this example, the new page happens to be the same
+as the page we came from.
+
+getServletConfig(
+).getServletContext(
+).getRequestDispatcher(response.encodeURL(trailingURL)
+).forward(request,response);
+6. Now we are back to our original page and the logginChecker bean gets invoked again. Because of the:
+
+<setfromrequest beanproperty = "*">
+in the loginChecker USEBEAN tag, and because our username and password field names in the LoginChecker.jsp page match our
+bean's property names, the username and password that the user typed in get 'magically' populated in the corresponding
+properties of the bean.
+
+7. The LoginChecker bean has a processRequest() method which checks to see if a username and password has been supplied.
+If so (and if we are not logged in), it performs a database lookup to log the user in. If the lookup is successful, the
+loggedIn property is set to true.
+
+8. We are finally back to our GuardedPage.jsp page. It will probably not want to display itself unless the user is logged
+in. The page should therefore only be included if loggedIn is true:
+
+<includeif property="loginChecker:loggedIn" value="true" >
+The contents of GuardePage.jsp are displayed only if loggedIn is true.
+
+</includeif>
+We're done! GuardedPage.jsp is only displayed if the user is logged in. If the user is not logged in, a login page is
+displayed, which if successful, returns the user to the original page.
+
+9. There is one small cleanup which is needed in Step 4. As coded above, a passthrough servlet is used to attach a
+database connection to the session. If the user repeatedly fails to login, the servlet prefix will get repeatedly
+pre-pended to the URL. Furthermore, the 'current page' is hardcoded into the LoginChecker.jsp page which restricts it's
+reusability. A little JavaScript fixes both of these problems. The following JavaScript should be used in place of the
+<FORM> tag in Step 4. above.
+
+<script language="JavaScript">
+<!--
+if (document.location.pathname.indexOf("/servlet/package.DBAccess") == 0)
+document.write(
+'<FORM action="' +
+document.location.pathname +
+'"method="post">');
+else
+document.write(
+'<FORM action="/servlet/package.DBAccess' +
+document.location.pathname +
+'" method="post">');
+//-->
+</script>
+30) So how can a newbie get started with JSP? TOC 
+
+
+
+See the QuickStart section of the JSP Book at http://www.esperanto.org.nz/jspbook
+
+31) How can I ensure that session objects stay in existence when the web server restarts? TOC 
+
+
+
+There is no requirement that a session object will stay around as far as I can tell, but some web servers will serialize objects if they support the serialization interface.
+
+32) How can I include one JSP inside another JSP? TOC 
+
+
+
+JRUN, ServletExec and GNUJSP allow you to specify (it was in the 0.91 spec):
+
+<%@ include="./header.jsp" %> - where header.jsp is the file you want to include.
+The spec does say that it supports NCSA style includes as in
+
+<!--#include virtual="/pathfromdocdir/" file="copyright.html" -->
+<!--#include file="data/table.html" -->
+But there is no requirement that they support JSP.
+

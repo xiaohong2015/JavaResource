@@ -1,0 +1,285 @@
+作者：八脚鱼
+email: o@test.com
+日期：2001-6-29 9:53:50
+明天的Java开发什么样？
+（仙人掌工作室　2001年06月19日 14:44）
+
+和当前的Servlet 2.2规范相比，Servlet 2.3 建议最终草案（PFD）最大的不同之处在于把filter（过滤器）和event（事件）加入了Servlet模型。过滤器提供了一种让应用程序在任何Servlet运行之前或运行之后执行标准动作的方法。很长时间以来，Servlet规范中都没有事件。事件提供的是特定动作的通知，特别是应用程序的启动/结束与会话的启动/结束，使得应用程序能够进行某些一次性的初始化/清理操作。
+
+事件句柄 
+在许多场合，应用程序一启动就必须进行一些初始化操作。例如，创建和初始化JDBC连接时，或者创建JDBC连接池时，或者读取在应用程序的整个生命周期内都要用到的资源时，或者进行简单的检查以确保应用程序要用到的某些资源确实存在时，这种情况都会发生。在遵从2.2规范的容器上，应用程序没有保证能够执行这类初始化操作的办法。
+
+在2.2规范中，部署Servlet时可以在web.xml文件中设置<load-on-startup>项目。这个元素应该包含一个正数，它决定了Servlet启动的次序，有关该标记的更多说明，请参见Servlet规范中的web.xml DTD说明。采用这种方案有几个问题。首先，Servlet规范说：“load-on-startup元素表示该Servlet应该（should）在Web应用程序启动的时候装入。”Servlet容器开发者可能把它理解成“应该装入，但不是必须装入”（因此，当应用程序启动时Servlet可能没有被装入）。另外一个问题在于，我们是在用一种与Servlet设计意图不同的方式使用Servlet。
+
+Servlet有一个“请求”级的作用范围。也就是说，按照设计，Servlet对于每个客户端的请求执行一次。但在这里，Servlet有了“应用”级作用范围，它执行一次然后就挂起。
+
+在2.2规范中，Servlet还可以被卸载——容器检查初始化Servlet，判断出Servlet在一段时间内已经没有使用，于是就卸载它。如果这个Servlet“占据”了一些启动的时候它初始化的资源，那么它应该释放这些资源。但是，Servlet不会被告知应用程序什么时候结束。Servlet的拆除方法会在应用程序关闭的时候被调用，但它无法知道是否所有其他Servlet也被卸载。当其他Servlet被卸载时，它们可能需要用到由初始化Servlet创建的资源。如果先卸载的是初始化Servlet，那么其他Servlet的处境就不妙了。
+
+使用会话的时候也会出现完全同样的问题，因为应用程序完全有理由在建立/拆除每一个会话的时候，做一些初始化或者清理工作。
+
+为了解决这些问题，Servlet 2.3规范引入了事件句柄的概念。事件句柄是一些回应和处理由容器初始化的特定事件的代码。Servlet 2.3规范定义了两种类型的事件：应用程序事件，会话事件。对于所有这两种事件类型，事件句柄能够捕获启动和结束事件，能够捕获属性改变事件。
+
+我们将把注意力主要集中到应用程序的启动和结束事件上，但对于其他事件类型来说，代码也是相似的。
+
+我们来看看事件句柄的代码。应用程序的事件句柄必须扩展javax.servlet.ServletContextListener接口。这个接口有两个方法，即contextDestroyed()和contextInitialized()。两个方法都有一个ServletContextEvent参数。正如你可以猜想到的，contextInitialized()方法在应用程序启动的时候被调用，contextDestroyed()方法在应用程序结束的时候被调用。ServletContextEvent类有一个方法，它能够返回正在被创建或拆除的ServletContext的引用。
+
+　　举例来说，假设你正在设计一个基于Web的简单白页（White Page）应用。在这个应用中，用户通过email查找姓名和地址，如Listing 1所示。这个例子在一个Hashtable（散列表）中保存白页的内容，散列表必须在应用程序启动的时候创建，而且它必须保存到应用程序的ServletContext。
+
+
+【Listing 1】
+import javax.servlet.ServletContextListener;
+
+  public class WhitePagesListener implements ServletContextListener {
+   Hashtable whitePages;
+     public WhitePagesServletListener() {
+       whitePages = new Hashtable();
+   }
+    public void contextDestroyed(ServletContextEvent sce) { }
+    public void contextInitialized(ServletContextEvent sce) {
+        System.out.println("contextInitialized");
+        WhitePageEntry wpe = new WhitePageEntry("Kevin Jones", "555-1234");
+        whitePages.put("kev@dev.com", wpe);
+        wpe = new WhitePageEntry( "Simon Horrell", "555-8765");
+        whitePages.put("simon@dev.com", wpe);
+        wpe = new WhitePageEntry( "Don Box", "555-2137");
+        whitePages.put("don@dev.com", wpe);
+        // 把散列表保存到ServletContext
+        sce.getServletContext().setAttribute( "addrbook", whitePages);
+}
+} 
+
+代码非常简单。WhitePagesListener类实现了ServletContextListener。散列表由类的构造方法创建。contextDestroyed()方法什么事情也不错，因为应用程序是被完全卸载，我们不需要清理过程。令人感兴趣的部分是在contextInitialized()方法内。这个方法把我们需要的数据保存到散列表，然后把散列表保存到ServletContext。当contextInitialized()被调用时，它的参数中传入了一个对ServletContextEvent对象的引用。ServletContextEvent类有一个getServletContext()方法，它返回的是对当前应用程序的ServletContext的引用。获得ServletContext的引用之后，散列表就被保存到了ServletContext之中。
+
+应用程序必须经过配置才能使用这个事件句柄，具体通过修改应用程序的部署描述器（即web.xml文件）完成：
+
+
+<web-app>
+<listener>
+  <listener-class>
+   WhitePagesListener
+  </listener-class>
+</listener>... 
+
+用这种方法可以配置任意数量的监听器（Listener）。调用监听器的次序就是它们在部署描述器中出现的次序。监听器属于Singleton，开发者必须负责进行同步。这一点对于本例来说不是特别重要，但对于所有其它类型的应用来说，它可能很重要。
+
+过滤器
+过滤器是Servlet 2.3规范中最主要的新增功能。过滤器使得Servlet开发者能够在请求到达Servlet之前截取请求，在Servlet处理请求之后修改应答。正如我们即将看到的，过滤器的创建和安装都很简单。
+
+所有的过滤器实现javax.filter.Filter接口。这个接口有三个方法：setFilterConfig()方法，在最后的规范中，这个方法很可能被两个方法取代，取代的方法可能是init(Filterconfig config)和destroy()；getFilterConfig()方法，在规范的稍后版本中这个方法可能消失；doFilter()方法。setFilterConfig()方法在第一次创建过滤器实例以及从调用链删除过滤器时被调用。创建实例时，传入过滤器的参数是一个非null的FilterConfig对象。这个对象使得过滤器能够访问它的名字和当前的ServletContext。初始化参数可以作为过滤器配置的一部分指定，这些参数也可以通过FilterConfig访问。当过滤器被删除时，传入setFilterConfig()的是一个值为null的FilterConfig。
+
+配置过滤器时，我们可以把过滤器关联到一个或者多个Servlet上。只要请求传递到了与某个过滤器关联的Servlet上，该过滤器就会执行。过滤器以调用链中一部分的形式执行，执行次序由过滤器在部署描述器（即web.xml文件）中的次序决定。容器通过调用过滤器的doFilter()方法执行过滤器。doFilter()方法的参数包括一个ServletRequest对象、一个ServletResponse对象、一个javax.servlet.FilterChain对象。
+
+FilterChain只有一个方法doFilter()，过滤器通过调用该方法把请求和应答继续向调用链的下一环传递。当然这也意味着，过滤器可以不再向调用链传递它，从而阻塞调用。此时，当前过滤器必须负责生成合适的应答内容。
+
+举一个例子，我们来看一个在调试Servlet时很有用的Servlet，如Listing 2所示。这个过滤器将输出“下游”Servlet和过滤器设置的HttpRequest头和HttpResponse头。如果让这个过滤器成为调用链中的第一个过滤器，它可能能够让我们捕获所有的应答头，不过容器可能决定以过滤器永远不能了解的方式设置应答头：
+
+
+【Listing 2】下面清单中的Servlet将输出由“下游”Servlet和 过滤器设置的HttpRequest头和HttpResponse头
+
+public class DumpHeadersimplements
+javax.servlet.Filter {
+  private FilterConfig fc;
+  private ServletContext ctx;
+  ... ...
+
+public FilterConfig getFilterConfig() {
+  return fc;
+}
+publicvoid setFilterConfig( FilterConfig filterConfig) {
+fc = filterConfig;
+if(fc !=null) ctx = fc.getServletContext();
+}
+} 
+
+这个过滤器实现了javax.servlet.Filter接口，所以它必须按照前面所显示的实现setFilterConfig()和getFilterConfig()。setFilterContext()保存了一个对ServletContext的引用以便以后使用。
+
+doFilter()方法的实现需要一点技巧。doFilter()的第一部分很简单：获取request对象，分析HTTP方法和查询字符串，然后枚举请求头。代码如Listing 3所示。
+
+
+【Listing 3】下面显示了doFilter()第一部分的实现，它获取request对象， 分析HTTP方法和查询字符串。
+
+public void doFilter(
+  ServletRequest request,
+  ServletResponse response, chain)
+  throws java.io.IOException,
+  ServletException {
+
+   // 获得request对象
+   HttpServletRequest req = (HttpServletRequest)request;
+
+   // 重新构造HTTP请求行
+   String temp;
+   temp = req.getMethod() + req.getRequestURI();
+   if(req.getQueryString() != null)
+   temp += "?"+req.getQueryString();
+   temp += " " + req.getProtocol();
+
+   // 用ServletContext记录HTTP请求行
+   ctx.log(temp); temp = "";
+
+   // 枚举请求头
+   Enumeration names = req.getHeaderNames();
+   while(names.hasMoreElements()) {
+      String name = (String)names.nextElement();
+      temp += name + ": " ;
+      Enumeration values = req.getHeaders(name);
+      while (values.hasMoreElements()) {
+         String value = (String)values.nextElement();
+         temp += value + " ";
+       } // 记录 ctx.log(temp); temp = "";
+} 
+
+但处理应答比较复杂，而且它涉及到Servlet的一个新概念——封装request和response对象。在Servlet规范以前的版本中，调用任何一个要求有[Http]ServletRequest或[Http]ServletResponse的方法时，你必须把传递给Servlet service方法的request和response对象传递给该方法。最明显的例子就是分派请求的时候：
+
+
+RequestDispatch rd = getServletContext().getRequestDispatcher("foo"); rd.forward(request, response); // or rd.include(request, response); 
+
+假设你想执行一个包含操作，然后，在把应答发送给客户端之前又要对它进行处理，或者在把应答发送给客户端之前从RequestDispatcher.forward()查看应答。在以前的Servlet规范中，这是不可能的。但在Servlet 2.3规范中这一切都成为可能。
+
+新的规范定义了两个新类，即javax.servlet.http.HttpServletRequestWrapper和javax.servlet.http.HttpServletResponseWrapper（这两个类从它们各自的非HTTP版本继承）。这两个类的构造方法如下：
+
+
+HttpServletRequestWrapper(HttpServletRequest request) HttpServletResponseWrapper(HttpServletResponse response) 
+
+在这些类中，这两个方法的默认行为是把调用传递给它们所封装的对象。使用这些类的时候，你一般要派生这些类并覆盖那些感兴趣的方法。对于本文的过滤器，我们必须创建一个应答封装器，记录对addXXXHeader()方法和setXXXHeader()方法的调用。另外，我们还想要捕获对setStatus()、setContentLength()、setContentType()和setLocale()方法的调用。代码如Listing 4所示，它简单地记录了对各个方法的调用。
+
+
+【Listing 4】应答封装器。下面的代码为过滤器构造了一个应答封装器， 它将记录对addXXXHeader()和setXXXHeader()方法的调用。另外， 它还要捕获对setStatus()、setContentLength()、setContentType()和 setLocale()方法的调用。
+
+class HeaderResponseWrapper extends
+HttpServletResponseWrapper {
+  ServletContext ctx;
+
+  public HeaderResponseWrapper(
+    HttpServletResponse response,
+    ServletContext ctx) {
+      super(response);
+      this.ctx = ctx;
+   }
+
+  public void addCookie(Cookie cookie) {
+    ctx.log("Set-Cookie: " + cookie.getName() + ":" + cookie.getValue());
+    super.addCookie(cookie);
+   }
+
+  public void addHeader(String name, String value) {
+    ctx.log(name + ": " + value); super.addHeader(name, value);
+   }
+
+  public void addIntHeader(String name, int value) {
+    ctx.log(name + ": " + value); super.addIntHeader(name, value);
+   }
+
+  public void addDateHeader(String name, long value) {
+    ctx.log(name + ": " + value); super.addDateHeader(name, value);
+   }
+
+  public void setHeader( String name, String value) {
+    ctx.log(name + ": " + value); super.setHeader(name, value);
+   }
+
+  public void setIntHeader( String name, int value) {
+    ctx.log(name + ": " + value); super.setIntHeader(name, value);
+   }
+
+  public void setDateHeader( String name, long value) {
+    ctx.log(name + ": " + value); super.setDateHeader(name, value);
+   }
+
+  public void setStatus(int sc) {
+    ctx.log("status: " + sc); super.setStatus(sc);
+   }
+
+  public void setStatus( int sc, java.lang.String sm) {
+    ctx.log("status: " + sc); super.setStatus(sc, sm);
+   }
+
+  public void setContentLength(int len) {
+    ctx.log("Content-Length: " + len); super.setContentLength(len);
+   }
+
+  public void setContentType(java.lang.String type) {
+    ctx.log("Content-Type: " + type); super.setContentType(type);
+   }
+
+  public void setLocale(java.util.Locale loc) {
+    ctx.log("locale: " + loc); super.setLocale(loc);
+   }
+} 
+
+在过滤器中，我们按照如下方式使用这个对象：
+
+
+HttpServletResponse resp = (HttpServletResponse)response;
+HeaderResponseWrapper hrespw = new HeaderResponseWrapper(resp, ctx);
+
+System.out.println("********");
+
+chain.doFilter(request, hrespw); 
+
+注意创建好封装器之后chain.doFilter()方法就被调用。
+
+定义好过滤器之后就应该安装它。为此，web.xml中应该定义一个filter元素：
+
+
+<filter>
+<filter-name>
+  Headers Filter
+</filter-name>
+<filter-class>
+  DumpHeaders
+</filter-class>
+<!- optional <init-params> ->
+</filter> 
+
+完成这一步之后，你还要把过滤器和你想要过滤的资源关联起来。这时你有两种选择：在web.xml中，把过滤器关联到单个命名的Servlet，或者把过滤器关联到一个URL。如下所示：
+
+
+<filter-mapping>
+<filter-name>
+  Headers Filter
+</filter-name>
+<servlet-name>
+AddressBookServlet
+</servlet-name>
+</filter-mapping> 
+
+或者：
+
+
+<filter-mapping>
+<filter-name>
+  Header Filter
+</filter-name>
+<url-pattern>/*</url-pattern>
+</filter-mapping> 
+
+输出的请求头如下所示：
+
+
+GET/AddressBook/Browse.jsp HTTP/1.1
+accept: */*
+referer: http://localhost/ AddressBook/
+accept-language: en-gb
+accept-encoding: gzip, deflate
+user-agent: Mozilla/4.0 ( compatible; MSIE 5.5; Windows NT 5.0)
+host: localhost
+connection: Keep-Alive
+cookie: JSESSIONID= E0F9646772F4448004C16122020664F1 
+
+输出的应答头如下所示：
+
+
+Content-Type: text/html;charset=8859_1 Content-Type: text/plain 
+
+如果进行网络跟踪，你会发现这里少了一些东西。例如，状态代码没有显示，这是因为有一些应答头由容器在过滤器链执行之前或之后设置。
+
+过滤器有很多用途，比如验证、转换、加密/解密。但有一点必须注意：你可以把过滤器关联到任意资源，而不仅仅是Servlet。如果你使用的是一个插入到其他Web服务器的Servlet引擎，Web服务器很可能会不依赖于Servlet容器独立地提供服务。在这种情况下，Servlet容器将接收不到所有的请求，所以过滤器也就不会总是被执行。
+
+JSP 1.1中有一个问题涉及到请求分派。如果你有一个页面执行include操作，jsp:include有一个必须设置为true的强制性flush（刷新）属性：
+
+
+<jsp:include page="somePage" flush="true" /> 
+
+这个属性强制容器把当前缓冲区内容刷新到客户端。这样，JSP页面不能再设置任意HTTP应答头。JSP 1.2规范已经修正这个问题，jsp:include标记中现在已经可以指定flush="false"。
+

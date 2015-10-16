@@ -1,0 +1,21 @@
+作者：jeru
+日期：2000-12-20 11:31:51
+JSP其他相关资源： 
+
+Servlets and JavaServer Pages (JSP) 1.0: A Tutorial 
+http://www.apl.jhu.edu/~hall/java/Servlet-Tutorial/ 
+
+JavaServer PagesTM: A Developer's Perspective 
+http://developer.java.sun.com/developer/technicalArticles/Programming/jsp/ 
+
+JAVASERVER PAGESTM NEWS & ARTICLES 
+http://java.sun.com/products/jsp/news.html 
+
+JAVASERVER PAGESTM TECHNICAL RESOURCES 
+http://java.sun.com/products/jsp/technical.html 
+
+SERVLETS TAVERNE 
+http://www.interpasnet.com/JSS/ 
+
+servlets.com 
+http://www.servlets.com/ 

@@ -1,0 +1,27 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：2001-6-15 13:43:16
+ 
+[b]使用 EJB 组件[/b] 
+因为 EJB 体系结构被设计为高度灵活的，并支持使用任意复杂的方式连接企业级 bean，所以可构建许多不同的方案，来说明应用程序可怎样使用企业级 bean。一个有用的方案提出将 EJB 组件表示为三层信息系统的关键组件，该系统将企业数据、事务和应用程序资源连接到 Web 上。
+基于 EJB 的三层编程模型视 Web 浏览器为第一层，视支持应用程序的 Web 服务器为第二层，视企业信息资源为第三层。在此编程模型中，除了 EJB 技术外，还实现了 Java servlet 技术、JavaBeans 技术和 Java Server Page (JSP) 技术。下图显示了各层的排列情况：
+[b][/b]
+[img]http://www.cn.ibm.com/developerWorks/java/what-are-ejbs/part3/ejb2.gif[/img]
+第一层是瘦客户机 -- 通常是 Web 浏览器，它可以处理普通 Web 数据类型，如 HTML 和 GIF，并支持 HTTP 通信。第二层是 Web 应用程序服务器，它是用代码扩充的 Web 服务器，用来对能够通过 Web 服务器调用的应用程序提供运行时支持。现有的 Web 应用程序都沿用 CGI-BIN 编程模型，但预计第二层应用程序开发将转向 Java servlet 编程模型，后者提供大幅改善的性能和可移植性。除支持 Java servlet 外，Web 应用程序服务器还将添加 EJB 服务器功能，以支持使用 EJB 组件的应用程序。第三层代表企业级信息资源，可以包括关系数据库和面向对象的数据库、事务监视器和定制的应用程序。EJB 技术在这一设计中扮演着关键角色，因为，它使驻留在第二层上的应用程序组件，与组成第三层的企业资源之间的接口，得以标准化。
+Java servlet、Java beans 和 Java server page 不是 EJB 应用程序方案的必需元素，但它们可与 EJB 组件一起工作，以提供基于 Java 的内聚性的应用程序环境。此处描绘的环境将以下职责指定给参与工作的 Java 组件：[UL][LI]给 Java servlet 指定了应用程序“控制器”的角色 [LI]JSP 页面处理数据表示和用户界面的任务 [LI]Java bean 充当“数据封装器”，存储中间结果的数据 [LI]EJB 组件提供访问企业信息资源的机制[/LI][/UL]
+客户可以使用一个假定的、基于 EJB 的 Web 应用程序更新现有的库存，并用容器管理式持久性和容器管理式事务，将访问库存数据库的位置封装在实体 EJB 组件的内部。库存票据可通过 Web 浏览器输入，浏览器提供一个 HTML 表单来捕获产品编号、供应商，等等，并在提交时调用一个 servlet。servlet 代码充当应用程序控制器角色，确定哪些企业数据库需要更新，需要用户追加什样的信息。servlet 可通过代表它的实体 bean 访问主库存数据库，并调用 JNDI 接口获取对此 bean 的本地对象的引用，然后使用 finder 方法定位所请求产品编号的远程对象。此时，通过调用远程对象的方法，servlet 可更新库存计数，接着容器将此方法委托给 EJB 组件。因为容器根据数据库更新，以对 bean 透明的方式划分一个事务，而且以对 bean 透明的方式将数据写入数据库来保证数据持久性，所以也就保持了数据的完整性。
+从 EJB 组件返回到 servlet 的任何结果信息，都可以使用 setter 方法存储在一个（非企业的） Java bean 的属性中。此时 servlet 可将控制权转让给一个适当的 JSP 页面，以便将这些结果组合到表示格式中，并将结果返回给用户。JSP 页面很可能主要由静态文本和有关单个事务的可变信息占位符组成。在向浏览器发送表示数据之前，JSP 页面使用 getter 方法从 Java bean 的属性中获得可变数据元素。
+基于 EJB 的三层设计提供了几个好处，包括：[UL][LI]访问企业数据的业务逻辑可封装在可重用、可移植的企业级 bean 中。 [LI]现有的企业系统只需很少修改或者根本不需要修改，就可以集成为企业级 bean。 [LI]企业应用程序所需的运行时服务，如事务和持久性，可以从 bean 中分解出来，并指定给此 bean 的容器。 [LI]无须更改 EJB 组件，即可修改控制应用程序流程的 Servlet。 [LI]Servlet 代码可将注意力集中在应用程序控制逻辑上，而无须考虑数据表示。 [LI]JSP 页面可将静态和动态内容混合在一起，生成表示信息。 [LI]用 Java 语言编写的系统组件，对于具有 JVM 的任何平台都是可移植的。[/LI][/UL]
+[b]结论[/b] 
+在开发能够支持关键任务的企业级信息系统的过程中，EJB 规范代表了 Java 技术的下一个发展阶段。EJB 组件将随 JavaBeans 规范引入的 Java 组件模型，扩展到服务器领域，从而使业务逻辑组件的开发可以跨企业应用程序重用，并且可以跨支持 Java 的平台移植。由于包含了基于 RMI 技术的对象分布，所以支持跨多层的可执行组件的分立，从而允许最大的实现灵活性和高度可伸缩性。如果将常规的企业应用程序运行时服务重新定义为可指定给容器抽象的对象服务，则允许 EJB 组件的开发人员将精力集中在业务逻辑上，从而减小了通常与运行时服务相关的复杂性和平台相关性。
+增强 Java 运行环境，以包括命名和目录服务的标准接口、关系数据库访问、事务服务和远程对象访问，使 Java 开发人员能够编写强健的企业应用程序，而不必离开 Java 编程环境。将其它 Java 技术 -- 如 Java servlet 和 JavaServer Pages 技术 -- 与 EJB 组件一起使用，可创建一个对于大型企业系统来说足够强健的紧凑编程模型，但由于使用了巧妙的接口，从而简化了开发工作。而且，因为 EJB 体系结构是 JavaBeans 组件模型的逻辑扩展，所以作为 EJB 组件开发的业务逻辑可跨多个企业应用程序重用。 
+企业级 bean 体系结构的另一个好处是，提供了现有企业信息系统的直接集成通道，此通道可能与 Java 编程语言或 bean 编程模型毫无共同之处。因为现有的企业信息资源 -- 如关系数据库、事务监视器和业务应用程序的定制新品种 -- 可通过将它们封装在 EJB 组件中连接到 Web 前端，而无须替换应用程序或重写主要代码段，所以，客户可保护其现有的 IT 投资。
+考虑到 EJB 技术的巨大前景，IT 业界以相当大的兴趣欢迎 EJB 规范，就不是什么令人惊讶的事了。[I]EJB 体系结构提供的一个最大好处可能是，把业务逻辑编程与将业务逻辑和企业级服务器端运行环境的复杂集成分离开来[/I]。如果部署了 EJB 组件的容器承担了管理运行时服务（如持久性、事务和并发数据库访问）的职责，则 bean 的开发人员就可以自由地将精力集中在开发封装业务逻辑的软件组件上。JavaSoft 副总裁表述了 EJB 技术的重要性（引自 Sun Microsystems 网站）： 
+[BLOCKQUOTE]“‘Enterprise JavaBeans API 将为企业开发人员和解决方案提供商提供一种新的战略武器，供他们建立下一代行业领先的、基于关键业务的应用程序，’Sun Microsystems 的 JavaSoft 软件产品部副总裁，Jon Kannegaard 说：‘因为用 Enterprise JavaBeans API 设计的应用程序将与现有的企业系统一起工作，所以企业利用 Java 平台会获得新的竞争优势，同时还保留他们对现有技术的投资，’Kannegaard 继续说。 [/BLOCKQUOTE]
+
+[BLOCKQUOTE]“使用 Enterprise JavaBeans API，开发人员将能够消除应用程序开发过程中的复杂性。这是可能的，因为每个 Enterprise JavaBeans 组件都封装了一个基本的业务功能。目前开发人员必须懂得如何编写业务逻辑和专门的系统级程序，以控制诸如安全性功能部件和处理多个事务的能力 -- 一项既枯燥又复杂的任务。Enterprise JavaBeans API 使全体开发人员能够将精力集中在编写解决业务问题的逻辑上，而不是将精力集中在编写用以简化不同技术间交互作用的代码上。”（[I]新闻稿：Sun Releases Draft Enterprise JavaBeans Specification for Public Review[/I]）[/BLOCKQUOTE]
+
+[b]参考资料[/b] 
+[UL][LI]通过 [url href=http://java.sun.com/products/ejb/]Sun 网站[/url]的 [url href=http://java.sun.com/products/ejb/faq.html]associated FAQs[/url] 深入了解 Java 技术和 EJB 体系结构。 [LI]查阅 [url href=ftp://ftp.javasoft.com/docs/ejb/ejb.10.pdf]Enterprise JavaBeans Specification 1.0[/url]。 [LI]请参阅 Enterprise JavaBeans 规范的完整[url href=http://www.javasoft.com/pr/1997/dec/pr971210-01.html]新闻稿[/url]。 [LI]请参阅 [url href=http://www.cn.ibm.com/developerWorks/java/what-are-ejbs/part3/appendix.html]IBM WebSphere Application Server 如何使用 EJB 技术[/url]。 [/LI][/UL]
+[b]作者简介[/b] 
+Ken Nordby 是 IBM 软件开发实验室的软件工程师，该实验室位于北卡罗来纳州 Research Triangle Park。作为 SWG Product Affinity Services 业务小组的成员，Ken 与为 IBM WebSphere Application Server （Enterprise JavaBeans 技术的 IBM 实现）进行开发和咨询的 IBM 人一起工作。可以通过 [email]nordby@us.ibm.com[/email] 与 Ken 联系  

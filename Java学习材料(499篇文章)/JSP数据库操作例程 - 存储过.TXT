@@ -1,0 +1,127 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-8-16 16:12:47
+<%--
+作者：何志强[hhzqq@21cn.com]
+日期：2000-08-04
+　　　2000-08-16
+版本：1.1
+功能：JSP数据库操作例程 - 存储过程 - JDBC-ODBC - SQL Server
+
+SQL Server的存储过程如下：
+    create procedure sp_jsptest
+       @yourname  varchar(50),
+       @myname varchar(50) output
+    as
+       select "您好,"+@yourname+",非常高兴认识您，^_^"
+       set @myname = "何志强"
+       return 1
+    go
+--%>
+
+<%@ page contentType="text/html;charset=gb2312"%>
+
+<%
+//变量声明
+java.lang.String strName; //姓名
+
+//取得用户输入的数据
+strName = request.getParameter("name");
+if(strName==null){//用户没有输入姓名
+%>
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>JSP数据库操作例程 - 存储过程 - JDBC-ODBC - SQL Server</title>
+</head>
+<body>
+
+<form action="jdbc-odbc.jsp" method="post">
+您尊姓大名：<input type="text" name="name" maxlength="50">
+<input type="submit" value="提交">
+</form>
+
+</body>
+</html>
+
+<%
+}
+else{
+   //对用户输入的数据作必要的字符编码转换
+   strName = new java.lang.String(strName.getBytes("iso-8859-1"));
+
+   //变量声明
+   java.sql.Connection sqlCon;         //数据库连接对象
+   java.sql.CallableStatement sqlStmt; //可调用语句对象
+   java.sql.ResultSet sqlRst;          //结果集对象
+
+   java.lang.String strCon;            //数据库连接字符串
+   java.lang.String strSQL;            //SQL语句
+
+   java.lang.String strWelcome;        //欢迎词
+   java.lang.String strMyName;         //我的姓名
+   int intReturn;                      //返回值
+
+   //装载JDBC-ODBC驱动程序
+   Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+
+   //设置数据库连接字符串
+   strCon = "jdbc:odbc:jspdemo";
+
+   //连接数据库
+   sqlCon = java.sql.DriverManager.getConnection(strCon,"sa","");
+
+   //准备SQL语句
+   strSQL = "{? = call sp_jsptest(?,?)}";
+
+   //准备可调用语句对象
+   sqlStmt = sqlCon.prepareCall(strSQL);
+
+   //设置输入参数
+   sqlStmt.setString(2,strName);
+
+   //登记输出参数
+   sqlStmt.registerOutParameter(1,java.sql.Types.INTEGER);
+   sqlStmt.registerOutParameter(3,java.sql.Types.VARCHAR);
+
+   //执行该存储过程并返回结果集
+   sqlRst = sqlStmt.executeQuery();
+
+   //获取来自结果集中的数据
+   sqlRst.next();
+   strWelcome = sqlRst.getString(1);
+
+   //获取输出参数的值
+   strMyName = sqlStmt.getString(3);
+
+   //获取返回值
+   intReturn = sqlStmt.getInt(1);
+
+   //关闭记录集
+   sqlRst.close();
+
+   //关闭可调用语句对象
+   sqlStmt.close();
+
+   //关闭数据库对象
+   sqlCon.close();
+%>
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>JSP数据库操作例程 - 存储过程 - JDBC-ODBC - SQL Server</title>
+</head>
+<body>
+
+<%=strWelcome%><br>
+我是<%=strMyName%><br>
+返回值是<%=intReturn%>
+
+</body>
+</html>
+
+<%
+}
+%>

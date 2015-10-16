@@ -1,0 +1,40 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-8-10 18:03:15
+<%--
+作者：何志强[hhzqq@21cn.com]
+日期：2000-08-04
+功能：Linux-JSP-JDBC-MySQL测试 - Insert
+--%>
+
+<%
+//声明
+java.sql.Connection sqlConn;//数据库连接对象
+java.sql.Statement sqlStmt;//语句对象
+java.lang.String strName;//来自客户端的数据：姓名
+long lngAge;//来自客户端的数据：年龄
+
+//登记JDBC驱动程序
+Class.forName("org.gjt.mm.mysql.Driver").newInstance();
+
+//连接数据库
+sqlConn = java.sql.DriverManager.getConnection("jdbc:mysql://localhost/test","test","test");
+
+//创建语句对象
+sqlStmt = sqlConn.createStatement();
+
+//获取来自客户端的数据
+strName = request.getParameter("name");
+lngAge = java.lang.Long.parseLong(request.getParameter("age"),10);
+
+//执行SQL语句
+sqlStmt.executeUpdate("insert into test(name,age) values('"+strName+"',"+lngAge+")");
+
+//关闭语句对象
+sqlStmt.close();
+
+//关闭数据库连接
+sqlConn.close();
+%>
+
+<jsp:forward page="select.jsp" />

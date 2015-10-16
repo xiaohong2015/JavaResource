@@ -1,0 +1,40 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：7/1/2001 10:10:46 PM
+Java编程中的异常处理是一个很常见的话题了，几乎任何一门介绍性的Java课程都会提到异常处理。不过，我认为很多人其实并没有真正掌握正确处理异常情况的方法和策略，最多也就不过了解个大概，知道点概念。本文就对三种不同程度和质量的Java异常处理进行了讨论，所阐述的处理异常的方式按手法的高下分为：好，不好和恶劣三种。同时向你提供了一些解决这些问题的技巧。 
+好 
+异常处理提供了处理程序错误的统一机制。事实上，Java语言通过向调用者提出异常警告的方式而显著地提升了软件开发中的异常处理能力。这种方式把Java语言中的“方法（method）”进行了扩展和增强，使之包括了自身的错误条件。下面就让我们看一个例子，这个例子说明了这种情况。 
+以下是FileInputStream构造器之一的原型： 
+public FileInputStream(String name) throws FileNotFoundException  
+这个原型和C或者C++语言中的同类原形都不一样，Java的方法和构造器必须声明他们在被调用时可能“扔出”的异常，采用的关键字就是“throws”。这种在方法原型中出现的异常提示增加了编程的可靠性。显而易见，这种方式是向方法的调用者提示意了可能出现的异常条件，这样调用者就可以对这些异常作出适当的相应处理。 
+以下代码示意我们是如何捕获并且处理FileNotFoundException 这一异常的： 
+try 
+ { 
+ FileInputStream fis = new FileInputStream(args[0]);  
+ // other code here ...  
+ } catch (FileNotFoundException fnfe)  
+ { 
+ System.out.println("File: " + args[0] + " not found. Aborting.");  
+ System.exit(1);  
+ } 
+Java异常处理还有其他一些优秀的特性，这就是可检查异常、用户定义异常和在JDK 1.4中推出的新型Java记录API（Java Logging API）。 
+java.lang.Exception的所有子类都属于可检查异常。可检查异常（checked exception）是扔出该异常的方法所必须提示的异常，这种异常必须被捕获或者向调用者提示。 
+用户定义异常（User-defined exceptions）是定制的异常类，这种异常类扩展了java.lang.Exception类。优良的Java程序规定定制异常封装、报告和处理他们自己独有的情况。最新的Java记录API（logging API）则可以集中记录异常。 
+不好 
+Java异常处理不好的一面包括两种情况：滥用非检查异常（unchecked exceptions）和滥用catchall构造器等。这两种方式都使得问题变得复杂起来。 
+有一种类别的异常属于RuntimeException的子类，这种异常不会受到编译器的检查。比如，NullPointerException和 ArrayStoreException就是这种类型异常的实例。程序员可以对RuntimeException进行子类化以回避检查异常的限制，从而便于产生这些异常的方法为其调用者所使用。专业的开发团队应当只允许在很少的情况下才可以这样做。第2种异常处理的陋习是catchall构造器。所谓的“catchall 构造器”就是一种异常捕获代码模块，它可以处理所有扔给它的可能异常。 
+以下是catchall处理器的实例： 
+try 
+ { 
+ // code here with checked exceptions 
+ } catch (Throwable t)  
+ { 
+ t.printStackTrace(); 
+ } 
+我得承认，我自己在编写一般程序的时候就曾经用过这种技术；但是，在编写关键程序的时候这种类型的构造器一定要避免使用，除非他们被授权可以和中央错误处理器联合使用才可以这样做。除此之外，catchall构造器不过只是一种通过避免错误处理而加快编程进度的机制。 
+异常处理的一个不足之处是难以采用优良的错误处理策略。从低容内存状态恢复、写入错误和算法错误等异常情况都不是轻易能得到解决的。你可以尝试一下循环、垃圾收集和提醒用户等常用技术来应付以上的局面。 
+恶劣 
+和许多Java特性及其API类似，Java的异常处理机制也有“霸王硬上弓”类的滑稽错误。比方说，为了扔出某个异常竟然毫不犹豫地用“new”关键词为其分配内存就是这样的例子。我自己不知道有多少次就因为犯了这种错误而在严肃的编译器面前屡屡碰壁。在这种情况下，我们其实都是在伺候语言而不是让语言为我们所用。 
+在我编写的Java Pitfalls一书中探讨了几个异常处理方面的缺陷，比如处理OutOfMemoryErrors就是其一。这一处理过程是：使用finally模块关闭文件，解析异常以得到出现问题的方法和代码行。在这一过程之内最大的缺陷是需要捕获OutOfMemoryError，而这一异常却并不是可检查异常！想想看，内存耗尽是相当常见的情况。任何与内存使用状态紧密相关的程序都应当捕获和处理这一错误。 
+最后，让我们考虑两个尚不属于Java异常处理机制的特性。第一，目前的情况是，在你成功地处理了异常之后你没有办法回到你刚才离开的地方。而C语言下的setjmp() 和longjmp()函数则可以实现这一特性，Java理应有这两个函数的对应版本，而我们也应该可以用“resume”关键词实现它。 
+第二个没有实现的特性是全局异常处理器，对比物就是C++语言中的set_new_handler()。比方说，在编程的时候，即便OutOfMemoryError异常比java.lang.Error 的子类更常见，但我们也可以针对OutOfMemoryError异常而采用全局处理器，这样的效果会比对其采用通常的可检查异常要好得多。如果你觉得对这些特性非常在意，那么你可以在Java Developer Connection那里提出自己的建议：在Java平台内增加这些特性吧！

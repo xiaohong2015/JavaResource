@@ -1,0 +1,32 @@
+作者：jspfuns
+日期：2000-8-10 17:04:30
+简介
+
+Resin提供了最快的jsp/servlets运行平台。在java和javascript的支持下，Resin可以为任务灵活选用合适的开发语言。Resin的一种先进的语言XSL(XML stylesheet language)可以使得形式和内容相分离。 
+
+如果您选用jsp平台作为internet商业站点的支持，那么速度、价格和稳定性都是要考虑到的，resin十分出色，表现更成熟，很具备商业软件的要求。而且，它是全免费的。从站点下载的就是完整版本。所以值得向您推荐！ 
+
+相对于tomcat3.1,后者更象是一个正在研究的项目。目前resin可以支持sun的j2ee，而tomcat不能直接支持，而j2ee是基于java服务器端大系统的基础。但tomcat结构非常合理，而且是apache组织的产品，因此有着很好的远景。
+
+
+Resin1.1的特性包括：
+
+
+1 支持jsp1.1和在服务器端编译的javascript.
+2 比mod_perl,mod_php更快，比Jakarta Tomcat快3倍。您可以在Caucho的站点看到很全面的各种测试报告。
+3 使用servlet2.2引擎。
+4 自动的servlet/bean编译！
+5 Servlet,XSL Filtering
+6 支持IIS,Apache,Netscape和其它内置了HTTP/1.1的Web服务器。
+7 XSLT和XPath1.0引擎。
+8 企业级的共享软件（基于一个开放源码的协议）
+
+安装与启动：
+安装特别简单，只需将resin-1.1.3.zip解压缩到某个目录即可。
+在运行之前需要有jdk的支持。
+启动方式是执行：
+resin-1.1.3/bin/httpd (在NT)
+系统已经按照缺省设置启动，系统将监听8080端口。
+jsp文件可放在resin-1.1.3/doc目录下；servlet可以放在resin-1.1.3/doc/web-inf/classes下面。
+
+

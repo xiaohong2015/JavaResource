@@ -1,0 +1,107 @@
+作者：jeru
+日期：2000-12-7 12:04:45
+数据库连接池简介 
+在传统的两层结构中，客户端程序在启动时打开数据库连接，在退出程序时关闭数据库连接。这样，在整个程序运行中，每个客户端始终占用一个数据库连接，即使在大量没有数据库操作的空闲时间，如用户输入数据时，从而造成数据库连接的使用效率低下。 
+在三层结构模式中，数据库连接通过中间层的连接池管理。只有当用户真正需要进行数据库操作时，中间层才从连接池申请一个连接，数据库操作完毕，连接立即释放到连接池中，以供其他用户使用。这样，不仅大大提高了数据库连接的使用效率，使得大量用户可以共享较少的数据库连接，而且省去了建立连接的时间。 
+
+连接池的配置使用 
+数据库连接池是应用服务器的一项基本功能，我们以Apusic Application Server为例，来说明JDBC连接池的配置使用。 
+
+Apusic JDBC连接池提供对多种数据库的支持，如Oracle、MS SqlServer、Sybase、Informix、DB2等。 
+
+Apusic JDBC连接池可以通过数据库本身的JDBC Driver连接到数据库，也可以通过JDBC-ODBC桥连接到数据库。下面我们以Oracle为例说明如何配置连接池： 
+
+Oracle数据库的JDBC Driver包文件classes111.zip在/usr/oracle/jdbc/lib(假设oracle的安装目录是/usr/oracle)目录下，首先将classes111.zip加入到系统的CLASSPATH中。然后在apusic/config/apusic.conf(假设安装目录为apusic) 中作如下设置：
+
+<SERVICE
+CLASS="com.apusic.jdbc.PoolManager"
+NAME="JdbcPool:name=jdbc/sample"
+>
+<ATTRIBUTE NAME="ExpirationTime" VALUE="300"/>
+<ATTRIBUTE NAME="MinCapacity" VALUE="5"/>
+<ATTRIBUTE NAME="URL" VALUE="jdbc:oracle:thin:@192.168.19.136:1521:orcl"/>
+<ATTRIBUTE NAME="ConnectionProperties" VALUE="user=gtj,password=abc123"/>
+<ATTRIBUTE NAME="DriverClassName" VALUE="oracle.jdbc.driver.OracleDriver" />
+<ATTRIBUTE NAME="MaxCapacity" VALUE="30"/>
+</SERVICE>
+
+ExpirationTime:       超时时间，单位是秒。当一个数据库连接超过expirationTime设定时间不被使用          
+                      时,系统会自动关闭这个数据库连接。默认值为300秒
+MinCapacity:          最小连接数
+URL:                  数据库的URL
+ConnectionProperties: 连接属性，其中：user用户名，password密码
+DriverClassName:      JDBC驱动程序类名
+MaxCapacity:          最大连接数
+192.168.19.136:       oracle所在计算机的IP地址。
+　 
+调用连接池 
+我们以一个JSP程序为例，说明如何使用连接池。首先通过JNDI得到DataSource，再的得到连接Connection，如下例所示： 
+
+
+<html>
+
+<head>
+
+<title>Jsp sample</title>
+
+</head>
+
+<body>
+
+<p>
+
+<%@ page contentType="text/html;charset=gb2312" %>
+
+<%@ page import="
+
+java.sql.*,
+
+javax.naming.*,
+
+javax.sql.*
+
+"%>
+
+<%
+
+try{
+
+    Context ctx = new InitialContext();
+
+    DataSource ds = (DataSource)ctx.lookup("jdbc/sample");
+
+    Connection con = ds.getConnection();
+
+    Statement stmt = con.createStatement();
+
+    ResultSet rs = stmt.executeQuery("select ENAME from EMP");
+
+    while(rs.next()){
+
+        out.println("<p>" + rs.getString(1));
+
+    }
+
+    rs.close();
+
+    stmt.close();
+
+}catch(Exception e){
+
+    System.out.println("jsp:" + e.getMessage());
+
+}finally{
+
+    try{
+
+        con.close();
+
+    }catch(Exception e1){}
+
+}
+
+%>
+
+</body>
+
+</html>

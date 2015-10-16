@@ -1,0 +1,252 @@
+作者：jeru
+email: jeru@163.net
+日期：7/3/2001 10:02:33 AM
+Objective 3) 
+Write code to construct instances of any concrete class including normal top level classes inner classes static inner classes and anonymous inner classes.
+Inner Classes
+·    A class can be declared in any scope. Classes defined inside of other classes are known as nested classes. There are four categories of nested classes.
+Top-level nested classes / interfaces
+·    Declared as a class member with static modifier. 
+·    Just like other static features of a class. Can be accessed / instantiated without an instance of the outer class. Can access only static members of outer class. Can’t access non-static instance variables or methods. 
+·    Very much like any-other package level class / interface. Provide an extension to packaging by the modified naming scheme at the top level.
+·    Classes can declare both static and non-static members.
+·    Any accessibility modifier can be specified.
+·    Nested interfaces are implicitly static (static modifier also can be specified). They can have any accessibility modifier. There are no non-static inner, local or anonymous interfaces.
+Non-static inner classes
+·    Declared as a class member without static.
+·    An instance of a non-static inner class can exist only with an instance of its enclosing class. So it always has to be created within a context of an outer instance.
+                Outer.Inner i = new Outer().new Inner();
+·    Just like other non-static features of a class. Can access all the features (even private) of the enclosing outer class. Have an implicit reference to the enclosing instance.
+·    Cannot have any static members.
+·    Can have any access modifier.
+Local classes
+·    Defined inside a block (could be a method, a constructor, a local block, a static initializer or an instance initializer). Cannot be specified with static modifier.
+·    Cannot have any access modifier (since they are effectively local to the block)
+·    Cannot declare any static members.(Even declared in a static context)
+·    Can access all the features of the enclosing class (because they are defined inside the method of the class) but can access only final variables defined inside the method (including method arguments). This is because the class can outlive the method, but the method local variables will go out of scope – in case of final variables, compiler makes a copy of those variables to be used by the class. (New meaning for final)
+·    Since the names of local classes are not visible outside the local context, references of these classes cannot be declared outside. So their functionality could be accessed only via super-class references (either interfaces or classes). Objects of those class types are created inside methods and returned as super-class type references to the outside world. This is the reason that they can only access final variables within the local block. That way, the value of the variable can be always made available to the objects returned from the local context to outside world.
+·    Cannot be specified with static modifier. But if they are declared inside a static context such as a static method or a static initializer, they become static classes. They can only access static members of the enclosing class and local final variables. But this doesn’t mean they cannot access any non-static features inherited from super classes. These features are their own, obtained via the inheritance hierarchy. They can be accessed normally with ‘this’ or ‘super’. 
+Anonymous classes 
+·    Anonymous classes are defined where they are constructed. They can be created wherever a reference expression can be used.
+·    An anonymous class is never abstract . An anonymous class is always an inner class; it is never static . An anonymous class is always implicitly final.
+·    Anonymous classes cannot have explicit constructors. Instance initializers can be used to achieve the functionality of a constructor.
+·    Anonymous classes can implement an interface (implicit extension of Object) or explicitly extend a class. Cannot do both.
+Syntax: new interfacename() { } or new classname(can take arg.) { }
+·    Keywords implements and extends are not used in anonymous classes.
+·    Abstract classes can be specified in the creation of an anonymous class. The new class is a concrete class, which automatically extends the abstract class.
+·    Discussion for local classes on static/non-static context, accessing enclosing variables, and declaring static variables also holds good for anonymous classes. In other words, anonymous classes cannot be specified with static, but based on the context, they could become static classes. In any case, anonymous classes are not allowed to declare static members. Based on the context, non-static/static features of outer classes are available to anonymous classes. Local final variables are always available to them.
+·    E.g. 
+   btn.addActionListener(
+     new ActionListener() {
+       void ActionPerformed() {System.out.println(s);}
+     }
+   )
+
+
+·    One enclosing class can have multiple instances of inner classes. 
+·    Inner classes can have synchronous methods. But calling those methods obtains the lock for inner object only, not the outer object.  If you need to synchronize an inner class method based on outer object, outer object lock must be obtained explicitly. Locks on inner object and outer object are independent.
+·    Nested classes can extend any class or can implement any interface. No restrictions.
+·    All nested classes (except anonymous classes) can be abstract or final.
+·    Classes can be nested to any depth. Top-level static classes can be nested only within other static top-level classes or interfaces. Deeply nested classes also have access to all variables of the outer-most enclosing class (as well the immediate enclosing class’s)
+·    Member inner classes can be forward referenced. Local inner classes cannot be.(?)
+·    Outer class variables are accessible within the inner class, but they are not inherited. They don’t become members of the inner class. This is different from inheritance. (Outer class cannot be referred using ‘super’, and outer class variables cannot be accessed using ‘this’)
+·    An inner class variable can shadow an outer class variable. If the inner class is sub-classed within the same outer class, the variable has to be qualified explicitly in the sub-class. To fully qualify the variable, use (classname.this.variablename). If we don’t correctly qualify the variable, a compiler error will occur. (Note that this does not happen in multiple levels of inheritance where an upper-most super-class’s variable is silently shadowed by the most recent super-class variable or in multiple levels of nested inner classes where an inner-most class’s variable silently shadows an outer-most class’s variable. Problem comes only when these two hierarchy chains (inheritance and containment) clash.)
+·    If the inner class is sub-classed outside of the outer class (only possible with top-level nested classes) explicit qualification is not needed (it becomes regular class inheritance)
+·    Inner class cannot have some name as any of its enclosing class.
+
+
+
+Entity    Declaration Context    Accessibility Modifiers    Outer instance    Direct Access to enclosing context    Defines static or non-static members
+Package level class    As package member    Public or default    No    N/A    Both static and non-static
+Top level nested class (static)    As static class member    All    No    Static members in enclosing context    Both static and non-static
+Non static inner class    As non-static class member    All    Yes    All members in enclosing context    Only non-static
+Local class (non-static)    In block with non-static context    None    Yes    All members in enclosing context + local final variables    Only non-static
+Local class (static)    In block with static context    None    No    Static members in enclosing context + local final variables    Only non-static
+Anonymous class (non-static)    In block with non-static context    None    Yes    All members in enclosing context + local final variables    Only non-static
+Anonymous class (static)    In block with static context    None    No    Static members in enclosing context + local final variables    Only non-static
+Package level interface    As package member    Public or default    No    N/A    Static variables and non-static method prototypes
+Top level nested interface (static)    As static class member    All    No    Static members in enclosing context    Static variables and non-static method prototypes
+
+
+// Example 1
+
+public class InnerInnerTest {
+  public static void main(String s[]) {
+    new Outer().new Inner().new InnerInner().new InnerInnerInner().doSomething();
+    new Outer().new InnerChild().doSomething();
+    new Outer2().new Inner2().new InnerInner2().doSomething();
+    new InnerChild2().doSomething();
+
+  }
+}
+
+class Outer {
+  String name = "Vel";
+
+  class Inner {
+    String name = "Sharmi";
+
+    class InnerInner {
+
+      class InnerInnerInner {
+
+        public void doSomething() {
+
+          // No problem in accessing without full qualification, 
+          // inner-most class variable shadows the outer-most class variable 
+          System.out.println(name); // Prints "Sharmi"
+          System.out.println(Outer.this.name); // Prints "Vel", explicit reference to Outer
+
+// error, variable is not inherited from the outer class, it can be just accessible
+//          System.out.println(this.name); 
+//          System.out.println(InnerInner.this.name); 
+//          System.out.println(InnerInnerInner.this.name); 
+
+// error, super cannot be used to access outer class.
+// super will always refer the parent, in this case Object
+//          System.out.println(super.name);  
+
+          System.out.println(Inner.this.name); // Prints "Sharmi", Inner has declared 'name'
+        }
+      }
+    }
+  }
+
+  /* This is an inner class extending an inner class in the same scope */
+  class InnerChild extends Inner {
+    public void doSomething() {
+// compiler error, explicit qualifier needed 
+// 'name' is inherited from Inner, Outer's 'name' is also in scope
+//      System.out.println(name); 
+      System.out.println(Outer.this.name); // prints "Vel", explicit reference to Outer
+      System.out.println(super.name); // prints "Sharmi", Inner has declared 'name'
+      System.out.println(this.name); // prints "Sharmi", name is inherited by InnerChild
+    }
+  }
+}
+
+class Outer2 {
+  static String name = "Vel";
+  static class Inner2 {
+    static String name = "Sharmi";
+
+    class InnerInner2 {
+      public void doSomething() {
+        System.out.println(name); // prints "Sharmi", inner-most hides outer-most
+        System.out.println(Outer2.name); // prints "Vel", explicit reference to Outer2's static variable
+//        System.out.println(this.name); // error, 'name' is not inherited
+//        System.out.println(super.name); // error, super refers to Object
+      }
+    }
+  }
+
+}
+
+/* This is a stand-alone class extending an inner class */
+class InnerChild2 extends Outer2.Inner2 {
+    public void doSomething() {
+      System.out.println(name); // prints "Sharmi", Inner2's name is inherited
+      System.out.println(Outer2.name); // prints "Vel", explicit reference to Outer2's static variable
+      System.out.println(super.name); // prints "Sharmi", Inner2 has declared 'name'
+      System.out.println(this.name); // prints "Sharmi", name is inherited by InnerChild2
+    }
+}
+
+// Example 2
+
+public class InnerTest2 {
+  public static void main(String s[]) {
+
+    new OuterClass().doSomething(10, 20);
+
+// This is legal
+//    OuterClass.InnerClass ic = new OuterClass().new InnerClass();
+//    ic.doSomething();
+
+// Compiler error, local inner classes cannot be accessed from outside
+//    OuterClass.LocalInnerClass lic = new OuterClass().new LocalInnerClass(); 
+//    lic.doSomething();            
+
+    new OuterClass().doAnonymous();
+
+  }
+}
+
+class OuterClass {
+  final int a = 100;
+  private String secret = "Nothing serious";
+
+  public void doSomething(int arg, final int fa) { 
+    final int x = 100;
+    int y = 200;
+
+    System.out.println(this.getClass() + " - in doSomething");
+    System.out.print("a = " + a + " secret = " + secret + " arg = " + arg + " fa = " + fa);
+    System.out.println(" x = " + x + " y = " + y);
+
+// Compiler error, forward reference of local inner class
+//    new LocalInnerClass().doSomething();
+
+    abstract class AncestorLocalInnerClass { } // inner class can be abstract
+
+    final class LocalInnerClass extends AncestorLocalInnerClass { // can be final
+      public void doSomething() {
+        System.out.println(this.getClass() + " - in doSomething");  
+        System.out.print("a = " + a );
+        System.out.print(" secret = " + secret);
+//        System.out.print(" arg = " + arg);  // Compiler error, accessing non-final argument
+        System.out.print(" fa = " + fa);
+        System.out.println(" x = " + x); 
+//        System.out.println(" y = " + y); // Compiler error, accessing non-final variable
+      }
+    }
+
+    new InnerClass().doSomething(); // forward reference fine for member inner class
+    new LocalInnerClass().doSomething();
+  }
+
+  abstract class AncestorInnerClass { }
+
+  interface InnerInterface { final int someConstant = 999;} // inner interface
+
+  class InnerClass extends AncestorInnerClass implements InnerInterface { 
+    public void doSomething() {
+      System.out.println(this.getClass() + " - in doSomething");  
+      System.out.println("a = " + a + " secret = " + secret + " someConstant = " + someConstant);
+    }
+  }
+
+  public void doAnonymous() {
+    // Anonymous class implementing the inner interface
+    System.out.println((new InnerInterface() { }).someConstant);
+
+    // Anonymous class extending the inner class
+    ( new InnerClass() { 
+public void doSomething() { 
+  secret = "secret is changed"; 
+  super.doSomething();
+} 
+} ).doSomething();
+  }
+}
+
+Thus an abstract class cannot be instantiated and so an object reference cannot be created. Remember that a class that contains any abstract methods the class itself is abstract and cannot be instantiated.
+
+A local class is visible only within it's code block or method.
+
+For class inside interface:(?)
+1.    The class is always public. 
+2.    The class is always static. 
+3.    the class methods cannot call the methods declared in the interface. 
+
+Q1
+public class MyClass1 {
+public static void main(String argv[]){ } 
+/*Modifier at XX */ class MyInner {}
+}
+What modifiers would be legal at XX in the above code? 
+1) public 
+2) private 
+3) static 
+4) friend 
+

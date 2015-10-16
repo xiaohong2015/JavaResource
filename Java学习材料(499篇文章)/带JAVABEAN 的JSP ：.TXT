@@ -1,0 +1,26 @@
+作者：天马
+日期：00-4-30 7:43:13
+   
+虽然你可以把大段的代码放在脚本片段（scriptlet）内，但是绝大多数的Java代码属于可重复使用的名为JavaBea的组件。JavaBean类似于ActiveX控件：他们都能提供常用功能并且可以重复使用。 
+
+JavaBean的值是通过一些属性获得的，你可通过这些属性访问JavaBean设置。以一个人来打比方，这个人就是一个JavaBean，这个人的名字、身份证号码以及住址就是其属性。在JSP网站，你基本上就是通过玩“Connect the beans）”来使你的网站动态化。 
+
+假设JavaBean先于网站被创建出来，你需要做的第一件事就是告诉JSP页面它将要用到一个“Bean”。你可以用“<jsp:useBean>”标记来做到这一点： 
+<jsp:useBean id="localName" class="com.jguru.Person" scope="application" />。
+
+“<jsp:useBean>”标记要求你用“id”属性来识鉴别Bean。这里你提供一个名字来JSP页面其余部分的Bean。除了“id”属性，你还须告诉网页面从何处查找Bean，或者它的Java类别名是什么。这种类别属性提供确 认Bean的功能，其他一些方法也可以做到这一点。最后一个必需的元素是“scope”属性。有了“scope”属性的帮助，你就能告诉Bean为单一页面（默认情况）[scope="page"]、为[scope="request"]请求为会话[scope="session"]，或者为整个应用程序[scope="application"]保持留信息。有了会话范围，你就能非常容易地在JSP网页面上维护购物车等项目。
+
+一旦你声名了一个JavaBean，你就可以访问它的属性来定制它。要获得属性值，请用“<jsp:getProperty>”标记。有了这个标记，你就能指定将要用到的Bean名称（从useBean的"id"字段得到）以及你想得到其值的属性。实际的值被放在输出中： 
+<jsp:getProperty id="localName" property="name" />。
+
+要改变JavaBean属性，你必须使用“<jsp:setProperty>”标记。对这个标记，你需要再次识别Bean和属性，以修改并额外提供新值。如果命名正确，这些值可以从一个已提交的表中直接获得：参数获得： 
+<jsp:setProperty id="localName" property="*" />; 
+
+可以从一个参数获得，但你必须直接命名属性和参数： 
+<jsp:setProperty id="localName" property="serialNumber" value="string" /> 
+
+或者直接用一个名字称和值来设置： <jsp:setProperty id="localName" property="serialNumber" value= <%= expression %> />.
+
+关于JavaBean 的最后一件事： 为了Web服务器能找到JavaBean，你需要将其类别文件放在一个特殊位置。用JSWDK，最 方便的位置是安装目录下的类别目录，如\jswdk-1.0.1\classes。
+
+ 

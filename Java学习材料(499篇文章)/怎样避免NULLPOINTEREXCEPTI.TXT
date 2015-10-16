@@ -1,0 +1,48 @@
+作者：friendcn
+日期：2001-5-30 17:38:21
+写JAVA程序，NullPointerExceptions会经常陪伴着你
+因为JAVA中到处都是对象，而每一个对象都可能为Null
+怎样能减少这种错误呢？
+我觉得应该尽量调用那些已经确定被实例话的对象的方法
+比如
+private String name = "";  // 给它初始化一个值不让它为null
+
+public boolean isNameEqual(String paraName) {
+    return name.equals(paraName);
+  }
+就比下面这种要好
+  public boolean isNameEqual(String paraName) {
+    return newName.equals(name);  // 这样如果paraName为空的话就会抛出一个 NullPointerException }
+
+当然，如果在程序中name可能被赋值为null的话
+那就要这样写了
+public boolean isNameEqual(String paraName) {
+    if (name != null) {
+      return name.equals(paraName);
+    }
+    else if (paraName != null) {  // name 为 null 而paraName 不是
+      return false;
+    }
+    else {  // 都为空
+return true;  // 根据你的需要，返回false也行
+    }
+  }
+
+至于
+public class Animator extends java.applet.Applet implements Runnable{
+Vector images;
+int imgNumber;
+int currentImage=1;
+Thread thisThread;
+public void init(){
+imgNumber=new Integer(getParameter("imgNumber")).intValue();
+for (int x=0;x<imgNumber;x++)
+{Image img=getImage(getDocumentBase(),"img"+(x+1)+".jpg");
+images.addElement(img);
+}
+}
+
+我觉得可以先给imgNumber=0；
+然后还要判断
+getParameter("imgNumber")是否为null
+这样更好些

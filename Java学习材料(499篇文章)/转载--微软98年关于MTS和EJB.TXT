@@ -1,0 +1,73 @@
+作者：zybersx
+email: zybersx3@21cn.com
+日期：2000-7-23 23:23:38
+
+Furthermore, both session and entity beans can be accessed with either the Java Remote Method Protocol (JRMP), which is the original protocol defined for Java's Remote Method Invocation (RMI) interface, or through the Internet Inter-ORB Protocol (IIOP) defined by the Object Management Group (OMG). And vendors can also use proprietary protocols to access an EJB container. The truth is that even a casual reading of the EJB specification makes clear that this is a technology created by committee. The authors of EJB suffer from the difficulty of pleasing a diverse group of vendors, many of whom plan to retrofit existing transaction products to support this new technology. Accordingly, EJB attempts to support products that are both component-based and not component-based, database-oriented and not database-oriented, and more. This results in significant complexity and a diffuse approach to the problem.
+
+Compare this complexity with the approach taken by MTS technology. MTS defines one style of component—a COM object—and one powerful but simple model for defining transaction boundaries. MTS components need not be configured as stateful or stateless, and they're always accessed in the same way: through COM calls. (Remote clients that speak Distributed COM (DCOM) can directly invoke methods in MTS objects on other machines. For access from Internet-enabled clients via HTTP, the MTS Executive is loaded into Internet Information Server (IIS), the Web server built into Windows NT. An IIS application such as an ASP script can then make COM calls into the same MTS objects.) The creators of MTS understood the importance of simplicity, and its easy-to-understand programming model is one of MTS's most attractive characteristics.
+
+Back to contents
+
+Portability
+Portability of enterprise beans across implementations from different vendors is frequently cited as a primary goal of EJB. In fact, the EJB specification states "An enterprise bean can be developed once and then deployed on multiple platforms without recompilation or source code modification." Yet the specification also states that "specialized containers can provide additional services beyond those defined by the Enterprise JavaBeans specification. An enterprise bean that depends on such a service must be deployed only in a container that supports the service." In practice, this is all but certain to lead to significant differences among products supporting Enterprise JavaBeans, which brings into question its validity as a standard.
+
+This approach to standardization is reminiscent of the OMG's Common Object Request Broker Architecture (CORBA), where vendors introduced significant differences in their products to gain proprietary advantage. Even though the Enterprise JavaBeans specification repeats the familiar claim that enterprise beans will be "Write Once, Run Anywhere," this cannot be true in a world of specialized, proprietary EJB containers. While the specification does define a common core that every product must support, the history of ensuring portability based on nothing but paper specifications isn't encouraging (CORBA is only the most recent failed attempt at achieving this). The bottom line is that true portability of enterprise beans is likely to be elusive.
+
+Back to contents
+
+Interoperability
+An important aspect of an effective distributed environment is seamless, secure communication among machines. MTS accomplishes this by defining one way to access MTS objects—COM calls—and specifying standard solutions for security and directory protocols. It is less clear how this will be accomplished with Enterprise JavaBeans.
+
+As already noted, the EJB specification allows either the native RMI/JRMP protocol or IIOP to be used for communication, with perhaps other choices possible. But JRMP is a very simple technology. It makes no provision, for example, for carrying a client's identity to the server, nor does it define a standard way to convey information about any transaction that might be in progress. The result is that even though JRMP appears to be a core protocol for Enterprise JavaBeans, this protocol cannot reasonably be used for interoperability among different vendors. Instead, using JRMP for communication from a client to an EJB server, or from one EJB server to another, requires either going without fundamental EJB, such as security and distributed transaction support, or adding proprietary extensions.
+
+For multivendor communication, the EJB specification assumes that IIOP will be used. Yet using IIOP to access enterprise beans raises several questions. First, there are well-known technical issues still outstanding with this protocol, such as how servers learn of client's untimely deaths. Equally important, the creators of Enterprise JavaBeans seem to place a great deal of faith in IIOP, stating in the EJB specification that EJB's CORBA mapping "enables on-the-wire interoperability among multiple vendors' implementations of an EJB server." Given that products implementing CORBA's Object Transaction Service (OTS) over IIOP don't interoperate today even among themselves, how can we expect them to interoperate with a completely foreign technology such as EJB? And the EJB specification doesn't require using the CORBA OTS to communicate with a transaction coordinator. This means that even if IIOP interoperates flawlessly among different vendors' products, EJB-compliant products may still not work together because they use incompatible transaction coordinators. Promises of interoperability are easy to make as long as there are no actual EJB products. Once there is shipping code from multiple vendors, however, customers are likely to find themselves with less than what they've been promised.
+
+In fact, EJB's attempt to merge the Java environment with CORBA is inherently problematic. The EJB specification is owned by Sun, a company that has largely exited the pure CORBA business. Many of their EJB partners have not, however. The perceived need to merge the Java world with CORBA stems as much from the political needs of the vendors involved as from real user requirements. And, as was true with CORBA, the creators of EJB clearly want to allow differentiation among their "standard" products. EJB vendors appear to want to have it both ways: They wish to say they have a standard but still retain substantial proprietary elements in their products.
+
+Furthermore, JRMP and IIOP provide only basic communication services. What about protocols for distributed security and directory services? Both the Java and CORBA camps define interfaces for these services, but interfaces alone are not sufficient to ensure interoperability; well-defined wire protocols are required. But agreements on what security and directory protocols should be used with EJB (or with CORBA) have yet to appear. Contrast this with MTS: By using standard protocols in a consistent way, MTS makes it easy to build an effective distributed environment, one that's capable of supporting the kinds of mission-critical uses targeted by transaction-oriented applications.
+
+Back to contents
+
+Standardization by Specification
+Writing specifications is a useful exercise, but the rubber meets the road when those specifications are actually implemented. To define a standard, write and publicize the specification, and only then build it and see if it works is not a good idea, as has been shown by many failed standardization efforts. In fact, today's most successful standardization organization, the Internet Engineering Task Force (IETF), requires working implementations before finalizing a standard.
+
+Yet it is doubtful that anybody actually built a complete implementation of Enterprise JavaBeans before the final specification was released. When this specification actually is implemented, the first EJB developers will probably find things that don't work or can't be effectively mapped to existing products. The result will be either changes to or more loosening of the specification.
+
+And as might be expected from a specification-only technology, EJB doesn't define every detail. It's hard to imagine that multiple vendors can build interoperable implementations or that third parties can create a market for truly portable components with only the EJB specification to guide them. Time after time, paper-only standards have proved to be an ineffective means of achieving interoperability and portability. Without a reference implementation, there's just too much room for ambiguity.
+
+MTS, by contrast, is a mature product, available since late 1996 and currently in use at hundreds of customer sites. And because MTS is an actual implementation rather than just a specification, its behavior is by definition unambiguous. Shipping software is much more effective than shipping specifications.
+
+Back to contents
+
+Choices for a Development Language
+Choosing a programming language is one of the most important decisions made on any project. Striking the right balance between power, ease of use and long-term support is critical. Because no one language can meet every need, MTS allows building applications in any language that supports COM. This list includes the Visual Basic&reg; development system, C++, Java, COBOL, and many more.
+
+By design, however, Enterprise JavaBeans allows development only in Java. To the Java proponents at many vendors, most of whom have roots in C++, Java seems simple. And compared to C++, Java is simple. But the users of transaction processing software are primarily business developers, very few of whom know C++. Instead, their experience is likely to be in COBOL or Visual Basic, languages that are much more common among end users.
+
+Both COBOL and Visual Basic can be used to write MTS applications, but neither can be used with EJB. If an organization does wish to use Java, MTS has excellent support for developing Java components. Yet Java is probably too complex for many business developers and, in any case, the entire industry will never settle on a single programming choice. By tying its fate exclusively to one language, EJB greatly limits its usefulness. And by making that language Java, EJB leaves behind a substantial percentage of its target developer market.
+
+Back to contents
+
+Administering a Distributed Transaction Environment
+A component-based transaction system relies heavily on its administrator. For example, both MTS automatic transactions and EJB container-managed transactions allow setting a component's transaction requirements administratively. Both technologies also allow a component's security requirements to be set by an administrator. Other important functions, such as how in-doubt transactions should be resolved, must be performed administratively as well.
+
+MTS provides standard graphical tools that allow an administrator to perform these types of functions. But while the EJB specification acknowledges the importance of the administrator's role, it does not explain how that role should be carried out. Without standards for administration, every EJB product will be different. Setting a component's transaction or security requirements, for example, is likely to require entirely different processes in different vendors' products. In practice, these kinds of differences will make it difficult for an organization to install and effectively use EJB containers from different companies. As is true in the CORBA world today, customers will be strongly motivated to choose and stick with a single vendor. To a very large degree, this will obviate the motivation for defining a multivendor standard in the first place. Instead, users who obtain a "standard" EJB product will find that changing to another vendor's EJB implementation is too painful to contemplate—there's just too much effort required.
+
+Back to contents
+
+Summary
+The Enterprise JavaBeans specification attempts to define a platform for building transaction-oriented applications. The reality, however, is that this technology is rife with problems. The most significant are as follows:
+
+EJB is remarkably complex, with many options. 
+EJB is defined by a committee-created specification only; there is no reference implementation to help insure interoperability. 
+EJB very likely won't allow true portability of enterprise beans, despite claims to the contrary. 
+EJB-based applications will have problems with interoperability because of the looseness and diversity of protocols allowed. 
+EJB allows application development in only one language, a language that is probably not suitable for a large part of its intended user base. 
+EJB leaves important parts of the problem undefined, such as how administration is accomplished, allowing vendors to create differentiation in what are touted as standard products. 
+MTS suffers from none of these problems. Its simple programming model makes it easy to create components in any popular language, and those components will work in any MTS environment. MTS is also much more mature, a critical attribute when choosing a foundation for mission-critical transactional applications. And, most important, MTS is available today as a part of Windows NT. Given all these advantages, it is clear that Microsoft Transaction Server is the right choice for building enterprise applications.
+
+Back to contents
+
+Last Updated: 7/30/98   
+&copy; 2000 Microsoft Corporation. All rights reserved. Terms of Use.   
+

@@ -1,0 +1,52 @@
+作者：blackwhites
+日期：2000-10-25 18:06:02
+redhat6.1+apache+tomcat安装指南
+
+
+下载说明：
+在java.sun.com取得jdk1_2_2-linux-i386.tar.gz
+在http://java.apache.org/builds/
+在http://jakarta.apache.org/builds/tomcat/release/v3.1/bin/取得jakarta-tomcat.tar.gz,
+在http://java.apache.org/jserv/dist/ApacheJServ-1.1-2_RH6x.i386.rpm
+
+1、安装jdk1.2.2
+#cp jdk1_2_2-linux-i386.tar.gz /usr/local
+#tar xvzf jdk1_2_2-linux-i386.tar.gz
+#ln -s jdk1.2.2 jdk
+#ln -s jdk/jre jre
+
+设置$JAVA_HOME,$CLASSPATH
+#vi /etc/profile
+加入：
+JAVA_HOME=/usr/local/jdk
+export JAVA_HOME
+CLASSPATH=/usr/local/jdk/lib:/usr/local/jre/lib
+export CLASSPATH
+PATH=$PAHT:/usr/local/jdk/bin:/usr/local/jre/bin
+
+2、安装tomcat
+#cp jakarta-tomcat.tar.gz /usr/local
+#tar xvzf jakarta-tomcat.tar.gz
+#cd /usr/local/jakarta-tomcat/bin
+运行tomcat服务器
+#./startup.sh start(用./shutdown.sh stop结束tomcat服务器)
+#lynx http://localhost:8080/
+如果可以运行它的例子程序，那么tomcat服务器就安装成功了
+
+3、安装jserv
+#rmp -ivh　ApacheJServ-1.1-2_RH6x.i386.rpm
+
+4、和apache连接
+在httpd.conf中加入
+Include /your/apache/conf/path/httpd/tomcat-apache.conf
+(这个文件在你第一次运行tomcat时候生成)
+注释掉
+<IfModule mod_jserv.c>
+Include /etc/httpd/conf/jserv/jserv.conf
+</IfModule>
+这几行
+
+5、测试
+重新启动你的apache, 然后运行tomcat服务器
+#lynx http://localhost/examples/
+如果你看见了jsp、servlet目录，你就成功了

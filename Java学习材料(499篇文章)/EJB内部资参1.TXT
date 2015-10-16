@@ -1,0 +1,362 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-1-12 18:09:27
+enterpriseJavaBean 入门 
+
+一 基本知识 
+
+1． 背景 
+
+Java由于其良好的跨平台行而成为服务器端的理想语言，为了利用Java实现服务 
+器端的计算，SUN推出了一个完整的开发平台J2EE，其目的是为基于Java的服务器 
+端配置提供一个独立于平台的可携带的多用户企业级的安全平台，而J2EE的基石 
+就是Enterprise JavaBeans(EJB),EJB是建立基于JAVA的服务器端组件的标准，它 
+定义了如何编写服务器端组件，提供了组件与管理组件的应用服务器之间的标准 
+约定，EJB是一种组件架构，使得开发人员能够快速开发出具有伸缩性的企业级应 
+用。 
+
+2． EJB简介 
+
+1）JavaBeans和Enterprise JavaBeans 
+JavaBeans是Java的组件模型。在JavaBeans规范中定义了事件和属性等特征。En 
+terprise JavaBeans也定义了一个Java组件模型，但是Enterprise JavaBeans组 
+件模型和JavaBeans组件模型是不同的。 JavaBeans重点是允许开发者在开发工具 
+中可视化的操纵组件。JavaBeans规范详细地解释了组件间事件登记、传递、识别 
+和属性使用、定制和持久化的应用编程接口和语意。 Enterprise JavaBeans的侧 
+重点是详细地定义了一个可以portably地部署Java组件的服务框架模型。因此， 
+其中并没提及事件，因为enterprise bean通常不发送和接受事件。同样也没有提 
+及属性------属性定制并不是在开发时进行，而是在运行时（实际上在部署时） 
+通过一个部署描述符来描述。 
+不要寻找JavaBeans和Enterprise JavaBeans之间的相似性。他们都是组件模型规 
+范，但是前者说明了开发工具中应用程序组装的问题，而后者则侧重于部署组件 
+的服务框架的细节。不要错误地认为JavaBeans是用于客户端的开发，Enterpris 
+e JavaBeans是用于服务器端的开发。JavaBeans也可作为进行非图形化服务器端 
+Java应用开发的组件模型。区别是当你使用JavaBeans创建服务器应用时，你还得 
+设计整个的服务框架。用Enterprise Javabeans框架是现成的，你只需遵守它的 
+APIs.对于复杂的服务器端应用程序，显然使用Enterprise JavaBeans比重新开发 
+更简单 
+2）EJB体系结构 
+EJB是一种组件架构，它采用分而制之的方法实现服务器端的计算。 
+EJB规范定义了六种不同的角色来完成其任务， 包括： 
+? Bean provider: 提供可重用的商业组件 
+? Container provider: 为ejb 应用提供低层次的运行环境 
+? Server provider:提供应用程序服务器用以包含，管理和配置ejb组件，目前E 
+JB规范没有提供EJB Container和EJB Server之间的接口，故二者的提供商是合一 
+的，有：BEA的Weblogic server,SUN的NetDynamics,IBM的WebSphere,Oracle的8 
+i等。 
+? Application assembler:负责将不同的组件组织起来构成能够运行的应用程序 
+
+? Deployer: 负责将要使用的组件安装到应用服务器中并加以配置 
+? System Administrator: 负责配置好的系统的管理等 
+这六种角色的流程图如下： 
+
+Enterprise JavaBean 驻留在EJB Container中，通过EJB Container对ejb进行管 
+理。EJB规范定义了二者之间的接口。 
+Javax.ejb.EJBHome接口列出了所有定位、创建、删除EJB 类实例的方法。Home对 
+象是home接口的实现。EJB类开发者必须定义home接口。EJB Container Provide 
+r应该提供从home接口中产生home对象实现的方法。 
+远程接口（remote interface）列出了EJB类中的商业方法。Javax.ejb.EJBObje 
+ct实现远程接口，并且客户端通过它访问EJB实例的商业方法。EJB开发者定义远 
+程接口，EJB Container Provider提供产生相应的EJBObject的方法。客户端不能 
+得到EJB实例的引用，只能得到它的EJBObject实例的引用。当客户端调用一个方 
+法，EJBObject接受请求并把它传给EJB实例，同时提供进程中必要的包装功能。 
+客户端应用程序通过home对象来定位、创建、删除EJB类的实例，通过EJBObject 
+来调用实例中的商业方法。客户端可以用Java来编程，通过Java RMI来访问访问 
+home对象和EJBObject,或用其他语言编程并通过CORBA/IIOP访问，使得部署的服 
+务器端组件可以通过CORBA接口来访问。 
+
+Enterprise javaBean规范将Enterprise Beans 分为两种：session bean和enti 
+ty bean. 
+
+I. session bean表示的是调用它的客户端代码索要完成的工作，是一种商业处理 
+过程对象，它实现商业逻辑，商业规则以及工作流程，例如：报价，订单处理， 
+视频压缩，股票交易等。session bean之所以叫session bean是因为其生命周期 
+与调用它的客户端相同。 
+session bean又分为两种：stateless和stateful, stateful session bean用于 
+贯穿多个方法请求和事务的商业过程，例如：网上商店，用户进入商店后，可以 
+将商品加入再现的购物车，组件必须跟踪用户的状态（如：购物车）；而statel 
+ess session bean用于客户调用方法期间不用维护任何状态信息，例如：解决复 
+杂数学运算的视频压缩/解压缩。 
+
+II. entity bean用来代表商业过程中处理的永久性的数据，例如：银行出纳员组 
+件完成储蓄等商业过程，其中涉及的数据时银行账户数据 
+entity bean用来代表底层的对象。最常用的是用entity bean代表关系库中的数 
+据。一个简单的entity bean 可以定义成代表数据库表的一个记录，也就是每一 
+个实例代表一个特殊的记录。更复杂的entity bean可以代表数据库表间关联视图 
+。在entity bean中还可以考虑包含厂商的增强功能，如对象--关系映射的集成。 
+
+通常用entity类代表一个数据库表比代表多个相关联的表更简单且更有效。反过 
+来可以轻易地向entity类的定义中增加关联，这样可以最大地复用cache并减小旧 
+数据的表现。 
+
+III. entity bean和session bean的比较 
+看起来session bean好象没什么用处，尤其对于数据驱动的应用程序。当然事实 
+并不是这样。因为entity bean（譬如说）代表底层数据库的一行，则entity be 
+an实例和数据库记录间就是一对一的关系。因为多个客户端必须访问底层记录， 
+这意味着，不同于session bean，客户端必须共享entity bean。因为是共享的， 
+所以entity bean不允许保存每个客户端的信息。session bean允许保存客户端的 
+状态信息，客户端和session bean实例间是一对一的。entity bean允许保存记录 
+的信息，entity bean实例和记录间是一对一的。一个理想的情况是客户端通过s 
+ession bean连接服务器，然后session bean通过entity bean访问数据库。这使 
+得既可以保存客户端的信息又可以保存数据库记录的信息。　 
+同时session bean也不能提供在相同或不同的EJB类调用间进行全局的事务控制。 
+没有session bean，应用程序开发者（客户端开发者）就必须理解EJB类的事务要 
+求，并使用客户端的事务划分来提供事务控制。EJB的主要好处就是应用开发者不 
+需知道EJB类的事务需求。一个session bean可以代表一个商业操作，进行事务控 
+制，不需要客户端进行事务划分。 
+以下我们作为EJB provider的角色来讨论Enterprise javaBean的开发。 
+
+3,EJB 开发 
+
+A) Enterprise JavaBean的由如下部分构成 
+Enterprise Bean 类： 包含ejb 组件的详细实现，对于session Bean它代表了 
+与业务处理相关的逻辑的实现，而对于entity Bean 它代表了与数据逻辑相关的 
+实现 
+EJB Object :是由EJB Container来实现的远程接口，它是客户端和bean 实例之 
+间的中介，传递客户端调用到bean 实例; 
+Home 接口：充当EJB Object工厂的java接口，创建EJB Object，Home接口的实现 
+由EJB Container负责。 
+Deploy descriptor:描述你的ejb 中间件的相关要求，包括：通知EJB Containe 
+r如何管理你的bean,事务的需要，安全需要等等。 
+特定于bean 的属性： 利用该属性，bean可以在运行时读取并调整自己的功能 
+Ejb-jar 文件：将生成的bean 类，home接口，Ejb object,deployment descrip 
+tor和bean 的properties 打包进ejb jar 文件，这样就可以deploy了。 
+
+B) Enterprise JavaBean编程的具体步骤 
+实现javax.ejb.EnterpriseBean接口： 
+对于session bean 可以直接实现javax.ejb.SessionBean接口，对于entity bea 
+n 可以直接实现javax.ejb.EntityBean接口,而后实现本bean特有的功能。 
+扩展javax.ejb.EJBObject接口： 
+增加在Enterprise Bean实现类中供客户调用的方法的相应的方法，必须相同 
+扩展javax.ejb.EJBHome接口： 
+增加创建上述扩展的javax.ejb.EJBObject接口的相应的create()方法。 
+编写deploy descriptor文件： 
+目前EJB 1.1规范规定了用XML文件来描述它，并提供了相应的DTD. 
+生成EJB jar 文件： 
+利用jar命令将上述生成的相应文件进行打包。 
+
+
+在第二部分给出了ejb开发的详细说明及相关注意事项 
+二 例子程序 
+
+以下的例子程序是以weblogic server(ver5.1)作为EJB Server(EJB Container) 
+的， 不同的EJB Server 在一些方面有所不同 （不同的地方另加注释） 
+
+例子一. Hello, world (Stateless Session Bean) 
+包括EJB相应接口的扩展和实现、deploy descriptor文件的生成以及.jar文件生 
+成； 
+
+服务器端EJB开发 
+
+EJB相应接口的扩展和实现：（与EJB Server无关） 
+第一步： 实现javax.ejb.SessionBean 接口，并提供该Bean的特定功能， "Hel 
+lo, world" Stateless SessionBean 仅仅向客户端返回“Hello,world!”字符串 
+
+
+注意：除了要实现javax.ejb.SessionBean接口外（ejbActivate(),ejbPassivat 
+e(), ejbRemove(), setSessionContext()），必须： 
+1）．实现公共方法ejbCreate(),该方法对于stateless SessionBean 无需带任何 
+参数而对stateful SessionBean则根据需要自定； 
+2）提供给客户调用的方法， 如：本例的hello()方法 
+
+package com.jsper.ejbexample.session.helloworld; 
+
+import javax.ejb.*; 
+import java.rmi.RemoteException; 
+
+public class HelloBean implements SessionBean { 
+public HelloBean() { 
+super(); 
+} 
+/** 
+*由EJB Server（EJB Container） 调用，用于激活SessionBean的实例 
+*/ 
+public void ejbActivate() throws EJBException, java.rmi.RemoteExceptio 
+n 
+{ 
+System.out.println("ejbActivate()"); 
+} 
+/** 
+*由EJB Server（EJB Container） 调用，用于创建本SessionBean的实例 
+* 创建日期：(2000-8-1 16:00:45) 
+*/ 
+public void ejbCreate() throws javax.ejb.CreateException 
+{ 
+System.out.println("ejbCreate()"); 
+} 
+/** 
+* 由EJB Server（EJB Container） 调用，用于惰化SessionBean的实例 
+*/ 
+public void ejbPassivate() throws EJBException, java.rmi.RemoteExcepti 
+on 
+{ 
+System.out.println("ejbPassivate()"); 
+} 
+/** 
+* 由EJB Server（EJB Container） 调用，用于删除SessionBean的实例 
+*/ 
+public void ejbRemove() throws EJBException, java.rmi.RemoteException 
+
+{ 
+System.out.println("ejbRemove()"); 
+} 
+/** 
+* 本SessionBean提供给客户调用的方法，但不能由客户直接调用，而是通过Ejb 
+Object远程接口调用 
+* 创建日期：(2000-8-1 16:04:58) 
+* @return java.lang.String 
+*/ 
+public String hello() { 
+return "Hello, World!"; 
+} 
+/** 
+* 由EJB Server（EJB Container） 调用，用于设置SessionBean的上下文 
+*/ 
+public void setSessionContext(SessionContext arg1) throws EJBException 
+, java.rmi.RemoteException 
+{ 
+System.out.println("setSessionContext()"); 
+} 
+} 
+第二步：扩展javax.ejb.EJBObject接口，增加在第一步SessionBean 接口实现中 
+提供给客户调用 的方法， 如本例的hello()方法 
+注意：1）增加的方法名称必须与相应的SessionBean实现中方法相同（case-sen 
+sitive）; 
+2) 增加的方法必须抛出java.rmi.RemoteException异常 
+
+package com.jsper.ejbexample.session.helloworld; 
+
+import java.rmi.*; 
+import javax.ejb.*; 
+public interface Hello extends EJBObject { 
+/** 
+* 由客户端直接调用，返回“hello,world!”,实现由相应的SessionBean完成 
+* 创建日期：(2000-8-1 15:56:25) 
+* @return java.lang.String 
+* @exception java.rmi.RemoteException 异常说明。 
+*/ 
+String hello() throws java.rmi.RemoteException; 
+} 
+第三步：扩展javax.ejb.EJBHome接口,增加创建EJBHome接口对象的create()方法 
+
+
+注意： 1）create()方法中参数的有无无关紧要，但必须与SessionBean接口实现 
+类中ejbCreate()方法相对应，包括从方法的个数上和参数上;例如：若SessionB 
+ean接口实现类中有ejbCreate(),ejbCreate(int nVal)方法，则该接口扩展中必 
+须增加create(),create(int nVal)方法 
+2）create()方法必须抛出javax.ejb.CreateException 和java.rmi.RemoteExce 
+ption 异常 
+
+package com.jsper.ejbexample.session.helloworld; 
+
+import java.rmi.*; 
+import javax.ejb.*; 
+public interface HelloHome extends EJBHome { 
+/** 
+* 创建EJBObject扩展对象Hello 
+* 创建日期：(2000-8-1 16:13:53) 
+* @return com.jsper.ejbexample.session.helloworld.Hello 
+* @exception javax.ejb.CreateException 异常说明。 
+* @exception java.rmi.RemoteException 异常说明。 
+*/ 
+Hello create() throws javax.ejb.CreateException, java.rmi.RemoteExcept 
+ion; 
+} 
+
+? deploy descriptor文件的生成 
+
+EJB1.1规范规定了必须利用xml文件构造deploy descriptor文件，并给出了相应 
+的DTD。本例的ejb-jar.xml文件如下： 
+
+
+
+
+images/green-cube.gif 
+　　 
+　　　 
+images/orange-cube.gif 
+helloworld 
+com.jsper.ejbexample.session.helloworld.HelloHome 
+com.jsper.ejbexample.session.helloworld.Hello 
+com.jsper.ejbexample.session.helloworld.HelloBean 
+Stateless 
+Container 
+
+　BEAS 
+　java.lang.Double 
+　100.0 
+
+
+　MSFT 
+　java.lang.Double 
+　150.0 
+
+　　　 
+　　 
+　　 
+　　　 
+
+　helloworld 
+　Remote 
+　* 
+
+Required 
+　　　 
+　　 
+　 
+
+对于weblogic Server还必须构造一个名为weblogic-ejb-jar.xml的文件，BEA公 
+司给出了相应的DTD.它描述了相应的EJB的名称以及JNDI的名称（**该部分与EJB 
+Server有关，ejb开发人员可省去，而由DEPLOYER来完成**） 
+
+
+
+　　 
+　　　helloworld 
+　　　 
+100 
+　　　 
+　　　hello.HelloHome 
+　　 
+　 
+? 提供用于标示本EJB的大小图标（icon）,注意：图像的格式必须是JPEG 或 GI 
+F。 
+本例提供了图像文件：orange-cube.gif和green-cube.gif(见附件) 
+? 构造.jar文件 
+第一步：编译相应的.java文件 
+本例中包括：Hello.java,HelloBean.java,HelloHome.java ，位于包com.jsper 
+.ejbexample.session.helloworld中。编译后相应的.class文件放在相对目录co 
+m\jsper\ejbexample\session\helloworld 中。 
+第二步：创建与com的同级目录META-INF,将相应的.xml文件拷贝到该目录下;将相 
+应的图标文件拷贝到相对目录（相对于该.xml文件父目录）中（本例为与com的同 
+级目录images） 
+第三步：利用JAR命令将目录com,images,META-INF中的内容做成.jar文件 
+本例JAR文件名成为std_hello.jar 
+jar cv0f std_hello.jar META-INF com images 
+
+至此， 对于EJB Provider的工作已经完成。 
+但是由于我们的开发人员在开发ejb的时候需要进行本地调试等工作，因此其既充 
+当ejb provider的角色，又充当其他的脚色， 因此，其可能需要作如下工作（仅 
+供参考，接上述工作）： 
+? 生成可deployable的jar文件 
+前边生成的jar文件（若不含weblogic-ejb-jar.xml文件）是不依赖于ejb serve 
+r（ejb container）的，而如前所述，不同的ejb server对于ejb的配置是不同的 
+，因此需要加上特定的信息 
+对于weblogic server则是通过相应的ejbc命令或deploy utility在原.jar文件的 
+基础上生成新的可deployable的.jar文件。(关于ejbc的详细使用请参见有关资料 
+)： 
+java –classpath e:\weblogic\classes;e:\weblogic\lib\weblogicaux.jar 
+-Dweblogic.home=e:\weblogic weblogic.ejbc -compiler javac std_hello.ja 
+r ejb_helloworld.jar 
+? 设定weblogic的环境 
+将最终的jar文件(本例ejb_helloworld.jar)放在weblogic的某一子目录下（例如 
+：myserver），而后将.jar文件所在的路径（ e:/weblogic/myserver/ ejb_hel 
+loworld.jar）添加到weblogic.properties文件的入口weblogic.ejb.deploy中（ 
+weblogic.ejb.deploy=e:/weblogic/myserver/ejb_helloworld.jar） 
+? 启动weblogic server, 在其启动的控制台中可以见到相应的ejb的装载成功的 
+信息。 
+
+
+? 客户端调用　 
+
+ 

@@ -1,0 +1,117 @@
+作者：hxfwsk
+email: hxfwsk@hotmail.com
+日期：2001-6-15 19:08:20
+在学习如何用Java编写你的JSP页之前，你需要了解叫做“行为（actions）”的服务器端的JSP元素，它执行服务器端的任务而不需我们编写Java代码。action标签可以被高级的页面设计者使用，那些可能并不熟悉Java而又想显示存于JavaBeans组件中的值的脚本编写者也可以使用它。正如前面提到的，大多数标签都是基于以组件为中心的web开发模型的。首先，我要描述一些JSP提供的action标签，然后展示一个仅仅使用标签来从一个JavaBean中显示信息的JSP页的例子――不需要编写Java代码。 
+
+载入一个JavaBean 
+　　记住，JSP模型离不开JavaBeans，因此多数JSP标签假定你将用到存于bean中的信息。在你用到一个JavaBean之前，你必须调用标签<jsp:usebean>来声明你将使用它。后面你将学到，此标签是否会在页面内生成一个新的bean实例（这个实例可能已经在前面的会话或应用中生成了），取决于你为这个bean声明的作用域（生命周期）。 
+
+　　<jsp:usebean>标签要包含几个参数，它们分别说明： 
+
+　　该JavaBean所从属的类 
+
+　　该JavaBean实例的名称 
+
+　　该JavaBean的作用域（生命周期） 
+
+　　例如： 
+
+　　<jsp:usebean ID="myBeanInstance" CLASS="com.myPackage.myBeanClass" SCOPE="request"> 
+
+　　 ...body... 
+
+　　</jsp:usebean> 
+
+　　在这里<jsp:usebean>标签后是一段在bean创建后被调用的主体部分，然后是一个结束标签</jsp:usebean>。如果这个主体是空的，你也可以选择下面这种简单的形式： 
+
+　　<jsp:usebean ID="myBeanInstance" CLASS="com.myPackage.myBeanClass" SCOPE="request"/> 
+
+　　这个示例程序会生成一个在com.myPackage.myBeanClass 类中定义过的bean的实例，在该页中命名为myBeanInstance；它只在其生命周期――对此JSP页的一个HTTP请求之内存在。这个bean现在就可以被该页使用了。 
+
+初始化一个JavaBean 
+　　并不是所有的JavaBeans都可以被简单的创建然后使用，有一些还需要在使用之前进行初始化。在<jsp:useBean> 和</jsp:useBean>标签的主体部分中，你可以用<jsp:setProperty>标签初始化bean的属性。你可以把bean的属性设置为指定的值或从HTTP请求中传送来的值，比如来自一个已提交的表单。 
+
+　　要初始化bean 的属性myProperty 为一个指定值，你可以用下面的格式： 
+
+　　<jsp:usebean ID="myBeanInstance" CLASS="com.myPackage.myBeanClass" SCOPE="request"> 
+
+　　 <jsp:setProperty NAME="myBeanInstance" PROPERTY="myProperty" VALUE="123"/> 
+
+　　</jsp:usebean> 
+
+　　下面的格式用来把同样的bean属性初始化为从HTML表单元素或一个URL查询字串中传送来的值： 
+
+　　<jsp:usebean ID="myBeanInstance" CLASS="com.myPackage.myBeanClass" SCOPE="request"> 
+
+　　 <jsp:setProperty NAME="myBeanInstance" PROPERTY="myProperty" 
+
+　　　　 PARAM="myFormElementName"/> 
+
+　　</jsp:usebean> 
+
+　　注意，不能在一个<jsp:setProperty>标签中同时使用VALUE和PARAM属性标志。 
+
+　　另外，在<jsp:usebean>行为的主体中使用<jsp:setProperty>时，在页面内你可以单独使用它。在此之前，必需先用<jsp:useBean>标签定义一个有适当作用域的bean。 
+
+Bean的作用域 
+　　<jsp:useBean>标签的SCOPE属性完成很简单的功能：它设置相关的bean的作用域，有四个可能的值，如下表（表1）所示。你可以根据情况在你的JSP应用中使用具有作用域的JavaBeans。 
+
+　　表1. JSP中的作用域及相应的维持情况 
+
+作用域 描述 
+Page 对象只可被来自它所在页的一个客户机程序存取。 
+request 对象在一个客户请求的生存时间内被一个客户机程序存取。 
+session 对象在整个用户会话的生存时间内被来自该应用程序中任何地方的一个客户机程序存取。 
+application 对象在应用程序的生存时间内可以被应用程序内来自任何页面的客户机程序存取。 
+
+　　不同的对象生存周期会影响到<jsp:useBean>标签如何创建或重新获取bean实例。当客户请求结束，输出被送回浏览器后，page bean和request bean就会被销毁。所以<jsp:useBean>标签必须为每个新的请求创建一个新的实例。尽管如此，当你创建一个新的session bean，这个bean的实例会保留到会话的生存周期结束，或直到你明确销毁它为止。因而<jsp:useBean>标签会在当前会话中不存在实例时创建bean的一个新的实例；否则，它就只是简单地重新取得当前实例。同样的规则也使用于应用程序的JavaBeans，除非它们在应用程序重新载入或服务器重新启动时终止。 
+
+　　如果你是SSJS开发者，汲取一些SSJS会话管理的相似之处是很有帮助的。在SSJS中，page bean与request对象的作用域相同；session bean与client对象作用域相同；application bean与project对象作用域相同。例如，如果你将数值存储在一个session bean中，之后你就可以单用户地从任何一个JSP页存取这个数值，就像在SSJS中把数值存在client对象中的性质一样。然而，JSP提供了比SSJS更加灵活的状态保持机制，因为你能够定义任何数量的page、request、session和application beans。而在SSJS中，request、client 和 project 对象都是单一的。 
+
+　　注意，在SSJS中没有与request bean相对应的对象。这是因为与SSJS不同，JSP允许在一个客户请求内执行多个页面。后面将对这一特性作更多讨论。 
+
+显示动态内容 
+　　一旦创建了一个bean,你就可以用它在JSP页中生成动态内容。JSP定义了一个<jsp:getProperty>标签用来显示bean的属性，这个bean可以是在页面内用<jsp:useBean>标签定义的，也可以是先前在应用程序中被定义的session bean 或 application bean。<jsp:getProperty>标签有两个参数：NAME和PROPERTY。NAME指明先前在<jsp:useBean>标签中定义的源对象，PROPERTY表示要显示的该对象的属性值。例如： 
+
+　　<jsp:usebean ID="myBeanInstance" CLASS="com.myPackage.myBeanClass" SCOPE="request"/> 
+
+　　<H2> myProp=<jsp:getProperty NAME="myBeanInstance" PROPERTY="myProp"> </H2> 
+
+　　正如你看到的，你可以把HTML标签与JSP标签混合使用来动态地产生和安排HTML内容。 
+
+重定向到一个外部页面 
+　　JSP定义了一个标签<jsp:request>,你可以使用它来重定向到一个外部页面，有两种方法可供选择：指定FORWARD参数或指定INCLUDE参数。 
+
+　　使用FORWARD参数，可以重定向到一个有效的URL。这种方法可以有效地在重定向发生处中止当前页的处理过程，但在这之前的处理还要进行。这一点与 CGI、SSJS、ASP和JavaScript中使用的典型的重定向十分相似。 
+
+　　使用INCLUDE参数，你不仅可以重定向到另一网页，而且当完成了被调用页内的处理后还能重新返回调用页。举个例子，你调用另一个可动态生成HTML的JSP页，让它生成HTML代码，而当返回时，这些HTML会被插入调用页中的<jsp:request>标签处。实际上，被调用页并不知道它正被另一JSP页调用，它只是看到一个HTTP请求，然后返回一些HTML文本作为响应。 
+
+　　请记住，你可以使用INCLUDE方法来访问静态的HTML页、JSP页、Java Servlets、SSJS页和ASP页等任何响应HTTP请求的资源，以生成一个你想要包含于你的网页中的响应。但是注意，如果你所访问的资源返回一个完整的HTML页，包含有<HTML>和<BODY>标签，那么你很可能得不到你想要的结果。　　 
+
+一个简单的例子 
+　　在例1中举了一个类型为jsp.beans.samples.SuperSimpleBean的bean的例子，命名为ssb。由于已将其作用域设定为session，所以它对于其余的user session是可用的。换句话说，在它创建后，我可以在应用程序的任何一个页中用名称来访问它。我还将它的属性初始化为counter。然后就可以用<jsp:getProperty>标签在HTML页中显示counter的值了。在给定一些特定的bean属性名称后，下面的代码对于HTML设计者来说是很容易编写的。 
+
+　　例1 
+
+　　<HTML> 
+
+　　<HEAD> 
+
+　　<META NAME="GENERATOR" Content="NetObjects ScriptBuilder 2.01"> 
+
+　　<TITLE>Counter Page</TITLE> 
+
+　　</HEAD> 
+
+　　<BODY> 
+
+　　<jsp:useBean ID="ssb" SCOPE="session" CLASS="jsp.beans.samples.SuperSimpleBean"/> 
+
+　　<jsp:setProperty NAME="ssb" PROPERTY="counter" VALUE="2"/> 
+
+　　<h2>Counter: <jsp:getProperty NAME="ssb" PROPERTY="counter"/></h2> 
+
+　　</BODY> 
+
+　　</HTML> 
+

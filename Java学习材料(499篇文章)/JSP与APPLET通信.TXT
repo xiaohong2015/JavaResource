@@ -1,0 +1,28 @@
+作者：jspfuns
+日期：2000-8-9 11:36:50
+作者/出处：Blueski编译
+
+
+很简单，你可以使用 java.net.URLConnection 和 java.net.URL类来打开一个标准的 HTTP连接，与web 服务器取得连接。服务器随后以通常的方式将这一信息传送给servlet。基本上，applet可以看作是一个a web浏览器，servlet并不能区分这2者。对servlet来说，applet仅仅是另一个HTTP客户。 
+
+(当然，你可以写一个servlet，专门由你的applet对它进行调用，在这种情况下servlet确实能知道2者的差别。你也可以在一个客户段TCP端口打开一个ServerSocket，然后让你的applet打开一个 Socket连接。然后你必须设计和实现一个客户段socket-level协议来对通信进行处理。这就是你可以写的东西。例如，一个聊天applet和一个servlet进行通信。总之，做一个客户端协议相比用HTTP要花费更多工作量，但更灵活。但是，客户端协议要花费长时间来通过防火墙。) 
+
+如要看更详细资料，你可以参考下列页面：
+
+http://www.sun.com/software/jwebserver/faq/faq.html
+
+Questions C8
+
+http://www.sun.com/software/jwebserver/faq/faq.html#c8
+
+和 C9
+
+http://www.sun.com/software/jwebserver/faq/faq.html#c9。
+
+Chad Darby有一篇带源程序的文章在：
+
+http://www.j-nine.com/pubs/applet2servlet/index.htm.
+
+Netscape DevEdge Online 也有类似文章 - 企业应用中Applet-to-Servlet通信
+
+http://developer.netscape.com/viewsource/index_frame.html?content=fields_servlet/fields_servlet.html

@@ -1,0 +1,119 @@
+作者：大哥
+日期：2001-5-10 11:59:39
+
+Jboss下配置EJB
+
+转载 东方一蛇
+
+〖返回〗〖转发〗
+
+一、前言 
+
+　　 Jboss为Open Source，完全免费的Appliaction Server，对于J2EE有很好的支持，可以和Tomcat完美结合。 
+
+二、下载，安装
+
+　　 下载地址为Jboss官方站点：http://www.jboss.org/，我下载的是Jboss2，而且和tomcat一起的，这样避免了单个下载一起配置的问题。下载地址是：http://www.jboss.org/jboss_tomcat.zip
+
+　　 下载完，解压到一个目录，我这里用E:jboss_tomcat作为例子。下面有子目录:
+
+E:jboss_tomcatjboss2
+
+和
+
+E:jboss_tomcat omcat32b7
+
+注意，我这里的目录稍微做了改动的，这样如果你不将TOMCAT_HOME加到CLASSPATH中，E:jboss_tomcatjboss2in un_with_tomcat.bat这个文件要做相应改动才能正常运行。
+
+
+
+三、配置运行
+
+　　 基本上不要什么配置的，只要安装好了JDK，当然，最好将TOMCAT_HOME加到CLASSPATH中。
+
+这样，E:jboss_tomcatjboss2in un_with_tomcat.bat这个文件前的TOMCAT_HOME就可以去掉了。
+
+运行E:jboss_tomcatjboss2in un_with_tomcat.bat这个文件，这样，Tomcat端口在8080，Jboss为8083，
+
+运行http://localhost:8080/将出现tomcat首页，
+
+运行http://localhost:8083/将出现无错误的空白页，
+
+
+
+四、测试EJB
+
+　　 (1)启动JBOSS：
+
+方法见上：
+
+
+
+
+
+　　 (2)下载代码：
+
+http://www.wodejia.net/softdownload/java/interestejb.zip
+
+解开，出现如下目录：
+
+interest/com
+
+interest/docs
+
+...
+
+全部copy到jboss2下examples目录下，如果没有examples目录，建立一个，结构如下：
+
+E:jboss_tomcatjboss2examplesinterest...
+
+将文件E:jboss_tomcatjboss2examplesinterestinterest.jar复制到：
+
+E:jboss_tomcatjboss2deploy下：
+
+在CLASSPATH中加入如下文件：
+
+E:jboss_tomcat omcat32b7libservlet.jar;E:jbossclientjboss-client.jar;E:jbossclientjnp-client.jar;E:jbosslibextejb.jar;E:jbossexamplesinterestinterest-client.jar 
+
+为了测试Client通过servlet调用EJB，必须将： E:jboss_tomcatjboss2examplesinterest下EJB.class和EJB.java复制到：
+
+E:jboss_tomcat omcat32b7webappsROOTWEB-INFclasses目录下
+
+重新启动JBOSS_TOMCAT
+
+
+
+
+　　 (3)command下client测试运行：
+
+command下，进入目录E:jboss_tomcatjboss2examplesinterest
+java InterestClient
+
+将出现：
+
+Got context
+
+Got reference 
+
+Interest on 1000 units, at 10% per period, compounded over 2 periods is: 210.00000000000023 
+
+jboss窗口将出现：
+
+[Interest] Someone called `calculateCompoundInterest!' 
+
+　　 (4)web下client通过Servlet测试运行：
+
+http://cgreen:8080/servlet/EJB
+
+将出现：
+
+Interest on 1000 units, at 10% per period, compounded over 2 periods is: 210.00000000000023 
+
+jboss窗口将出现： 
+
+[Interest] Someone called `calculateCompoundInterest!' 
+
+到此已经成功了。 
+
+
+ 

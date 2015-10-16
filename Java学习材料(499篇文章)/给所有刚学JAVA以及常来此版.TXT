@@ -1,0 +1,39 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：2001-5-10 10:44:40
+给所有刚学JAVA以及常来此版的兄弟
+
+　　在坛子上，经常（注意，是经常，而且是非常经常！）碰到一些并不难的问题，甚至同一天就有很多类似的问题，我想作为版主，我不能光是给大家回答问题了（更何况还有很多问题我也不懂），而需要讲一下应该如何学习JAVA的问题了。我不想大家碰到了什么小问题，第一个想到的就是问人，这样是很难得到提高的！
+
+　　以这两天的例子来说吧！是一个关于如何格式化日期的问题，有问如何将一个Date对象按自己需要的格式来以String输出。也有问，如何将一个给定格式的String类转换成Date对象的。
+　　昨天我刚加了一个帖子进精华区，内容如下：
+[hr]【chenm】 于 2001-5-8 14:57:29 加贴在 JAVA技术 ↑：
+/*
+file: timeformat.java
+*/
+import java.lang.*;
+import java.text.*;
+import java.util.*;
+public class timeformat{
+  public timeformat(){
+  }
+  static public String getChineseFormatTime(){
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+      return sdf.format(new Date());  
+  }
+  static public String getSimpleFormatTime(){
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm", Locale.US);
+      return sdf.format(new Date());  
+  }
+}[hr]
+
+　　只要仔细看，想要自己解决问题的朋友一定看出，这段代码虽然简单，但却已经说明了Date到String的转换。SimpleDateFormat所在的包是java.text。
+　　那么由String到Date的转换呢？
+　　学JAVA的人，机器上不会没有JAVA　API吧！只需要查一下SimpleDateFormat类的方法，就会找两个返回值为Date的parse方法（其中有一个是继承的DateFormat类的），这样转换还难吗？
+
+　　刚才回答了一个帖子，问题是这样的：“我要用  2000-09-03  这各字符串来构造一个Date，怎么写直截 Date("2000-09-03")好像不行啊”，其实我觉得这位朋友已经走到了解决方法的前面了，但却没有自己想办法继续走下去。Date类根本没有这样的构造方法呀！
+　　但Date类却有其它的方法呀，事实上Date类只有一个以String作为参数的方法static long parse(String s) ，但API中说：[b][i]Deprecated. As of JDK version 1.1, replaced by DateFormat.parse(String s).[/i][/b]，那么好了，看一下java.text.DateFormat类好了。当然DateFormat类的parse方法所支持的日期格式并不很多，但不是还子类SimpleDateFormat吗？这些在API中都是一目了然的呀！
+
+　　在其它的坛子里，经常看到很多朋友在讨论，中国的项目管理，.....的不行不行，缺乏团队意识什么的，那个时候我很难过，因为我不是一个项目高手，我只知道老老实实的写程序。但今天我更难过，因为我发现我的朋友们很多时候，连[#ff0000][b]学习[/b][/#]都不会了！
+
+　　不是没事干想找人批，也不是不要大家提问题，而是真的希望大家都能提高，如同版面说明中所写！

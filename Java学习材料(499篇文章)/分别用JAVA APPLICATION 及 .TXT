@@ -1,0 +1,92 @@
+作者：webwing
+email: webwing@21cn.com
+日期：2001-1-12 11:24:45
+//java bean
+//file name: faq.java
+import java.sql.*;
+
+public class faq {
+	String sDBDriver = "sun.jdbc.odbc.JdbcOdbcDriver";
+	String sConnStr = "jdbc:odbc:faq";
+	Connection conn = null;
+	ResultSet rs = null;
+
+	public faq() {
+	try {
+		Class.forName(sDBDriver);
+	}catch(java.lang.ClassNotFoundException e) {
+		System.err.println("faq(): " + e.getMessage());
+	}
+}
+
+	public ResultSet executeQuery(String sql) {
+		rs = null;
+		try {
+			conn = DriverManager.getConnection(sConnStr);
+			Statement stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+		}catch(SQLException ex) {
+			System.err.println("aq.executeQuery: " + ex.getMessage());
+		}
+		return rs;
+	}
+}
+
+//java Application
+//file name: testfaq.java
+import java.sql.*;
+class getRs
+{
+	public static String Answer;
+	public static String Subject;
+	public static String[][] rsArray = new String[9][2];;
+	public static int n = 0;
+	getRs(){
+		try	{
+			faq workM = new faq();
+			ResultSet oRs = workM.executeQuery("SELECT * FROM faq");
+			//System.out.println(oRs.getCount());
+			while (oRs.next()){
+			System.out.println(oRs.getString("Answer"));
+			System.out.println(oRs.getString("Subject"));
+			n=n+1;
+			}
+		}catch (SQLException ex)
+		{
+			System.out.println("error:"+ex);
+		}
+	}
+}
+
+public class testfaq {
+	public static void main(String[] args) {
+		getRs aa = new getRs();
+	}
+}
+
+//jsp
+//file name: testfaq.jsp
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>我的FAQ !</title>
+</head>
+<body>
+<p><b>这是我的FAQ!</b></p>
+<%@ page contentType="mimeType; charset=gb2312"%>
+<%@ page language="java" import="java.sql.*" %>
+
+<%
+faq workM = new faq();
+ResultSet RS = workM.executeQuery("SELECT * FROM faq");
+String tt;
+while (RS.next()) {
+tt = RS.getString("Answer");
+out.print("<LI>" + RS.getString("Subject") + "</LI>");
+out.print("<pre>" + tt + "</pre>");
+}
+RS.close();
+%>
+</body>
+</html>

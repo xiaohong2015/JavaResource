@@ -1,0 +1,131 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：2001-3-12 15:01:35
+package sony.utils;
+
+import java.io.*;
+import java.net.*;
+public final class Codes {
+public final static byte[] base64Encode(byte[] byteData) {
+	if (byteData == null)
+		return null;
+	int iSrcIdx; // index into source (byteData)
+	int iDestIdx; // index into destination (byteDest)
+	byte byteDest[] = new byte[((byteData.length + 2) / 3) * 4];
+
+	for (iSrcIdx = 0, iDestIdx = 0; iSrcIdx < byteData.length - 2; iSrcIdx += 3) {
+		byteDest[iDestIdx++] = (byte) ((byteData[iSrcIdx] >>> 2) & 077);
+		byteDest[iDestIdx++] = 
+			(byte) ((byteData[iSrcIdx + 1] >>> 4) & 017 | (byteData[iSrcIdx] << 4) & 077); 
+		byteDest[iDestIdx++] = 
+			(byte) ((byteData[iSrcIdx + 2] >>> 6)
+				& 003
+				| (byteData[iSrcIdx + 1] << 2)
+				& 077); 
+		byteDest[iDestIdx++] = (byte) (byteData[iSrcIdx + 2] & 077);
+	}
+
+	if (iSrcIdx < byteData.length) {
+		byteDest[iDestIdx++] = (byte) ((byteData[iSrcIdx] >>> 2) & 077);
+		if (iSrcIdx < byteData.length - 1) {
+			byteDest[iDestIdx++] = 
+				(byte) ((byteData[iSrcIdx + 1] >>> 4) & 017 | (byteData[iSrcIdx] << 4) & 077); 
+			byteDest[iDestIdx++] = (byte) ((byteData[iSrcIdx + 1] << 2) & 077);
+		} else
+			byteDest[iDestIdx++] = (byte) ((byteData[iSrcIdx] << 4) & 077);
+	}
+
+	for (iSrcIdx = 0; iSrcIdx < iDestIdx; iSrcIdx++) {
+		if (byteDest[iSrcIdx] < 26)
+			byteDest[iSrcIdx] = (byte) (byteDest[iSrcIdx] + 'A');
+		else
+			if (byteDest[iSrcIdx] < 52)
+				byteDest[iSrcIdx] = (byte) (byteDest[iSrcIdx] + 'a' - 26);
+			else
+				if (byteDest[iSrcIdx] < 62)
+					byteDest[iSrcIdx] = (byte) (byteDest[iSrcIdx] + '0' - 52);
+				else
+					if (byteDest[iSrcIdx] < 63)
+						byteDest[iSrcIdx] = (byte) '+';
+					else
+						byteDest[iSrcIdx] = (byte) '/';
+	}
+
+	for (; iSrcIdx < byteDest.length; iSrcIdx++)
+		byteDest[iSrcIdx] = (byte) '=';
+
+	return byteDest;
+}
+public final static String base64Encode(String strInput) {
+	if (strInput == null)
+		return null;
+	return base64Encode(strInput,"GB2312");
+}
+public final static String base64Encode(String strInput,String charSet) {
+	if (strInput == null)
+		return null;
+	String strOutput=null;
+	byte byteData[] = new byte[strInput.length()];
+	try {
+		//strInput.getBytes(0, strInput.length(), byteData, 0);
+		byteData = strInput.getBytes(charSet);
+		strOutput=new String(base64Encode(byteData),charSet);
+		//strOutput=new String(base64Encode(byteData),0);
+	} catch (UnsupportedEncodingException e) {
+		return null;
+	}
+	return strOutput;
+}
+/**
+ * 此处插入方法说明。
+ * 创建日期：(2000-11-4 18:27:35)
+ * @param steam java.io.InputStream
+ * @param charSet java.lang.String
+ */
+public final static String base64Encode(InputStream in, String charSet) {
+	try {
+		int c;
+		byte[] buff = new byte[1024];
+		ByteArrayOutputStream out = new ByteArrayOutputStream(2048);
+		while ((c = in.read(buff, 0, 1024)) != -1) {
+			out.write(buff, 0, c);
+			//index+=1024;
+			//out.write(c);
+			//attachContent+=ss;
+		}
+		in.close();
+		out.flush();
+		byte[] tmp2 = Codes.base64Encode(out.toByteArray());
+		out.close();
+		return new String(tmp2,charSet);
+	}
+	catch (IOException e) {
+		return "";
+	}
+}/**
+ * 此处插入方法说明。
+ * 创建日期：(2000-11-3 23:31:04)
+ * @return java.lang.String
+ * @param strIn java.lang.String
+ */  
+public final static String chunkSplit(String strIn) {
+	return chunkSplit(strIn,76);
+}/**
+ * 此处插入方法说明。
+ * 创建日期：(2000-11-3 23:31:04)
+ * @return java.lang.String
+ * @param strIn java.lang.String
+ */  
+public final static String chunkSplit(String strIn,int splitLen) {
+	int index=0;
+	String strOut="";
+	while(index+splitLen<strIn.length()){
+		strOut+=strIn.substring(index,index+splitLen)+"\n";
+		index+=splitLen;
+	}
+	if(index<strIn.length()){
+		strOut+=strIn.substring(index);
+	}
+	return strOut;
+}
+}

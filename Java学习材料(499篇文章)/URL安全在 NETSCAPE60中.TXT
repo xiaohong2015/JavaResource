@@ -1,0 +1,31 @@
+作者：Lihailong
+日期：2001-4-17 11:06:04
+当我在APPLET中使用url连接时在netscape6.0中提示如下的安全错误：
+java.security.AccessControlException: access denied (java.net.SocketPermission 192.168.0.121 resolve)
+
+java.security.AccessControlException: access denied (java.net.SocketPermission 192.168.0.121 resolve)
+
+	at java.security.AccessControlContext.checkPermission(Unknown Source)
+
+	at java.security.AccessController.checkPermission(Unknown Source)
+
+	at java.lang.SecurityManager.checkPermission(Unknown Source)
+
+	at java.lang.SecurityManager.checkConnect(Unknown Source)
+
+	at sun.plugin.protocol.jdk12.http.HttpURLConnection.connectStep1(Unknown Source)
+
+	at sun.plugin.protocol.jdk12.http.HttpURLConnection.getInputStream(Unknown Source)
+
+	at com.ynet.ads.applet.Booking.loadObject(Booking.java:539)
+
+	at com.ynet.ads.applet.Booking.loadCustomer(Booking.java:258)
+
+	at java.lang.reflect.Method.invoke(Native Method)
+
+	at sun.plugin.liveconnect.PrivilegedCallMethodAction.run(Unknown Source)
+
+	at java.security.AccessController.doPrivileged(Native Method)
+
+	at sun.plugin.liveconnect.SecureInvocation.CallMethod(Unknown Source)
+但此程序在IE下运行正常。（ns6.0使用的是内嵌的jdk1.3_01）

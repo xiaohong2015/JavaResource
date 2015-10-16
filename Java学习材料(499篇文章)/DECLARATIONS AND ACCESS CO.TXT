@@ -1,0 +1,306 @@
+作者：jeru
+email: jeru@163.net
+日期：7/3/2001 9:59:34 AM
+Objective 2
+Declare classes, inner classes, methods, instance variables static, variables and automatic (method local) variables, making appropriate use of all permitted modifiers (such as public final static abstract and so forth). State the significance of each of these modifiers both singly and in combination and state the effect of package relationships on declared items qualified by these modifiers.
+1. Two types of variables. 
+1.    Member variables
+·    Accessible anywhere in the class.
+·    Automatically initialized before invoking any constructor.
+·    Static variables are initialized at class load time.
+·    Can have the same name as the class.
+2.    Automatic variables(method local)
+·    Must be initialized explicitly. (compiler will catch it when using, but doesn’t catch it if no using) Object references can be initialized to null to make the compiler happy. 
+·    Can have the same name as a member variable, resolution is based on scope.
+·    Can only be final.  Not other modifiers.
+
+2.   Modifiers are Java keywords that provide information to compiler about the nature of the code, data and classes.   The visibility modifiers are part of the encapsulation mechanism for Java. Encapsulation allows separation of the interface from the implementation of methods.
+
+
+3.  Access modifiers – public, protected, private
+·    Only applied to class level variables. (Method variables are visible only inside the method.)
+·    Can be applied to class itself (only to inner classes declared at class level, no such thing as protected or private top level class)
+·    Can be applied to methods and constructors.
+·    If a class is accessible, it doesn’t mean, the members are also accessible. But if the class is not accessible, the members are not accessible, even though they are declared public.
+·    If no access modifier is specified, then the accessibility is default package visibility. All classes in the same package can access the feature. It’s called as friendly access. But friendly is not a Java keyword. Same directory is same package in Java’s consideration.
+·    Only one outer class per file can be declared public.  If you declare more than one class in a file to be public, a compile time error will occur.
+·    ‘private’ means only the class can access it, not even sub-classes.  So, it’ll cause access denial to a sub-class’s own variable/method.
+·    These modifiers dictate, which classes can access the features. An instance of a class can access the private features of another instance of the same class.
+·    ‘protected’ means all classes in the same package (like default) and sub-classes in any package can access the features. But a subclass in another package can access the protected members in the super-class via only the references of subclass or its subclasses. A subclass in the same package doesn’t have this restriction. This ensures that classes from other packages are accessing only the members that are part of their inheritance hierarchy.
+·    Methods cannot be overridden to be more private. Only the direction shown in following figure is permitted from parent classes to sub-classes.
+
+private à friendly (default) à protected à public
+
+    Parent classes                     Sub-classes
+
+4.  final
+·    final classes cannot be sub-classed.
+·    final variables cannot be changed. 
+·    final methods cannot be overridden.  Any methods in a final class are automatically final.    
+·    Method arguments marked final are read-only. Compiler error, if trying to assign values to final arguments inside the method. 
+·    Final variables that are not assigned a value at the declaration and method arguments that are marked final are called blank final variables. Try to use blank final variables will give compile error.  They can only be assigned a value at most once in all constructor or initialized block.
+·    Static final variables have to be assigned at the declaration time or in static initialized block.
+·    Local variables can be declared final as well.
+
+5.  abstract
+·    Can be applied to classes and methods.
+·    Opposite of final, abstract must be sub-classed.
+·    A class should be declared abstract, 
+1.    if it has any abstract methods.
+2.    if it doesn’t provide implementation to any of the abstract methods it inherited
+3.    if it doesn’t provide implementation to any of the methods in an interface that it says implementing.
+·    Just terminate the abstract method signature with a ‘;’, curly braces will give a compiler error.
+·    A class can be abstract even if it doesn’t have any abstract methods.
+·    Abstract methods may not be static, final, private, native, synchonized.
+·    A class that is abstract may not be instantiated (ie, you may not call its constructor, but in subclass’s constructor, super() works)
+
+6.  static
+·    Can be applied to nested classes, methods, variables, free floating code-block (static initializer)
+·    static means one per class, not one for each object no matter how many instance of a class might
+exist. This means that you can use them without creating an instance of a class.
+·    Static variables are initialized at class load time. A class has only one copy of these variables.
+·    Static methods can access only static variables. (They have no this)
+·    Access by class name is a recommended way to access static methods/variables.
+·    Static methods may not be overridden to be non-static. 
+·    Non-static methods may not be overridden to be static.
+·    Local variables cannot be declared as static.
+·    Actually, static methods are not participating in the usual overriding mechanism of invoking the methods based on the class of the object at runtime. Static method binding is done at compile time, so the method to be invoked is determined by the type of reference variable rather than the actual type of the object it holds at runtime. 
+
+public class StaticOverridingTest {
+  public static void main(String s[]) {
+    Child c = new Child();
+    c.doStuff(); // This will invoke Child.doStuff()
+    Parent p = new Parent();
+    p.doStuff(); // This will invoke Parent.doStuff()
+    p = c;
+    p.doStuff(); // This will invoke Parent.doStuff(), rather than Child.doStuff()    
+  }
+}
+
+class Parent {
+  static int x = 100;
+  public static void doStuff() {
+    System.out.println("In Parent..doStuff");
+    System.out.println(x);
+  }
+}
+
+class Child extends Parent {
+  static int x = 200;
+  public static void doStuff() {
+    System.out.println("In Child..doStuff");
+    System.out.println(x);
+  }
+ }
+
+
+7.  native
+·    Can be applied to methods only. (static methods also)
+·    Written in a non-Java language, compiled for a single machine target type.
+·    Java classes use lot of native methods for performance and for accessing hardware Java is not aware of.
+·    Native method signature should be terminated by a ‘;’, curly braces will provide a compiler error.
+·    native doesn’t affect access qualifiers. Native methods can be private.
+·    abstract can appear with native declaration. This forces the entire class to be abstract.(obviously)
+·    Can pass/return Java objects from native methods.
+·    System.loadLibrary is used in static initializer code to load native libraries. If the library is not loaded when the static method is called, an UnsatisfiedLinkError is thrown.
+
+8.  transient
+·    Can be applied to class level variables only.(Local variables cannot be declared transient)
+·    Variables marked transient are never serialized. (Static variables are not serialized anyway.)
+·    Not stored as part of object’s persistent state, i.e. not written out during serialization.
+·    Can be used for security.
+
+9.  synchronized
+·    Can be applied to methods or parts of methods only.
+·    Used to control access to critical code in multi-threaded programs.
+
+10.  volatile
+·    Can be applied to variables only.
+·    Can be applied to static variables.
+·    Cannot be applied to final variables.
+·    Declaring a variable volatile indicates that it might be modified asynchronously, so that all threads will get the correct value of the variable.
+·    Used in multi-processor environments.
+
+Modifier    Class    Inner classes (Except local and anonymous classes)    Variable    Method    Constructor    Free floating Code block
+public    Y    Y    Y(not local)    Y    Y    N
+protected    N    Y     Y(not local)    Y    Y    N
+(friendly)No access modifier    Y    Y (OK for all)    Y    Y    Y    N
+private    N    Y    Y(not local)    Y    Y    N
+final    Y    Y (Except anonymous classes)    Y    Y    N    N
+abstract    Y    Y (Except anonymous classes)    N    Y    N    N
+static    N    Y     Y(not local)    Y    N    Y (static initializer)
+native    N    N    N    Y    N    N
+transient    N    N    Y(not local)    N    N    N
+synchronized    N    N    N    Y    N    Y (part of method, also need to specify an object on which a lock should be obtained)
+volatile    N    N    Y    N    N    N
+
+Objective 3
+For a given class, determine if a default constructor will be created and if so state the prototype of that constructor.
+
+Constructors and Sub-classing
+·    Constructors are not inherited as normal methods, they have to be defined in the class itself.
+·    Constructors have same name with the class, no return type.  A method with a class name, but with a return type is just a method by compiler. Expect trick questions using this.
+·    If you define no constructors at all, then the compiler provides a default constructor with no arguments and same modifier with class. 
+·    We can’t compile a sub-class if the immediate super-class doesn’t have a no argument default constructor, and sub-class constructors are not calling super or this explicitly (and expect the compiler to insert an implicit super() call )
+·    A constructor can call other overloaded constructors by ‘this (arguments)’. If you use this, it must be the first statement in the constructor. 
+·    A constructor can’t call the same constructor from within. Compiler will say ‘ recursive constructor invocation’
+·    A constructor can call the parent class constructor explicitly by using ‘super (arguments)’. If you do this, it must be first the statement in the constructor. 
+·    Obviously, we can’t use both this and super in the same constructor. If compiler sees a this or super, it won’t insert a default call to super().
+·    Constructor body can have an empty return statement. 
+·    Only modifiers that a constructor can have are the accessibility modifiers.
+
+·    Initializers are used in initialization of objects and classes and to define constants in interfaces. These initializers are :
+1.    Static and Instance variable initializer expressions.
+Literals and method calls to initialize variables. Static variables can be initialized 
+only by static method calls.
+Cannot pass on the checked exceptions. Must catch and handle them.
+2.    Static initializer blocks.
+       Used to initialize static variables and load native libraries.
+Cannot pass on the checked exceptions. Must catch and handle them.
+3.    Instance initializer blocks.
+       Used to factor out code that is common to all the constructors.
+       Also useful with anonymous classes since they cannot have constructors.
+       All constructors must declare the uncaught checked exceptions, if any.
+       Instance Initializers in anonymous classes can throw any exception.(?)
+·    In all the initializers, forward referencing of variables is not allowed. Forward referencing of methods is allowed.
+·    Order of code execution (when creating an object) is a bit tricky.
+1.    static variables initialization.
+2.    static initializer block execution. (in the order of declaration, if multiple blocks found)
+3.    constructor header ( super or this – implicit or explicit )
+4.    instance variables initialization / instance initializer block(s) execution
+5.    rest of the code in the constructor
+
+Objective 4 
+State the legal return types for any method given the declarations of all related methods in this or parent classes.
+See mynote_6 for overloeading and overridden.
+Examples:
+Q1.
+Assume we have the following code in the file /abc/def/Q.java: 
+//File: /abc/def/Q.java:
+package def;
+
+public class Q {
+   private int privateVar;
+   int packageVar;
+   protected int protectedVar;
+   public int publicVar;
+}
+and this code is in /abc/Sub.java: 
+//File: /abc/Sub.java:
+public class Sub extends Tester {
+}
+and this code is in /abc/Tester.java: 
+//File: /abc/Tester.java:
+import def.Q;
+
+public class Tester extends Q {
+   Q q = new Q();
+   Sub sub = new Sub();
+
+   public void someMethod() {
+      // First, try to refer to q's memebers.
+      q.privateVar = 1;    // compiler error
+      q.packageVar = 2;    // compiler error
+      q.protectedVar = 3;  // compiler error
+      q.publicVar = 4;     // fine
+
+      // Next, try to refer to this object's members
+      // supplied by class Q.
+      privateVar = 5;        // compiler error
+      packageVar = 6;        // compiler error
+      protectedVar = 7;      // fine
+      publicVar = 8;         // fine
+
+      // Next, let's try to access the members of
+      // another instance of Tester.
+      Tester t = new Tester();
+      t.privateVar = 9;      // compiler error
+      t.packageVar = 10;     // compiler error
+      t.protectedVar = 11;   // fine
+      t.publicVar = 12;      // fine
+
+      // Finally, try to refer to the members in a
+      // subclass of Tester.
+      sub.privateVar = 13;   // compiler error
+      sub.packageVar = 14;   // compiler error
+      sub.protectedVar = 15; // fine
+      sub.publicVar = 16;    // fine
+   }
+}
+Q2
+Determine the result of attempting to compile and run the following code:
+class A {
+   public A() {
+      System.out.println("AAA");
+   }
+   {
+      System.out.println("456");
+   }
+}
+
+public class B extends A {
+   B() {
+      this(12);
+      System.out.println("BBB");
+   }
+   B(int x) {
+      System.out.println("CCC");
+   }
+   {
+      System.out.println("123");
+   }
+   public static void main(String[] args) {
+      new B();
+   }
+}
+
+The output is: 
+456
+AAA
+123
+CCC
+BBB
+Q3
+Determine the result of attempting to compile and run the following code: 
+class A {
+   public int Avar;
+   public A() {
+      System.out.println("AAA");
+      doSomething();
+   }
+   public void doSomething() {
+      Avar = 1111;
+      System.out.println("A.doSomething()");
+   }
+}
+
+public class B extends A {
+   public int Bvar = 2222;
+   public B() {
+      System.out.println("BBB");
+      doSomething();
+      System.out.println("Avar=" + Avar);
+   }
+   public void doSomething() {
+      System.out.println("Bvar=" + Bvar);
+   }
+   public static void main(String[] args) {
+      new B();
+   }
+}
+
+The output is: 
+AAA
+Bvar=0
+BBB
+Bvar=2222
+Avar=0
+Q4
+A class is not abstract if it implements all superinterfaces either directly or inherited
+from superclass.
+
+eg. class a { void method() {} }
+interface ab { void method(); }
+class abc extends a implements ab {} // PERFECTLY LEGAL since superclass has 
+implemented the interface method signature.
+

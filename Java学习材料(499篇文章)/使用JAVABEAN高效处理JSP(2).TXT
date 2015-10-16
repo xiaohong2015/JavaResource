@@ -1,0 +1,281 @@
+作者：Eazily
+email: Eazily@yeah.net
+日期：6/12/2001 2:49:38 PM
+
+
+
+　　JSP例子
+
+　　每个页面都必须使用指定的结构，以符合整个架构。
+
+　　列表1。login.jsp
+
+＜%@ page import = "lbm.jsputil.*" %＞ 
+＜jsp:useBean id="_loginJSPBean" class="lbm.examples.LoginJSPBean" 
+scope="session"/＞ 
+＜jsp:setProperty name="_loginJSPBean" property="*"/＞ 
+＜% AbstractJSPBean _abstractJSPBean = _loginJSPBean; %＞ 
+＜%@ include file="includeheader.jsp" %＞ 
+
+＜html＞ 
+＜head＞＜title＞Vote Login＜/title＞＜/head＞ 
+＜body bgcolor="white"＞ 
+
+＜font size=4＞ 
+Please enter your Voter ID and Password 
+
+＜/font＞ 
+
+＜font size="3" color="Red"＞ 
+＜jsp:getProperty name="_loginJSPBean" property="errorMsg"/＞ 
+
+＜/font＞ 
+
+＜font size=3＞ 
+＜form method=post＞ 
+Voter ID ＜input type=text name=voterId value=＜jsp:getProperty 
+name="_loginJSPBean" property="voterId"/＞＞
+
+Password ＜input type=password name=password value=＜jsp:getProperty 
+name="_loginJSPBean" property="password"/＞＞
+
+
+＜input type=submit value="Login"＞ 
+＜/form＞ 
+＜/font＞ 
+＜/body＞ 
+＜/html＞ 
+
+＜%@ include file="includefooter.jsp" %＞ 
+ 
+
+　　该JSP页面的架构如下：由几个JSP语句开始。接着的HTML代码将没有多少JSP指令、语句和脚本等。除了几个必要的指令，它们负责由bean中得到动态的内容。最后，页面使用了一个JSP include指令。
+
+　　我们讨论其中一些重要的JSP语句：
+
+＜jsp:useBean id="_loginJSPBean" class="lbm.examples.LoginJSPBean" scope="session"/＞ 
+＜jsp:setProperty name="_loginJSPBean" property="*"/＞ 
+ 
+
+以上的代码在JSP和相应的bean间建立了一个连接。第二个语句显式传送全部的form字段（存储为HTTP request参数）到bean中匹配的属性中。代码中使用了bean的setter方法。
+
+＜% AbstractJSPBean _abstractJSPBean = _loginJSPBean; %＞ 
+＜%@ include file="includeheader.jsp" %＞ 
+ 
+
+　　第一个语句让includeheader.jsp可执行共有的处理。第二个语句将includeheader.jsp静态包含进来。要注意到loginJSPBean和_abstractJSPBean现在指向同样的对象，只是带有不同的接口。
+
+　　列表2：includeheader.jsp 
+
+＜%-- Set the SharedSessionBean --%＞ 
+＜jsp:useBean id="_sharedSessionBean" class="lbm.jsputil.SharedSessionBean" scope="session"/＞ 
+＜% _abstractJSPBean.setSharedSessionBean(_sharedSessionBean); %＞ 
+
+＜%-- Set implicit Servlet objects --%＞ 
+＜% _abstractJSPBean.setRequest(request); %＞ 
+＜% _abstractJSPBean.setResponse(response); %＞ 
+＜% _abstractJSPBean.setServlet(this); %＞ 
+
+＜%-- Perform the processing associated with the JSP --%＞ 
+＜% _abstractJSPBean.process(); %＞ 
+
+＜%-- If getSkipPageOutput equals false, do not output the JSP page --%＞ 
+＜% if (! _abstractJSPBean.getSkipPageOutput()) { %＞ 
+
+ 
+
+　　includeheader.jsp是模板的核心元素之一。所有的JSP页面都使用这个共有的元素。
+
+　　列表2的前两个语句令不同页面但在同一HTTP session中的JSP bean之间互相进行通信。基本上，每个JSP将有两个与它关联的JavaBean：一个指定的JSP JavaBean（例如，LoginJSPBean）和共有的SharedSessionBean。SharedSessionBean作为一个共有的元素使用，用来连接所有的页面；我将在后面继续讨论它。
+
+　　includeheader.jsp中接着的三个语句与固有的Servlet对象有关。
+
+＜% _abstractJSPBean.setRequest(request); %＞ 
+＜% _abstractJSPBean.setResponse(response); %＞ 
+＜% _abstractJSPBean.setServlet(this); %＞ 
+ 
+
+　　JSP规范提供访问Java Servlet规范中的固有对象，例如页面处理中常用到的request、response和servlet对象。因此它们被传送到JSP bean。
+
+　　＜% _abstractJSPBean.process(); %＞ 
+
+　　最后，通过上面的语句来触发相关JSP页面的处理。你看到我们调用的是抽象JSP bean上的方法，而不是实类LoginJSPBean上的。为什么？我将在以下的部分解释。
+
+　　运用Template Method设计方法
+
+　　AbstractJSPBean是Template Method设计的主体。每个实际的JSP JavaBean都必须继承这个类。
+
+　　列表 3. AbstractJSPBean.java 
+
+package lbm.jsputil; 
+
+import java.util.*; 
+import javax.servlet.http.*; 
+import javax.servlet.*; 
+
+public abstract class AbstractJSPBean { 
+
+/* constants used for _state */ 
+public static final int NEW = 0; 
+public static final int FIRSTPASS = 1; 
+public static final int PROC = 2; 
+public static final int ERR = -1; 
+
+private int _state; // current state 
+private String _errorMsg; // current message that is being appended during validation 
+private boolean _skipPageOutput; // should the page output be skipped 
+
+private SharedSessionBean _sharedSessionBean; // used for associating the JSP Bean with the HTTP Session 
+
+/* standard Servlet objects that need to be setup for each JSP Bean */ 
+protected HttpServletRequest _request; 
+protected HttpServletResponse _response; 
+protected Servlet _servlet; 
+
+public AbstractJSPBean () { 
+setState(NEW); 
+} 
+
+protected abstract void beanProcess() throws java.io.IOException; 
+
+protected abstract void beanFirstPassProcess() throws java.io.IOException; 
+
+protected abstract void beanFooterProcess() throws java.io.IOException; 
+
+protected abstract String getJSPCode(); 
+
+public void process() throws java.io.IOException { 
+setSkipPageOutput(false); // by default do not skip page output. Specific bean process 
+// methods can override it. 
+if (getState() == NEW) { 
+setState(FIRSTPASS); 
+beanFirstPassProcess(); 
+} else { 
+resetErrorMsg(); 
+setState(PROC); 
+beanProcess(); 
+} 
+
+// validation that all common fields have been properly set by the application 
+// this is actually checking that the code has been written properly 
+String l_err = ""; 
+if (_sharedSessionBean == null) l_err = l_err + "; SharedSessionBean must be set"; 
+if (_request == null) l_err = l_err + "; Request must be set"; 
+if (_response == null) l_err = l_err + "; Response must be set"; 
+if (_servlet == null) l_err = l_err + "; Servlet must be set"; 
+if ( ! l_err.equals("")) throw new IllegalStateException(l_err); 
+} 
+
+public void footerProcess() throws java.io.IOException { 
+beanFooterProcess(); 
+} 
+
+protected void addErrorMsg (String addErrorMsg) { 
+if (_errorMsg == null) _errorMsg = addErrorMsg; 
+else _errorMsg = _errorMsg + " ＜br＞\n" + addErrorMsg; 
+
+setState(ERR); 
+} 
+protected void resetErrorMsg () { 
+_errorMsg = null; 
+} 
+public String getErrorMsg () { 
+if (_errorMsg == null) return ""; 
+else return _errorMsg; 
+} 
+
+protected void setState (int newState) { 
+_state = newState; 
+} 
+public int getState () { 
+return _state; 
+} 
+
+public void setSharedSessionBean (SharedSessionBean newSharedSessionBean) { 
+if (_sharedSessionBean == null) { 
+_sharedSessionBean = newSharedSessionBean; 
+_sharedSessionBean.putJSPBean(getJSPCode(), this); 
+} else { 
+if (_sharedSessionBean != newSharedSessionBean) { 
+throw new IllegalStateException("SharedSessionBean is not set properly. SharedSessionBean must be the same for all PageBeans within the session"); 
+} 
+} 
+} 
+public SharedSessionBean getSharedSessionBean () { 
+return _sharedSessionBean; 
+} 
+
+public void setSkipPageOutput (boolean newSipPageOutput) { 
+_skipPageOutput = newSipPageOutput; 
+} 
+public boolean getSkipPageOutput () { 
+return _skipPageOutput; 
+} 
+
+protected void redirect (String redirectURL) throws java.io.IOException { 
+// skip the page output since we are redirecting 
+setSkipPageOutput(true); 
+_response.sendRedirect(redirectURL); 
+} 
+
+public void setRequest (HttpServletRequest newRequest) { 
+_request = newRequest; 
+} 
+public void setResponse (HttpServletResponse newResponse) { 
+_response = newResponse; 
+} 
+public void setServlet (Servlet newServlet) { 
+_servlet = newServlet; 
+} 
+} 
+ 
+
+AbstractJSPBean包含有以下的抽象方法：beanFirstPassProcess(), beanProcess(), and beanFooterProcess()。这些方法被称为primitive方法。你必须在实际的JSP JavaBean子类中实现它们。每个都在JSP处理的一个特定阶段中执行。
+
+　　beanFirstPassProcess()--在页面被首次调用时进行的处理，它发生在页面开始输出之前。它适合用来初始化动态的内容和验证对页面的访问。可参见VoteJSPBean中该方法的实现，该Bean中用它来验证页面的访问，并且进行应用的流程控制。
+
+　　beanProcess()--发生在第二和后来的页面调用期间的处理，在页面输出开始之前。你可以用它来作HTML form验证和数据库更新。在LoginJSPBean类中，该方法被用作HTML form处理，在VoteJSPBean类中，用来保存信息到数据库中。
+
+　　beanFooterProcess()--在页面输出完成后进行的处理。你可以使用它来令session无效。在ConfirmationJSPBean类中，当投票完成后，通过实现该方法令session无效，并且显示确认的页面。
+
+　　接着我们将看一下process()方法：
+
+public void process() throws java.io.IOException { 
+setSkipPageOutput(false); // by default do not skip page output. Specific bean process 
+// methods can override it. 
+if (getState() == NEW) { 
+setState(FIRSTPASS); 
+beanFirstPassProcess(); 
+} else { 
+resetErrorMsg(); 
+setState(PROC); 
+beanProcess(); 
+} 
+.... 
+ 
+
+
+　　process()首先检查JSP的状态；然后，根据状态，它调用相应的primitive方法。它还设置了JSP相应的状态。
+
+　　process()和footerProcess()方法被称为template方法。它们由JSP中真正调用（在includeheader.jsp和includefooter.jsp中）。实体的bean不应该覆盖它们。template方法包含有共有的框架算法。一个典型模板方法的框架算法执行一个共有的处理，并且调用primitive（抽象）方法（beanFirstPassProcess()、beanProcess()和beanFooterProcess()），这些方法的实现在每个实际的JSP JavaBean中都是不同的。框架算法也可以称为AbstractJSPBean中实现的实体方法。以上的规则是Template Method设计方法的基本点。
+
+　　这种方法的好处是：
+
+　　1、通过在模板方法中分解出共有的处理，你可以做到代码重用
+
+　　2、你可以对整个应用进行共有的设计和处理
+
+除了处理逻辑外，AbstractJSPBean还包含有以下具体的方法来帮助子类（实际的JSP JavaBean）来实现它们的处理任务，你不应该覆盖这些实际的方法。
+
+　　1、与用户错误管理相关的方法（addErrorMsg(), resetErrorMsg(), and getErrorMsg()）
+
+　　2、与页面状态管理相关的方法（setState(), getState()）
+
+　　3、管理与SharedSessionBean关联的方法
+
+
+　　4、控制JSP页面的HTML部分是否输出的方法（setSkipPageOutput(), getSkipPageOutput()）
+
+　　5、重定向的方法 
+
+　　6、访问Servlet对象的方法: request, response和servlet 

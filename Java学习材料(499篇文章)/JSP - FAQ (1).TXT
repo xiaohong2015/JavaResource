@@ -1,0 +1,183 @@
+作者：jspfuns
+日期：2000-8-10 17:48:55
+Java Server Pages Frequently Asked Questions 
+
+
+Maintainer: Richard Vowles, rvowles@esperanto.org.nz (http://www.esperanto.org.nz)
+
+
+
+Questions
+What is JSP? 
+What version is the current version of JSP? 
+Where can I get the specification for JSP? 
+Who supports JSP? 
+What books are available for JSP? 
+Is JSP better than ASP (Microsoft's Active Server Pages)? 
+What HTML editors support JSP? 
+Yes, but how does it perform? 
+How to invoke a JSP page directly from by browser? 
+How do you invoke a JSP page from a servlet? 
+How do you pass data (including beans) to a JSP from a servlet? 
+How can I pool connections to my database? 
+How do I use other languages in my JSP? 
+How can I set a cookie in JSP? 
+Can JSP and Servlet share same Session and Beans? 
+How do I plug JSP into Microsoft's IIS Web Server? 
+Are there any newsgroups that discuss JSP? 
+What do the differing levels of bean storage (page, session, app) mean? 
+Where can I find the mailing list archives? 
+What are the important steps in using JDBC in JSP? 
+How does variable scope work in JSP? 
+How do I forward to an HTML page? 
+Are there any white papers or documents explaining how JSP fits? 
+How to I create dynamic GIFs for my JSP? 
+Do you know where I could get some code that would encode something to the HTML DTD standard? 
+What is page compilation? 
+How are servlets and JSP pages related? 
+Any good web sites for up to date activities in the Java/JSP/Servlet world? 
+How do I force a user to log in? 
+So how can a newbie get started with JSP? 
+How can I ensure that session objects stay in existence when the web server restarts? 
+How can I include one JSP inside another JSP? 
+Is there some sort of event that happens when a session object gets bound or unbound to the session? 
+Is there a way to execute a JSP from the comandline or from my own application? 
+What should I use, Model 1 or Model 2? 
+How do I delete a cookie with JSP? 
+Are there tips on things to watch out for in JSP? 
+How do you get started with JSP on the Macintosh? 
+What Application Servers support JSP? 
+What happened to the LOOP and DISPLAY tags from JSP 0.92? 
+Does JSP have a bean providing File Upload features like ActiveX upload control? 
+So how do I use EJB from JSP? 
+Can I just abort processing a JSP? 
+"I'm trying to pass an object between a servlet and a JSP page, but my object is null on the JSP page. What could be wrong?" 
+
+
+
+
+1) What is JSP? TOC 
+
+
+JSP is a dynamic scripting capability for web pages that allows Java as well as a few special tags to be embedded into a web file (HTML/XML, etc). The suffix traditionally ends with .jsp to indicate to the web server that the file is a JSP file. JSP is a server side technology - you can't do any client side validation with it.
+
+JSP files actually get compiled into Servlets, so what is the point? Why not just write Servlets?
+
+For most people, the benefit is twofold:
+
+The focus is on HTML. Java and the JSP extensions assist in making the HTML more
+functional. Servlets on the other hand allow outputting of HTML but it is a tedious
+process. 
+It is easy to make a change and then let the JSP capability of the Web Server you are
+using deal with compiling it into a Servlet and running it. 
+In the past, people have used servlets because of the problem of redirection - because by the time the JSP engine gets around to writing information back down the HTTP pipe, you could not do a redirect effectively in JSP - leading to the concepts of Model 1 vs Model 2 (see question 38). This has been fixed in JSP 1.0 with the addition of buffered output streams.
+
+JavaSoft also has a FAQ, covering different questions, and it is located at http://java.sun.com/products/jsp/faq.html.
+
+2) What version is the current version of JSP? TOC 
+
+
+
+The current version of JSP is 1.1. It is available from http://java.sun.com/products/jsp.
+
+The JSP 1.1 is available from http://java.sun.com/products/jsp/techinfo.html.
+
+The 0.92 spec is available from http://java.sun.com/products/jsp/jsp092.html
+
+The 0.91 spec is a popular version though, and much software that supports the JSP pre-standard actually supports 0.91 of JSP.
+
+The 0.91 spec is available from http://www.burridge.net/jsp/Spec91/jsp_spec.html
+
+3) Where can I get the specification for JSP? TOC 
+
+
+
+You can get the current spec from http://java.sun.com/products/jsp. This is along with the reference implementation which works with its own web server.
+
+4) Who supports JSP? TOC 
+
+
+
+There are the following implementations available:
+
+Name 
+Version of JSP Supported 
+Cost 
+Comments 
+JSP Reference 1.1 free TOMCAT - Now included as part of the J2EE Reference Implementation, but also managed by the Jakarta Project as part of Apache. This implementation has a way to go before being ready for production. 
+GNU JSP 1.0 free, open source, located in CVS at the Giant Java Tree 
+Sun's Java Web Server 2.0 1.0 commercial Sun's own Java Web Server. Being replaced with iPlanet (Alliance) 
+PolyJSP 0.92 free, open source PolyJsp is based on XML/XSL and has been designed to be extensible. Now supports WebL Hasn't been updated for a while. 
+Resin 1.0, 1.1 in beta Unknown Now Open Source. 
+SJSP 1.1 free for personal use Uses compile time introspection, allows you to replace your existing JSP engine in your web server. 
+zJSP 0.91 Last updated, Sept 3, 1998 
+JRUN 0.92, 1.0 commercial JSP 1.1 support now in beta. 
+Orion 1.1 commercial Orion is a web application server that implements JSP internally. It also has a lot of JSP vs other JSP and vs ASP stats on its pages. Also supports Servlet 2.2 
+ServletExec 1.1 commercial Supports large number of web servers 
+RocketJSP 1.0 GPL Located in the Giant Java Tree 
+
+
+
+
+5) What books are available for JSP? TOC 
+
+
+
+There are now a number of books available on JSP from various publishers.
+
+A quick search of Amazon comes up with
+
+Professional Java Server Programming: with Servlets, JavaServer Pages (JSP), XML, Enterprise JavaBeans (EJB), JNDI, CORBA, Jini and Javaspaces 
+Professional Java XML Programming with servlets and JSP 
+Pure JSP Java Server Pages 
+Web Development with JavaServer Pages 
+There is a group of people working on a Web book for JSP - information is located at http://www.esperanto.org.nz/jspbook. There is another at http://www.aptura.com/technology/jspBook_Architectures.html and yet another at Brainopolis.
+
+6) Is JSP better than ASP (Microsoft's Active Server Pages)? TOC 
+
+
+
+This is a matter of great debate. Many punters think that JavaSoft has the benefit of hindsight - what works well and what does't. ASP is very complex but supports multiple scripting languages and the ActiveX model of Microsoft. Although ASP _is_ available on many platforms, the ActiveX library support that makes it as powerful as it is is missing and thus makes ActiveX only feasible for an NT platform.
+
+According to recent statistics (see the RedHat site), 22% of web servers are NT, (21% are Linux), that means there is 78% needing something else, and JSP advocates believe that JSP fits the bill nicely that you very much.
+
+7) What HTML editors support JSP? TOC 
+
+
+
+Most of the visual developers do not support JSP in any way, shape or form, they mess up the tags totally. 
+
+The following HTML editors have been known to work with JSP:
+
+
+Product 
+Location 
+Comments 
+HomeSite http://www.allaire.com/ JSP colour coding will be in HS 4.0.1, but you can get a plug in now from http://www.burridge.net/jsp/homesite.html 
+NetObjects ScriptBuilder 3.0 http://www.netobjects.com/products/html/nsb3.html Win32 product supports JSP 
+Any text editor 
+Borland JBuilder 3.5 http://www.borland.com/jbuilder Java Development tool, supports JSP internally, and allows running and debugging of JSPs 
+DreamWeaver 3 http://www.dreamweaver.com/ Ignores JSP tags, and allows you to edit JSP files as if they are HTML files given you customise the product slightly (you need to edit a special file) 
+FrontPage 2000 http://www.microsoft.com/frontpage Some reports that Front Page now ignores JSP tags. 
+
+
+
+8) Yes, but how does it perform? TOC 
+
+
+
+I have been picking up some comments:
+
+Brian Burridge, brian_burridge@VALPAK.COM
+"Our extranets for 300 franchises, 500+ users, our Intranet for thousands of employees, 
+and eventually all of our other web sites. New Atlanta has been running for 6 weeks 
+now without even one problem. Programming in JSP has turned out to be as easy as Perl, 
+yet all our tests show it to be up to 10x faster."
+Also available are a set of benchmarks from the people who make the Orion server, located at http://orion.evermind.net/, and also from the people who do Resin (comparing their JSP implementation with Orion)
+
+9) How to invoke a JSP page directly from by browser? TOC 
+
+
+
+JSP files are just like HTML files, so if your index.jsp file is in your root directory of your web site, use http://localhost/index.jsp
+

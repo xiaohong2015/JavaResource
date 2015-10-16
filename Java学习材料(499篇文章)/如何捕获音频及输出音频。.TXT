@@ -1,0 +1,169 @@
+作者：wflm
+email: wflm@263.net
+日期：6/22/2001 2:04:31 AM
+这是我原来用过的两段代码，输出音频和捕获音频。 
+构造器里的socket是用来接受来自网络的音频数据。不做网络音频可以去掉它。
+
+希望能与大家分享经验。8-）
+
+import java.io.*; 
+import javax.sound.sampled.*; 
+import java.net.*; 
+
+
+/** 
+* Title:        VoiceChat 
+* Description:  输出音频（放音程序） 
+* Copyright:    Copyright (c) 2001 
+* Company: 
+* @author       你猜！ 
+* @version 1.0 
+*/ 
+
+
+class Playback implements Runnable { 
+
+       final int bufSize = 16384; 
+       SourceDataLine line; 
+       Thread thread; 
+       Socket s; 
+
+       Playback(Socket s){//构造器 取得socket以获得网络输入流 
+         this.s=s; 
+       } 
+       public void start() { 
+
+           thread = new Thread(this); 
+           thread.setName("Playback"); 
+           thread.start(); 
+       } 
+
+       public void stop() { 
+           thread = null; 
+       } 
+
+       public void run() { 
+
+           AudioFormat format =new AudioFormat(8000,16,2,true,true);//AudioFormat(float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian） 
+           BufferedInputStream playbackInputStream; 
+
+           try { 
+             playbackInputStream=new BufferedInputStream(new AudioInputStream(s.getInputStream(),format,2147483647));//封装成音频输出流，如果网络流是经过压缩的需在此加套解压流 
+           } 
+           catch (IOException ex) { 
+               return; 
+           } 
+
+           DataLine.Info info = new DataLine.Info(SourceDataLine.class,format); 
+
+           try { 
+               line = (SourceDataLine) AudioSystem.getLine(info); 
+               line.open(format, bufSize); 
+           } catch (LineUnavailableException ex) { 
+               return; 
+           } 
+
+           byte[] data = new byte[1024];//此处数组的大小跟实时性关系不大，可根据情况进行调整 
+           int numBytesRead = 0; 
+           line.start(); 
+
+           while (thread != null) { 
+              try{ 
+                 numBytesRead = playbackInputStream.read(data); 
+                 line.write(data, 0,numBytesRead); 
+              } catch (IOException e) { 
+                   break; 
+               } 
+           } 
+
+           if (thread != null) { 
+               line.drain(); 
+           } 
+
+           line.stop(); 
+           line.close(); 
+           line = null; 
+       } 
+} 
+
+
+import java.io.*; 
+import javax.sound.sampled.*; 
+import java.net.*; 
+
+/** 
+* Title:        VoiceChat 
+* Description:  音频捕捉（录音程序） 
+* Copyright:    Copyright (c) 2001 
+* Company: 
+* @author       你猜！ 
+* @version 1.0 
+*/ 
+
+class Capture implements Runnable { 
+
+       TargetDataLine line; 
+       Thread thread; 
+       Socket s; 
+       BufferedOutputStream captrueOutputStream; 
+
+       Capture(Socket s){//构造器 取得socket以获得网络输出流 
+         this.s=s; 
+       } 
+
+       public void start() { 
+
+           thread = new Thread(this); 
+           thread.setName("Capture"); 
+           thread.start(); 
+       } 
+
+       public void stop() { 
+           thread = null; 
+       } 
+
+       public void run() { 
+
+           try { 
+             captrueOutputStream=new BufferedOutputStream(s.getOutputStream());//建立输出流 此处可以加套压缩流用来压缩数据 
+           } 
+           catch (IOException ex) { 
+               return; 
+           } 
+
+           AudioFormat format =new AudioFormat(8000,16,2,true,true);//AudioFormat(float sampleRate, int sampleSizeInBits, int channels, boolean signed, boolean bigEndian） 
+           DataLine.Info info = new DataLine.Info(TargetDataLine.class,format); 
+
+           try { 
+               line = (TargetDataLine) AudioSystem.getLine(info); 
+               line.open(format, line.getBufferSize()); 
+           } catch (Exception ex) { 
+               return; 
+           } 
+
+           byte[] data = new byte[1024];//此处的1024可以情况进行调整，应跟下面的1024应保持一致 
+           int numBytesRead=0; 
+           line.start(); 
+
+           while (thread != null) { 
+               numBytesRead = line.read(data, 0,1024);//取数据（1024）的大小直接关系到传输的速度，一般越小越快， 
+               try { 
+                 captrueOutputStream.write(data, 0, numBytesRead);//写入网络流 
+               } 
+               catch (Exception ex) { 
+                   break; 
+               } 
+           } 
+
+           line.stop(); 
+           line.close(); 
+           line = null; 
+
+           try { 
+               captrueOutputStream.flush(); 
+               captrueOutputStream.close(); 
+           } catch (IOException ex) { 
+               ex.printStackTrace(); 
+           } 
+       } 
+} 

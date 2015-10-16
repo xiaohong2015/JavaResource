@@ -1,0 +1,116 @@
+作者：diego lynn
+日期：2001-3-25 11:00:19
+Can I implement my own JavaTM Web Start? 
+
+The underlying technology for JavaTM Web Start, the Java Network Launching Protocol and API, is being developed through the Java Community Process. 
+
+http://java.sun.com/aboutJava/communityprocess/jsr/jsr_056_jnlp. html 
+
+Thus, you can implement this protocol in any product, however note that additional licensing and terms must be met to implement any JCP(SM) technology including the JNLP technology. back to top 
+
+What are the supported browsers? 
+
+JavaTM Web Start supports primarily Internet Explorer 4 or higher and Netscape 4.X. However JNLP files can be launched from any browser if the mime-type association is done correctly. Please note that JavaTM Web Start uses the browsers settings and may launch a browser to show a URL these may/may not work with unsupported browsers. 
+
+JavaTM Web Start works with Netscape 6. However, you will manually need to register JavaTM Web Start with NS6. This is done in the Navigator/Applications section of the Navigator/Helper Application section. 
+
+This will be done automatically in a later version of the JavaTM Web Start installer. back to top 
+
+When and where can we get the European and Asian language versions of JavaTM Web Start? 
+
+We are currently working on the Asian and European versions which will be made available in a forthcoming release in the early or mid part of 2001. The localized versions would be: French, German, Italian, Spanish, Swedish, Japanese, Korean, Simplified Chinese and Traditional Chinese. back to top 
+
+Is there a comprehensive list of Online Resources for JavaTM Web Start? 
+
+* JSR-56: 
+http://java.sun.com/aboutJava/communityprocess/jsr/jsr_056_jnlp. html 
+
+* Product Page:  
+http://java.sun.com/products/javawebstart/ 
+
+* README: 
+http://java.sun.com/products/javawebstart/docs/readme.html 
+
+* Developer's Guide: 
+http://java.sun.com/products/javawebstart/docs/developersguide.h tml 
+* Java Web Start Discussion Forums http://forum.java.sun.com/list/discuss.sun.java.web.start.jnlp 
+back to top 
+
+Can I deploy any application with JavaTM Web Start? 
+
+JavaTM Web Start is an application launcher for JavaTM 2 technology based applications that are written to be Web-deployed. 
+
+An application must be delivered in a set of JAR files and all application resources, such as images, configuration files and Native libraries, must be included in the JAR files. The resources must be looked up using the ClassLoader getResource or another method. JavaTM Web Start only transfers JAR files from the Web server to the client. 
+
+If an application is written to run in a restricted execution environment (sandbox), then access to disk is not permitted and the application may only connect to the host on which it resides. back to top 
+
+Are there any third party tools available to deploy my application with Java Web Start? 
+
+Sitraka Software's free DeployDirector Bundler for JNLP automatically generates the required XML files and .WAR file needed by the server to deploy the bundle. back to top 
+
+What applications are available for JavaTM Web Start? 
+
+Currently we have a set of demo applications to try out at: http://java.sun.com/products/javawebstart/demos.html. However most JavaTM applications can be made to run with JavaTM Web Start. back to top 
+
+Is JavaTM Web Start a software distribution mechanism like Marimba and MS SMS? 
+
+JavaTM Web Start is an application launcher for JavaTM 2 technology-based applications. It allows easy distribution of full-featured applications based on the Java platform from a Web server to a client machine with minimal user interaction.  
+
+The software distribution technology is only one aspect of JavaTM Web Start. It also provides security, updates to the applications, ease-of-use for end users, and flexibility for developers when they create the applications. back to top 
+
+Is JavaTM Web Start an application installer? 
+
+JavaTM Web Start is an application launcher for JavaTM 2 technology-based applications that are written to be Web-deployed. It launches only those applications written on the JavaTM 2 platform. 
+
+JavaTM Web Start caches resources locally on the disk, but this is only one aspect of its technology. It also provides a secure execution environment and a virtually transparent updating facility for applications. The end user does not need to manually initiate a software update because the application is updated each time it is used. back to top 
+
+What version of the JavaTM platform does JavaTM Web Start work with? 
+
+JavaTM Web Start is an application launcher for JavaTM 2 technology-based applications that are written to be Web-deployed. It launches only those applications written for the JavaTM 2 platform. back to top 
+
+How does JavaTM Web Start relate to Plug-in? 
+
+The two approaches are very similar. The key difference is in the user experience. If the JavaTM application/applet needs to interact with a web page and be tightly bound to a web browsers, then applets may be the solution. On the other hand, if browser independence is important then JavaTM Web Start is the deployment platform of choice. There are a number of other differences, but this is the fundamental difference. 
+
+JavaTM Plug-in enables users to run JavaTM 2 technology-based applets inside a browser. 
+
+JavaTM Web Start enables users to download full-featured applications with any browser. Once they have downloaded and launched an application, the browser can be closed, while the application continues working. 
+
+The application is not dependent upon an open browser to function. The browser can be shut down or you can go to a different Web page and the application will continue running. back to top 
+
+
+Licensing and Support Questions 
+
+Is there a Licensing fee for JavaTM Web Start? 
+
+There is no licensing fee or royalty to redistribute JavaTM Web Start (per terms of the license that comes with the software). There is also no fee to obtain JavaTM Web Start from http://java.sun.com/products/javawebstart/.   back to top 
+
+Can we deploy/redistribute JavaTM Web Start with our application? 
+
+Yes, JavaTM Web Start can be bundled with your application. back to top 
+
+Are there any restrictions to redistributing JavaTM Web Start? 
+
+This release includes Sun's standard Binary Code License (BCL) + any supplemental terms, similar to the JRE terms. In general the terms tend to boil down to "you must ship is as, without modification." back to top 
+
+Where can I find the Licensing Terms for the JRE? 
+
+The JRE licensing terms can be found here: 
+http://java.sun.com/j2se/1.3/jre/j2re1_3_0.license &nbs p; back to top 
+
+What kind of support is available for JavaTM Web Start with the License? 
+
+Support is an optional purchase. We recommend you explore these options:  
+http://www.sun.com/developers/support/index.html   back to top 
+
+
+Technical Questions 
+
+Why does JavaTM Web Start download the application the next time? 
+
+JavaTM Web Start will always launch the application from the cache, if possible, and it will simultaneously perform a background check with the server for updates. If updates are available, then it will notify the user, and launch the update versions the next time. This approach ensures fast startup time in the common case where there is no update, and also makes sure that an application can be launched offline. 
+
+For the 1.0 release, this behavior can be overwritten by adding the line javaws.cfg.forceUpdate=true in a client's javaws.cfg file. This will force Java Web Start to check for an update the first time. Unfortunately though, setting this flag will cause offline mode to not work properly. 
+
+In a future release of Java Web Start, we expect to change the behavior of the update checking to immediatly launch the newer version of the application, if an update is available, while still preserving offline launching. back to top 
+

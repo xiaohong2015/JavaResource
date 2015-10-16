@@ -1,0 +1,86 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-16 11:34:11
+第五章 JSP技术
+5.1 JSP简介
+     JSP（JavaServer Pages）是一种基于Java的脚本技术。在JSP 的众多优点之中，其中之一是它能将 HTML 编码从 Web 页面的业务逻辑中有效地分离出来。用 JSP 访问可重用的组件，如 Servlet、JavaBean 和基于 Java 的 Web 应用程序。JSP 还支持在 Web 页面中直接嵌入 Java 代码。可用两种方法访问 JSP 文件：浏览器发送 JSP 文件请求、发送至 Servlet 的请求。
+	1. JSP 文件访问 Bean 或其它能将生成的动态内容发送到浏览器的组件。图5-1说明了该 JSP 访问模型。当 Web 服务器接收到一个 JSP 文件请求时，服务器将请求发送至 WebSphere应用服务器。WebSphere应用服务器 对 JSP 文件进行语法分析并生成 Java 源文件（被编译和执行为 Servlet）。Java 源文件的生成和编译仅在初次调用 Servlet 时发生，除非已经更新了原始的 JSP 文件。在这种情况下，WebSphere应用服务器 将检测所做的更新，并在执行它之前重新生成和编译 Servlet。
+图5-1：浏览器发送 JSP 文件请求
+    2. 发送至 Servlet 的请求生成动态内容，并调用 JSP 文件将内容发送到浏览器。图5-2说明了该访问模型。该访问模型使得将内容生成从内容显示中分离出来更为方便。WebSphere应用服务器 支持 HttpServiceRequest 对象和 HttpServiceResponse 对象的一套新方法。这些方法允许调用的 Servlet 将一个对象放入（通常是一个 Bean）请求对象中，并将该请求传递到另一个页面（通常是一个 JSP 文件）以供显示。调用的页面从请求对象中检索 Bean, 并用 JSP 来生成客户机端的 HTML。 
+
+图5-2：发送至 Servlet 的请求
+5.2 JSP示例
+    浏览器通过一个Web 页面中的HTML表单请求一个servlet（PopulateBeanServlet），该servlet创建一个名为 dataBean 的DataBean 实例，并调用 JSP 文件将内容发送到浏览器。Servlet 示例和 JSP 文件示例说明了启用内容分离的 JSP 访问模型。
+A.	Servlet 是由下列Web 页面中的 HTML 表单来调用的。 
+<HTML>
+<BODY>
+<H1>运行 PopulateBeanServlet</H1>
+<P>您是否希望运行 PopulateBeanServlet?
+<FORM action="/servlet/PopulateBeanServlet" method="GET">
+<INPUT type="SUBMIT" value="Yes">
+<INPUT type="SUBMIT" value="No">
+</FORM>
+</BODY>
+</HTML>
+B.	被请求的servlet为PopulateBeanServlet， 其源代码如下：
+/******************************************************************
+*Servlet 示例：PopulateBeanServlet.java 
+*这个servlet创建一个名为 dataBean 的DataBean 实例，设置dataBean的若干个属性， 
+*将dataBean放置在当前“请求”对象中， 
+*调用 JSP 文件（DisplayData.jsp）来格式化并显示dataBean的数据
+********************************************************************/
+import java.io.*;
+import java.beans.Beans; 
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.ejb.CreateException;
+
+public class PopulateBeanServlet extends HttpServlet { 
+   public void Service(HttpServletRequest req, HttpServletResponse res)
+       throws ServletException, IOException { 
+   try {
+         dataBean = (DataBean) Beans.instantiate(this.getClass().getClassLoader(), "DataBean");
+      }
+   catch (Exception ex) {
+         throw new ServletException("Can't create BEAN of class DataBean: "
+		      metaData.setSQL(getSQLString());
+   }
+   // Set some Bean properties (content generation)
+   dataBean.setProp1("Value1");
+   dataBean.setProp2("Value2");
+   dataBean.setProp3("Value3");
+   // To send the Bean to a JSP file for content formatting and display
+   // 1) 将dataBean放置在当前“请求”对象中，
+   ((com.sun.server.http.HttpServiceRequest) req).setAttribute("dataBean", dataBean);
+   // 2) 使用callPage 方法调用JSP文件，文件名为DisplayData.jsp，并把请求对象传递给JSP。
+   ((com.sun.server.http.HttpServiceResponse) res).callPage("/DisplayData.jsp", req);
+ } //end of service mehtod
+} /* end of class PopulateBeanServlet */
+
+C.	被调用的JSP文件为DisplayData.jsp，其内容如下：
+<!-- 该 JSP 文件获得在请求对象中传递的 dataBean，并显示该 Bean 的属性。 -->
+<html> 
+<head>
+<title>Bean Data Display</title>
+</head>
+ 
+<!-- Get the Bean using the BEAN tag   -->
+<bean name="dataBean" type="DataBean" introspect="no" create="no" scope="request">
+</bean>
+<body>
+<!-- There are three ways to access Bean properties -->
+<!--    Using a JSP scriptlet  -->
+<% out.println("The value of Bean property 1 is " + dataBeans.getProp1());
+%>
+ 
+<!-- Using a JSP expression -->
+<p>The value of Bean property 2 is 
+<%= dataBean.getProp2()  %> </p>
+ 
+<!--Using the INSERT tag   -->
+<p>The value of Bean property 3 is 
+<insert bean=dataBean property=prop3 default="No property value" >
+</insert></p>
+ 
+</body>
+</html> 

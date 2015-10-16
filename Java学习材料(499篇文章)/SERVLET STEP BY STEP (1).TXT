@@ -1,0 +1,28 @@
+作者：haohe
+email: hao-he@263.net
+日期：2000-11-14 20:02:14
+Servlet step by step 
+
+（在安装好 JDk, Tomcat 后）
+
+ 1．直接运行servlet :
+
+     A. 将编译好的 *.class放在webapps 下的 test, admin, examples, root, 任一目录下的\web-inf\classes目录中，(如test目录，下同) 
+     B. URL栏中输入：http://localhost:8080/test/servlet/classname
+       即可运行servlet!
+
+   
+  2. 由Form传数据给servlet：
+     
+     A; 将 html 文件放在 test目录下 ，form中的                 ACTION="/test/servlet/getForm"
+        method=get 方法对应 servlet 的doGet方法：    
+        public void doGet( HttpServletRequest req,
+	                  HttpServletResponse response) 
+        post 对doPost方法。
+
+
+        
+   3.中文问题
+
+       javac -encoding ISO8859_1 myservlet.java    (ISO大写)
+ 

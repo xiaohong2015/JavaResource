@@ -1,0 +1,278 @@
+作者：罗亭
+email: tinluo@263.net
+日期：2001-3-8 13:57:47
+续   
+---
+
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-4 17:28:17)
+* @return java.util.Enumeration
+*/
+public Enumeration getParameterNames() {
+if (pairs == null) return null;
+return pairs.keys();
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-4 17:33:40)
+* @return java.lang.String[]
+* @param name java.lang.String
+*/
+public String[] getParameterValues(String name) {
+if (pairs == null || !pairs.containsKey(name)) return null;
+ArrayList al = (ArrayList) pairs.get(name);
+String[] values = new String[al.size()];
+for(int i=0;i<values.length;i++)
+values[i] = (String) al.get(i);
+return values;
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-4 20:34:37)
+* @param urlenc java.lang.String
+*/
+private void parse(String urlenc) throws java.io.IOException{
+if (urlenc == null) return;
+StringTokenizer tok = new StringTokenizer(urlenc,"&");
+try{
+while (tok.hasMoreTokens()){
+String aPair = tok.nextToken();
+int pos = aPair.indexOf("=");
+String name = null;
+String value = null;
+if(pos != -1){
+name = decode(aPair.substring(0,pos));
+value = decode(aPair.substring(pos+1));
+}else{
+name = aPair;
+value = "";
+}
+if(pairs.containsKey(name)){
+ArrayList values = (ArrayList)pairs.get(name);
+values.add(value);
+}else{
+ArrayList values = new ArrayList();
+values.add(value);
+pairs.put(name,values);
+}
+}
+}catch(Exception e){
+throw new java.io.IOException(e.getMessage());
+}
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-4 20:34:37)
+* @param urlenc java.lang.String
+*/
+private void parse(String urlenc,String encoding) throws java.io.IOException{
+if (urlenc == null) return;
+StringTokenizer tok = new StringTokenizer(urlenc,"&");
+try{
+while (tok.hasMoreTokens()){
+String aPair = tok.nextToken();
+int pos = aPair.indexOf("=");
+String name = null;
+String value = null;
+if(pos != -1){
+name = decode(aPair.substring(0,pos),encoding);
+value = decode(aPair.substring(pos+1),encoding);
+}else{
+name = aPair;
+value = "";
+}
+if(pairs.containsKey(name)){
+ArrayList values = (ArrayList)pairs.get(name);
+values.add(value);
+}else{
+ArrayList values = new ArrayList();
+values.add(value);
+pairs.put(name,values);
+}
+}
+}catch(Exception e){
+throw new java.io.IOException(e.getMessage());
+}
+}
+}
+这个类的功能就是读取并保存form提交的信息，并实现常用的getParameter方法。
+package com.hto.servlet;
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+/**
+* Insert the type's description here.
+* Creation date: (2001-2-5 8:28:20)
+* @author: 钱卫春
+*/
+public class UtfBaseServlet extends HttpServlet {
+public static final String PARAMS_ATTR_NAME = "PARAMS_ATTR_NAME";
+/**
+* Process incoming HTTP GET requests
+*
+* @param request Object that encapsulates the request to the servlet
+* @param response Object that encapsulates the response from the servlet
+*/
+public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+performTask(request, response);
+
+}
+/**
+* Process incoming HTTP POST requests
+*
+* @param request Object that encapsulates the request to the servlet
+* @param response Object that encapsulates the response from the servlet
+*/
+public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+performTask(request, response);
+
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-5 8:52:43)
+* @return int
+* @param request javax.servlet.http.HttpServletRequest
+* @param name java.lang.String
+* @param required boolean
+* @param defValue int
+*/
+public static java.sql.Date getDateParameter(HttpServletRequest request, String name, boolean required, java.sql.Date defValue) throws ServletException{
+String value = getParameter(request,name,required,String.valueOf(defValue));
+return java.sql.Date.valueOf(value);
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-5 8:52:43)
+* @return int
+* @param request javax.servlet.http.HttpServletRequest
+* @param name java.lang.String
+* @param required boolean
+* @param defValue int
+*/
+public static double getDoubleParameter(HttpServletRequest request, String name, boolean required, double defValue) throws ServletException{
+String value = getParameter(request,name,required,String.valueOf(defValue));
+return Double.parseDouble(value);
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-5 8:52:43)
+* @return int
+* @param request javax.servlet.http.HttpServletRequest
+* @param name java.lang.String
+* @param required boolean
+* @param defValue int
+*/
+public static float getFloatParameter(HttpServletRequest request, String name, boolean required, float defValue) throws ServletException{
+String value = getParameter(request,name,required,String.valueOf(defValue));
+return Float.parseFloat(value);
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-5 8:52:43)
+* @return int
+* @param request javax.servlet.http.HttpServletRequest
+* @param name java.lang.String
+* @param required boolean
+* @param defValue int
+*/
+public static int getIntParameter(HttpServletRequest request, String name, boolean required, int defValue) throws ServletException{
+String value = getParameter(request,name,required,String.valueOf(defValue));
+return Integer.parseInt(value);
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-5 8:43:36)
+* @return java.lang.String
+* @param request javax.servlet.http.HttpServletRequest
+* @param name java.lang.String
+* @param required boolean
+* @param defValue java.lang.String
+*/
+public static String getParameter(HttpServletRequest request, String name, boolean required, String defValue) throws ServletException{
+if(request.getAttribute(UtfBaseServlet.PARAMS_ATTR_NAME) != null) {
+UTF8ParameterReader params = (UTF8ParameterReader)request.getAttribute(UtfBaseServlet.PARAMS_ATTR_NAME);
+if (params.getParameter(name) != null) return params.getParameter(name);
+if (required) throw new ServletException("The Parameter "+name+" Required but not provided!");
+else return defValue;
+}else{
+if (request.getParameter(name) != null) return request.getParameter(name);
+if (required) throw new ServletException("The Parameter "+name+" Required but not provided!");
+else return defValue;
+}
+}
+/**
+* Returns the servlet info string.
+*/
+public String getServletInfo() {
+
+return super.getServletInfo();
+
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-5 8:52:43)
+* @return int
+* @param request javax.servlet.http.HttpServletRequest
+* @param name java.lang.String
+* @param required boolean
+* @param defValue int
+*/
+public static java.sql.Timestamp getTimestampParameter(HttpServletRequest request, String name, boolean required, java.sql.Timestamp defValue) throws ServletException{
+String value = getParameter(request,name,required,String.valueOf(defValue));
+return java.sql.Timestamp.valueOf(value);
+}
+/**
+* Initializes the servlet.
+*/
+public void init() {
+// insert code to initialize the servlet here
+
+}
+/**
+* Process incoming requests for information
+*
+* @param request Object that encapsulates the request to the servlet
+* @param response Object that encapsulates the response from the servlet
+*/
+public void performTask(HttpServletRequest request, HttpServletResponse response) {
+
+try
+
+{
+// Insert user code from here.
+
+}
+catch(Throwable theException)
+{
+// uncomment the following line when unexpected exceptions
+// are occuring to aid in debugging the problem.
+//theException.printStackTrace();
+}
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-5 8:31:54)
+* @param request javax.servlet.ServletRequest
+* @param response javax.servlet.ServletResponse
+* @exception javax.servlet.ServletException The exception description.
+* @exception java.io.IOException The exception description.
+*/
+public void service(ServletRequest request, ServletResponse response) throws javax.servlet.ServletException, java.io.IOException {
+String content = request.getContentType();
+if(content == null || content != null && content.toLowerCase().startsWith("application/x-www-form-urlencoded"))
+request.setAttribute(PARAMS_ATTR_NAME,new UTF8ParameterReader((HttpServletRequest)request));
+super.service(request,response);
+}
+}
+　　这个就是Servlet基类，它覆盖了父类的service方法，在调用父类service前，创建了UTF8ParameterReader对象，其中保存了form中提交的信息。然后把这个对象作为一个Attribute保存到Request对象中。然后照样调用父类的service方法。
+　　对于继承这个类的Servlet，要注意的是，"标准"getParameter在也不能读到post的数据，因为在这之前这个类中已经从ServletInputStream中读出了数据了。所以应该使用该类中提供的getParameter方法。
+　　剩下的就是输出问题了，我们要把输出的信息，转为UTF8的二进制流输出。只要我们设置Content-Type时指定charset为UTF8，然后使用PrintWriter输出，那么这些转换是自动进行的，Servlet中这样设置：
+　　response.setContentType("text/html;charset=UTF8");
+Jsp中这样设置：
+　　<%@ page contentType="text/html;charset=UTF8"%>
+　　这样就可以保证输出是UTF8流，客户端能否显示，就看客户端的了。
+　　对于multipart/form-data的form提交的内容，我也提供一个类用来处理，在这个类的构造子中可以指定页面使用的charset，默认还是UTF-8，限于篇幅不贴出源码，如果感兴趣可以mail to：vividq@china.com和我探讨。

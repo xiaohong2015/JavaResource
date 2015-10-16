@@ -1,0 +1,4 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-8-11 9:01:57
+在Linux平台下的Tomcat中，只需把相关的类库(*.zip、*.jar)放到$TOMCAT_HOME/lib目录下，Tomcat启动时就会自动将这些类库放到CLASSPATH环境变量中，Windows平台下的Tomcat不行，必须手工添加到CLASSPATH环境变量中。

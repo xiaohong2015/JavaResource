@@ -1,0 +1,345 @@
+作者：allsky
+email: zhangyan_@163.com
+日期：2001-4-24 14:47:39
+一、引言
+　　在熙熙攘攘的Internet上制作极富个性化的主页、及时发布令人心动的信息 
+,以便吸引全世界不同肤色、不同职业的人们驻"足"观看,以致流连忘返,甚者慷慨 
+解囊,是Internet冲浪者心中的梦想。通过合理运用HTML脚本语言提供的表格、列 
+表、字体和段落的格式化、多媒体支持等,能使网页内容清晰、层次分明、可读性 
+强,这些已有众多文献论述,在此不再赘述。 
+
+　　我们知道,在各种信息中,统计信息堪称是用得较多、具有相当说服力的信息 
+,而表达统计数据最直观的方式是根据这些数据绘制曲线。文献[1]用相当的篇幅 
+介绍了如何在Windows操作系统中编写一个具有OLE服务器能力的统计曲线绘制工 
+具,而本文的主题则是:如何利用Java对绘图的支持,编写一个根据统计数据绘制曲 
+线的小程序(Applet)Plot,通过把Plot编译生成的字节码文件Plot.class嵌入到H 
+TML脚本中,从而实现在网页上发布统计曲线的目的。 
+
+　　二、Java编程概述 
+
+　　1.Java语言规范 
+
+　　Java继承了C++的基本语法,摒弃了一些过时的特征,比如预编译的头文件、宏 
+、条件编译,数据结构的结构体、枚举体和联合体,容易导致安全性问题的指针,以 
+及晦涩难懂的多重继承等,借鉴了Objective C的接口和Ada的包(package),以及内 
+置了Internet网络所需要的基本特征:结构中立(任何芯片、任何操作系统可以运 
+行同一版本的Java程序)、安全性(避免感染病毒和防止非法访问)、多线程和网络 
+通信等。事实上,上述被Java抛弃的特征,如指针和类的多重继承,都是由于太复杂 
+而遭C++程序员诅咒的;而新发展的特征,如结构中立、安全性、多线程和网络通信 
+等,是C++程序员极想实现而又非常难实现的特征。 
+
+　　2.JDK 
+
+　　Windows程序员一定都知道做Windows开发要用Windows SDK(软件开发工具), 
+现在,做Ja va开发的程序员也都知道编写Java小程序要用JDK(Java开发工具)了。 
+然而,与SDK主要采用结构体和函数等面向过程的方式提供Windows编程接口不同, 
+JDK采用包、界面和类等面向对象的方式提供Java编程接口。从这种意义上说,JD 
+K与Microsoft Visual C++的MFC,或者Bor land C++的OWL相似:它是一个类库,一 
+个应用框架,一个无缝集成的解决方案。 
+
+　　最先发布的JDK应该算JDK 1.0.3α,它是1995年Sun公司在全球范围内进行Ja 
+va程序设计大奖赛时随HotJava 1.0.3α发放的。在该版本中,通用包实现得比较 
+少,只有java.lang、j ava.util和java.io,而其他有关用户界面和网络通信的包 
+都在HotJava中提供。尔后发行了1.0版,这是提供给各Java平台开发公司的,其中 
+,包全部独立出来,共八个:java.applet、ja va.awt 、java.awt.image 、java. 
+awt.peer 、java.io、java.lang、java.net 和java. util 以及一个sun.tools 
+.debug。本文的程序基于1.0版本编写。由于1.0.3α和1.0两个版本的包安排差别 
+很大,因而用前一个版本编写的程序在后一个版本的编译工具中编译有可能通不过 
+,要作修改。在1996年8月底,Sun公司在Internet上发布了1.1版,1.1版在1.0版基 
+础上稍有改进,两个版本保持完全的兼容。 
+
+　　三、设计目标和程序构思 
+
+　　现在我们回到本文的主题上。首先,考虑编写一个Java小程序,它的界面和功 
+能可以这样来描述: 
+
+　　统计标题和统计数据由HTML的param标注提供,统计数据的个数没有限制; 
+　　根据数据的取值画出带刻度的X、Y轴; 
+　　在用线连接每个数据点的同时标出该点的坐标值; 
+　　提供绘制三组曲线的选择。 
+
+　　针对上述要求,考虑构造两个类来完成:Curve类用于实现绘制统计曲线的各个 
+方面;Plo t类则派生于Applet,它是本程序的小程序类,通过使用Curve类来完成统 
+计曲线的绘制。鉴于篇幅,下面给出实现要点及其程序。如需要全部源代码的读者 
+,请与笔者联系。 
+
+　　1.Curve类 
+
+　　Curve类构造主要基于以下几点考虑。 
+
+　　(1)基类。Curve从Java所有类的基类Object派生,那么就可以不显式声明了。 
+
+
+class Curve { 
+...... 
+} 
+
+　　(2)绘图环境。根据Windows等窗口操作系统的编程经验,向显示器、打印机等 
+输出设备绘图是通过绘图环境来实现的。由于Java要面向所有平台,包括Windows 
+、Unix和Macintosh 等,它们的绘图环境(如显示器)概念很不一样。那么,Java如 
+何来实现绘图呢?原来,Java在java.awt包中通过Graphics类来提供了对各种绘图 
+设备的设备环境的抽象类封装。用Window s编程来作对照,Graphics所代表的概念 
+就是Windows GDI的设备环境(Device Context),也就是MFC中CDC类或OWL的TDc类 
+。有了这样的比较,对Graphics就比较好理解了。也就是,所有绘制直线、矩形、 
+椭圆、多边形、设置字体、绘制文本等操作,调用Graphics类中的相应方法即可。 
+下面代码是通过Curve构造器将小程序类Plot的设备环境对象g传递给Curve,以被 
+其他各个绘制方法使用: 
+
+public Curve(Graphics g) 
+{ 
+myGC = g; 
+...... 
+} 
+
+　　(3)绘制算法。绘制算法就是绘制统计曲线的实现方法,包括绘制标题、坐标 
+轴、数据联线、标出数据点坐标等,以及其逆过程:清除这些绘制(因为当绘制其他 
+曲线时,得保证刷新前一次绘制的所有内容)。鉴于篇幅,下面仅给出显示数据的方 
+法实现showData. 
+
+public synchronized void showData(Vector v) 
+{ 
+float maxY=0; 
+myGC.setColor(Color.red); 
+int xPoint; 
+int yPoint; 
+//确定Vector中的最大值。 
+for(int i = 0; i < v.size(); i++) 
+{ 
+float temp = ((Float)v.elementAt(i)).floatValue(); 
+if(temp > maxY) 
+{ 
+maxY = temp; 
+} 
+} 
+//确定第一个数据点的X坐标。 
+xPoint = xOrigin + (xSpacing/2); 
+int oldX = 0; 
+int oldY = 0; 
+//在数据点处绘制一个小圆圈。 
+for(int j = 0; j < v.size(); j++) 
+{ 
+yPoint = yOrigin(int)((axisH/maxY) * 
+((Float)v.elementAt(j)).floatValue()); 
+myGC.fillRect(xPoint, yPoint, 3, 3); 
+//在数据点之间联线。 
+if((oldX != 0) && (oldY != 0)) 
+{ 
+myGC.drawLine(oldX-xSpacing, oldY, xPoint, yPoint) 
+; 
+} 
+myGC.setColor(Color.blue); 
+//在数据点边上写出数据值。 
+String coordString = 
+Float.toString(((Float)v.elementAt(j)).floatValue( 
+)); 
+myGC.drawString(coordString, xPoint+5, yPoint - 4); 
+myGC.setColor(Color.red); 
+xPoint += xSpacing; 
+oldX = xPoint; 
+oldY = yPoint; 
+} 
+} 
+
+　　2.Plot类 
+
+　　Plot类构造主要基于以下几点考虑。 
+
+　　(1)派生于Applet 
+
+　　一个Java小程序有且只有一个类派生于Applet,这就好像在MFC中,必须有且只 
+有一个类派生于CWinApp一样。另外,与MFC程序不一样的是,不管包含派生于Appl 
+et类的源程序文件( .java)命名为什么,生成的供网页使用的字节码文件(.class 
+)只与该派生类同名,而与源文件名无关,这一点容易引起混淆。打个比方,如果包 
+含Plot类的文件为PlotTest.java,而编译生成的字节码文件名为Plot.class,而不 
+是PlotTest.class。最后,Plot必须声明为public,这是由于一个编辑单元必须有 
+且只有一个类声明为public。 
+
+public class Plot extends Applet 
+{ 
+...... 
+} 
+
+　　(2)用户界面 
+
+　　目前,Java在java.awt中提供小程序的用户界面所需要的接口和类(共42个类 
+和2个接口),其中实现了我们在Windows中见到的各种用户界面,比如,菜单、对话 
+框,以及各种控件,如按钮、列表框、复选框、单选框、编辑框、组合框等。鉴于 
+本程序要求从3组数据中选择一组进行绘制,需要选用单选框控件。单选框在java 
+.awt中用Checkbox和CheckboxGroup两个类联合实现:当Checkbox单独使用时,它是 
+复选框;而把它添加到CheckboxGroup中则变成了单选框。 
+
+public void init() 
+{ 
+...... 
+cbg = new CheckboxGroup(); 
+//单选按钮。 
+cb1 = new Checkbox("数据1", cbg, false); 
+cb2 = new Checkbox("数据2", cbg, false); 
+cb3 = new Checkbox("数据3", cbg, false); 
+} 
+
+　　(3)布局管理器 
+
+　　在Java中,为了使得小程序在各种操作系统中的用户界面具有一致的外观,采 
+用布局管理器(Layout Manager)对用户界面的相对位置进行管理。Java在java.a 
+wt包中包含了流布局管理器(FlowLayout)、边界布局管理器(BorderLayout)、卡 
+片布局管理器(CardLayout)、网格布局管理器(GridLayout)和网格包布局管理器 
+(GridBagLayout)5个布局管理器。如果希望3 个单选框按钮放在绘制图形的下面 
+按一行排列,该如何编写代码呢?可以这样来实现:首先设置Plot小程序为边界布局 
+,然后为3个单选框按钮创建一个Panel对象cbPanel,用于组织3个控件,并设置cbP 
+anel为网格布局,最后将cbPanel添加到Plot类中,并设置其方向为南(South)。 
+
+public void init() 
+{ 
+...... 
+//设置Plot为边界布局。 
+setLayout(new BorderLayout()); 
+//为3个控件申请面板对象cbPanel。 
+cbPanel = new Panel(); 
+//设置网格布局管理器,并按1×3方式排列。 
+cbPanel.setLayout(new GridLayout(1, 3)); 
+//为各按钮申请1个面板。 
+cb1Panel = new Panel(); 
+cb1Panel.add(cb1); 
+cb2Panel = new Panel(); 
+cb2Panel.add(cb2); 
+cb3Panel = new Panel(); 
+cb3Panel.add(cb3); 
+//添加到统一的1个面板cbPanel中。 
+cbPanel.add(cb1Panel); 
+cbPanel.add(cb2Panel); 
+cbPanel.add(cb3Panel); 
+//添加cbPanel到Plot中,方向为:图形在北,按钮在南。 
+add("South", cbPanel); 
+} 
+
+　　(4)读取HTML参数 
+
+　　因为本程序要用到统计数据和统计标题作为小程序的参数存放在HTML文档中 
+,所以在开始绘制图形之前,需要从HTML读取这些参数,然后才开始显示标题和绘制 
+统计曲线。其中,读取统计标题和统计数据分别实现。 
+
+　　①统计标题,其格式可以是: 
+　　　　<param value="1-DESC" value="每月访问者统计"> 
+　　1-DESC表示第一组数据的统计标题,"每月访问者统计"是标题内容。 
+
+public String readStringData(String s) 
+{ 
+String tempString = null; 
+Integer param; 
+boolean datapresent = true; 
+int i = 0; 
+try 
+{ 
+tempString = getParameter(s + "-DESC"); 
+} catch (Exception e) 
+{ 
+System.out.println(e); 
+} 
+return tempString; 
+} 
+
+　　②统计数据,格式可以是: 
+　　　　<param value="1-2" value="14"> 
+　　1-2表示第一组数据的第二个数据点,14表示该数据点的值。 
+
+public Vector readData(String s) 
+{ 
+Vector tempVector = new Vector(); 
+Float param; 
+String tempData = null; 
+boolean datapresent = true; 
+int i = 0; 
+while(datapresent) 
+{ 
+try { 
+tempData = getParameter(s + "-" + (i+1)); 
+} 
+catch(Exception e) 
+{ 
+System.out.println(e); 
+} 
+if(tempData == null) 
+{ 
+datapresent = false; 
+} else { 
+param = Float.valueOf(tempData); 
+tempVector.addElement(param); 
+i += 1; 
+} 
+} 
+return tempVector; 
+} 
+
+　　(5)消息循环 
+
+根据Windows编程经验,有用户界面就有消息循环,以组织消息处理函数句柄对用户 
+界面发出的消息进行响应。遗憾的是,在JDK 1.0中,尚没有类似MFC中的消息映射 
+表之类的东西组织消息循环。不过,Java发展势头迅猛,不久的将来就会有公司将 
+它实现!现在,我们需要自己来组织它:Applet类有一个action方法,在其中可以通 
+过if...then语句来对不同的消息进行响应。 
+
+public boolean action(Event e, Object o) 
+{ 
+Vector actionVector = new Vector(); 
+String actionString = new String(); 
+if(e.target instanceof Checkbox) 
+{ 
+//"数据1"发出的消息 
+if(cbg.getCurrent() == cb1) 
+{ 
+actionVector = readData("1"); 
+actionString = readStringData("1"); 
+System.out.println("1"); 
+} 
+//数据2发出的消息 
+if(cbg.getCurrent() == cb2) 
+{ 
+actionVector = readData("2"); 
+actionString = readStringData("2"); 
+} 
+//数据3发出的消息 
+if(cbg.getCurrent() == cb3) 
+{ 
+actionVector = readData("3"); 
+actionString = readStringData("3"); 
+} 
+int count = actionVector.size(); 
+c.clearHashMarks(); 
+c.clearScreen(); 
+c.drawAxes(curveWidth, curveHeight); 
+c.makeHashMarks(count); 
+c.showData(actionVector); 
+c.makeTitle(actionString); 
+repaint(); 
+return true; 
+} 
+return false; 
+}   
+
+　　3.HTML文档和程序演示 
+
+　　下面列出了一个HTML实例,用于观察上述编制的小程序,结果参见附图。 
+
+<html><body><center> 
+<applet code="Plot.class" width = 350 height = 200> 
+<param name="1-DESC" value="每月访问者统计"> 
+<param name="1-1" value="10"> 
+<param name="1-2" value="4"> 
+<param name="1-3" value="17"> 
+<param name="1-4" value="24"> 
+<param name="1-5" value="9"> 
+<param name="1-6" value="7"> 
+<param name="1-7" value="30"> 
+<param name="2-DESC" value="每年访问者统计"> 
+<param name="2-1" value="17"> 
+<param name="2-2" value="13"> 
+<param name="3-DESC" value="一次购买税统计"> 
+<param name="3-1" value="10000"> 
+<param name="3-2" value="130000"> 
+<param name="3-3" value="16100"> 
+<param name="3-4" value="14000"> 
+</applet></center></body> 
+<address><IMG SRC="\image\Li Zhenwen.jpg"> 
+Li Zhenwen, Zhenwen@Websoft.com 
+</address></html> 

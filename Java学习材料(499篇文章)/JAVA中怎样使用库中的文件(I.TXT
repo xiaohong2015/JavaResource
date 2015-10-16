@@ -1,0 +1,36 @@
+作者：jiafa
+email: jiafahehe@sina.com
+日期：2001-4-19 16:36:29
+我做了一个测试，用到3个文件: test.java ,   list.java,  litest.java 都保存在 /mnt/test/buel/util文件夹中
+// test.java
+  package buel.util
+ public class test  {
+     public test() {
+           System.out.println("this is from test");
+                           }
+                               }
+
+//list.java
+package buel.util
+  public class list {
+       public list()  {
+       System.out.println("this is from list");
+                            }
+      public int finds(int i)  {
+        system.out.print("we find i="+i);
+                                           }
+                             }
+//litest.java
+import buel.util;
+    public class litest{
+          public litest() {
+                    System.out.println("this is from list");
+                   list  L=new list();
+                   test t=new test();
+                   L.find(6);
+                                   }
+    }
+ java 的环境变量我增加了 /mnt/test
+然后进行编译test.java  和list.java 都编译成功了，在编译litest时出现:cannot find method find(int);
+这是怎么回事呢？
+              

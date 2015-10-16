@@ -1,0 +1,40 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:30:40
+Taglib 指令 
+
+
+定义一个标签库以及其自定义标签的前缀. 
+
+JSP 语法
+
+<%@ taglib uri="URIToTagLibrary" prefix="tagPrefix" %> 
+
+例子
+
+<%@ taglib uri="http://www.jspcentral.com/tags" prefix="public" %> 
+<public:loop> 
+. 
+. 
+</public:loop> 
+
+描述
+
+<% @ taglib %>指令声明此JSP文件使用了自定义的标签，同时引用标签库，也指定了他们的标签的前缀。 
+
+这里自定义的标签含有标签和元素之分。因为JSP文件能够转化为XML,所以了解标签和元素之间的联系很重要。标签只不过是一个在意义上被抬高了点的标记，是JSP元素的一部分。JSP元素是JSP语法的一部分，和XML一样有开始标记和结束标记。元素也可以包含其它的文本，标记，元素。比如，一个jsp:plugin元素有<jsp:plugin>开始标记和</jsp:plugin>结束标记，同样也可以有<jsp:params>和<jsp:fallback>元素. 
+
+你必须在使用自定义标签之前使用<% @ taglib %>指令，而且你可以在一个页面中多次使用，但是前缀只能使用一次 
+
+属性
+
+uri="URIToTagLibrary" 
+Uniform Resource Identifier (URI)根据标签的前缀对自定义的标签进行唯一的命名，URI可以是以下的内容: 
+
+Uniform Resource Locator (URL), 由 RFC 2396 定义, 查看 http://www.hut.fi/u/jkorpela/rfc/2396/full.html 
+　 
+Uniform Resource Name (URN), 由 RFC 2396定义
+　 
+一个相对或绝对的路径 
+prefix="tagPrefix"
+在自定义标签之前的前缀，比如，在<public:loop>中的public，如果这里不写public，那么这就是不合法的。请不要用jsp, jspx, java, javax, servlet, sun, 和sunw做为你的前缀 

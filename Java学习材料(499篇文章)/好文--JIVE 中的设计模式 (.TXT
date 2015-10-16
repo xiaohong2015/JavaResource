@@ -1,0 +1,187 @@
+作者：jeru
+email: jeru@163.net
+日期：7/13/2001 5:48:02 PM
+Jive 中的设计模式     
+ 
+ 
+   
+(Design Pattern) 
+马旋 
+2001年 5月
+
+摘要:Jive 是一个开放源码的论坛项目, 也就是我们所常见的 BBS, 采用了 SUN 公司的 JSP 技术, 相比起 j2ee 这个庞大的体系结构, 其整个的设计思想非常精炼, 适用于中小型网站, 建立自己的论坛系统. 这篇文章我们就一起来看一看 Jive 中所应用的设计模式(Design Pattern).
+关于设计模式, 这篇文章并不详细解释, 只是结合 Jive 来看看设计模式在一个实际项目中的应用及其整体的设计思想. 所以在读这篇文章前, 假设您对设计模式有一个感性的认识, 对其具体应用以及实现方法有些疑问, 并渴望了解其思想,并使用过 Jive. 本文将一同来探讨这个问题. 为什么选择 Jive 而不是选择一个新的例子重新开始呢? 有以下两个原因: 1, 我们很多人对 bbs 这样一个事物比较熟悉,很清楚 bbs 所具有的一些基本功能, 如果自己作为设计者来设计这样一个 web bbs,会怎么想, 再看看别人是怎么实现的, 有对比才能明白自己设计上的缺点, 看到别人的优点才能更快地进步. 2, Jive 并不是非常地复杂, 并且包括了一个完整的实现方案, 从底层到高层, 从后端到前端, 都有很好的文档, 这些都能更好地帮助我们理解它. 
+
+这里我们所用的 Jive 的版本采用其开发者作为正式发布的 1.0 版, 其最新版为 1.21, 对其结构作了少量改动, 主要增加了 jsp tag 的支持, 这种技术不属于我们的讨论范围, 以后有机会可以共同学习. 
+
+Jive 中所使用的设计模式, 对设计模式的三种类型 -- 创建型, 结构型,行为型 -- 都有涉及, 这样也能比较全面地了解设计模式. 我们先来自己设计一下,运用面向对象的思想, 可以很容易知道, 整个系统主要需要这几个对象: 
+
+Forum　　 --　　一个讨论区, 也就是一个版面. 
+Thread　　--　　一条线索, 也就是有关同一个主题的所有的回文. 
+Message　 --　　一条消息, 也就是一个用户发的一篇贴子.(以后我们就用"贴子"这个叫法) 
+User　　　--　　一个用户, 也就是讨论区的使用者.
+好了, 我们需要的东西都在了, 它们之间的关系十分复杂, 怎么把它们组织地很符合我们的思路又能容易扩充呢? 我想大家都有自己的想法了, "我能这么这么做","我可以这样这样设计", 我们一起来看看 Jive 是怎么做的. 下面是其整体结构: 
+                    |~~~~~~~~~~~~~~~~~~|
+                    |   Skin 设计者    |
+                    |__________________|
+                            | |
+                            | |  使用
+                            \ /
+                    |~~~~~~~~~~~~~~~~~|
+                    | 各种对象的接口  |
+                    |_________________|
+                            | |
+                            | |  被实现
+                            \ /
+                       |~~~~~~~~~~~~|
+                       |  权限控制  |
+                       |____________|
+                            | |
+                            | |  控制
+                            \ /
+                |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+                | 对数据库进行操作的各种对象  |
+                |_____________________________|
+                            | |
+                            | |  取连接
+                            \ /
+                     |~~~~~~~~~~~~~~~~|
+                     |  数据库连接池  |
+                     |________________|
+                     (图 1)
+ 
+
+
+下面是其类的大概的继承情况:
+
+                 |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|
+                 |          Interface  A             |
+                 |___________________________________|
+                         |                    |
+                         |    implements      |
+                         |                    |
+                 |~~~~~~~~~~~~~~~~~|          |
+                 |   Proxy   A     |          |
+                 |_________________|          |
+                                              |
+                                              |
+                                     |~~~~~~~~~~~~~~~~~~|
+                                     |    Database A    |
+                                     |__________________|
+                  (图 2)
+ 
+
+
+好了看到这里, 如果您对设计模式有了解的话, 从上面所写的伪名字中, 可以看到一些熟悉的东西. 请让我做一些解释. 上面的图表示的是类的继承关系, A 代表上面所提到的四种对象, Interface A 表示名为 A 的一个接口, 相信大家对接口都不陌生, 接口在 java 中有着重要的作用. Proxy A 表示一个名为 ProxyA 的类,实现 A 接口. Database A 表示名为 DbA 的一个类, 实现 A 接口. 但设计模式并没有从中体现出来,设计模式所要表现的是怎么样更好地组织对象之间的逻辑关系,怎么样才能更好地扩充现有的东西而不需要作很大的改动, 而不仅仅是类的继承. 
+
+还有一点需要说明的是, 设计模式总的原则是针对接口编程, 而不关心其具体实现, 这样搭起来的是一个架子, 还需要作许多具体的编程才能真正的完成系统. 
+
+下面, 我们就分别从设计模式的三种类型来看 Jive 使用了其中的哪些. 
+
+一, 创建型模式 (Creational Patterns)
+这一类型的设计模式, 所要表现的是对象的创建过程及和用户所使用的对象之间的关系. 
+
+Jive 中在 Forum 之上又加了一层, ForumFactory, 来实现对 Forum 的一些控制, 比如创建新的讨论区, 删除一个讨论区等等. 这个类实际上是整个系统的入口,jsp 中所做的一切都要从得到这个类的一个实例开始. 它的一些子类和它的关系如下: 
+                        |~~~~~~~~~~~~~~~~~|
+                        |  ForumFactory   | abstract
+                        |_________________|
+                           |           |
+                           |  extends  |
+                           |           |
+              |~~~~~~~~~~~~~~~~~~~~| |~~~~~~~~~~~~~~~~~|
+              | ForumFactoryProxy  | |  DbForumFactory |
+              |____________________| |_________________|
+
+                (图 3)
+ 
+我们来看一下得到一个 ForumFactory 实例的过程:
+FactoryForum factory = ForumFactory.getInstance(aAuthorization);就得到了 ForumFactory 的实例, 这个最终用户(skin 设计人员)所使用的是它的子类 ForumFactoryProxy 的实例, (其中涉及到另一个模式, 后面将会提到), 但实际上真正在做实际工作的是 DbForumFactory 或者是一个指定的类的实例, 相关代码如下: 
+
+From ForumFactory.java
+
+    private static String className = "com.coolservlets.forum.database.DbForumFaactory";
+    // 系统缺省的 ForumFactory 的一个具体的子类.
+
+    private static ForumFactory factory = null;
+
+ForumFactory.getInstance()
+
+    String classNameProp = PropertyManager.getProperty("ForumFactory.className")
+    // 可以通过配制文件来选择其他的具体的子类.
+
+    if (classNameProp != null) {
+          className = classNameProp;
+    }
+    try {
+       //Load the class and create an instance.
+       Class c = Class.forName(className);
+       factory = (ForumFactory)c.newInstance();
+    }
+    catch (Exception e) {
+       System.err.println("Failed to load ForumFactory class "
+            + className + ". Jive cannot function normally.");
+       e.printStackTrace();
+       return null;
+    }
+
+ 
+它使用的是 Abstract Factory (抽象工厂)设计模式. 给用户一个使用一系列相关对象的接口, 而不需要指定其具体的类. 也就是说, skin 设计人员写的 jsp 中不应该出现new DbForumFactory 之类的语句. Jive 中 AuthorizationFactory 也使用了这个设计模式 
+
+
+Jive 中有一个很不错的想法, 就是对贴子的内容和标题可以进行过滤, 比如过滤 html过滤一些脏话, 对附加的代码进行高亮显示, 转换链接等等. 如果我要实现这样的功能, 有有下几种方法: (1) 在 Message.getBody() getSubject() 中进行控制, (2) 在 Thread 中得得Message 后进行转换. 还需要考虑的问题是这些过滤的操作必须能够很方便地添加删除. 不不的目标所用的设计方法是不一样的, Jive 是这样做的: 以版面为主, 把这些过滤器看作是鞍婷的属性, 过滤器只对其所属的版面有效, 所以 Jive 中使用了 (2), 这并不是主要的, 重要要是这些过滤器该怎么来组织. 我们先来看看需求: 能动态添加删除, 功能类似, 贴子的显示示其具体怎么创建, 如何表现无关. 似乎目标只有一个 -- Prototype(原型) 设计模式. 看看Jive 的具体实现.                                   |~~~~~~~~~~~~~~~~~~~~|
+                                  |    ForumMessage    |
+                                  |____________________|
+                                           |
+                                           | implements
+                                           |
+   |~~~~~~~~~~~~~~~~| Prototype   |~~~~~~~~~~~~~~~~~~~~~|
+   |  ForumThread   |-----------> |  ForumMessageFilter |
+   |----------------|             |---------------------|
+   | getMessage() o |             |     clone()         |
+   |______________|_|             |_____________________|
+                  |                 /             |
+   |~~~~~~~~~~~~~~~~|      |~~~~~~~~~~~~~~~| |~~~~~~~~~~~~~|
+   | aFilter.clone()|      | HighlightCode | |    HTML     |
+   |________________|      |---------------| |-------------| ......
+                           |  clone()  o   | |   clone() o |
+                           |___________|___| |___________|_|
+                                       |                 |
+                           |~~~~~~~~~~~~~~~| |~~~~~~~~~~~~~~~|
+                           |  返回一个实例 | |  返回一个实例 |
+                           |_______________| |_______________|
+
+                           (图 4)
+ 
+上图作了少许的简化. Jive 用的时候是把这些过滤器存在数据库中, 可以动态设置属性, 比较方便. 来看一些代码:
+
+From: DbForumThread.java
+
+    public ForumMessage getMessage(int messageID)
+            throws ForumMessageNotFoundException
+    {
+        ForumMessage message = factory.getMessage(messageID);
+
+        //Apply filters to message.
+
+        message = forum.applyFilters(message);
+
+        //通过 Forum 来实现, 因为 Filter 是 Forum 的属性,
+        //Thread 只能通过 Forum 的接口来访问.
+
+        return message;
+    }
+
+From: DbForum.java
+
+    public ForumMessage applyFilters(ForumMessage message) {
+
+        for (int i=0; i < filters.length; i++) {
+            message = filters[i].clone(message);
+        }
+
+        //可能会有多个过滤器, 依次来操作.
+
+        return message;
+    }
+ 
+

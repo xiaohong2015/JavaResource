@@ -1,0 +1,25 @@
+作者：blackwhites
+日期：2000-11-10 14:37:02
+请看下面这个例子
+  public static String escapeHTMLTags( String input ) {
+        // Check if the string is null or zero length -- if so, return what was sent in.
+        if( input == null || input.length() == 0 ) {
+            return input;
+        }
+        // Use a StringBuffer in lieu of String concatenation -- it is much more efficient this way.
+        StringBuffer buf = new StringBuffer();
+        char ch = ' ';
+        for( int i=0; i<input.length(); i++ ) {
+            ch = input.charAt(i);
+            if( ch == '<' ) {
+                buf.append( "&lt;" );
+            }
+            else if( ch == '>' ) {
+                buf.append( "&gt;" );
+            }
+            else {
+                buf.append( ch );
+            }
+        }
+        return buf.toString();
+    }

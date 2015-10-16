@@ -1,0 +1,33 @@
+作者：飞鸟
+日期：00-7-12 0:03:00
+在windows2000 server中文版上安装apache 
+
+1。下载apache1.3
+http://www.apache.org/dist/binaries/win32/apache_1_3_12_win32.exe
+
+2。安装apache
+我把apache安装到了D:\Program Files\Apache Group\Apache\下
+然后我用notepad打开conf目录下的httpd.conf文件进行编辑
+找到Port 80 改成 Port 81 ,因为我的机器已经安装了IIS 5 , 80端口已经被占用了。
+找到#ServerName new.host.name,去掉#,改成 ServerName spf 我的机器名叫spf
+
+4。运行apache
+直接运行D:\Program Files\Apache Group\Apache\apache.exe
+
+3。打开浏览器，输入http://localhost:81/,看到一个页面
+说：
+If you can see this, it means that the installation of the Apache web server software on this system was successful.。。。。。
+说明我安装成功了。
+
+4。然后根据这个页面的连接我寻找，把apache设置成win2k一个service服务。
+幸运的是我在5minutes里面找到了方法。
+先把刚才运行的那个apache程序关掉，在那个dos窗口里面按ctrl + c
+我在命令行内输入
+D:\Program Files\Apache Group\Apache\apache.exe -i -n "apache_svr"
+net start apache_svr
+----------------------------------------------------------------------
+搞定！hehe 还是蛮简单的嘛。
+
+明天晚上我们继续研究apache的进一步设置和使用。
+
+

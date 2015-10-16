@@ -1,0 +1,20 @@
+作者：jeru
+日期：2000-12-20 11:30:16
+虽然你可以在小型指令文件里放入一大块的程序代码，但是大多数的Java程序代码是属于可以重复使用的组件，称为JavaBean。JavaBean就跟ActiveX控件一样:它们提供已知的功能，并且是为了可随时重复使用的目的而设计的。 
+
+　　JavaBean的价值在于它可以经由一组特性来使用，而这些特性则提供对JavaBean设定的存取。以人来作范例，此人就是JavaBean，而他的姓名，社会福利安全号码，以及住址可以是特性。对于JSP网站，基本上你是将'JavaBean'动态的连接到你的网站。 
+
+　　假设JavaBean是在建立网站之前建好的，你要做的第一件事是告诉JSP网页它所需要使用JavaBean.这工作可以用<jsp:useBean>卷标来完成：<jsp:useBean id="localName" class="com.jguru.Person" scope="application" />. 
+
+　　<jsp:useBean>卷标需要你以id 属性来辨识豆子.在这里，你提供一个名称让JSP网页来辨识豆子，除了id 属性之外，你也必须告诉网页要到哪里去找这个豆子，或者是它的Java类别名称。类别属性提供如何在各式方法之中找到它，最后一个需要的组件是scope 属性.有了范围属性的帮助，你可以告诉豆子，要它为单一网页(预设)[scope="page"]；为一个被请求的网页[scope="request"]；为通话期[scope="session"]；或为整个应用程序[scope="application"]来维护它自己的信息.对于通话期范围，你可以很容易的维护JSP网页里的项目，例如购物车。 
+
+　　一但你宣告了JavaBean之后，你就可以存取它的特性来订定它。要取得一特性的值，使用<jsp:getProperty>卷标。有了<jsp:getProperty>卷标，你可以指定要使用的豆子名称(从useBean的id字段)，以及你要取得值的特性。接着，真正的值就会放在输出里：<jsp:getProperty id="localName" property="name" />. 
+
+　　要更改JavaBean的特性，你需要使用<jsp:setProperty>卷标.对这个卷标，你也需要辨认豆子以及要修正的特性，除此之外，你还需要提供新值.如果命名正确，这些可以直接经由规定的格式取得：<jsp:setProperty id="localName" property="*" />;　 
+
+　　要从一参数取得，你必须直接命名此特性以及参数: <jsp:setProperty id="localName" property="address" param="parameterName" />;　 
+
+　　或是直接以名称与值来设定: <jsp:setProperty id="localName" property="serialNumber" value="string" /> or <jsp:setProperty id="localName" property="serialNumber" value= <%= expression %> />. 
+
+　　有关JavaBean的最后一点:要让网络服务器可以找到JavaBean，你需要将它们的类别档案放在特别位置。对JSWDK而言，最简单的地方是在安装目录里的类别目录，例如 \jswdk-1.0.1\classes. 
+

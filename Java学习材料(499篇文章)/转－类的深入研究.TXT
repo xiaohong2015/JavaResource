@@ -1,0 +1,96 @@
+作者：lovefan
+email: lovefan@cmmail.com
+日期：8/8/2001 2:26:55 PM
+类的深入研究
+（印佛西地　2001年08月07日 10:29）
+
+1：在Java中使用继承
+　　面向对象的程序设计中最为强大的功能是类的继承，类的继承允许你在一个已经存在的类之上编写新的程序，例如，你想建立一个可在屏幕上显示并能填充它的矩形类，你可以从头开始或者利用旧的矩形类，下面的部分将向你介绍如何继承已存在的Rectangle类，而不需重写其中的代码。
+　　比如建立一个fillRect类，该类可以使用Rectangle类中所有已定义的数据和成员函数，如：width、height等数据和getArea等成员函数，就可是使用继承的方法来实现。使用extands关键字让Java程序员能够继承已有类的成员函数，为了继承Rectangle类，你必须引用旧的Rectangle类，你必须引用旧的Rectangle类，并且在新类的说明中引用它，比如：
+
+import Shapes.Rectangle;
+
+class fillRect extands Rectangle
+{
+   .....
+
+} 
+
+
+2：成员函数的重载
+　　继承之后，如何使fillRect类比Rectangle类有所提高呢？我们可以用如下代码来实现一个新的drawRect成员函数，它将大大缩短代码，并能填充矩形，而不是仅仅画出矩形的轮廓：
+
+private String makeString(chr ch,int num)
+{ 
+  StringBuffer str=new StringBuffer();
+  for(int i=num;i>0;i--)
+  str.append(ch);
+  return str.toString();
+} 
+
+public void drawRect()
+{ 
+  for(int i=height;i>0;i--)
+
+  System.out.println(makeString("#",width));
+} 
+
+　　注意这里我们使用了StringBuffer类。之所以使用StringBuffer是因为String只能产生一个静态类型－－它的大小是不能改变的，而StringBuffer能够产生一个可变长度的字符串类型。
+　　在这里，drawRect成员函数被重载了，通过使用相同的成员函数名字，你可以用新的成员函数来代替旧的成员函数。不过，那些被说明为final的成员函数是不能被重载的。
+　　注意，你不必在新的类中包含那些与被继承类相同的代码，而只需要加入你想要的东西，但你必须建立一个新的构造成员函数，以区分这两个不同的类。
+　　新类的全貌如下所示，你可以发现通过继承Rectangle类，代码变得非常简单明了。
+
+class fillRect extands Rectangle
+{ 
+   public fillRect(int w,int h)
+  {
+      supper(w,h);
+      private String makeString(char ch,int num)
+      {
+         StringBuffer str=new StringBuffer();
+         for(int i=num;i>0;i--)
+         str.append(ch);
+         return str.toString();
+      }    
+      public void drawRect()
+      {
+         for(int i=height;i>0;i--)
+         System.out.printlm(makeString("#",width));
+      }   
+  } 
+} 
+
+3：使用接口
+　　Java可以创建一种称作接口(interface)的类，在这个类中，所有的成员函数都是抽象的，也就是说它们都只有说明没有定义，你可以如下所示来说明一个接口。
+public interface interfaceName 
+//成员函数说明
+
+　　接口中成员函数的缺省引用类型是private，接口（interface）的内部变量是不可更改的，并且总是static和final。
+　　通过使用关键字implement，你可以在定义类时继承一个接口。不过与extends不同的是，一个类可以同时继承多个接口。
+　　使用接口的优点在何处呢？通过创建一个接口，你可以说明一整套抽象的成员函数而无须去具体实现它，所有继承了这个接口的类，都将有着具有相同原形的成员函数。例如，你想所有的shapes都有一个draw()成员函数，你可以创建一个接口并且用Shape命名：
+
+public interface Shape 
+void draw();
+
+　　现在，无论你何时创建一个继承自Shape的类，都将拥有一个成员函数draw()。
+
+4：类的转换
+　　类的转换，与不同类型的变量之间的转换有相似之处，但并不一样。
+　　我们可以把一个父类的对象转换成一个子类对象，下面的代码说明一个类转换的例子，其中Y类是从X类继承而来的：
+
+Y y=new Y();
+X x;
+x=y;
+
+　　需要注意的是两个子类之间的转换是不可以的。
+
+5：null,this和supper变量
+　　所有的类都有三种变量：null、this和supper。
+　　null变量不指向任何实际对象,而是指向一个空对象,如下例所示:
+
+    Rectangle rect=null;
+
+　　该例产生一个矩形类的变量，但不创建一个实际的对象。另外，假如一个成员函数需要一个对象作为参数时，你同样可以用null代替。
+　　this变量指向对象本身，一个类可以通过this变量来获得一个代表它自身的对象变量。
+　　supper变量是一个指向类父类构造成员函数的变量，你可以通过调用它，来迅速完成对子类的构造成员函数的设计。
+

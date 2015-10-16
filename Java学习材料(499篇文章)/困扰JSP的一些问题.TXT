@@ -1,0 +1,203 @@
+作者：jspfuns
+日期：2000-8-12 2:29:45
+Blueski编译
+
+
+（编者按：此文通过jsp和template engines的比较，提示了目前jsp的一些不足。后者也是一项基于servlets的技术，有些类似于宏，可以简化开发，但后来没有得到应有的重视和发展。）
+
+
+如今每一个使用servlets的开发者都知道JSP，一种由Sun公司发明并花费大量精力加以推行并建构在servlet技术之上的web技术。JSP将servlet中的html代码脱离了出来，从而可以加速web应用开发和页面维护。实际上，由Sun发布的官方 "应用开发模型"文档上说得更远： "JSP技术应该被视为标准，而servlets在多数情况下可视为一种补充。" ( Section 1.9, 1999/12/15听取意见版 )。
+
+本文的目的在于听取对该申明的合理性的评估 -- 通过比较JSP和另一项基于servlets的技术： template engines（模板引擎）。 
+
+直接使用Servlets的问题
+
+　
+
+起初，servlets被发明，整个世界都看到了它的优越。基于servlet的动态网页可以被快速执行，可以在多个服务器之间轻易转移， 并且可以和后台数据库完美地集成。 Servlets被广泛接受成为一种web服务器端的首选平台。 
+但是，通常通过简单方式即可实现的html代码现在却要让程序员通过 out.println()调用每一行HTML行，这在实际的 servlet应用中成为了一个严重问题。 HTML内容不得不通过代码来实现, 对于大的HTML页来说不啻是一项繁重费时的工作。另外，负责网页内容的人员不得不请开发人员来进行所有的更新。为此，人们寻求这一种更好的解决方式。 
+
+JSP到！
+
+
+JSP 0.90出现了。在这种技术中你可以将Java代码嵌入到HTML文件，服务器将自动为页面创建一个 servlet。 JSP被认为是一种写servlet的简易方式。所有HTML可以直接得到而不必通过out.println()调用，而负责页面内容的人员可以直接修改HTML而不必冒破坏Java代码的风险。 
+但是，让页面美术设计师和开发人员在同一文件上工作并不理想，让Java嵌入HTML被证明是就象将HTML 嵌入Java一样令人尴尬。读取一堆很乱的代码仍然是一件困难的事情。 
+
+于是，人们在使用jsp方面变得成熟，更多地使用了JavaBeans。 Beans包含了jsp所需的业务逻缉代码。JSP中的大多数代码都可以取出来放到bean中去，而只留下极少的标记用于调用bean。
+
+ 
+最近，人们开始认为这种方式下的JSP页面真的很象是视图（view）。它们成为一个用于显示客户端请求的结果的组件。于是人们会想，为什么不直接对view发送请求呢？ 目标view如果对该请求不合适又将如何？ 说到底，很多的请求有多种可能来取得结果view视图。例如，同一请求可能产生成功的页面，数据库例外出错报告，或者是缺少参数的出错报告。同一请求可能产生一个英文页面也可能是西班牙文页面，这取决于客户端的locale。为什么客户端必须直接将请求发送给view?为什么客户端不应该将请求发送给一些通用的服务器组件并让服务器来决定JSP view的返回?
+
+
+这使很多人接受了已被称为"Model 2"的设计, 这是在JSP 0.92中定义的基于model-view-controller的模型。在这种设计中，请求被发送到一个servlet控制器，它执行了商业逻缉并产生一个相近的数据"model"来用于显示。这一数据随后通过内部送到一个JSP "view"来进行显示，这样看起来JSP页就象是一个普通的嵌入的JavaBean。 可以根据负责控制的servlet的内部逻辑来选择适当的JSP页面进行显示。这样，JSP文件成为了一个漂亮的template view。这就是另一种发展，并被另外一些开发者所推崇至今--->> 
+
+进入Template Engines
+
+
+使用template engine来代替通常目的的JSP, 接下去的设计将变得简单，语法更简单，出错信息更易读，工具也更用户化。 一些公司已经做了这样的引擎，最著名的可能是WebMacro (http://webmacro.org, from Semiotek)，他们的引擎是免费的。
+开发者应该明了，选定一个template engine来取代JSP提供了这么一些技术优势，这也正是jsp的一些不足之处： 
+
+问题 #1: Java代码太模板化了
+
+
+虽然被认为是不好的设计，JSP仍试图将Java代码加入web页面。这有些象是Java曾经做的，即对C++的简化修改，template engines也通过将jsp中的较低层的源码移去来使之简化。Template engines实行了更好的设计。
+
+
+问题 #2: 要求Java代码 
+
+
+在JSP页中要求写一些Java代码。例如，假设某页要决定当前web应用中根的上下文从而导向其主页， 
+在JSP中最好使用如下Java代码： 
+
+<a href="<%= request.getContextPath() %>/index.html">Home page</a>
+
+你可以试图避免 Java代码，而使用 <jsp:getProperty> 标记但这将给你六下难以阅读的字串：
+
+<a href="<jsp:getProperty name="request"
+property="contextPath"/>/index.html">HomePage</a>
+
+使用template engine则没有Java代码和难看的语法。这里是同样要求下在WebMacro中的写法： 
+
+<a href="$Request.ContextPath;/index.html">Home page</a>
+
+在WebMacro中, ContextPath 作为 $Request变量的一个属性，使用类似Perl的语法。其它er template engines使用了其它的语法类型。 
+
+再看另 一个例子，假设一个高级的"view"需要设定一个cookie来记录用户缺省的颜色配置 -- 这种任务看起来大概只能由view而不是servlet控制器来完成。在JSP中要有这样的Java代码： 
+
+<% Cookie c = new Cookie("colorscheme", "blue"); response.addCookie(c); %>
+
+在WebMacro中则没有Java代码： 
+
+#set $Cookie.colorscheme = "blue"
+
+作为最后一个离子，假如又要重新找回原来的cookie中的颜色配置。对于JSP，我们可以认为也有一个相应的工具类来提供帮助，因为用getCookies()直接做这样低层的会变得可笑而且困难。在JSP中： 
+
+<% String colorscheme = ServletUtils.getCookie(request, "colorscheme"); %>
+
+在WebMacro中没有对工具类的需要，通常是： 
+
+$Cookie.colorscheme.Value
+
+对写jsp的图形艺术师，又是哪一种语法更容易学习呢？
+
+JSP 1.1 引入了自定义标记（custom tags）允许任意的和HTML相似的标记在JSP页面中在后台执行Java代码，这将具有一定的价值，但前提是要有一个广泛知晓的，全功能的，可以免费得到的，标准化的标记库。目前还没有出现这样的标记库。 
+
+问题 #3: 简单工作仍然很累人 
+
+
+即使是很简单的工作，例如包含 header和 footer，在JSP中仍然很很困难。 假设有一个 "header"和一个 "footer"模板要包含到所有页面，而每一个模板要在content中包含当前的页标题。 
+在JSP中最佳办法是： 
+<% String title = "The Page Title"; %>
+<%@ include file="/header.jsp" %>
+...你的页面内容...
+<%@ include file="/footer.jsp" %>
+
+页面设计者要记住不能遗漏第一行的分号并要将title定义为一个字符串。此外， /header.jsp和/footer.jsp必须在根目录下并且必须是可存取的完整文件。 
+在WebMacro中包含headers和footers做起来比较简单： 
+
+#set $title = "The Page Title"
+#parse "header.wm"
+Your content here
+#parse "footer.wm"
+
+这里对设计者来说没有要牢记的分号或对title的定义， .wm文件可以放在可自定义的搜索路径下。 
+
+
+问题 #4: 很粗的循环
+
+
+在JSP中循环很困难。这里是用JSP重复打印出每一个ISP对象名字。 
+<%
+Enumeration e = list.elements();
+while (e.hasMoreElements()) {
+out.print("The next name is ");
+out.println(((ISP)e.nextElement()).getName());
+out.print("<br>");
+}
+%>
+
+也许什么时候会有用户自定义标记来做这些循环。对"if"也是如此。JSP页可能看上去成了很古怪的java代码。而同时，webmacro循环很漂亮： 
+#foreach $isp in $isps {
+The next name is $isp.Name <br>
+}
+
+如果必要的话，#foreach指令可被自定义的 #foreach-backwards指令很容易地取代。 
+用jsp的话很可能变这样：（这里是一个可能的 <foreach>标记） 
+
+<foreach item="isp" list="isps">
+The next name is <jsp:getProperty name="isp" property="name"/> <br>
+</foreach>
+
+设计者当然地回选择前者。
+
+
+问题 #5: 无用的出错信息
+
+
+JSP常有一些令人惊讶的出错信息。这是因为页面首先被转换成为一个servlet然后才进行编译。好的JSP 工具可以相对增加找到出错位置的可能性，但即使是最好的工具也无法使所有出错信息都能容易地被读懂。由于转化的过程，一些错误对工具来说可能根本不可能被识别。 
+例如，假设JSP页面需要建立一个对所有页通用的标题。以下代码并没有错： 
+
+<% static String title = "Global title"; %>
+
+但Tomcat会提供以下出错信息： 
+work/%3A8080%2F/JC_0002ejspJC_jsp_1.java:70: Statement expected.
+static int count = 0;
+^
+
+此信息认为以上脚本被放入 _jspService()方法而静态变量不允许放入方法中。该语法应该是 <%! %>。页面设计者很难读懂这些出错信息。即使最好的平台在这方面也做得很不够。即使所有 Java代码都从页中移出也无法解决问题。另外，以下表达式有什么错？ 
+
+<% count %>
+tomcat给出： 
+work/8080/_0002ftest_0002ejsptest_jsp_0.java:56: Class count not found in
+type declaration.
+count 
+^
+work/8080/_0002ftest_0002ejsptest_jsp_0.java:59: Invalid declaration.
+out.write("\r\n");
+^
+
+换句话说，只是遗失了一个标记而已。应该是 <%= count %>。
+
+ 
+由于template engine可以在template文件中直接产生而没有任何戏剧性的向代码转化，所以可以非常容易地给出适当的出错报告。  依次类推，当c语言的命令被打入Unix shell的命令行， 你并不希望shell 会生成一个C程序来运行这个命令，而只是需要shell简单地解释命令并加以执行，如有错误也直接给出。 
+问题 #6: 需要一个编译器
+
+
+JSP需要一个置放在webserver中的编译器。由于Sun拒绝放弃包含了他们的javac编译器的tools.jar库， 这其中就变得有问题了。Web服务器可以包含进一个第三方的编译器如ibm的 jikes。但这样的编译器并不能在所有平台上顺利工作(用 C++写成的) 也不利于建立纯Java 的web服务器。 JSP有一个预编译选项可以起到一定作用，尽管并不完美。
+
+ 
+问题 #7: 空间的浪费
+
+
+JSP消耗了额外的内存和硬盘空间。对服务器上每30K的JSP文件，必须要有相应的大于30K的类文件产生。实际上使得硬盘空间加倍。考虑到JSP文件随时可以很容易地通过 <%@ include>包含一个大的数据文件，这样的关注有着很现实的意义。同时，每一个JSP的类文件数据必须加载到服务器的内存中，这意味着服务器的内存必须永远地将整个JSP文档树保存下去。少数一些JVM有能力将类文件数据从内存中移去；但是，程序员通常无法控制这样的规则来重新申明，而且对大的站点来说重新申明可能不是很有效。对template engines由于没有产生第二个文件，所以节省了空间。Template engines还为程序员提供对templates在内存中进行缓存的完全控制。
+
+
+使用template engine也有一些问题： 
+
+Template的问题 #1: 没有严格定义
+
+
+template engine该如何工作并没有严格定义。可是，但相对jsp来说，其实这并不很重要，和 JSP不同的是，template engines对web服务器没有任何特殊要求 -- 任何支持servlet的服务器都可以支持template engines (包括API 2.0服务器如Apache/JServ，它们并不能完全支持 JSP)! 如果为最好的template engine设计提供健康的竞争本可以引起一场耀眼的革新，特别是有开放源码的促进，（可以让思想相互推动和促进），那么今天的WebMacro就会象Perl一样，没有严格定义但公开源码组织的推动就是它的标准。
+
+ 
+Template的问题 #2: 没有获得公认
+
+
+Template engines并未被广泛知晓。JSP已经占据了极大的商业市场，并且深入人心。而使用g template engines只能是一种未被了解的替代技术。 
+
+
+Template的问题 #3: 尚未调配好
+
+
+Template engines还没有被高度地调配好。没有对template engine 和JSP两者进行性能测试和比较。理论上说一个调配完好的template engine实现应该和一个调配好的JSP相匹配；但是，考虑到第三方为jsp已经作出了这么深远的推动，结果只有jsp被很好地调配好了。 
+
+
+JSP的角色
+
+
+当然地，JSP在将来必然会有其地位。即使从名称上也可以看出JSP和ASP的相似性，它们只有一个字母的差别。所以如果要让使用asp的人们转向java,非常相似的jsp环境将对此起到很大的推动作用，和asp保持这种对应关系所能起到的作用应该也是被推出jsp的设计者重点考虑到的。 
+然而这里想要强调的一点是：有利于转入新环境的工作者，以及实际上是否是使用该环境的最佳方式，这两者是有很大不同的。 
+
+JSP日益显示出它正成为最重要的java技术之一， 它让人们离开ASP的世界 -- 由此，Sun将支持这一强有力的商业case, Java相关技术支持者也将给予更大力的支持。 
+
+可是，这并非java平台的最佳解决方案。这将使java解决方案变得好象是没有java的解决方案了。

@@ -1,0 +1,22 @@
+作者：jeru
+email: jeru@163.net
+日期：7/4/2001 3:47:09 PM
+5.9a 怎样判断使用者按下的是滑鼠哪一个按钮 ? 
+
+
+A. 请参考底下这个例子: 
+public void mouseClicked(MouseEvent e) {
+
+if(e.getModifiers()==MouseEvent.BUTTON1_MASK){
+System.out.println("您按了滑鼠第一个按钮!");
+}
+if(e.getModifiers()==MouseEvent.BUTTON2_MASK){
+System.out.println("您按了滑鼠第二个按钮!");
+}
+if(e.getModifiers()==MouseEvent.BUTTON3_MASK){
+System.out.println("您按了滑鼠第叁个按钮!");
+}
+} 
+
+通常第一个按钮指的是用来 "选择" 的按钮, 第二, 叁个按钮则视不同的平台而定, 有些系统并不提供这两个按钮给使用者, 因此程式设计者必须谨慎地考量到这两个按钮缺席的 场合.
+

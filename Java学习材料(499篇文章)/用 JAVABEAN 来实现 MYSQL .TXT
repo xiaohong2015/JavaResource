@@ -1,0 +1,299 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-1-4 17:13:10
+用 javabean 来实现 MySQL 的分页显示
+
+●○●○●○●○●○●○●○●○●○●○●○●○●○●○
+○  作者:刘湛      日期:2000-02-04      jeru@163.net  ●
+●  http://www.cyberlabs.com/~jeru/                   ○
+○  欢迎访问爪哇人，获取更多资料                      ●
+●○●○●○●○●○●○●○●○●○●○●○●○●○●○
+
+今天写了个 MySQL 分页的 javabean,是用 MySQL 里的 LIMIT 来实现的.
+sql = "SELECT * FROM Test LIMIT 5, 10";
+这句话的意思就是从第五条记录开始往下读 10 条记录出来，这个 bean 没有连接数据库的功能，
+你可以使用自己的类来链接数据库，当然可以用我那个写的很烂的 dbClass.java 来连，^_^
+
+这里给出三个程序的源代码。
+dbClass.java -- 用来连接 MySQL 数据库。
+
+PageQuery.java -- 重写了 dbClass 返回的 ResultSet,使其具备分页功能。
+
+example.jsp -- jsp 文件，可以看到，我只用了两行就实现了分页的功能，当然，
+sql 语句是不鼓励直接写在 jsp 里的，这里为了让大家看清楚，所以这么做了。
+
+自知水平不高，只想抛砖引玉，有什么错漏之处还望高手指出。
+
+=========================== example.jsp ===================================
+<%@ page language="java" import="java.sql.*, dbclass.*" %>
+<%@ page contentType="text/html; charset=gb2312" %>
+<jsp:useBean id="pq" scope="page" class="dbclass.PageQuery" />
+<html>
+
+<body bgcolor="#8BA9C9">
+<table bgcolor="#fecda9" cellspacing=0>
+<% 
+
+String query = "SELECT * FROM systempass";   // 注意这个" FROM "一定要大写     	
+ResultSet rs = pq.myQuery(query, request);
+String bar = pq.PageLegend();  //读取分页提示栏
+
+out.println("<tr><td colspan=2>"+bar+"</td></tr>");
+out.println("<tr><td colspan=2><hr size=1 color=blue></td></tr>");
+while (rs.next())  { %> 
+<tr><td><%=rs.getString(9)%></td><td><%=rs.getString(10)%></td></tr>
+<% } %>
+</table>
+</body>
+</html>
+
+=========================== PageQuery.java ===================================
+package dbclass;
+/**
+ * PageQuery v 1.0 
+ * 这个类原名叫 TViewPage ,作者 sharetop ,用 php 写的。
+ * 同事 Macro 曾用 PHP 改写过这个类，添加了不少功能。
+ * 我感觉封装的很好，使用十分方便，使用 JSP 后，便有了
+ * 想法用 JSP 来改写，这次为了简明起见，我省去了很多功能,
+ * 尽量让它好读，以后有空添加更多的功能，
+ *
+ * Mender : 
+ *	 Jeru Liu
+ * Homepage : 
+ *	 http://www.cyberlabs.com/~jeru/
+ * Email: jeru@163.net
+ *
+ * 本类没有提供连接数据库的功能，所以需在外部打开相应的数据库。 
+ * 需在外部自定义数据显示格式。 
+ */
+
+import java.util.*;
+import java.sql.*;
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class PageQuery  {   
+  
+  int Offset; // 记录偏移量 
+  int Total; // 记录总数 
+  
+  int MaxLine; // 记录每页显示记录数 
+  ResultSet rs; // 读出的结果 
+
+  int TPages; // 总页数 
+  int CPages; // 当前页数 
+
+  String PageQuery; // 分页显示要传递的参数
+  String Query;     // query 语句
+  String QueryPart; // " FROM " 以后的 query 部分 
+  
+  String FilePath;
+  
+  dbClass db;	// object of dbclass
+  
+  //constructer do nothing
+  public PageQuery() {
+    // 每页显示十行
+	MaxLine = 10;	
+	db = new dbClass();	
+  }  
+  
+  //********读取记录*************** 
+  //　主要工作函数，根据所给的条件从表中读取相应的记录   
+
+  public ResultSet myQuery(String query, HttpServletRequest req) throws SQLException { 
+	
+	String query_part, os;
+	int begin, offset;
+	
+	// 截取 " FROM " 以后的 query 语句
+	begin = query.indexOf(" FROM ");
+	query_part = query.substring(begin, query.length()).trim();	
+		
+    // 计算偏移量
+	os = req.getParameter("offset");
+    if (os == null) Offset = 0;
+	else Offset = Integer.parseInt(os);
+	
+	// 获取文件名
+    FilePath = req.getRequestURI(); 
+	
+	Query = query;
+	QueryPart = query_part;	
+	
+	// 计算总的记录条数
+	String SQL = "SELECT Count(*) AS total " + this.QueryPart; 
+    rs = db.executeQuery(SQL);	
+	if (rs.next()) 
+	Total = rs.getInt(1); 	
+
+	// 设置当前页数和总页数
+	TPages = (int)Math.ceil((double)this.Total/this.MaxLine); 
+    CPages = (int)Math.floor((double)Offset/this.MaxLine+1); 
+
+	// 根据条件判断，取出所需记录
+	if (Total > 0) { 
+	  SQL = Query + " LIMIT " + Offset + " , " + MaxLine; 
+	  rs = db.executeQuery(SQL); 	  
+	}	
+	return rs; 
+  }  
+ 
+  // 显示总页数
+  public int getTotalPages() {	
+	return TPages;
+  }
+
+  //显示当前所在页数
+  public int getCurrenPages() {      	
+	return CPages;
+  } 
+
+  //**********显示翻页提示栏*************  
+  // 显示首页、下页、上页、尾页
+  // 你可以改成你喜欢的样式
+  public String PageLegend() {    
+
+	String str = "";	
+	int first, next, prev, last;
+	first = 0; 
+	next = Offset + MaxLine; 
+	prev = Offset - MaxLine; 
+	last = (this.TPages - 1) * MaxLine; 
+		
+	if(Offset >= MaxLine) 
+	  str +=  " <A href=" + FilePath + "?offset=" + first + ">首页</A> "; 
+	else str += " 首页 ";
+	if(prev >= 0) 
+	  str +=  " <A href=" + FilePath + "?offset=" + prev + ">前页</A> "; 
+	else str += " 前页 ";
+	if(next < Total) 
+	  str +=  " <A href=" + FilePath + "?offset=" + next + ">后页</A> "; 
+	else str += " 后页 ";
+	if(TPages != 0 && CPages < TPages) 
+	  str +=  " <A href=" + FilePath + "?offset=" + last + ">尾页</A>"; 
+	else str += " 尾页 ";
+
+	str += " 页次：" + getCurrenPages() + "/" + getTotalPages() + "页 ";
+	str += MaxLine + "条/页 " + "共" + Total + "条";
+	return str;
+  }
+}
+
+=========================== dbClass.java ===================================
+/**
+ * a class use to connect the MySQL database and do some query
+ * use mm.MySQL.Drive 
+ * Jeru Liu ,November 2, 2000 , ver - 1.1
+ *
+ */
+
+package dbclass;
+import java.sql.*;
+
+public class dbClass  {
+    
+  // public: connection parameters 
+  String dbName = "Kernel"; 
+  String Login = "root";
+  String Password = "MySQL";  
+  
+  String DBDriver = "org.gjt.mm.MySQL.Driver";
+  String ConnStr = "jdbc:MySQL://localhost/"+dbName+"?user="+Login+";password="+Password;    
+  Connection con = null;  
+  Statement stmt = null;
+  ResultSet rs = null;		
+  ResultSetMetaData resultsMeta =null;
+  int rows = 0;
+	
+  // public: constructor to load driver and connect db 
+  public dbClass()  {   	    
+  	  // load mm.MySQL.driver 
+	  try  
+	  {       
+          Class.forName("org.gjt.mm.MySQL.Driver");             
+	  }
+      // display corresponding error message when onload error occur      
+      catch (java.lang.ClassNotFoundException e)  
+	  { 
+          System.out.println("Class not found exception occur. Message is:"); 
+          System.out.println(e.getMessage()); 
+      }
+
+      // establish connection to the database throught driver
+	  try
+      {       
+	      con = DriverManager.getConnection(ConnStr);	
+      }
+      // display sql error message
+	  catch (SQLException e)
+	  {
+	      System.out.print("SQL Exception occur. Message is:"); 
+          System.out.print(e.getMessage());     
+	  }	
+  }   
+   
+	
+  // perform a query with records returned
+  public ResultSet executeQuery(String sql)  throws SQLException
+  {	 
+      
+	  ResultSet rs = null;		
+      try
+      {
+          stmt = con.createStatement();
+          rs = stmt.executeQuery(sql);	
+          while(rs.next())
+	          this.rows ++;         
+          rs = stmt.executeQuery(sql);
+	  }
+      catch (SQLException e)
+      {
+	      System.out.print("Query:"+e.getMessage());
+      }    
+	  
+	  this.rs = rs;
+	  return rs;    
+  }
+
+  // perform a query without records returned
+  public boolean executeUpdate(String sql)  
+  {	 
+      try
+	  {
+          stmt = con.createStatement();
+          stmt.executeUpdate(sql);							
+          return true;    
+      }
+	  catch(SQLException e)
+	  {
+	      System.out.print("Update:"+e.getMessage());
+          return false;
+	  }
+  }
+
+  // return the num of columns	
+  public int getColumns()
+  {
+     int columns = 0;
+	 try
+	 {
+	      this.resultsMeta = this.rs.getMetaData();
+          columns = this.resultsMeta.getColumnCount();
+	 }
+	 catch (SQLException e)  {}
+	 return columns;
+  }
+
+  // return the num of rows
+  public int getRows()
+  {
+     return this.rows;
+  }
+
+  public String getDBName() {
+      return this.dbName;
+  }
+
+}

@@ -1,0 +1,87 @@
+作者：kevin佳
+email: cgjmail@163.net
+日期：7/27/2001 4:37:25 PM
+                      Adding Fonts to the Java Runtime 
+要加一种亚洲字体进JRE，请按以下步骤进行：
+1.装入字体
+首先，你必须装载中文、日文、韩文或传统的中文字体（楷书、宋体等）到你的系统里面
+2.复制字体进font.properties
+装好了字体后，复制你感兴趣字体的descriptio到font.properties,最简捷的方法是把
+font.properties.<locale>直接改名为font.properties
+
+例如：要使用中文字体，你可以复制或者改名font.properties.zh为font.properties. 
+现行的WIN32 JDK提供如下font properties 文件
+./lib/font.properties
+./lib/font.properties.ja
+./lib/font.properties.ko
+./lib/font.properties.zh
+./lib/font.properties.zh_TW
+     
+并且你可以在JRE里使用多于一种的亚洲字体，所必须做的就是编辑font.properties
+文件。
+例如你要加三种SERIF字体；
+serif.0=Times New Roman,ANSI_CHARSET
+serif.1=WingDings,SYMBOL_CHARSET,NEED_CONVERTED
+serif.2=Symbol,SYMBOL_CHARSET,NEED_CONVERTED
+<virtual font name>.<index number> = <platform font name>, attributes
+
+后面有三个参数，如Times New Roman、WingDings就是字体名
+第二个参数(SYMBOL_CHARSET)是相应字符集的处理接口
+第三个参数是表明相应字符集不能直接同过UNICODE编码处理，需要与UNICODE间的转换器
+通过以下语句设不同FONTS的转换器
+fontcharset.serif.1=sun.awt.windows.CharToByteWingDings
+fontcharset.serif.2=sun.awt.CharToByteSymbol
+
+用户也可以定制自己的字体、字符集与自定义的UNICODE转换器
+
+例如说你想增加你自己定制的字体到JAVA的serif    系列字体里去，
+假设你的字体共有256个，从0到0Xff.正对应于UNICODE里的OXE000-0XEOFF。
+首先你要设计你的转换类
+package mypkg.converter;
+
+import sun.io.CharToByteISO8859_1;
+import sun.io.CharToByteConverter;
+import sun.io.ConversionBufferFullException;
+
+public class CharToByteMyFont extends sun.io.CharToByteISO8859_1 { 
+
+   /*
+    * This method indicates the range this font covers.
+    */
+   public boolean canConvert(char ch) {
+      if (ch >= 0xe000 && ch <= 0xe0ff) {
+         return true;
+      }
+      return false;
+   }
+
+   /*
+    * This method converts the unicode to this font index.
+    */
+   public int convert(char[] input, int inStart, int inEnd, 
+                      byte[] output, int outStart, int outEnd) 
+                      throws ConversionBufferFullException {
+      int outIndex = outStart; 
+      for (int i = inStart; i < inEnd; i++) {
+         char ch = input[i];
+         if (ch >= 0xe000 && ch <= 0xe0ff) {
+            if (outIndex >= outEnd) 
+            throw new ConversionBufferFullException();
+            output[outIndex++] = (byte)(ch - 0xe000);
+         }
+      }
+      return outIndex - outStart;
+   }
+第二步，加你自己的字体和转换器进Properties文件
+你先要增加你的字体的名子进文件里，
+如
+serif.3=<your own font name>
+然后定义相应的converter
+fontcharset.serif.3=mypkg.converter.CharToByteMyfont
+
+为了确定JRE能够找到你的转换器，你的application classpath 必须包含转换器的路径
+
+以上是我看了sun里的相关文章后觉得很不错而粗略整理出来的，目的只在于把相关内容大概介绍一下，请不要见笑，最好参考英文原文
+http://java.sun.com/products/jdk/1.1/docs/guide/intl/fontprop.html
+或到http://java.sun.com/products/jdk/1.1/docs/guide/intl/index.html看更多的Internationalization相关资料以及samples
+本人正在做多国语的网版词典，所以有在找相关资料，这是我看到的比较有用的叙述JAVA中字符集处理的文章，如果各位看到更好的java对unicode支持的资料请告知我，谢谢

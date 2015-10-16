@@ -1,0 +1,109 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:34:51
+<jsp:useBean> 
+
+创建一个Bean实例并指定它的名字和作用范围. 
+
+
+JSP 语法
+
+<jsp:useBean 
+
+id="beanInstanceName" 
+
+scope="page | request | session | application" 
+
+{ 
+
+    class="package.class" | 
+
+    type="package.class" | 
+
+    class="package.class" type="package.class" | 
+
+    beanName="{package.class | <%= expression %>}" type="package.class" 
+
+} 
+
+{ 
+
+    /> | 
+
+    > other elements </jsp:useBean> 
+
+} 
+
+
+
+例子
+
+<jsp:useBean id="cart" scope="session" class="session.Carts" /> 
+
+<jsp:setProperty name="cart" property="*" /> 
+
+
+<jsp:useBean id="checking" scope="session" class="bank.Checking" > 
+
+<jsp:setProperty name="checking" property="balance" value="0.0" /> 
+
+</jsp:useBean> 
+
+
+描述
+
+<jsp:useBean>用于定位或示例一个JavaBeans组件。<jsp:useBean>首先会试图定位一个Bean实例，如果这个Bean不存在，那么<jsp:useBean>就会从一个class或模版中进行示例。 
+
+为了定位或示例一个Bean，<jsp:useBean>会进行以下步聚，顺序如下: 
+
+
+
+通过给定名字和范围试图定位一个Bean. 
+对这个Bean对象引用变量以你指定的名字命名. 
+如果发现了这个Bean,将会在这个变量中储存这个引用。如果你也指定了类型，那么这个Bean也设置为相应的类型. 
+如果没有发现这个Bean,将会从你指定的class中示例，并将此引用储存到一个新的变量中去。如果这个class的名字代表的是一个模版，那么这个Bean被java.beans.Beans.instantiate示例. 
+如果<jsp:useBean>已经示例（不是定位）了Bean,同时<jsp:useBean>和</jsp:useBean>中有元素，那么将会执行其中的代码. 
+
+<jsp:useBean>元素的主体通常包含有<jsp:setProperty>元素，用于设置Bean的属性值。正如上面第五步所说的，<jsp:useBean>的主体仅仅只有在<jsp:useBean>示例Bean时才会被执行，如果这个Bean已经存在，<jsp:useBean>能够定位它，那么主体中的内容将不会起作用 
+
+
+属性以及用法
+
+
+id="beanInstanceName" 
+在你所定义的范围中确认Bean的变量，你能在后面的程序中使用此变量名来分辨不同的Bean 
+
+这个变量名对大小写敏感，必须符合你所使用的脚本语言的规定，在Java 
+
+Programming Language中，这个规定在Java Language 
+
+规范已经写明。如果这个Bean已经在别的<jsp:useBean>中创建，那么这个id的值必须与原来的那个id值一致. 
+
+scope="page | request | session | application" 
+Bean存在的范围以及id变量名的有效范围。缺省值是page,以下是详细说明： 
+
+
+
+page - 你能在包含<jsp:useBean>元素的JSP文件以及此文件中的所有静态包含文件中使用Bean,直到页面执行完毕向客户端发回响应或转到另一个文件为止。 
+request - 你在任何执行相同请求的Jsp文件中使用Bean,直到页面执行完毕向客户端发回响应或转到另一个文件为止。你能够使用Request对象访问Bean,比如request.getAttribute(beanInstanceName) 
+session - 从创建Bean开始，你就能在任何使用相同session的Jsp文件中使用Bean.这个Bean存在于整个Session生存周期内，任何在分享此Session的Jsp文件都能使用同一Bean.注意在你创建Bean的Jsp文件中<% 
+@ page %>指令中必须指定session=true 
+
+ 
+
+application - 从创建Bean开始，你就能在任何使用相同application的Jsp文件中使用Bean.这个Bean存在于整个application生存周期内，任何在分享此application的Jsp文件都能使用同一Bean. 
+class="package.class" 
+使用new关键字以及class构造器从一个class中示例一个bean.这个class不能是抽象的，必须有一个公用的，没有参数的构造器.这个package的名字区别大小写。 
+
+type="package.class" 
+如果这个Bean已经在指定的范围中存在，那么写这个Bean一个新的数据库类型 
+
+。如果你没有使用class或beanName指定type，Bean将不会被示例.package和class的名字，区分大小写. 
+
+beanName="{package.class | <%= expression %>}" type="package.class" 
+使用java.beans.Beans.instantiate方法来从一个class或连续模版中示例一个Bean,同时指定Bean的类型。 
+
+beanName可以是package和class也可以是表达式,它的值会传给Beans.instantiate.tupe的值可以和Bean相同。 
+
+ package 和 class 名字区分大小写.
+

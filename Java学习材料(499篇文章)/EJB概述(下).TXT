@@ -1,0 +1,175 @@
+作者：asp2001
+email: asp2001@163.net
+日期：00-7-4 下午 07:30:27
+EJB概述(下)
+2000-05-15· ilamei·cpcw
+
+Application roles：（应用角色）
+
+　　Enterprise beans Provider:Beans提供者在应用领域方面是专家。例如：Beans提供者可能是金融或电信方面的专家。Beans提供者提供了业务tasks，Enterprise beans的业务方法，定义了beans的romote和home接口，还定义了beans的配置描述器。因为容器管理着系统级的任务，所以，Beans提供者便不需要关心分布处理，事务处理，安全性能等从应用方面看来没什么关系的方面。
+
+Application Assembler程序组装器:
+
+　　这是一个将定制的Enterprise beans和其它的组件，例如，GUI client,applet,Servelet等组装成一个完整的应用程序的行家。在Enterprise的配置器下，组装器在组装成一个应用程序的时候，只关心beans的接口，包括romote接口和home接口。而不关心这些接口是怎么实现的。组装的结果就是一个一个的应用程序，或者由多个Enterprise beans组合成的一个比较复杂的Enterprise beans.
+
+Deployment and Operate roles配置和操作角色
+
+　　配置器为特定的Enterprise beans配置特殊的操作环境。配置器为了适应应用程序，将多个Enerprise beans 组合起来，通过修改Enterprise beans 的属性来达到配置相应的操作环境。例如，配置器通过设置配置描述符的相应的属性来设置事务和安全方针。配置器的另一个任务是将应用程序与现有的Enterprise管理软件结合起来。
+
+System Administrator系统管理者；
+
+　　是与配置应用有关的。管理者配置个管理Enterprise计算和网络服务的低层，包括EJB服务和容器。管理员监视着应用服务器的运行状况，当应用服务器不正常运行是就采取相应的措施。典型的说，管理员使用Enterprise管理工具来与应用程序打交道，通过由容器提供的hooks来配置。
+
+　　传统的应用程序开发者现在是Enterprise beans的提供者。也可能是应用程序的装配者。这样能使他们将主要精力放在应用问题或者应用逻辑上面。当安装Enterprise beans时，配置器定义了一系列的配置方针。机制的复杂性和执行配置的方针就交给了专门的代理。虽然分布式的应用程序还是比较复杂，可是，应用程序设计者的工作却变的简单了，因为所有复杂的工作都交给了EJB服务器和容器提供者了。
+
+　　通过大量的设计之前的定义和命名约定，EJB达到了前面提到的目的。这样的编程体系结构限制了一定的自由，但是，允许EJB服务器和容器提供者假定应用程序的设计，并以一种行之有效的方式来支持他们。
+
+EJB的设计模式和命名约定：
+
+　　有三种途径来建立一个基于对象的，多层的，分布式的系统：无状态服务的途径，基于会话的途径和持续对象的途径。
+
+　　无状态的服务是通过对象的操作提供一种功能的函数，但是，不保持会话的状态。当一个客户使用无状态的对象时，客户不能够提供上一次操作的信息。
+
+　　基于会话的设计产生了一个中间层的对象，称为一个会话（Session）。这个会话可以看成是这个客户的代理。典型的，会话的生命是由客户和所在的服务程序决定的。客户如果完成了会话就可以将对象移走。如果服务终止了，会话对象就会超时。会话对象就会变的无效了。
+
+　　持续对象设计模式绑定了存在数据库中的一块数据。提供了操作这块数据的一些个操作。持续对象是由多个客户共享的。起生命期是由存储数据的库所决定的。
+
+　　EJB规范中将这些分别称做：stateless Session, stateful Session, Entiry Beans.Session Beans模式就是基于会话的设计模式。Entiry Beans模式就是持续对象设计模式。每种模式都定义了一些接口和命名约定。
+
+Enterprise JavaBeans infrastruct （EJB的基础结构）
+
+　　容器和服务提供者实现了EJB的基础构造。这些基础构造处理了EJB的分布式方面，事务管理，安全性方面。EJB规范定义了基础构造和J ava API的为了适应各种情况的要求。而没有去指定用什么技术，平台，协议来实现他们。
+
+　　Enterprise beans, container, server说明了EJB基础结构的要求，EJB基础结构必须提供客户和Enterprise beans通信的通道。虽然这不是EJB规范所定义的。但保证通道的安全也是很重要的。特别是当客户通过internet访问远程的Enterprise beans时。EJB基础结构也必须能够加强Enterprise beans 的访问控制。
+
+　
+
+　　Enterprise beans所有的数据的持续性必须被保证。EJB的低层结构必须提供在企业级的计算环境中与现存系统的结合能力。Beans的所有通信都是分布式事务的一部分，需要由EJB低层结构来管理对于一个成功的配置，EJB低层必须提供分布式应用管理工具的钩子（hooks）
+
+Container
+
+　　容器可能是EJB里面最重要的概念。因为它向程序开发人员提供了最大程度的方便。基于对象的中间层软件平台如CORBA或者远过程调用RMI是程序开发者从网络传输中解放出来，通过提供对象定位机制，数据重组机制等等。容器的概念则走的更远一点。通过简化分布式应用程序的那些复杂的方面，如：安全性，事务协调性，数据持久性。
+
+　　一旦Enterprise Beans准备好了可以配置了。就被打包成一个标准的JAVA文件，ejb-jar文件。一个ejb-jar文件可以包括一个或多个的Enterprise Beans。对每一个Enterprise beans，都由它的接口，类，和配置描述器。
+
+Enterprise Beans Provider提供如下东西给ejb-jar 文件：
+
+Enterprise Beans 的remote 接口，接口说明了Client端能调用的函数。 
+
+Enterprise Beans 的home 接口，home接口使客户生成和定位一个Enterprise Beans的实例。 
+
+Enterprise 类本身，实现了Enterprise beans 的语义。 
+
+Deploy Descripot配置描述器，deployer通过利用配置描述器来提供没有在代码中申明的信息。例如方针和属性。EJB的1.0规范把配置描述器定义为javax.ejb.deployment. SessionDescriptor类或者javax.ejb.deployment.EntityDescriptor的一个实例，但是在1.1版本中不赞成这样做。而是用XML来定义配置描述器。 
+　　配置一个Enterprise Beans 意味着将一个Enterprise Bean安装到容器中去。安装过程包括了如下几个方面：
+
+
+保证不同的Enterprise beans能够工作在一起。 
+
+用名字服务来注册一个Enterprise Bean 
+
+通过EJB服务的通信系统提供访问EJB的入口。 
+
+执行事务管理和安全方针。 
+　　在一个EJB容器中可以又任意多个Enterprise beans.除了安装和执行以外，容器也提供了配置Enterprise beans的工具。
+
+　　为什么用Inprise的EJB 容器？
+
+　　Inprise EJB容器提供的完全的服务
+
+
+完全支持EJB1。1规范。 
+
+一个有效的运行和管理EJBs的容器。 
+
+提供命名服务，事务服务，植入Java RDBMS的内部。编程，配置简单。 
+
+充分的例子来演示怎样使用EJBs和EJB容器。 
+　　对于Enterprise beans的开发者来说，EJB 容器是一个高级Enterprise类产品。因为它有如下优点：
+
+完整的，灵活的运行时环境：
+
+
+EJB容器完全实现了EJB1。1的规范，包括了它的所有功能。 
+
+每一个由工具产生的Enterprise bean都同时是Enterprise bean 对象和CORBA对象。 
+
+EJB容器能够进行单独配置，100%的纯JAVA服务，或者作为完全的分布式的配置。这样的灵活性意味着你能够根据你的要求调整你的应用程序。 
+
+与其它的EJB服务不一样，Inprise 的EJB容器服务并没有限制一定要分开。而是任意个数的Enterprise beans可以放在任意个数的容器中，这些容器也可以放在任意个数机器上。并且支持分布式的事务协议，允许Enterprise beans的分别裁定。允许部分的配置你的应用，而将你的性能配置成最优化。 
+Inprise 的EJB是建立在Vbroker和RMI—IIOP之上的。
+
+
+EJB容器是建立在Inprise的Vbbroker之上的。VisBroker是已经被证明的在各种条件下都是ORB的领导角色。无论在各大公司的联合测试下，或者在实际的应用环境中。VisiBroker提供了一个很好的的运行时的任务的完成。 
+
+为了更好的性能，Vbroker使用了大量的运行时优化，高级的多路链接，链接池和管理，线程池和管理。 
+
+客户和Enterprise beans,Enterprise benas之间，Enterprise beans 和其它的CORBA对象之间的通信都是通过用VisiBroker的IIOP方式进行的。VisiBroker完全适应CORBA2。3规范，RMI—IIOP通过值传递的方式来实现。这意味着，复杂的JAVA数据类型能够用新的IDL值类型写到IIOP里面去。就象在CORBA2。3规范中一样。数据和服务之间相互协调怎样传送复杂的数据类型是很重要的。否则，协同能力就会受到危及。EJB容器能够与其他的所有支持RMI-over-IIOP的进行协同工作。 
+
+安全特性是可由VisiBroker所有的。保证信用是从客户传象服务。 
+
+事务上下文也是由visibroker所有的。保证当CORBA客户开始一个事务时，并且访问EJB容器的服务时。事务上下文被传向服务，当服务需要调用环境中的各项资源时，就要使用事务上下文。 
+
+事务的两段提交是由Inprise的ITS管理的。如果JDBC支持两阶段提交协议，EJB就支持两阶段提交协议。当时，如果JDBC不支持两阶段提交，两阶段提交就不能被完成。 
+Enterprise的EJB容器是一个CORBA对象：
+
+　　Inprise 的java2iiop编译器和EJB容器一样，都是与CORBA兼容的。EJB容器能够理解RMI调用，但是，它用IDL来存放接口定义。虽然Java2iiop编译器从java接口产生了stub 和skeleton.也能够从java接口中产生IDL。然后在其他语言里面用。对于一个CORBA客户端，EJB容器是一个CORBA服务，EJB容器工具就是与控制EJB的功能相同的CORBA工具。
+
+EJB容器是建立在JNDI和CosNaming，JTS/OTS基础山的。他们都是完全支持CORBA的。
+
+容器对不同的Enterprise beans 的支持：
+
+　　EJB容器的主要的特征就是它提供对各种各样的Enterprise beans的管理和支持。包括：
+
+
+有状态或无状态的Session Enterprise beans. 
+
+Entiry beans包括container-manager和beans-manager的持续性。 
+　　EJB容器可以包括一个或多个的jar文件。每一个jar文件又能够包括多个的Enterprise beans。每个Enterprise bean都包括一个配置描述器。一个EJBhome接口，一个EJBremote接口，还有Enterprise bean的实现代码。
+
+使Inprise 的EJB容器不同的是：它支持许多当前的客户，包括如下两个方面：
+
+
+VisiBroler提供了连接管理，允许一个服务同时支持比TCP连接数多的客户连接。用最近最少使用算法来关闭连接。 
+
+对于客户来说，容器本身是无状态的。意味着容器并没有为每一个新的Enterprise bean会话分配内存。这样，容器就能够支持任意多的无状态的Session Enterprise beans. 
+配置的支持：
+
+　　Inprise 容器提供了产生代码的编译器。也提供了一个验证的工具来在配置之前检查你的Enterprise beans.支持EJB1。1的JNDI命名基于XML的配置描述器。
+
+事务管理者：
+
+　　事务管理者提供了事务管理的手段。包括分布式的两段提交的支持。遵从最新的SUN公司JTS规范。也支持最新的OMG的OTS规范。在开发时尽量少用JTS而在配置时使用健壮的ITS。
+
+JDBC链接池和事务综合：
+
+　　所有JDBC访问数据库都是通过DataSource对象的实现来完成的。DataSource对象与数据库的池链接还有JTS管理的全局的事务处理和用JDBC管理的数据库事务处理。
+
+命名服务：
+
+　　命名服务提供了分布式的命名管理。服务遵从JAVA的命名和目录规范（JNDS）。也遵从OMG的cosNaming规范。与事务服务类似，在配置的时候，你可以用JNS，也可以用更健壮的INS。JNDI提供的容器能够运行在其他的JNDI实现之上。这样就能够使用其他的命名服务，例如：LDAP。
+
+安全性的支持：
+
+　　在CORBA之上的Inprise 的安全服务是附加的。
+
+JAVA数据库：
+
+　　Java数据库提供了一个全关系型的高性能的数据库来存储Enterprise beans的状态。
+
+　　JAVA数据库既可以运行在同一个进程的容器中，或者，为了提高性能，也可以运行在一个单独的进程中。实际上，JAVA 数据库是即插即用的。意味着终端用户能够用一个另外的实现就取代了所有的JAVA版本。例如，能够实现一个用别的数据库来存储会话状态和Entiry Data的后台存储。
+
+容器管理的Entity beans的持久性：
+
+　　Inprise 提供了一个CMP（Container-Managed Persistence）引擎来提供透明的对象关系映射和在纯JDBC上的持续框架。更进一步，第三方的工具可以通过开放的API插进来。
+
+与其他组件的结合：
+
+　　在配置环境的真实世界里，EJB的四个模式能够与以下的组件工作在一起：
+
+
+client链接到Enterprise beans对象。Clients可以由java Enterprise bean接口的EJB对象，或者IDL接口的CORBA对象。在Inprise 的EJB容器服务中，每一个Enterprise bean都同时是EJB对象也是CORBA对象。CORBA客户能够用所有支持CORBA的语言来实现，包括C++，Java,Delphi. 
+
+从Enterprise bean的数据库访问。典型的，Enterprise beans对象是Entity beans对象，或者是beans-managed,或者是container-managed. 
+
+后端服务：CORBA服务，用C++，Java ,Delphi实现，运行在任何兼容CORBA的ORB中。EJB服务，包括所有其他的inprise的服务，或者其他支持IIOP的代理商的服务。其它原来的服务，包括ERP系统，main-frame程序。等等。 

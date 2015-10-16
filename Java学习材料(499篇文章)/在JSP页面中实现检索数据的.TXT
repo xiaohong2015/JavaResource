@@ -1,0 +1,660 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 1:05:13 PM
+发布者:flyfox 
+
+在页面中，当检索的数据很多时，通常需要分页显示数据，并要实现翻页。 
+
+下面将通过一些例程来说明实现JSP页面翻页技术的实现。 
+
+首先，在JSP中，通过JAVA servlet 来检索数据，而用JSP来调用结果来显示。 
+
+因而，此技术可分为两个部分（依赖关系）： 
+
+1. 在服务器端的servlet 中的实现 
+
+要点： 
+
+& 将查询条件保存到session中，取session中的查询条件 
+
+& 设置Statement对象的MaxRows（确定一页显示多少行数据） 
+
+& 顺序地通过执行SQL语句查询数据，按maxRows 来检索一个maxRows的数据， 
+
+下一页再检索下一maxRows的数据，以此类推。 
+
+2. 在JSP中的显示实现 
+
+要点： 
+
+& 显示maxRows条数据 
+
+& 通过“下一页”按钮或超链再次调用刚才的servlet查询下一maxRows的数据 
+
+流程如图所示： 
+
+
+
+下面通过一个例程来说明（一个servlet程序和一个JSP程序）： 
+
+l querymedicine. java (Medicine. querymedicine) 
+
+package Medicine; 
+
+import javax.servlet.*; 
+
+import javax.servlet.http.*; 
+
+import java.io.*; 
+
+import java.util.*; 
+
+import java.sql.*; 
+
+import Medicine.medicinelist; 
+
+import Medicine.searchData; 
+
+//////////////////////////////////////////////////// 
+
+// 接---mutiquery.jsp页面，并从request中得到5条查询条件 /// 
+
+// 按条件查询药品，并将结果存进session的“medicinelist”中。 /// 
+
+// 张乾 2000年3月15日 /// 
+
+//////////////////////////////////////////////////// 
+
+public class querymedicine extends HttpServlet { 
+
+private DBConnectionManager connMgr; 
+
+//Initialize global variables 
+
+public void init(ServletConfig config) throws ServletException { 
+
+super.init(config); 
+
+connMgr = DBConnectionManager.getInstance(); 
+
+} 
+
+//========================处理 HTTP Get 请求============================ 
+
+public void doGet(HttpServletRequest request, HttpServletResponse response) 
+throws ServletException, IOException { 
+
+Statement stmt=null; 
+
+Connection con = connMgr.getConnection("medicine"); 
+
+if (con == null) { 
+
+response.sendRedirect("/medicine/con_error.html"); 
+
+return; 
+
+} 
+
+// ==================== 创建数据库Statement ============================= 
+
+try { 
+
+stmt=con.createStatement(); 
+
+} 
+
+catch (Exception e) 
+
+{ 
+
+connMgr.freeConnection("medicine",con); 
+
+response.sendRedirect("/medicine/stmt_error.html"); 
+
+return; 
+
+} 
+
+//------------------------------------------------------------- 
+
+long all_count=0; //存满足条件的药品总数 
+
+//===================从request中得到session====================== 
+
+try{ 
+
+HttpSession session = request.getSession(false); 
+
+if (session == null) { 
+
+connMgr.freeConnection("medicine",con); 
+
+response.sendRedirect("/medicine/session_error.html"); 
+
+return; 
+
+} 
+
+//----------------------------------------------------------- 
+
+//======从“下一页”提交来的参数取得前页最后一条数据的药品编码======= 
+
+String ll_pos=request.getParameter("pos"); 
+//如果pos=-1则表示要从头开始查 
+
+//---------------------------------------------------------- 
+
+//=====================查询用的SQL语句串========================== 
+
+String sqlstatment="SELECT medicines.ypbm, medsmalltypes.zlmc, medsupertypes.clmc, 
+medtypes.dlmc, medicines.ypm, medicines.zyyx, medicines.ypzy FROM medicines, 
+medsmalltypes,medsupertypes,medtypes WHERE medicines.ypbm>"+ll_pos+" 
+and (( medsmalltypes.zlbm = medicines.zlbm ) and ( medsupertypes.clbm = medicines.clbm ) 
+and ( medtypes.dlbm = medicines.dlbm ) and ( ( medicines.del_flag = 0 ) "; 
+
+//----------------------------------------------------- 
+
+String zlbm; 
+
+String dlbm; 
+
+String clbm; 
+
+String zyyx; 
+
+String ypm; 
+
+searchData slist=new searchData(); 
+
+synchronized (session) { 
+
+slist=(searchData)session.getAttribute("searchList"); 
+
+} 
+
+if(ll_pos.equals("-1")){ 
+
+//===表示不是由“下一页”过来要从头开始查数据========== 
+
+if(slist!=null){ 
+
+synchronized (session) { 
+
+session.removeAttribute("searchList"); 
+
+} 
+
+} 
+
+slist=new searchData(); 
+
+//=============从设置查询条件页面取得查询条件的参数=================== 
+
+zlbm=request.getParameter("zlbm"); 
+
+dlbm=request.getParameter("dlbm"); 
+
+clbm=request.getParameter("clbm"); 
+
+zyyx=request.getParameter("zyyx"); 
+
+ypm=request.getParameter("ypm"); 
+
+//------------------------------------------------------ 
+
+//=================将查询条件参数通过Vector存到session中========== 
+
+slist.setZlbm (zlbm); 
+
+slist.setDlbm (dlbm); 
+
+slist.setClbm (clbm); 
+
+slist.setZyyx (zyyx); 
+
+slist.setYpm (ypm); 
+
+synchronized (session) { 
+
+session.setAttribute ("searchList",slist); 
+
+} 
+
+//--------------------------------------------------------- 
+
+} 
+
+//-------------------------------------------------------- 
+
+else 
+
+{ 
+
+//============================取出查询条件参数==================== 
+
+if(slist!=null){ 
+
+zlbm=slist.getZlbm(); 
+
+dlbm=slist.getDlbm(); 
+
+clbm=slist.getClbm(); 
+
+zyyx=slist.getZyyx(); 
+
+ypm=slist.getYpm(); 
+
+} 
+
+else{ 
+
+if(stmt!=null) stmt.close(); 
+
+stmt.setMaxRows(0); 
+
+connMgr.freeConnection("medicine",con); 
+
+response.sendRedirect("/medicine/session_error.html"); 
+
+return; 
+
+} 
+
+//------------------------------------------------- 
+
+} 
+
+String sql2="select count(*) from medicines where del_flag=0"; 
+
+//=====================根据条件参数设置SQL语句======================= 
+
+if(!(zlbm.trim().equals("0"))) { 
+
+sqlstatment+=(" and ( medicines.zlbm='"+zlbm.trim()+"' ) "); 
+
+sql2+=(" and zlbm='"+zlbm.trim()+"'"); 
+
+} 
+
+if(!(dlbm.trim().equals("0"))) { 
+
+sqlstatment+=(" and ( medicines.dlbm='"+dlbm.trim()+"' )"); 
+
+sql2+=(" and dlbm='"+dlbm.trim()+"'"); 
+
+} 
+
+if(!(clbm.trim().equals("0"))) { 
+
+sqlstatment+=(" and ( medicines.clbm='"+clbm.trim()+"' ) "); 
+
+sql2+=(" and clbm='"+clbm.trim()+"'"); 
+
+} 
+
+if(!(zyyx.trim().length ()==0)) { 
+
+sqlstatment+=(" and ( medicines.zyyx like '%"+zyyx.trim()+"%' ) "); 
+
+sql2+=(" and zyyx like '%"+zyyx.trim()+"%'"); 
+
+} 
+
+if(!(ypm.trim().length ()==0)) { 
+
+sqlstatment+=(" and ( medicines.ypm like '%"+ypm.trim()+"%' ) "); 
+
+sql2+=(" and ypm like '%"+ypm.trim()+"%'"); 
+
+} 
+
+sqlstatment+=" )) ORDER BY medicines.ypbm ASC "; 
+
+//------------------------------------------------------------- 
+
+Vector list = new Vector(); 
+
+//================= 设置一页显示的数据条数（一次检索出的数据条数）=========== 
+
+stmt.setMaxRows(25); 
+
+//---------------------------------------------------------------------- 
+
+//===================执行查询将结果放到ResultSet中================ 
+
+ResultSet rs = stmt.executeQuery(sqlstatment); 
+
+ResultSet rs2 = stmt.executeQuery(sql2); 
+
+//------------------------------------------------ 
+
+if(rs==null){ //如果没有查询结果数据 
+
+if(stmt!=null) stmt.close(); 
+
+stmt.setMaxRows(0); 
+
+connMgr.freeConnection("medicine",con); 
+
+response.sendRedirect("/medicine/no_medicine.html"); //定向到一个页面 
+
+return; 
+
+} 
+
+//====================将药品信息填入数据对象并存入Vector中================ 
+
+if(rs2.next()){ 
+
+all_count=rs2.getLong(1); //取得总条数 
+
+} 
+
+if(rs2!=null)rs2.close(); 
+
+while(rs.next()){ 
+
+medicinelist m = new medicinelist(); 
+
+m.setYpbm(rs.getInt("ypbm")); 
+
+m.setZlmc(rs.getString("zlmc")); 
+
+m.setClmc(rs.getString("clmc")); 
+
+m.setDlmc(rs.getString("dlmc")); 
+
+m.setYpm(rs.getString("ypm")); 
+
+m.setZyyx(rs.getString("zyyx")); 
+
+m.setYpzy(rs.getString("ypzy")); 
+
+m.setClbm(clbm); 
+
+m.setDlbm(dlbm); 
+
+m.setZlbm(zlbm); 
+
+list.addElement(m); 
+
+} 
+
+//---------------------------------------------------------- 
+
+if(rs!=null)rs.close(); 
+
+stmt.setMaxRows(0); 
+
+if(stmt!=null)stmt.close(); 
+
+connMgr.freeConnection("medicine",con); 
+
+//========================存入session中=========================== 
+
+synchronized (session) { 
+
+session.setAttribute("medicinelist",list); 
+
+} 
+
+//----------------------------------------------- 
+
+}catch (SQLException e){ 
+
+connMgr.freeConnection("medicine",con); 
+
+response.sendRedirect("/Medicine/sql_error.html"); 
+
+return;} 
+
+//=======================重定向到一个JSP页面========================== 
+
+String url="/medicine/querymedicine.jsp?all_count="+all_count; 
+
+ServletContext sc = getServletContext(); 
+
+RequestDispatcher rd = sc.getRequestDispatcher(url); 
+
+rd.forward(request, response); 
+
+//------------------------------------------------------- 
+
+} 
+
+public void destroy() { 
+
+// =================== 在Servlet退出时终止数据库连接,取消Statement对象 
+
+if(connMgr!=null) connMgr.release(); 
+
+//------------------------------------------------------------------------ 
+
+} 
+
+//========================处理HTTP Post 请求 ============================ 
+
+public void doPost(HttpServletRequest request, HttpServletResponse response) 
+throws ServletException, IOException { 
+
+doGet(request,response); 
+
+} 
+
+//==========================取得 Servlet 信息 ============================ 
+
+public String getServletInfo() { 
+
+return "medicine.querymedicine Information"; 
+
+} 
+
+} 
+
+l querymedicine.jsp 
+
+<%@ page language="java" session="true" import="java.util.*, 
+Medicine.method, Medicine.medicinelist"contentType="text/html;charset=gbk" %> 
+
+<script language="javascript"> 
+
+function next(){ 
+
+var ls_pos=document.form2.maxpos.value; 
+
+document.location="/servlet/Medicine.querymedicine?pos="+ls_pos; 
+
+} 
+
+function detail(ypbm){ 
+
+document.location="/servlet/Medicine.Detail?ypbm="+ypbm; 
+
+} 
+
+</script> 
+
+<!--add head--> 
+
+<div align="center"> 
+
+<body topmargin="0" leftmargin="10" rightmargin="10” bgcolor="#FFFFFF"> 
+<div align="center"> 
+
+<center><IFRAME WIDTH=760 height=130 NORESIZE SCROLLING=no FRAMEBORDER=0 
+MARGINHEIGHT=0 MARGINWIDTH=0 SRC="..\medicinetitle.html"></iframe> 
+
+</div> 
+
+<!--finish--> 
+
+<title>商品列表</title> 
+
+<% 
+
+method md = new method(); 
+
+Vector sklist; 
+
+synchronized (session) { 
+
+sklist = (Vector) session.getAttribute("medicinelist"); 
+
+} 
+
+%> 
+
+<!----------------------------- 显示表头 --------------------------------> 
+
+<% 
+
+if (sklist == null or sklist.size() <= 0) 
+
+{ 
+
+response.sendRedirect("/medicine/no_medicine.html"); 
+
+return; 
+
+} 
+
+else 
+
+{%> 
+
+<center>您好！以下是商品的列表，共有<font color=#ff0000> 
+<%=request.getParameter("all_count")%></font>条符合条件的药品信息 
+
+</center> 
+
+<div align="center"> 
+
+<center> 
+
+<table border="1" cellpadding="0" cellspacing="0" width="840" 
+bordercolorlight="#FFFFFF" bordercolordark="#000000"> 
+
+<tr bgcolor="#339933"> 
+
+<td width=42 align="center"><font color="#339933"><b>明细</b></font></td> 
+
+<td width=160 align="center"><font color="#FFFFFF"><b>商品名称</b></font></td> 
+
+<td width=52 align="center"><font color="#FFFFFF"><b>超类</b></font></td> 
+
+<td width=145 align="center"><font color="#FFFFFF"><b>大类</b></font></td> 
+
+<td width=145 align="center"><font color="#FFFFFF"><b>子类</b></font></td> 
+
+<td width=270 align="center"><font color="#FFFFFF"><b>描述</b></font></td> 
+
+</tr> 
+
+<!-------------------------------------------------------------------------------------------------------------------> 
+
+<% 
+
+medicinelist d=new medicinelist(); 
+
+for (int index=0; index < sklist.size();index++) 
+
+{ 
+
+d = (medicinelist)sklist.elementAt(index); 
+
+String lshref; 
+
+if (d.getYpzy()==null or d.getYpzy().equals("http://") or d.getYpzy().equals("")) 
+
+{ 
+
+lshref=""; 
+
+}else{ 
+
+lshref="<a href="+d.getYpzy()+">"; 
+
+} 
+
+out.println("<form name=form1 method=post action=/servlet/Medicine.Detail?ypbm="+d.getYpbm()+">"); 
+
+out.println("<tr bgcolor=#F3F3E9><td align=center><font color=#000000 size=2> 
+<input type=submit name=submit1 value=明细></font></td><td align=center><font color=#000000 size=2>"); 
+
+out.println(lshref+d.getYpm()+"</a></font></td><td align=center><font color=#000000 size=2>"); 
+
+out.println(d.getClmc()+"</font></td><td align=center><font color=#000000 size=2>" 
++d.getDlmc()+"</font></td><td align=center><font color=#000000 size=2>"); 
+
+out.println(d.getZlmc()+"</font></td><td align=center><font color=#000000 size=2>" 
++md.notNull(d.getZyyx())+"</font></td></tr></form>"); 
+
+out.flush(); 
+
+} 
+
+%> 
+
+<form name=form2 id=form2> 
+
+<input type=hidden name=maxpos id=maxpos value=<%=d.getYpbm()%>> 
+
+</form> 
+
+<% 
+
+} 
+
+%> 
+
+</table> 
+
+<p></p> 
+
+<% 
+
+String ssll=request.getParameter("all_count"); 
+
+Long temp=new Long(ssll); 
+
+long cou= temp.longValue(); 
+
+if(sklist.size()==25&&cou>25) 
+
+{%> 
+
+<input type=button value=" 下页 " onclick="next(1);"> 
+
+<%}%> 
+
+<% 
+
+synchronized (session) { 
+
+if(session.getAttribute("medicinelist")!=null){ 
+
+session.removeValue("medicinelist"); 
+
+} 
+
+} 
+
+%> 
+
+</center> 
+
+<p align="center"><input type="button" value=" 返回 " name="B3" onclick="history.back()"> 
+
+<br><br><br> 
+
+<!--add bottom--> 
+
+<div align="center"> 
+
+<center><IFRAME WIDTH=760 height=140 NORESIZE SCROLLING=no FRAMEBORDER=0 
+MARGINHEIGHT=0 MARGINWIDTH=0 SRC="..\bottom.html"></iframe> 
+
+</div> 
+
+<!--finish-->  

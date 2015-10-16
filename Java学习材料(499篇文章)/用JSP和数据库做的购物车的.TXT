@@ -1,0 +1,333 @@
+作者：asp2001
+email: asp2001@163.net
+日期：2000-8-10 12:12:37
+下面是我用JSP和数据库做的购物车的源程序：
+
+注意：
+1、重新计费部分还没有做好，大家自己动手吧！
+2、下一版本将用session做。
+
+//shop_cart.jsp
+
+<%@ page contentType="text/html;charset=gb2312"%>
+<%@ page session="true" %>
+<%@ page language="java" import="java.sql.*" %>
+<jsp:useBean id="bka" scope="page" class="shop.bka" />
+<%
+
+String product_type;
+String action;
+int product_id;
+int curpage;
+
+//商品类型
+if (request.getParameter("product_type")==null){
+product_type="all";
+}else{
+product_type=request.getParameter("product_type");
+}
+
+//页数和商品类型参数，可以在“继续购物”时返回到上次购物的页面
+if (request.getParameter("curpage")==null){
+curpage=1;
+}else{
+curpage=java.lang.Integer.parseInt(request.getParameter("curpage"));
+}
+
+//动作
+if (request.getParameter("action")==null){
+action="view";
+}else{
+action=request.getParameter("action");
+}
+
+//商品编号
+if (request.getParameter("product_id")==null){
+product_id=0;
+}else{
+product_id=java.lang.Integer.parseInt(request.getParameter("product_id"));
+}
+
+int bbb;
+bbb=1;
+
+Integer num = new Integer(bbb);
+
+//商店编号
+session.putValue("shop_id",num);
+//顾客username
+session.putValue("guest_name","asp2001");
+
+String guest_name=(String)session.getValue("guest_name");
+Integer shop_id=(Integer)session.getValue("shop_id");
+
+
+
+java.lang.String sql;       
+java.sql.ResultSet rs;
+
+
+
+if (action.compareTo("add")==0) {
+
+sql="select cart_quantity from shop_cart where cart_shop_id=" + shop_id + " and cart_guest_id='" + guest_name + "' and cart_product_id=" + product_id ;
+rs = bka.executeQuery(sql);
+if (rs.next()){
+int cart_quantity;
+cart_quantity=java.lang.Integer.parseInt(rs.getString("cart_quantity"))+1;
+sql="update shop_cart set cart_quantity=" + cart_quantity + " where cart_shop_id=" + shop_id + " and cart_guest_id='" + guest_name + "' and cart_product_id=" + product_id ;
+rs = bka.executeQuery(sql);}
+else
+{
+sql="insert into shop_cart (cart_shop_id,cart_guest_id,cart_product_id,cart_quantity) values ('" + shop_id + "','" + guest_name + "','" + product_id + "',1)";
+rs = bka.executeQuery(sql);
+}
+}
+
+if (action.compareTo("clear")==0) {
+sql="delete from shop_cart where cart_shop_id=" + shop_id + " and cart_guest_id='" + guest_name + "'";
+rs = bka.executeQuery(sql);
+}
+
+if (action.compareTo("delete")==0) { 
+sql="delete from shop_cart where cart_shop_id=" + shop_id + " and cart_guest_id='" + guest_name + "' and cart_product_id=" + product_id ;
+rs = bka.executeQuery(sql);
+}
+%>
+<div align="center"><center>
+
+<table border="0" cellpadding="0" cellspacing="0" width="610" 
+
+height="2">
+  <tr>
+    <td><form method="POST" 
+
+action="shop_cart.jsp?action=update&product_type=<%=product_type%>&curp
+
+age=<%=curpage%>">
+      <table border="0" cellpadding="0" cellspacing="0" width="610" 
+
+height="2">
+        <tr>
+          <td width="122" height="7"><div align="center"><center><table 
+
+border="1" cellpadding="2" cellspacing="0" width="100%" bordercolorlight="#FFB468" 
+
+bordercolordark="#FFFFFF" bgcolor="#FFB468">
+            <tr>
+              <td width="100%"><div 
+
+align="center"><center><p>购物车</td>
+            </tr>
+          </table>
+          </center></div></td>
+          <td width="122" height="7" style="border: medium" 
+
+align="center"><div align="center"><center><table
+          border="1" cellpadding="2" cellspacing="0" width="100%" 
+
+bordercolorlight="#FFB468"
+          bordercolordark="#FFFFFF" bgcolor="#FFB468">
+            <tr>
+              <td width="100%"><div align="center"><center><p><a 
+
+href="shop_list.jsp?shop_id=<%=shop_id%>&product_type=<%=product_type%>
+
+&curpage=<%=curpage%>">继续购物</a></td>
+            </tr>
+          </table>
+          </center></div></td>
+          <td width="122" height="7" style="border: medium" 
+
+align="center"><div align="center"><center><table
+          border="1" cellpadding="2" cellspacing="0" width="100%" 
+
+bordercolorlight="#FFB468"
+          bordercolordark="#FFFFFF" bgcolor="#FFB468">
+            <tr>
+              <td width="100%"><div align="center"><center><p><a 
+
+href="javascript: document.forms[0].submit()">重新计费</a></td>
+            </tr>
+          </table>
+          </center></div></td>
+          <td width="122" height="7" style="border: medium" 
+
+align="center"><div align="center"><center><table
+          border="1" cellpadding="2" cellspacing="0" width="100%" 
+
+bordercolorlight="#FFB468"
+          bordercolordark="#FFFFFF" bgcolor="#FFB468">
+            <tr>
+              <td width="100%"><div align="center"><center><p><a href="shop_cart.jsp?action=clear&product_type=<%=product_type%>&curpage=<%=curpage%>">清空购物车</a></td>
+            </tr>
+          </table>
+          </center></div></td>
+          <td width="122" height="7" style="border: medium" align="center"><div align="center"><center><table
+          border="1" cellpadding="2" cellspacing="0" width="100%" bordercolorlight="#FFB468"
+          bordercolordark="#FFFFFF" bgcolor="#FFB468">
+            <tr>
+              <td width="100%"><div align="center"><center><p><a href="shop_order.asp">确认购买</a></td>
+            </tr>
+          </table>
+          </center></div></td>
+        </tr>
+        <tr align="center">
+          <td width="610" height="1" colspan="5"><div align="center"><center>
+<table border="1" cellpadding="2" cellspacing="0" width="100%" bgcolor="#FDFEE2" bordercolorlight="#FFB468" bordercolordark="#FFFFFF" height="40">
+            <tr>
+              <td width="20%" height="8" align="left">商品名称</td>
+              <td width="10%" height="8" align="left">市场价</td>
+              <td width="10%" height="8" align="left">优惠价</td>
+              <td width="10%" height="8" align="left">数量</td>
+	      <td width="14%" height="8" align="left">小计</td>
+	      <td width="12%" height="8" align="left">定金比例</td>
+	      <td width="17%" height="8" align="left">定金小计</td>
+              <td width="17%" height="8" align="left">删除</td>
+            </tr>
+<%
+sql="select shop_product.product_id,shop_product.product_name,shop_product.product_price,shop_product.product_discount,shop_cart.cart_quantity,shop_product.product_first from shop_cart,shop_product where shop_cart.cart_shop_id=" + shop_id + " and shop_cart.cart_guest_id='" + guest_name + "' and shop_cart.cart_product_id=shop_product.product_id";
+rs = bka.executeQuery(sql);
+int total;
+int total_first;
+total=0;
+total_first=0;
+String product_name;
+int product_price;
+int product_discount;
+int product_first;
+int cart_quantity;
+
+if (rs.next()){
+while (rs.next()) {
+product_id=java.lang.Integer.parseInt(rs.getString(1));
+product_name=rs.getString(2);
+product_price=java.lang.Integer.parseInt(rs.getString(3));
+product_discount=java.lang.Integer.parseInt(rs.getString(4));
+cart_quantity=java.lang.Integer.parseInt(rs.getString(5));
+product_first=java.lang.Integer.parseInt(rs.getString(6));
+%>
+
+<tr>
+<td width="10%" height="1" align="left"><%=product_name%></td>
+<td width="10%" height="1" align="left"><%=product_price%></td>
+<td width="10%" height="1" align="left"><%=product_discount%></td>
+<td width="10%" height="1" align="left"><input type="text" name="<%= "t" + product_id %>" size="3" value="<%=cart_quantity%>"></td>
+<td width="14%" height="1" align="left"><%=product_discount*cart_quantity%></td>
+<td width="12%" height="1" align="left"><%=product_first + "%"%></td>
+<td width="17%" height="1" align="left"><%=product_first*product_discount*cart_quantity/100.0%></td>
+<td width="17%" height="1"><div align="center"><center><p><a href="shop_cart.jsp?action=delete&product_id=<%=product_id%>">delete</a></td>
+</tr>
+
+<%
+total=total+product_discount*cart_quantity;
+total_first=total_first+product_discount*cart_quantity*product_first/100;
+}
+%>
+
+<tr align="center">
+<td width="72%" colspan="6" height="16"><div align="right"><p>总计</td>
+<td width="36%" colspan="2" height="16"><div align="left"><%=total%></td>
+</tr>
+<tr align="center">
+<td width="72%" colspan="6" height="16"><div align="right"><p>定金总计</td>
+<td width="36%" colspan="2" height="16"><div align="left"><%=total_first%></td>
+</tr>
+<tr align="center">
+<td width="72%" colspan="6" height="16"><div align="right"><p>结余</td>
+<td width="36%" colspan="2" height="16"><div align="left"><%=total-total_first%></td>
+</tr>
+          </table>
+          </center></div>
+
+<%
+}else{
+%>
+<p align="center">购物车为空!</p>
+<%
+}
+%>
+
+
+
+数据库操作部分
+
+程序用到两个表：
+1 shop_cart表
+	cart_id int  购物车编号  自动编号
+	cart_shop_id  nvarchar     商店编号
+	cart_product_id   nvarchar         商品编号
+	cart_quantity      int         商品数量
+临时存放购物车数据
+
+2 shop_product表
+	product_id    int      商品编号   自动编号
+	shop_id       nvarchar    商店编号
+	product_name    nvarchar     商品名称
+	product_bb       nvarchar     商品介绍
+	product_price      int         市场价
+	product_discount    int         优惠价
+	product_img           img        图片
+	product_status         nvarchar        状态
+	product_first           int        定金比例
+	product_type            nvanchar     商品类型
+存放商品资料
+
+使用bka.java制成的javabean：bka.class可以提供对数据库的操作。
+
+另外，需在控制面板的系统DSN中注册bka.dsn，
+从而可使JSP通过JDBC-ODBC来调用sql数据库。
+在页面中调用javabean，基本上可采用以下方式：
+
+
+<%@ page language="java" import="java.sql.*" %>
+<jsp:useBean id="RegisterBean" scope="page" class="shop.bka" />
+<%
+String sql="select * from xxx";
+ResultSet rs = RegisterBean.executeQuery(sql); 
+if(rs.next()) { 
+rs.close();
+RegisterBean.closeStmt();
+session.putValue("register_message","duplicate name found!");
+}
+%>
+注意应在使用后将rs关闭。
+
+
+以下是bka.java的源程序。注意在使用前需用javac加以编译成为class文件即javabean.
+
+--shop/bka.java--
+
+
+package shop;
+import java.sql.*;
+
+public class bka {
+String sDBDriver = "sun.jdbc.odbc.JdbcOdbcDriver";
+String sConnStr = "jdbc:odbc:bka";
+Connection conn = null;
+ResultSet rs = null;
+
+public bka() {
+try {
+Class.forName(sDBDriver); 
+}
+catch(java.lang.ClassNotFoundException e) {
+System.err.println("bka(): " + e.getMessage());
+}
+}
+
+public ResultSet executeQuery(String sql) {
+rs = null;
+try {
+conn = DriverManager.getConnection(sConnStr,"xxx","yyy"); 
+Statement stmt = conn.createStatement();
+rs = stmt.executeQuery(sql);
+} 
+catch(SQLException ex) { 
+System.err.println("aq.executeQuery: " + ex.getMessage());
+}
+return rs;
+}
+}
+

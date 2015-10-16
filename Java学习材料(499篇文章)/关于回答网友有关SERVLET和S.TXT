@@ -1,0 +1,108 @@
+作者：blackwhites
+日期：2000-11-13 17:50:11
+以下是几种常调用的方法
+     Servlet to Servlet Communication
+    
+     Listing 1: ServletBase
+     public class ServletBase extends HttpServlet{
+     static Connection databaseConnection = null;
+     public void init(ServletConfig _config) throws ServletException{
+     super.init(_config);
+     if ( databaseConnection == null )
+     //- Open up the database connection
+     }
+     protected boolean isLoggedOn( String _username ){
+     return true;
+     }
+     protected boolean logUserOn( String _username ){
+     return true;
+     }
+     }
+     Listing 2: Using the NewSerletBase Class
+     public class logonServlet extends ServletBase{
+     public void service(HttpServletRequest _req, HttpServletRe-
+     sponse _res) throws ServletException{
+     if ( isLoggedOn( _req.getParameter(襏SERNAME? ){
+     //- Display a message indicating they are already logged on
+     }else{
+     logUserOn( _req.getParameter(襏SERNAME? );
+     }
+     }
+     }
+     Listing 3: Storing an Object
+     public class logonServlet extends HttpServlet{
+     public void service(HttpServletRequest _req, HttpServletRe-
+     sponse _res) throws ServletException{
+     ServletContext thisContext = getServletContext();
+     //-- Assume some method creates a new connection class
+     Connection newConnection = createConnection();
+     thisContext.setAttribute( database.connection? newConnection );
+     //-- Return some output to the client
+     }
+     }
+     Listing 4: retrieving an Object
+     public class logoffServlet extends HttpServlet{
+     public void service(HttpServletRequest _req, HttpServletRe-
+     sponse _res) throws ServletException{
+     ServletContext thisContext = getServletContext();
+     //-- Assume some method creates a new connection class
+     Connection newConnection = thisContext.getAttribute(
+     database.connection?;
+     if ( newConnection == null )
+     //- Database has not been opened yet
+     //-- Return some output to the client
+     }
+     }
+     Listing 5: Looking at All the Objects
+     public class allServlet extends HttpServlet{
+     public void service(HttpServletRequest _req, HttpServletRe-
+     sponse _res) throws ServletException{
+     ServletContext thisContext = getServletContext();
+     //-- Assume some method creates a new Connection class
+     Enumeration E = thisContext.getAttributeNames();
+     while ( E.hasMoreElements() ){
+     String name = (String)E.nextElement();
+     System.out.println( "Object: " + name );
+     }
+     }
+     }
+     Listing 6: Retrieving Remote Contexts
+     public class otherServlet extends HttpServlet{
+     public void service(HttpServletRequest _req, HttpServletRe-
+     sponse _res) throws ServletException{
+     ServletContext otherContext =
+     getServletContext(http://<otherdomain>/servlet/allServlet?;
+     //-- Assume some method creates a new Connection class
+     Enumeration E = otherContext.getAttributeNames();
+     while ( E.hasMoreElements() ){
+     String name = (String)E.nextElement();
+     System.out.println( "Object: " + name );
+     }
+     }
+     }
+     Listing 7: Forwarding a Request
+     public class forwardServlet extends HttpServlet{
+     public void service(HttpServletRequest _req, HttpServletRe-
+     sponse _res) throws ServletException{
+     ServletContext xt = getServletContext();
+     RequestDispatcher xyzServlet =
+     xt.getRequestDispatcher(http://<domain>/servlet/xyzServlet?;
+     //- Do any preliminary processing
+     _req.setAttribute( database.results? new Results() );
+     xyzServlet.forward( _req, _res );
+     }
+     }
+     Listing 8: Inserting Content
+     public class insertServlet extends HttpServlet{
+     public void service(HttpServletRequest _req, HttpServletRe-
+     sponse _res) throws ServletException{
+     ServletContext xt = getServletContext();
+     RequestDispatcher xyzServlet =
+     xt.getRequestDispatcher(http://<domain>/servlet/xyzServlet?;
+     PrintWriter Out = _res.getWriter();
+     Out.println( this is from the insertServlet ?);
+     for(int x=0; x < 10; x++ )
+     xyzServlet.insert( _req, _res );
+     Out.println( this is the end of the print servlet ?);
+     }
+     }

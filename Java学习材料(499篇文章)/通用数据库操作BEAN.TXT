@@ -1,0 +1,220 @@
+×÷Õß£ºzergman
+email: zergman@chinaasp.com
+ÈÕÆÚ£º6/12/2001 1:25:34 PM
+
+
+package pkgCDB; 
+
+import java.text.*; 
+import java.util.*; 
+import java.sql.*; 
+
+public class clsCDB 
+{ 
+String sDBDriver = ""; 
+¡¡¡¡String sConnStr = ""; 
+¡¡¡¡String sHint = ""; 
+¡¡¡¡ResultSet¡¡rs = null; 
+¡¡¡¡Connection conn = null; 
+¡¡¡¡Statement¡¡stmt = null; 
+
+¡¡¡¡public String getHint() 
+¡¡¡¡{ 
+return sHint; 
+¡¡¡¡} 
+
+¡¡¡¡public void setDBDriver(String s) 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡sDBDriver = "" + s; 
+¡¡¡¡} 
+
+¡¡¡¡public String getDBDriver() 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡return sDBDriver; 
+¡¡¡¡} 
+
+¡¡¡¡public String getConnStr() 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡return sConnStr; 
+¡¡¡¡} 
+
+¡¡¡¡public void setConnStr(String s) 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡sConnStr = "" + s; 
+¡¡¡¡} 
+
+¡¡¡¡public ResultSet getResultSet() 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡return rs; 
+¡¡¡¡} 
+
+¡¡¡¡//Initialize the database 
+¡¡¡¡public boolean Initialization(String dbDrive,String dbConn) 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡sDBDriver = dbDrive; 
+¡¡¡¡¡¡¡¡sConnStr = dbConn; 
+return Initialization(); 
+¡¡¡¡} 
+
+¡¡¡¡public boolean Initialization() 
+¡¡¡¡{ 
+try 
+¡¡¡¡¡¡¡¡{ 
+¡¡¡¡¡¡¡¡¡¡¡¡Class.forName(sDBDriver); 
+¡¡¡¡¡¡¡¡¡¡¡¡sHint = "Initialization sucessfully";¡¡¡¡¡¡¡¡¡¡¡¡ 
+¡¡¡¡¡¡¡¡¡¡¡¡return true; 
+} 
+catch(java.lang.ClassNotFoundException e) { 
+sHint = "Initialization : " + e.getMessage(); 
+¡¡¡¡¡¡¡¡¡¡¡¡return false; 
+} 
+¡¡¡¡} 
+
+//A common function perhaps usable 
+¡¡¡¡public String chkStr(String inStr) 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡StringBuffer result = new StringBuffer(""); 
+¡¡¡¡¡¡¡¡char cc; 
+
+¡¡¡¡¡¡¡¡if (inStr != null) 
+¡¡¡¡¡¡¡¡{ 
+¡¡¡¡¡¡¡¡ for (int i = 0; i < inStr.length(); i++) 
+¡¡¡¡¡¡¡¡ { 
+¡¡¡¡¡¡¡¡¡¡¡¡ cc = inStr.charAt(i); 
+¡¡¡¡¡¡¡¡¡¡¡¡ if (cc == '\'') 
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡{ 
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡ result.append('\''); 
+¡¡¡¡¡¡¡¡¡¡¡¡ } 
+¡¡¡¡¡¡¡¡¡¡¡¡ result.append(cc); 
+¡¡¡¡¡¡¡¡ } 
+} 
+return result.toString(); 
+¡¡¡¡} 
+
+//execute a SQL statement with recordset returned 
+¡¡¡¡public ResultSet executeQuery(String sql) 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡rs = null; 
+¡¡¡¡¡¡¡¡try 
+¡¡¡¡¡¡¡¡{ 
+¡¡¡¡¡¡¡¡ conn = DriverManager.getConnection(sConnStr); 
+¡¡¡¡¡¡¡¡¡¡¡¡stmt = conn.createStatement(); 
+¡¡¡¡¡¡¡¡¡¡¡¡rs = stmt.executeQuery(sql); 
+¡¡¡¡¡¡¡¡} 
+¡¡¡¡¡¡¡¡catch(SQLException ex) 
+¡¡¡¡¡¡¡¡{ 
+¡¡¡¡¡¡¡¡ sHint = "executeQuery: " + ex.getMessage(); 
+¡¡¡¡¡¡¡¡} 
+¡¡¡¡¡¡¡¡return rs; 
+¡¡¡¡} 
+
+//execute a SQL statement without returning recordset 
+¡¡¡¡public boolean executeUpdate(String sql) 
+¡¡¡¡{ 
+¡¡¡¡¡¡¡¡try 
+¡¡¡¡¡¡¡¡{ 
+¡¡¡¡¡¡¡¡ conn = DriverManager.getConnection(sConnStr); 
+¡¡¡¡¡¡¡¡¡¡¡¡stmt = conn.createStatement(); 
+¡¡¡¡¡¡¡¡¡¡¡¡stmt.executeUpdate(sql); 
+¡¡¡¡¡¡¡¡¡¡¡¡return true; 
+¡¡¡¡¡¡¡¡} 
+¡¡¡¡¡¡¡¡catch(SQLException ex) 
+¡¡¡¡¡¡¡¡{ 
+¡¡¡¡¡¡¡¡ sHint = "executeUpdate: " + ex.getMessage(); 
+¡¡¡¡¡¡¡¡¡¡¡¡return false; 
+¡¡¡¡¡¡¡¡} 
+¡¡¡¡} 
+
+//Close connections 
+¡¡¡¡public boolean closeConn() 
+¡¡¡¡{ 
+
+¡¡ try 
+¡¡¡¡¡¡¡¡{ 
+¡¡ if (rs!=null) 
+¡¡¡¡¡¡¡¡¡¡¡¡ rs.close(); 
+¡¡ if (stmt!=null) 
+¡¡¡¡¡¡¡¡¡¡¡¡ stmt.close(); 
+¡¡¡¡ if (conn!=null) 
+¡¡¡¡¡¡¡¡¡¡¡¡ conn.close(); 
+¡¡¡¡¡¡¡¡¡¡¡¡return true; 
+¡¡¡¡ } 
+¡¡¡¡¡¡¡¡catch(SQLException ex) 
+¡¡¡¡¡¡¡¡{ 
+sHint = "closeConn: " + ex.getMessage(); 
+¡¡¡¡¡¡¡¡¡¡¡¡return false; 
+¡¡¡¡¡¡¡¡} 
+¡¡¡¡} 
+} 
+
+
+
+²âÊÔÓÃJSPÎÄ¼þ 
+
+<%@ page language="java" import="java.sql.*"¡¡%> 
+<%@ page import = "pkgCDB.clsCDB"%> 
+<jsp:useBean id="CommonDBBean" class="pkgCDB.clsCDB" scope="session"/> 
+
+<html> 
+<head><title>Common Database Bean Test</title></head> 
+<body> 
+<font size=4> 
+<% 
+if ( (request.getParameter("DBDriver") == null) 
+¡¡¡¡ // (request.getParameter("ConnStr") == null) 
+¡¡¡¡¡¡¡¡// (request.getParameter("SQLStr") == null) ) 
+¡¡¡¡{ %> 
+¡¡ <form method=get> 
+¡¡ Input DBDriver: <input type=text name=DBDriver value="sun.jdbc.odbc.JdbcOdbcDriver"> 
+¡¡¡¡¡¡¡¡<BR> 
+¡¡ Input Connection String: <input type=text name=ConnStr value="jdbc:odbc:testBean"> 
+¡¡¡¡¡¡¡¡ 
+
+¡¡ Input SQL Query: <input type=text name=SQLStr value="select * from jobs"> 
+¡¡¡¡¡¡¡¡<BR> 
+¡¡ <input type=submit value="Submit"> 
+¡¡ </form> 
+
+<%¡¡} 
+else 
+¡¡¡¡{ %> 
+<% if (!CommonDBBean.Initialization(request.getParameter("DBDriver"),request.getParameter("ConnStr"))) 
+¡¡¡¡ { %> 
+¡¡¡¡ <%=CommonDBBean.getHint() + "<p></p>" %> 
+<% } 
+else 
+¡¡¡¡ { %> 
+¡¡¡¡ <% ResultSet rs; %> 
+¡¡¡¡¡¡¡¡ <% rs = CommonDBBean.executeQuery(request.getParameter("SQLStr")); %> 
+¡¡¡¡¡¡¡¡ <%int j = rs.getMetaData().getColumnCount();¡¡%> 
+¡¡¡¡¡¡¡¡ <table BORDER = "1"> 
+<tr> 
+¡¡¡¡¡¡¡¡ <%for (int i = 1; i <= j; ++i) 
+¡¡¡¡¡¡¡¡ { %> 
+¡¡¡¡¡¡¡¡ <td> 
+¡¡¡¡¡¡¡¡¡¡¡¡ <%=rs.getMetaData().getColumnName(i) %> 
+¡¡¡¡¡¡¡¡¡¡¡¡ </td> 
+<% } %> 
+</tr> 
+
+¡¡¡¡¡¡¡¡ <%while(rs.next()) 
+¡¡¡¡¡¡¡¡ { %> 
+¡¡¡¡¡¡¡¡ <tr> 
+¡¡¡¡¡¡¡¡ <%for (int i = 1;i <= j; ++i) 
+¡¡¡¡¡¡¡¡¡¡¡¡ { %> 
+<td> 
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡ <%=rs.getString(i)%> 
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡ </td> 
+<% } %> 
+</tr> 
+<% } %> 
+</table> 
+<% } 
+} 
+¡¡¡¡if (!CommonDBBean.closeConn()) 
+¡¡¡¡{ %> 
+¡¡¡¡ <%=CommonDBBean.getHint() + "<p></p>" %> 
+<% } %> 
+</font> 
+</body> 
+</html>

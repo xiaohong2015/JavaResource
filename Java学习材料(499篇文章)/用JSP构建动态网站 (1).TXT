@@ -1,0 +1,40 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:37:04
+一、 什么是JSP 
+
+　　JSP(JavaServer Pages) JSP由Sun Microsystems公司倡导、许多公司参与一起建立的一种动态网页技术标准，其网址为http://www.javasoft.com/products/jsp。 在传统的网页HTML文件(*.htm,*.html)中加入Java程序片段(Scriptlet)和JSP标记(tag)，就构成了JSP网页(*.jsp)。Web服务器在遇到访问JSP网页的请求时，首先执行其中的程序片段，然后将执行结果以HTML格式返回给客户。程序片段可以操作数据库、重新定向网页以及发送 email 等等，这就是建立动态网站所需要的功能。所有程序操作都在服务器端执行，网络上传送给客户端的仅是得到的结果，对客户浏览器的要求最低，可以实现无Plugin，无ActiveX，无Java Applet，甚至无Frame。 本文将介绍利用JSP技术开发动态网页的方法，还将简要分析JSP技术和 Microsoft 公司的ASP技术的不同之处。 
+
+　　二、 如何安装和启动 
+
+　　为了实验JSP技术，首先需要建立运行环境，这个过程相当简单： 
+
+　　1、在 http://java.sun.com/jdk/处下载JDK(Java 2 SDK、Standard Edition、v 1.2.2)。 
+
+　　2、在http://java.sun.com/products/jsp/处下载JSWDK(JavaServer Web Development Kit 1.0.1)。Linux用户可以在ttp://jakarta.apache.org/处下载Tomcat 3.0。 
+
+　　3、安装 以Windows NT环境为例，JDK的安装是首先运行下载得到的jdk1_2_2-win.exe，然后修改系统环境参数，在PATH参数中加入[x:]\jdk1.2.2\bin以及增加新的环境参数 CLASSPATH=[x:]\jdk1.2.2\lib\tools.jar，其中[x:]是安装JDK的硬盘符（c:、d: 等）。 JSWDK的安装仅需将jswdk1_0_1-win.zip带目录释放到硬盘根目录下（c:\、d:\ 等），然后就可以在硬盘上找到\jswdk-1.0.1\目录。将来如果不想保留JSWDK，删除这个目录就可以了，没有任何系统文件和注册表遗留问题。更详细的安装过程以及Solaris/Unix和Linux下JDK、Tomcat的安装可以参考下载得到的文件包中的安装说明。 
+
+　　4、启动 以Windows NT环境为例，在\jswdk-1.0.1\目录下执行startserver.bat，就可启动JSWDK中一个支持JSP网页技术的Web服务器。为了不与现有的Web服务器（例如IIS、PWS等）冲突，JSWDK的Web服务器使用了8080端口。 在浏览器的地址栏中键入http://localhost:8080或者http://127.0.0.1:8080后，如果能看到 JSWDK 的欢迎页就说明JSP实验环境已经建成，可进入下一步实验。 要关闭Web服务器则运行stopserver.bat。 
+
+　　三、 JSP简单示例 
+
+　　JSWDK中包含的Web服务器的文档目录在缺省状态下为\jswdk-1.0.1\webpages，主文档在缺省状态下为index.html和index.jsp。也就是说访问http://localhost:8080等于访问\jswdk-1.0.1\webpages\index.html。 用文本编辑器，如Windows中的记事本(Notepad)，创建一个文本文件hi.jsp，保存在\jswdk-1.0.1\webpages\目录下，其内容如下： 
+
+＜html＞ 
+＜head＞ 
+＜title＞Hi-JSP实验＜/title＞ 
+＜/head＞ 
+＜body＞ 
+＜% 
+String Msg = "This JSP test."; 
+out.print("Hello World!"); 
+%＞ 
+＜h2＞＜%=Msg%＞＜/h2＞ 
+＜/body＞ 
+＜/html＞ 
+ 
+
+　　　　　　　　图１ 
+
+在浏览器的地址栏中键入http://localhost:8080/hi.jsp，JSWDK中的Web服务器会执行JSP 文件中用＜%以及%＞括起来的Java程序语句，其中out.print是将文字输出到网页，语句＜%= 变量 | 表达式 %＞的作用是将Java Scriptlet中变量或表达式的值输出到网页，执行结果如图1。 图1 将变量Msg赋值为中文字符串，用＜%= %＞输出，或者用out.print输出中文字符串，则在英文版NT4及Redhat 6.1下实验运行结果正常，而在中文NT 4.0和中文98下，则反而会出现乱码。

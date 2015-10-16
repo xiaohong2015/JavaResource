@@ -1,0 +1,27 @@
+作者：jspfuns
+日期：2000-8-25 21:27:30
+在<% .... %>定义的变量是JSP的本地变量，它们对于外部函数是不可见的，即使这些函数和变量在同一页面中声明。如： 
+
+<%
+int evilVariable = "666";
+%>
+...
+function testFunction() {
+//在函数内部，变量evilVariable是不可见的
+}
+为什么呢？这是因为变量evilVariable最终成为结果servlet中service()方法的一个本地变量，因此它不能被结果servlet的其它方法存取。
+
+对于在<%! %>中声明的变量将作为全局变量。如：
+
+<%!
+int evilVariable = "666";
+%>
+...
+function testFunction() {
+int x = evilVariable; //能够使用变量evilVariable
+}
+这是因为通过这种方式定义的evilVariable变量变为了结果servlet的一个私有成员变量，因此它可以被servlet中的所有的方法存取。
+
+结论
+
+理解以上的概念是很重要的，因为在servlet环境中，对于一个JSP页只允许有一个结果servlet的实例在运行和响应所有的页面请求。因此，在结果servlet中所有的成员变量可以被所有的请求所共享，而service()方法中的本地变量只能每响应一次请求就重建一次。故我们将变量放置到<SERVER></SERVER>标签中时，应注意以上的规则。

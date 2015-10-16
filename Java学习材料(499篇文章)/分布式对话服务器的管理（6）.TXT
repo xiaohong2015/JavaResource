@@ -1,0 +1,133 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：7/4/2001 1:43:27 PM
+　　尽管我们已经能够访问对话服务器，而且可以避免单一点故障，我们还必须为HttpSession建立一个封装对象，而SessionWrapper就是这样一个对象，而且，它还假定HttpSession的执行也是串行化的。如果它不是串行化的，可以很方便地修改封装对象将对话的信息转移到一个哈希表中并在其他成员变量中保留其他信息（ID、创作时间等信息。）。
+
+
+public interface SessionWrapper extends Memory 
+{ 
+/** 
+* 得到HttpSession的信息。 
+*/ 
+public HttpSession getSession(); 
+} 
+
+public class SessionWrapperImpl implements SessionWrapper 
+{ 
+
+/**识别该对话的关键字 */ 
+protected String _id; 
+/** 当前HttpSession的信息。 */ 
+protected HttpSession _sess; 
+
+/** 
+* 建立ID，但没有建立对话的其他信息，可用于通过read寻找一个对话。
+*/ 
+public SessionWrapper(String id) { 
+_id = id; 
+} 
+
+/** 
+* 建立一个带对话的SessionWrapper。其ID与对话的ID相同。 
+*/ 
+public SessionWrapper(HttpSession sess) { 
+_sess = sess; 
+_id = sess.getId(); 
+} 
+
+/** 
+* 如果Memory对象是SessionWrapper的一个实例，当前的SessionWrapper
+* 已经建立了与对象相同的ID，则此方法返回的值为真。 
+*/ 
+public boolean equalsMemory(Memory m) { 
+return (m instanceof SessionWrapper 
+&& _id != null 
+&& _id.equals(((SessionWrapper)m)._id)); 
+} 
+
+/** 
+* 得到HttpSession的信息。 
+*/ 
+public HttpSession getSession() { 
+return _sess; 
+} 
+} 
+ 
+
+
+　　SessionWrapper类执行了Memory的界面，因此，HttpSession对象的ID可以与远程对话的ID进行比较。
+
+　　最后需要创建read()、write()和delete()，以对远程对话进行管理。我们向SessionManager类添加三个静态类：
+
+
+/** 
+* 从在初始化时建立的Mnemosyne中得到HttpSession信息。 
+*/ 
+public static HttpSession getSession(String id) 
+throws RemoteException 
+{ 
+try { 
+SessionWrapper result 
+= (SessionWrapper)_Mnemosyne.read(new SessionWrapper(id), 
+null); 
+return result.getSession(); 
+} catch (TransactionException ex) { 
+// 由于没有处理事物，因此不会有事务意外被放弃。
+ex.printStackTrace(); 
+} 
+return null; 
+} 
+
+/** 
+* 在初始化时指定的Mnemosyne中保存对话信息。
+*/ 
+public static void saveSession(HttpSession sess) 
+throws RemoteException 
+{ 
+try { 
+_Mnemosyne.write(new SessionWrapper(sess), null); 
+} catch (TransactionException ex) { 
+file://由于没有处理事物，因此不会有事务意外被放弃。 
+ex.printStackTrace(); 
+} 
+} 
+
+/** 
+* 从在初始化时指定的Mnemosyne中删除一个对话。
+*/ 
+public static void removeSession(String id) 
+throws RemoteException 
+{ 
+try { 
+_Mnemosyne.take(new SessionWrapper(id), null); 
+} catch (TransactionException ex) { 
+// /由于没有处理事物，因此不会有事务意外被放弃。
+ex.printStackTrace(); 
+} 
+} 
+ 
+
+　　在servlet中，可以以如下方式管理对话：
+
+public void init(ServletConfig conf) throws ServletException { 
+// 调用一个方法得到指示对话服务器位置的RMI URL清单
+// 例如：//server1.foo.com/MnemosyneImpl, //server2.foo.com/MnemosyneImpl，等 
+String[] urls = getURLs(conf); // Method to get the URLs from properties for the session servers 
+SessionManager.initializeMnemosyne(urls) 
+} 
+
+public void doGet(HttpServletRequest req, HttpServletResponse rsp) throws IOException { 
+
+file:// 得到存贮在cookie中的对话，仅仅是为了得到其ID。
+HttpSession baseSess = req.getSession() 
+file://根据得到的ID，从Mnemosyne中得到真正的对话
+HttpSession realSess = SessionManager.getSession(base.getId()); 
+
+SessionManager.saveSession(realSess); 
+} 
+ 
+
+
+　　结论
+
+　　尽管这篇文章讨论了一个分布式对话管理的例子，但我们可以将这一技术用于管理必须容忍任一节点出错的分布式内存管理系统中。Mnemosyne还可以用在成员不断加入和离开的P2P应用中。通过使用Mnemosyne，任何一个成员都可以与系统进行快速同步，而无需要求为保持系统有效而必须保证某一结点不出故障。

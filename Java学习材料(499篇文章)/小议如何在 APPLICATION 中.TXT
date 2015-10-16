@@ -1,0 +1,60 @@
+作者：jeru
+日期：2000-12-20 12:58:53
+小议如何在 Application 中显示图象
+
+*************************************************************
+**                                                         
+** 作者：刘湛 ------------------- 一天进步一小步             
+** 日期：2000-12-20 ------------ ==============              
+** jeru@163.net ----------------- 充实我的每一天             
+**                                                         
+*************************************************************
+
+在 application 中显示图象有些人用的方法比较麻烦，要用到 Toolkit 类。
+这里我发现了一个教为简单的办法，就是用getImage()方法来从一个 ImageIcon 对象获取 Image 对象。
+具体做法如下：
+
+//获取图象文件路径
+//getResource()方法会自动的去CLASSPATH中找你的图象文件，这不失为一中好的办法
+//即使你的图象文件在jar包中，我们也可以很轻易的找到它
+URL imgURL = getClass().getResource("img/test.gif");
+
+//建立ImageIcon 类
+ImageIcon icon = new ImageIcon(imgURL);
+
+//由icon得到img
+Image img = icon.getImage();
+
+这样一来，把我上一篇文章<小议如何在 Applet 中显示图象>的代码稍微改动一点就可以在application中显示
+图象了，连附例程如下：
+
+import javax.swing.*;
+import java.awt.*;
+import java.net.URL;
+import java.awt.image.*; 
+
+public class MyFrame extends JFrame {
+
+  int xpoint = 100, ypoint = 100;
+
+  public MyFrame() {
+    //Do frame stuff.
+    super("MyFrame");    
+  }
+
+  public void paint(Graphics g) {
+    URL imgURL = getClass().getResource("img/test.gif");
+    ImageIcon icon = new ImageIcon(imgURL);
+    g.drawImage(icon.getImage(),xpoint,ypoint,this);
+  }
+  
+// main function
+  public static void main(String[] args) {
+    MyFrame frame = new MyFrame();
+    frame.pack();
+    frame.setVisible(true);
+  }
+
+}
+
+

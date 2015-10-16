@@ -1,0 +1,239 @@
+作者：freehero
+email: jdxmoon@163.net
+日期：2000-11-29 14:28:02
+声明：本文档由freehero翻译，未经作者同意不能用于商业用途，您可以自由的复制和传播，文档只供您理解j2ee，因作者能力有限，建议您同时阅读英文文档，对于因为翻译的错误代来的后果作者不负任何责任，欢迎您来信讨论freehero@163.net   
+
+
+j2ee配置指南
+
+1。介绍
+    本文介绍j2ee环境的配置，所有涉及的文件都在j2ee安装目录下的oncfig目录，这些文件都是文本文件，
+
+你可以有任意的文本编辑器来编辑它们。
+    通常情况下，你没有改变这些文件的必要。但是如果你使用的数据库驱动不是cloudscape的时候，你需要
+
+遵循本章的内容进行配置。
+
+2。JDBC驱动
+    默认的j2ee安装后支持cloudscape数据库（一个sun公司提供的演示数据库），如果你的ejb使用的jdbc不
+
+是连接cloudscape数据库，那么你需要按照下面的知道进行配置。（如果你不能确定本版本的j2ee支持你使用
+
+的jdbc驱动，请到 11111 看相关信息。）
+
+3。驱动的位置
+   你必须把驱动文件（.jar文件）copy到 $J2EE_HOME/lib/system目录下。并且保证该文件包含在
+
+J2EE_CLASSPATH 的环境变量中。
+
+4。J2EE_CLASSPATH 环境变量
+   j2ee server通过JDBC驱动连接数据库。通通过J2EE_CLASSPATH 的环境变量定位驱动文件（.jar文件）的位
+
+置。你可以在启动j2ee前在命令行设置这个变量。但是我们推荐你在脚本中设置J2EE_CLASSPATH 变量。编辑用
+
+户配置文件在安装的过程中是必须的一步。在unix中，用户配置文件是 /bin/userconfig.sh，windows nt中是
+
+bin/userconfig.bat
+    注意：你应该同时在CLASSPATH环境变量中去掉驱动文件（.jar文件）。
+
+5。JDBC 1.0 驱动
+    为了配置jdbc1.0驱动，编辑config/default.properties 文件的jdbc.drivers 和 jdbc.datasources两个
+
+属性值。再次要注意的是驱动文件必须包含在J2EE_CLASSPATH环境变量中。
+    jdbc.drivers 属性
+   
+    jdbc.drivers 属性的值是有一系列的冒号分割的jdbc驱动的类名。格式如下：
+    jdbc.drivers=<classname>:<classname>: . . .
+    例如：
+    jdbc.drivers=oracle.jdbc.driver.OracleDriver:testutil.MyDriver
+   
+    jdbc.datasources 属性值
+    
+    jdbc.datasources 属性值由两部分组成，一个是datasource的jndi的名字，一个是数据库的url。典型的
+
+情况是：jndi名字是数据库的逻辑名字，rul指定数据库的实际位置。jndi名字和url都是在ejb编码的过程中指
+
+定的。rul的格式，请参照jdbc驱动提供商的文档。
+    jdbc.datasources 的语法如下：    
+    jdbc.datasources=<jndi_datasource>|<url>|<jndi_datasource>|<url>. . .
+    |符号有两个作用。第一，它隔开几个jndi_datasource；第二，它隔开每一个jndi_datasource中的
+
+jndi_datasource> 和 <url> 元素. 
+    jndi_datasource元素的语法如下：
+    jdbc/<jndi_name>
+    由jdbc关键字开头，jndi_name是在jndi目录中指定的datasouce名字。
+    例如：
+    jdbc.datasources=jdbc/Oracle|jdbc:oracle:thin@rtc:1521:acct|jdbc/MyDB|jdbc:test
+
+6。支持JTA的JDBC2.0驱动
+    配置JTA的JDBC2.0的驱动，你需要设置以下属性的值：
+    jdbc20.datasources
+    xadatasource.<n>.jndiname
+    xadatasource.<n>.classname
+    xadatasource.<n>.dbuser
+    xadatasource.<n>.dbpassword
+    xadatasource.<n>.prop.<property-name>
+    同时你也必须在J2EE_CLASSPATH 环境变量中包括jdbc驱动文件。
+
+    jdbc20.datasources 属性
+    jdbc20.datasources 属性的值和jndi名字连接，用于定位datasouce的位置（它就是lookup方法的参数）
+
+。
+    jdbc20.datasources 的语法如下：
+    
+
+jdbc20.datasources=<jndi_datasource>|<jndi_XA_datasource>|<jndi_datasource>|<jndi_XA_datasource>  
+
+   
+    |的作用有两个，第一，隔开jndi_datasource 和<jndi_XA_datasource>并组成一对，第二，隔开每一对的
+
+jndi_datasource> 、<jndi_XA_datasource>元素。
+    <jndi_datasource> 和 jndi_XA_datasource有相同的语法：
+    jdbc/<jndi_name>
+    jdbc关键字开头。jndi_name是datasource名字，这个名字指向jndi目录。
+    例如：
+    jdbc20.datasources=jdbc/Merant|jdbc/XAMerant|jdbc/Finch|jdbc/XAFinch
+
+    xadatasource属性
+    xadatasource.<n>.jndiname 属性指定XA DataSource的jndi名字。语法如下：
+    xadatasource.<n>.jndiname=jdbc/<jndi_XA_datasource>
+    n代表每一组xadatasource。第一个jdbc2.0驱动n为0，下一个是1，2等等。jndi_XA_datasource元素和
+
+jdbc20.datasources 指定的值对应。
+    The xadatasource.<n>.dbuser 和 xadatasource.<n>.dbpassword 属性指定数据库用户和密码。通常该用
+
+户具有管理员的权限（更多的信息请看   2222  The distributed.transaction.recovery ）。
+    xadatasource.<n>.prop.<property_name> 指定和特定的属性值关联的值。实际的值可能是jdbc驱动。
+    例如：
+    xadatasource.0.jndiname=jdbc/XAMerant
+    xadatasource.0.classname=com.merant.sequelink.jdbcx.datasource.SequeLinkDataSource
+    xadatasource.0.prop.url=jdbc:sequelink://mypc:5000/[Oracle]
+
+7。事务
+
+    你可以编辑config/default.properties 文件控制事务发生和超时设置。
+    distributed.transaction.recovery 属性
+    这个属性控制分布事物是否发生。入这些事物可以发生的化，下面的条件必须满足：
+        跨库操作时的事物范围。
+        j2ee程序通过jdbc2.0 JTA驱动访问数据库
+        当故障发生的时候，事物的各个的组成部分可以按照符合两段提交协议的方式提交或回滚。
+        事物发生的时候，server重新启动后事物可以提交或回滚。
+    distributed.transaction.recovery的值为true或者false。j2ee安装后默认为false。
+    distributed.transaction.recovery=false
+
+    transaction.time属性
+    在应用container-managed 事物的ejb中，你可以控制事物超时的间隔通过设置transaction.timeout的值
+
+。例如：
+    transaction.timeout=5
+    在设置以后，如果事物在5秒内没有完成，j2ee事物管理器将回滚它。
+    当j2ee第一次安装的时候，timeout的值时0代表没有超时。
+    只有使用container-managed 管理事物的ejb受到timeout的影响。至于在bean-managed和JTA 
+
+transactions 中你可以引用 UserTransaction 的 setTransactionTimeout方法。同时你也可以在其他组建中
+
+引用setTransactionTimeout方法：比如servlets和jsp。
+
+8。端口
+
+    j2ee需要tcp/ip端口。修改config目录下的相应文件可以修改端口号。下表是端口号和相应的文件。
+
+    EJB                 9191    ejb.properties  http.port=9191  
+    HTTP                8000    web.properties  port=8000  
+    HTTPS               7000    web.properties  https.port=7000  
+  Naming and Directory  1050    orb.properties  port=1050  
+
+
+    9191 端口用于提供client下载需要的stub类
+    8000 提供http服务
+    7000 提供https服务
+    1050 基于orb的jndi名字服务使用的端口
+
+9。日志文件
+
+    j2ee server有几个日志文件。默认这些文件在logs目录下。编辑config/default.properties 文件中的 
+
+log.directory 属性可以更改默认目录。
+    log.directory=logs  
+
+    同时你也可以编辑default.properties 文件更改日志文件的名字。例如：你可以修改log.output 属性的
+
+值来修改the output.log 文件的名字。
+    一般来说，日志文件决定于启动j2ee的模式。（single还是multiple   VM (virtual machine) 模式）
+    Single VM 日志文件
+    默认的情况是Single VM 模式。在这种情况下，日志文件位于
+    $J2EE_HOME/<logs>/<host>/ejb
+    logs是在default.properties 文件中log.directory 属性指定的。host元素是计算机名称。
+    生成下列文件。
+    system.out
+    system.err
+    event.log
+    output.log
+    error.log
+    system.out 和system.err文件包括ejb中 System.out 和 System.err的输出。如果你运行j2ee -verbose
+
+参数，输出被写到stdout（标准输出） 和stderr（标准错误。输出）。system.out 和 system.err日志文件不
+
+创建。只有config/auth.properties 文件中audit属性值为true时audit.lo才创建。
+
+    Multiple VM 日志
+
+    如果你用j2ee -mutiVM启动server，ejb和http服务在自己的虚拟机以单独的服务启动。每一个depploy的
+
+应用程序也在自己的虚拟机中运行。日志文件和上述的一样，但是存放的目录不同。
+    目录如下：
+    EJB                      $J2EE_HOME/<logs>/ejb/ejbd  
+    HTTP                     $J2EE_HOME/<logs>/ejb/httpd  
+    deployed application     $J2EE_HOME/<logs>/ejb/<app-name>  
+
+    web server日志
+    编辑web.properties文件中的内容，可以改变由web server创建的日志文件的名字。
+
+10。安全
+ 
+    未授权用户
+    对于j2ee来说，当有未授权的用户试图调用ejb container的时候，j2ee必须存在一般意义上的未授权用户
+
+存在。在j2ee中这个用户名字是guest，密码是guest123。你可以在auth.properties 文件中修改用户名和密码
+
+。   
+    default.principal.name=guest
+    default.principal.password=guest123
+
+    Keystore密码
+    如果用户使用公钥访问https，认证信息放在<user-home>/.keystore 文件中。同时user-home是
+
+System.getProperty("user.home")的返回值。
+    keystore是一个典型的密码文件。默认的密码是changeit。可以在web.properties 文件中修改
+
+keystore.password 属性的值来改变密码。
+ 
+    ANYONE 角色
+    在application  deployment工具的security面板中，默认的情况下方法分配给ANYONE 角色。这样的结果
+
+是所有的用户和组都可以调用它。如果你没有影射到一个特定的角色，每一个用户和用户都可以调用它。可以
+
+在auth.properties 文件中设置anyone.role.name 的值来改变默认anyone角色。
+    
+    钝化发生的条件：内存限制
+    当ejb container开始钝化一个ejb的时候，它把ejb保存在附属存储中并且试图重新分配内存。默认的情况
+
+下，如果内存使用超过128m的时候钝化开始发生。可以编辑config/default.properties 文件中
+
+passivation.threshold.memory 属性的值来修改默认值。
+    passivation.threshold.memory=128000000
+    值必须是一个正的整数。当你减少这个值的时候钝化现象回经常发生。
+
+    jndi name  server host
+    如果jndi name server和j2ee server不在同一个机器上，你必须改变config/orb.properties 文件中host
+
+属性的值。
+    host=localhost
+
+    HTTP 文档根
+    默认的情况下，http和https服务的文档是public_html。你可以编辑web.properties 文件中documentroot
+
+属性的值来改变它。
+    documentroot=public_html/
+
+

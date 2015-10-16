@@ -1,0 +1,201 @@
+作者：friendcn
+日期：2001-2-22 12:49:46
+JSP tags run on the server and are not interpreted by the client like HTML tags are.
+
+
+JSP tags provide proper code re-use.
+
+
+HTML and JavaScript can be added to pages using a JSP mechanism called include. However, developers have a tendency to create huge JavaScript library files, and these libraries are included into the JSP file. The result is a much larger than necessary HTML page returned to the client. The proper use of include is for HTML snippets for such things as page headers and footers.
+
+
+By abstracting out the Java code, JSP tags have promoted specialization of development roles. 
+
+Model-View-Controller (MVC)
+JSP tags solved only part of our problem. We still have issues with validation, flow control, and updating the state of the application. This is where MVC comes to the rescue. MVC helps resolve some of the issues with the single module approach by dividing the problem into three categories: 
+
+Model
+The model contains the core of the application's functionality. The model encapsulates the state of the application. Sometimes the only functionality it contains is state. It knows nothing about the view or controller. 
+
+
+View
+The view provides the presentation of the model. It is the look of the application. The view can access the model getters, but it has no knowledge of the setters. In addition, it knows nothing about the controller. The view should be notified when changes to the model occur.
+
+
+Controller
+The controller reacts to the user input. It creates and sets the model. 
+
+MVC Model 2
+The Web brought some unique challenges to software developers, most notably the stateless connection between the client and the server. This stateless behavior made it difficult for the model to notify the view of changes. On the Web, the browser has to re-query the server to discover modification to the state of the application.
+
+Another noticeable change is that the view uses different technology for implementation than the model or controller. Of course, we could use Java (or PERL, C/C++ or what ever) code to generate HTML. There are several disadvantages to that approach: 
+
+Java programmers should develop services, not HTML. 
+Changes to layout would require changes to code. 
+Customers of the service should be able to create pages to meet their specific needs. 
+The page designer isn抰 able to have direct involvement in page development. 
+HTML embedded into code is ugly. 
+
+For the Web, the classical form of MVC needed to change. Figure 4 displays the Web adaptation of MVC, also commonly known as MVC Model 2 or MVC 2. 
+
+Figure 4. MVC Model 2
+
+
+Struts, an MVC 2 implementation
+Struts is a set of cooperating classes, servlets, and JSP tags that make up a reusable MVC 2 design. This definition implies that Struts is a framework, rather than a library, but Struts also contains an extensive tag library and utility classes that work independently of the framework. Figure 5 displays an overview of Struts. 
+
+Figure 5. Struts overview
+
+
+Struts overview
+
+
+Client browser
+An HTTP request from the client browser creates an event. The Web container will respond with an HTTP response.
+
+
+Controller
+The Controller receives the request from the browser, and makes the decision where to send the request. With Struts, the Controller is a command design pattern implemented as a servlet. The struts-config.xml file configures the Controller.
+
+
+Business logic
+The business logic updates the state of the model and helps control the flow of the application. With Struts this is done with an Action class as a thin wrapper to the actual business logic.
+
+
+Model state
+The model represents the state of the application. The business objects update the application state. ActionForm bean represents the Model state at a session or request level, and not at a persistent level. The JSP file reads information from the ActionForm bean using JSP tags.
+
+
+View
+The view is simply a JSP file. There is no flow logic, no business logic, and no model information -- just tags. Tags are one of the things that make Struts unique compared to other frameworks like Velocity. 
+
+Struts details 
+Displayed in Figure 6 is a stripped-down UML diagram of the org.apache.struts.action package. Figure 6 shows the minimal relationships among ActionServlet (Controller), ActionForm (Form State), and Action (Model Wrapper). 
+
+Figure 6. UML diagram of the relationship of the Command (ActionServlet) to the Model (Action & ActionForm)
+
+
+The ActionServlet class
+Do you remember the days of function mappings? You would map some input event to a pointer to a function. If you where slick, you would place the configuration information into a file and load the file at run time. Function pointer arrays were the good old days of structured programming in C. 
+
+Life is better now that we have Java technology, XML, J2EE, and all that. The Struts Controller is a servlet that maps events (an event generally being an HTTP post) to classes. And guess what -- the Controller uses a configuration file so you don抰 have to hard-code the values. Life changes, but stays the same. 
+
+ActionServlet is the Command part of the MVC implementation and is the core of the Framework. ActionServlet (Command) creates and uses Action, an ActionForm, and ActionForward. As mentioned earlier, the struts-config.xml file configures the Command. During the creation of the Web project, Action and ActionForm are extended to solve the specific problem space. The file struts-config.xml instructs ActionServlet on how to use the extended classes. There are several advantages to this approach: 
+
+The entire logical flow of the application is in a hierarchical text file. This makes it easier to view and understand, especially with large applications.
+
+
+The page designer does not have to wade through Java code to understand the flow of the application.
+
+
+The Java developer does not need to recompile code when making flow changes.
+
+Command functionality can be added by extending ActionServlet.
+
+The ActionForm class
+
+
+ActionForm maintains the session state for the Web application. ActionForm is an abstract class that is sub-classed for each input form model. When I say input form model, I am saying ActionForm represents a general concept of data that is set or updated by a HTML form. For instance, you may have a UserActionForm that is set by an HTML Form. The Struts framework will: 
+
+Check to see if a UserActionForm exists; if not, it will create an instance of the class.
+
+
+Struts will set the state of the UserActionForm using corresponding fields from the HttpServletRequest. No more dreadful request.getParameter() calls. For instance, the Struts framework will take fname from request stream and call UserActionForm.setFname(). 
+
+
+The Struts framework updates the state of the UserActionForm before passing it to the business wrapper UserAction.
+
+
+Before passing it to the Action class, Struts will also conduct form state validation by calling the validation() method on UserActionForm. Note: This is not always wise to do. There might be ways of using UserActionForm in other pages or business objects, where the validation might be different. Validation of the state might be better in the UserAction class.
+
+
+The UserActionForm can be maintained at a session level.
+
+Notes: 
+
+The struts-config.xml file controls which HTML form request maps to which ActionForm. 
+Multiple requests can be mapped UserActionForm. 
+UserActionForm can be mapped over multiple pages for things such as wizards. 
+
+The Action class
+The Action class is a wrapper around the business logic. The purpose of Action class is to translate the HttpServletRequest to the business logic. To use Action, subclass and overwrite the process() method. 
+
+The ActionServlet (Command) passes the parameterized classes to ActionForm using the perform() method. Again, no more dreadful request.getParameter() calls. By the time the event gets here, the input form data (or HTML form data) has already been translated out of the request stream and into an ActionForm class. 
+
+Note: "Think thin" when extending the Action class. The Action class should control the flow and not the logic of the application. By placing the business logic in a separate package or EJB, we allow flexibility and reuse.
+
+Another way of thinking about Action class is as the Adapter design pattern. The purpose of the Action is to "Convert the interface of a class into another interface the clients expect. Adapter lets classes work together that couldn抰 otherwise because of incompatibility interface" (from Design Patterns - Elements of Reusable OO Software by Gof). The client in this instance is the ActionServlet that knows nothing about our specific business class interface. Therefore, Struts provides a business interface it does understand, Action. By extending the Action, we make our business interface compatible with Struts business interface. (An interesting observation is that Action is a class and not an interface. Action started as an interface and changed into a class over time. Nothing's perfect.) 
+
+The Error classes
+The UML diagram (Figure 6) also included ActionError and ActionErrors. ActionError encapsulates an individual error message. ActionErrors is a container of ActionError classes that the View can access using tags. ActionErrors is Struts way of keeping up with a list of errors.
+
+Figure 7. UML diagram of the relationship of the Command (ActionServlet) to the Model (Action)
+The ActionMapping class
+An incoming event is normally in the form of an HTTP request, which the servlet Container turns into an HttpServletRequest. The Controller looks at the incoming event and dispatches the request to an Action class. The struts-config.xml determines what Action class the Controller calls. The struts-config.xml configuration information is translated into a set of ActionMapping, which are put into container of ActionMappings. (If you have not noticed it, classes that end with s are containers)
+
+The ActionMapping contains the knowledge of how a specific event maps to specific Actions. The ActionServlet (Command) passes the ActionMapping to the Action class via the perform() method. This allows Action to access the information to control flow.
+
+ActionMappings
+ActionMappings is a collection of ActionMapping objects.
+
+Mailing list sample revisited
+Let抯 see how Struts can solve the problems plaguing join.jsp. Two projects make up the rewrite. The first project contains the business logic portion of the application that is independent of the Web application. The independent layer could be a common service layer implemented with EJB technology. For demonstration purposes, I have created a package called business using an Ant build process. There are several reasons for the independent business layer: 
+
+Separate responsibilities 
+A separate package allows the manager to delegate responsibilities within the development group. This also helps promote developer responsibility.
+
+
+Off-the-shelf 
+Think of the developer as treating the package as a piece of commercial software. By putting it into a different package, it gives it more of the feel of being off-the-shelf. The package might be off-the-shelf or might be developed by a different group within your organization.
+
+
+Avoiding unnecessary build and unit testing 
+A separate build process helps avoid unnecessary build and unit testing.
+
+
+Developed using interfaces
+It helps to think from an interface perspective when doing development and avoids possible coupling. This is an extremely important fact. When doing your own business package, the business classes should not care if a Web application or a stand-alone Java application is making the calls. Therefore, avoid any reference to servlet API or Struts API calls in the business layer.
+
+
+Stability
+Not every organization conducts daily, weekly, or even monthly releases. Hence, when doing development, stable interface points are nice. Just because the business package is in a state of flux, does not mean the Web project should be in a state of flux. 
+
+Business build note
+I use Ant to build the projects, and JUnit to run the unit test. The business.zip contains everything to build the business project, except for Ant and JUnit. The package script will build the classes, run the unit test, create the Java docs and jar file, and compress all of it into a zip file to deliver to a customer. You can deploy to other platforms by modifying the build.xml. Business.jar is in the Web download portion, therefore, you do not have to download and build the business package.
+
+Web project
+The second project is a Web application developed with Struts. You will need a JSP 1.1 and Servlet 2.2-compliant container. The quickest way to get started is to download and install Tomcat 3.2 (see Resources). Until there is a 1.0 release of Struts, I recommend getting the latest build from the Jakarta project (see Resources). This has been a huge issue for me, and I cannot insure that my sample Web project will build with your Struts download. Struts is in a constant state of change, and I have had to constantly update my project. I used jakarta-struts-20010105.zip for this project. Figure 8 displays the Web project layout. If you have Ant installed, running the build will create a war file called joinStruts.war that is ready for deployment.
+
+Figure 8. Web project layout
+
+
+Listing 4 displays the converted JSP file called joinMVC.jsp. The file has gone from 50 lines to 19 lines, and now contains no Java code. This is a huge improvement from a page designer perspective. 
+
+Listing 4. joinMVC.jsp -- simple JSP revisited
+<%@ page language="java" %>
+<%@ taglib uri="/WEB-INF/struts.tld" prefix="struts" %>
+<%@ taglib uri="/WEB-INF/struts-form.tld" prefix="form" %>
+<html>
+<head>
+<title><struts:message key="join.title"/></title>
+</head>
+<body bgcolor="white">
+
+<form:errors/>
+<h3>Enter your email to join the group</h3>
+
+<form:form action="join.do" focus="email" >
+    <form:text   property="email" size="30" maxlength="30"/>
+    <form:submit property="submit" value="Submit"/>
+</form:form>
+
+</body>
+</html>
+
+ 
+
+
+
+
+
+

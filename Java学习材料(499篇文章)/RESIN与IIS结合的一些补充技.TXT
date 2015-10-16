@@ -1,0 +1,23 @@
+作者：jian
+email: wjian111@163.net
+日期：2001-5-22 2:54:07
+软件环境：
+JDK1.3 http://java.sun.com
+resin1.2.0 http://www.caucho.com
+Winnt 4.0 & IIS4
+Win2000 & IIS5
+
+　　简单来说，直接运行Resin的bin目录下的setup.exe即可自动完成Resin与多种WEB服务器的结合，其原理是将ISAPI文件isapi_srun.dll拷贝至IIS的scripts目录并创建针对所有站点的ISAPI筛选器，对于IIS默认站点，一般已经建立了虚拟目录scripts，如果需要为同一机器上多站点中的某一个网站提供Resin服务，按Resin文档所说，可以通过为此站点创建同样的scripts虚拟目录实现。
+　　经过实验，我发现，完全可以绕过上述所有步骤：
+一、在任意地方建立scripts目录，将Resin的bin目录下的isapi_srun.dll拷贝过来；
+二、进入IIS管理器，在目标站点下建立具有可执行权限的虚拟目录scripts，对到刚刚创建的scripts物理目录；
+三、打开目标站点的属性，创建新的ISAPI筛选器，名为Resin，其可执行文件对应到同一scripts目录下的isapi_srun.dll；
+四、用命令net stop iisadmin停止WEB服务，用net start w3svc重启。
+　　这样，也可以将Resin与IIS结合起来。
+　　需要注意的是，最好不要将scripts目录放到系统所在的区，因为IIS搞不好就有可能出现一个CGI文件目录解码的漏洞，这个虚拟的scripts目录就会成为被攻击的罪魁祸首，我就是疏忽了这一点，参照Resin的文档进行配置，结果导致一台服务器遭遇骇客捣蛋，很是头痛了一番。
+
+　　谬误之处，请高手佐正。
+
+
+---------------------------------------------
+转载请注明出处：jian(http://www.21active.com)

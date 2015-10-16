@@ -1,0 +1,119 @@
+作者：bdsc
+email: bdscca@yahoo.ca
+日期：2001-7-13 17:06:42
+
+5.4.2 数组
+SOAP数组定义为具有"SOAP-ENC:Array"类型或一个从"SOAP-ENC:Array"衍生的类型（参见规则8）。数组表示为元素值，对元素的名没有特别的约束（正如元素值并不约束它们所属的元素）。
+
+数组可以包含任意类型的元素，包括嵌套数组。可以创建新的类型（受SOAP-ENC:Array类型限制）来表示数组，如整数数组或某些用户定义的枚举。
+
+数组值表示为组成这个数组的项的元素的规则序列。在数组值中，元素名对于区分accesor并不重要。元素可以有任意的名。实际上，元素常常用它们在schema中暗示或确定的数组类型来命名元素。并且一般情况下对于复合值来说，如果数组中数组项的值是single-reference值，则这个数组项包含它的值，否则，该数组项通过"href"属性引用这个值。
+
+下面的例子是一个整型数组的schema片断：
+
+<element name="myFavoriteNumbers"
+        type="SOAP-ENC:Array"/>
+
+<myFavoriteNumbers
+  SOAP-ENC:arrayType="xsd:int[2]">
+   <number>3</number> 
+   <number>4</number> 
+</myFavoriteNumbers>
+
+在这个例子中，数组"myFavoriteNumbers"包括几个成员，每个成员是一个类型为SOAP-ENC:int的值。注意SOAP-ENC:Array允许不受限制的元素名，它们不传达任何类型信息，所以在使用时，或者它们有xsi:type属性，或者它们所属的元素有SOAP-ENC:arrayType属性。自然，由SOAP-ENC:Array衍生的类型可以声明局部元素，但这种情况下要包括类型信息。
+
+上面已经提到，SOAP-ENC schema包含了元素的声明，元素名与"XML Schema Part 2: Datatypes"规范[11]中的简单类型一致。其中包括了对"Array"的声明。于是，我们可以这样写：
+
+<SOAP-ENC:Array SOAP-ENC:arrayType="xsd:int[2]">
+   <SOAP-ENC:int>3</SOAP-ENC:int>
+   <SOAP-ENC:int>4</SOAP-ENC:int>
+</SOAP-ENC:Array>
+
+数组可以包含特定arrayType的任意子类型的实例。即，数组成员可以是arryType属性值指定的类型的任意子类型，这个类型对于arrayType属性中指定的类型来说是可替换的（根据schema中的替换规则）。例如，一个整型数组可以包含从整型衍生的任意类型（如"int"或任意用户定义的从整型衍生的类型）。同样，一个"address"数组可能包含一个address的受限类型或扩展类型如"internationalAddress"。因为提供的SOAP-ENC:Array类型允许任意类型的成员，所以可以包含任意类型的混合除非使用arrayType属性加以特别的限制。
+
+在实例中，可以使用xsi:type指定成员元素的类型，或通过schema中成员元素的声明来指定。下面是两个例子。
+
+<SOAP-ENC:Array SOAP-ENC:arrayType="SOAP-ENC:ur-type[4]">
+   <thing xsi:type="xsd:int">12345</thing>
+   <thing xsi:type="xsd:decimal">6.789</thing>
+   <thing xsi:type="xsd:string">
+      Of Mans First Disobedience, and the Fruit
+      Of that Forbidden Tree, whose mortal tast
+      Brought Death into the World, and all our woe,
+   </thing>
+   <thing xsi:type="xsd:uriReference">
+      http://www.dartmouth.edu/~milton/reading_room/
+   </thing>
+</SOAP-ENC:Array>
+
+<SOAP-ENC:Array SOAP-ENC:arrayType="SOAP-ENC:ur-type[4]">
+   <SOAP-ENC:int>12345</SOAP-ENC:int>
+   <SOAP-ENC:decimal>6.789</SOAP-ENC:decimal>
+   <xsd:string>
+      Of Mans First Disobedience, and the Fruit
+      Of that Forbidden Tree, whose mortal tast
+      Brought Death into the World, and all our woe,
+   </xsd:string>
+   <SOAP-ENC:uriReference>
+      http://www.dartmouth.edu/~milton/reading_room/
+   </SOAP-ENC:uriReference > 
+</SOAP-ENC:Array>
+
+数组值可以是结构或其它复合值。例如"xyz:Order"结构数组：
+
+<SOAP-ENC:Array SOAP-ENC:arrayType="xyz:Order[2]">
+   <Order>
+       <Product>Apple</Product>
+       <Price>1.56</Price>
+   </Order>
+   <Order>
+       <Product>Peach</Product>
+       <Price>1.48</Price>
+   </Order>
+</SOAP-ENC:Array>
+
+数组成员值也可以是数组。下例是两个字符串数组组成的数组：
+
+<SOAP-ENC:Array SOAP-ENC:arrayType="xsd:string[][2]">
+   <item href="#array-1"/>
+   <item href="#array-2"/>
+</SOAP-ENC:Array>
+<SOAP-ENC:Array id="array-1" SOAP-ENC:arrayType="xsd:string[2]">
+   <item>r1c1</item>
+   <item>r1c2</item>
+   <item>r1c3</item>
+</SOAP-ENC:Array>
+<SOAP-ENC:Array id="array-2" SOAP-ENC:arrayType="xsd:string[2]">
+   <item>r2c1</item>
+   <item>r2c2</item>
+</SOAP-ENC:Array>
+
+包含数组的元素无需命名为"SOAP-ENC:Array"。它可以有任意的名，只要元素的类型是SOAP-ENC:Array或由之衍生的类型。例如，下面是一个schema片断和与之一致的数组实例。
+
+<simpleType name="phoneNumber" base="string"/>
+
+<element name="ArrayOfPhoneNumbers">
+  <complexType base="SOAP-ENC:Array">
+    <element name="phoneNumber" type="tns:phoneNumber" maxOccurs="unbounded"/>
+  </complexType>
+  <anyAttribute/>
+</element>
+
+<xyz:ArrayOfPhoneNumbers SOAP-ENC:arrayType="xyz:phoneNumber[2]">
+   <phoneNumber>206-555-1212</phoneNumber>
+   <phoneNumber>1-888-123-4567</phoneNumber>
+</xyz:ArrayOfPhoneNumbers>
+
+数组可能是多维的。在这种情况下，在arrayType属性的asize部分将不止有一个值：
+
+<SOAP-ENC:Array SOAP-ENC:arrayType="xsd:string[2,3]">
+   <item>r1c1</item> 
+   <item>r1c2</item> 
+   <item>r1c3</item> 
+   <item>r2c1</item> 
+   <item>r2c2</item> 
+   <item>r2c3</item> 
+</SOAP-ENC:Array>
+
+虽然上面的例子把数组编码为独立的元素，但元素值也可以是嵌入形式，而且若元素值是single reference时，必须编码为嵌入形式。
+

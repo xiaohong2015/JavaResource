@@ -1,0 +1,30 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：7/4/2001 1:43:50 PM
+　　在Component-Base和N-Tier潮流下，无状态（stateless）物件扮演着重要的角色。stateless物件是 OO 和Transaction Service两项技术结合的产物。OO 技术强调的是弹性（felxibility）、重用性（reusability）和分散性(distribution)，Transaction Service技术强调的是效率（performance）和延展性（scalability）。 Stateless物件是这两项技术结合的重要支柱。
+
+　　传统的OO技术大多着重于 Stateful 物件，然而在今天的MiddleWare（如EJB和 COM+/MTS）里面，Stateless物件的地位却远远高于Stateful物件。尤其是在EJB的架构里，Stateless有着非常重要的用途。例如Stateless的Session物件不需要长期保存自身的状态值，也不专属于特定的用户（client），所以占用的服务器资源非常之少，也由于不隶属于特定的用户，所以许多EJB物件可以共用少数的Stateless物件。
+
+　　Stateless物件的特性
+
+　　就Client而言，在意的是server物件的外在行为，而行为又和物件的状态无关。所以client物件不必在意物件状态的变化，而不是此 种物件真的没有状态。比如说stateless的限制并不意味着stateless的session beans不能拥有属性变量，所以，这些session beans一样会拥有自己的内部状态，然而重要的是，client不会看到这些内部状态。
+
+　　在Internet时代里，资讯系统的扩展性（scalability）显得无比重要，而高度扩展性的前提是必须有效运用Server的资源，而无状态的物件的资源共用性极大地减少了服务器的负载，因此，在开发N-Tier系统的时候，活用Stateless物件是系统开发人员必须具有的技能之一。
+
+　　使用Stateless支持交易
+
+　　当企业资讯系统的Client数目大幅度增加的时候，每个Client能够享有的共用资源（shared resources）自然会更加稀少。面对这个问题，除了投入更多的资源之外，好好协调以避免资源的浪费，达到充分共享，也是重要的解决之道。
+
+　　其中，数据库是最典型的稀有共享资源，交易是协调这项共享资源的可靠技术，如果加上Stateless物件，交易就会更加具有威力--更有效运用数据库的connection，并能跨越不同的数据库（即分布式交易）。
+
+　　交易是商业往来或异动的事件（event） 。事件一旦发生，企业资讯系统就会参与进行一连串的作业过程（process），在这个过程中，会导致共享资源（比如数据库的资料）的一连串异动。为了确保在异动过程中，不受到别的交易的干扰，也为了确保异动过程中的例外处理（比如roll back），“交易”就成为用来管理和协调共用资源的工具。
+
+　　在交易过程中，需要数据库提供服务（即资源），以便能够异动数据库里面的资料，完毕后就把资源释放，供彼得交易使用。在像EJB等系统的交易服务（transaction service）里 ，都必须具备有ACID（atomic,consistency,isolation,duration）四个特性，来做到上述的资源管理功能。
+
+　　一般来说，必须先取得和数据库的沟通管道（connection） ，才能获得数据库的服务，而数据库的connection又很有限，所以协调connection成为管理数据库资源的重心。让每个client能尽快释放connection成为重要的管理工作。
+
+　　在交易的进行过程中，会取得所需的数据库连接，一直到交易结束才会释放掉，所以充分运用连接一定要注意两点，一是交易的时间越短越好，交易越短就能越快速地释放被占用的connection。二是交易所需要的connection越少越好，这样就有更多的共享机会了。
+
+　　在component-based环境中，一个交易通常由一群物件所共同合作，每个物件可能由不同人所设计开发，每个物件也都可能向数据库索取connection。如果一个交易的参与物件越多，而且每个物件占用的connection时间越长，则这个交易就需要足够多的connection才能完成任务。
+
+　　因此，“让物件迅速释放connection” 是提升数据库资源运用效率的重要策略，stateless物件则是实现这个策略的重要技术。 

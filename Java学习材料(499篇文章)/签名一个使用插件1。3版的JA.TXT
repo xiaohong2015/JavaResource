@@ -1,0 +1,131 @@
+作者：wflm
+日期：2001-6-6 16:15:48
+Subject: 签名一个使用插件1。3版的Java小程序 (作者：山水 欢迎转载！ 哈哈！~!@#$%^&*）  
+Date: Sat, 14 Apr 2001 13:33:24 +0800  
+From: "山水" <wflm@263.net>  
+Newsgroups: ChinaFCU.JAVA  
+
+签名一个使用插件1。3版的Java小程序 (作者：山水 欢迎转载 哈哈！~!@#$%^&*）
+
+为了签署一个小程序，有下面几件事情需要完成：
+1。签名工具
+2。一个RAS keypair 和一个公钥的证书链。
+3。把小程序用到的所有类文件打包成一个JAR文件。
+
+签名工具
+
+现在有两种工具支持签署使用插件的小程序
+1。Jarsigner --可以在jdk里找到2。Netscape Signing Tool 网景公司提供的一个签
+署小程序的工具，用来签名在网景浏览器中使用的小程序。最新的版本可以到
+http://developer.netscape.com/software/signedobj/jarpack.html 下载
+注意：网景公司已经不再提供旧版本的签名工具的下载
+
+RSA 证书
+
+RSA 证书需要向一个支持RAS的CA公司购买。如Thawte
+为了使用RSA证书签名你的小程序，你需要从Thawte或是其它CA获得Java代码签名证
+书。在你登记你的证书的时候可能需要你提供证书签名请求文件（CSR）你可使用以下
+步骤：
+---------------------------------------------------------
+1。使用keytool建立一个RSA keypair
+2. C:\>C:\jdk1.3\bin\keytool -genkey -keyalg rsa -alias MyCert
+3. Enter keystore password: ********* file://键入你keystore的密码
+4. What is your first and last name? file://以下是键入你的信息
+   [Unknown]: XXXXXXX YYY
+5. What is the name of your organizational unit?
+6. [Unknown]: Java Software
+7. What is the name of your organization?
+8. [Unknown]: Sun Microsystems
+9. What is the name of your City or Locality?
+10. [Unknown]: Cupertino
+11. What is the name of your State or Province?
+12. [Unknown]: CA
+13. What is the two-letter country code for this unit?
+14. [Unknown]: US
+15. Is <CN=XXXXXXX YYY, OU=Java Software, O=Sun Microsystems, L=Cupertino,
+ST=CA, C=US> correct?
+16. [no]: yes file://确认后按y结束
+17. Enter key password for <MyCert> file://键入你key的密码。若按回车次密码与
+键入的keystore的密码相同
+18. (RETURN if same as keystore password): *********
+19。使用 "keytool -certreq" 建立一个证书请求文件，拷贝并粘贴到Thawte的
+webform上。例如：
+20. C:\>C:\jdk1.3\bin\keytool -certreq -alias MyCert
+21. Enter keystore password: *********
+-----BEGIN NEW CERTIFICATE REQUEST-----
+MIIBtjCCAR8CAQAwdjELMAkGA1UEBhMCVVMxCzAJBgNVBAgTAkNBMRIwE
+AYDVQQHEwlDdXBlcnRpbm8xGTAXBgNVBAoTEFN1biBNaWNyb3N5c3RlbX
+MxFjAUBgNVBAsTDUphdmEgU29mdHdhcmUxEzARBgNVBAMTClN0YW5sZXk
+gSG8wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBALTgU8PovA4y59eb
+oPjY65BwCSc/zPqtOZKJlaW4WP+UhmebE+T2Mho7P5zXjGf7elo3tV5uI
+3vzgGfnhgpf73EoMow8EJhly4w/YsXKqeJEqqvNogzAD+qUv7Ld6dLOv0
+CO5qvpmBAO6mfaI1XAgx/4xU/6009jVQe0TgIoocB5AgMBAAGgADANBgk
+qhkiG9w0BAQQFAAOBgQAWmLrkifKiUYtd4ykhBtPWSwW/IKkgyfIuNMML
+dF1DH8neSnXf3ZLI32f2yXvs7u3/xn6chnTXh4HYCJoGYOAbB3WNbAoQR
+i6u6TLLOvgv9pMNUo6v1qB0xly1faizjimVYBwLhOenkA3Bw7S8UIVfdv
+84cO9dFUGcr/Pfrl3GtQ==
+-----END NEW CERTIFICATE REQUEST-----
+22。你可以从邮箱里收到Thawte发给你的证书链，拷贝她并存处在一个文件中。可以使
+用 "keytool -import" 把它导入你的keystore中
+23. C:\>C:\jdk1.3\bin\keytool -import -alias MyCert -file VSSStanleyNew.cer
+24。导入成功后你的证书及证书支持的链将生效。你现在可以使用Jarsigner签名你的
+Jar文件了。注意：必须所有的步骤使用同样的别名或是不使用别名（缺省的别名是
+"mykey"）
+
+打包Java小程序
+
+使用Jarsigner和你的RSA证书签名你的小程序，小程序必须打包成JAR文件。JAR工具也
+可以在JDK里找到。
+例如 C:>C:\jdk1.3\bin\jar cvf C:\TestApplet.jar .
+added manifest
+adding: TestApplet.class (in = 94208) (out= 20103)(deflated 78%)
+adding: TestHelper.class (in = 16384) (out= 779)(deflated 95%)
+这个例子将建立一个名为TestApplet.jar的JAR文件，它包含当前目录下的以及其子目
+录下的所有文件
+当JAR文件建立后，你需要验证它的完整性。
+C:>C:\jdk1.3\bin\jar tvf TestApplet.jar
+0 Mon Mar 06 18:02:54 PST 2000 META-INF/
+68 Mon Mar 06 18:02:54 PST 2000 META-INF/MANIFEST.MF
+94208 Wed Mar 10 11:48:52 PST 2000 TestApplet.class
+16384 Wed Mar 10 11:48:52 PST 2000 TestHelper.class
+这样可以保证存储在JAR里的类文件的是正确的
+
+签名小程序
+
+使用下面的步骤来签名小程序：
+1。使用Jarsigner签名JAR文件，使用先前步骤中建里在你的keystore文件中的RSA证
+书，确保别名相同。
+2. C:\>C:\jdk1.3\bin\jarsigner C:\TestApplet.jar MyCert
+3. Enter Passphrase for keystore: ********
+4. Use "jarsigner -verify -verbose -certs" to verify the jar files
+5. C:>C:\jdk1.3\bin\jarsigner -verify -verbose -certs d:\TestApplet.jar
+245 Wed Mar 10 11:48:52 PST 2000 META-INF/manifest.mf
+187 Wed Mar 10 11:48:52 PST 2000 META-INF/MYCERT.SF
+968 Wed Mar 10 11:48:52 PST 2000 META-INF/MYCERT.RSA
+smk 943 Wed Mar 10 11:48:52 PST 2000 TestApplet.class
+smk 163 Wed Mar 10 11:48:52 PST 2000 TestHelper.class
+
+X.509, CN=XXXXXXX YYY, OU=Java Software,
+O=Sun Microsystems, L=Cupertino,
+ST=CA, C=US (mycert)
+X.509, CN=Sun Microsystems, OU=Java Plug-in QA,
+O=Sun Microsystems, L=Cupertino, ST=CA, C=US
+X.509, EmailAddress=server-certs@thawte.com,
+CN=Thawte Server CA, OU=Certification
+Services Division, O=Thawte Consulting cc,
+L=Cape Town, ST=Western Cape, C=ZA
+
+s = signature was verified
+m = entry is listed in manifest
+k = at least one certificate was found in keystore
+i = at least one certificate was found in identity scope
+
+jar verified.
+6。现在你的小程序已经被正确的签名。可以发布你的这个小程序了。
+
+
+发布签名过的小程序
+
+1。在 EMBED/OBJECT 标记中加入 ARCHIVE=xyz.jar
+2。把JAR文件及其HTML页放到web服务器上。
+

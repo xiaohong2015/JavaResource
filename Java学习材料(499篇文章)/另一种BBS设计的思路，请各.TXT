@@ -1,0 +1,124 @@
+作者：wflm
+日期：2000-12-21 22:32:18
+    最近一段时间研究了一下bbs方面的一些程序，也拜读了本站bbs的源程序，自己觉得受益匪浅，
+很多程序都堪称典范。在主要的论坛贴子处理方面，很多的论坛也都模仿此作。因为我不想总拿别
+人的东西照抄，所以自己用了另一种处理方法来做的。至于方法如何还请大家评断。（我当然觉得
+自己的好了 8-））
+1。贴子的排序
+	数据库 Id,SortId  ,Title,Uname,Stime,BackTimes,ReadTimes,Face,Content
+		1 999999   .........................................
+		2 999998   .........................................
+		3 999997   ......................................... 
+     	id为自动编号，也即显示的贴子号
+	引入一个SortId,50位字符型，
+	设根贴子为六位（如999999，你也可以更多，我想已经够了）
+	设第一贴为999999 第二贴为999998 第三贴为999997 .............
+	（注意这都是根贴，是六位长）
+		
+	为什么第一贴为999999，是为了以后便于输出贴子。
+	要在999999下面回复一贴即第二层贴子就在数据库中写入
+	       Id,SortId  ,Title,Uname,Stime,BackTimes,ReadTimes,Face,Content
+		4 999999z   .........................................	
+	在999999后面加了一个“z” (增加一位可以用来区分贴子所在层数)
+	要在999999下面再回复一贴也即第二层的贴子就在数据库中写入
+	       Id,SortId  ,Title,Uname,Stime,BackTimes,ReadTimes,Face,Content
+		5 999999y   .........................................	
+	要在发贴，依此类推
+		Id,SortId  ,Title,Uname,Stime,BackTimes,ReadTimes,Face,Content
+		6 999999x   .........................................	
+	要在第二层贴子下面再回复贴子 如贴子999999z下 即第三层贴子就在数据库中写入
+		Id,SortId  ,Title,Uname,Stime,BackTimes,ReadTimes,Face,Content
+		7 999999zz   .........................................
+
+	再回复999999z贴子就在数据库中写入
+		Id,SortId  ,Title,Uname,Stime,BackTimes,ReadTimes,Face,Content
+		8 999999zy   .........................................
+
+	现在的贴子情况即为：
+		Id,SortId  ,Title,Uname,Stime,BackTimes,ReadTimes,Face,Content
+		1 999999   .........................................
+		2 999998   .........................................
+		3 999997   ......................................... 
+		4 999999z   .........................................
+		5 999999y   .........................................
+		6 999999x   .........................................
+		7 999999zz   .........................................
+		8 999999zy   .........................................
+
+	我向大家也看出了我的思路至于输出的时候使用
+	 sql = "select * from [plan] where boardid="+ strboardid+" ORDER BY SortId ";
+         rs = conn.executeQuery(sql);
+
+	根据SortId排序后的结果：
+		1 999997   .........................................
+		2 999998   .........................................
+		3 999999   ......................................... 
+			4 999999x   .........................................
+			5 999999y   .........................................
+			6 999999z   .........................................
+				7 999999zy   .........................................
+				8 999999zz   .........................................
+
+	现在大家应该明白为什么前六位贴子号和字母是递减的了.(当然也能是递增的)
+	
+2.贴子的显示输出,主要是处理<UL></UL>.程序如下
+	/*
+	取得数据集rs
+	*/	
+	String Id,SortId,Title,Uname,Stime,BackTimes,ReadTimes,Face,Content;   
+				int length=6,ContentLength;//初始化第一贴为根贴
+				boolean isnew=false;
+		out.println("<UL>");  
+     		while (rs.next()) {  
+			Id=rs.getString("Id");  
+ 			SortId=rs.getString("SortId");
+    		    	Title=china.asHTML(rs.getString("Title"));   
+    		   	Uname=china.asHTML(rs.getString("Uname"));   
+    		    	Stime=china.asHTML(rs.getString("Stime").substring(0,19));
+			//if (System.currentTimeMillis() - rs.getDate("Stime").getTime()< 86400000){isnew =true;} else {isnew =false;}  
+    		       	BackTimes=rs.getString("BackTimes");  
+    		    	ReadTimes=rs.getString("ReadTimes"); 
+			Face=rs.getString("Face");
+			ContentLength = rs.getString("Content").length();
+    		    	String dot = ",";
+			String yh = "\"";
+			//控制部分
+			if(length>SortId.length())//用来计算上贴到本贴需要输出多少个</UL>
+			while(length>SortId.length())
+			{ length--;
+			out.println("</UL>");
+			}
+
+		//举例 从3到4
+		//<ul>1 .......................SortId=6
+		//	<ul>2 .......................SortId=7	
+		//		<ul>3.......................SortId=8
+		//		</ul>//此标记是由if(BackTimes.equals("0"))out.println("</UL>");输出的
+		//	</ul>
+		//</ul>//此标记和上一个</UL>是由if(length>SortId.length())......这一部分生成的	
+		//<ul>4........................SortId=6</ul>
+		//
+		//if (8>6)//条件成立进入循环
+		//while(8>6)//开始循环输出两个</UL>	  	
+		
+			
+			out.println("<UL>");//因为任何一贴前都有<UL>
+			out.println(china.turnGb("<SCRIPT>o("+yh+Title+yh+dot+yh+Uname+yh+dot+yh+Stime+yh+dot+Id+dot+ContentLength+dot+BackTimes+dot+ReadTimes+dot+isnew+dot+Face+");</SCRIPT>")); 
+			if(BackTimes.equals("0"))out.println("</UL>");//因为任何回复次数为0的贴子后都有</UL>
+			length=SortId.length();//记录贴子SortId的长度，用来与下一贴比较
+
+		}//循环结束
+			while((length-6)!=0)//因为最后一条记录不能再与下一条比较，所以要补齐最后的</UL>
+			{ length--;
+			out.println("</UL>");
+			}
+			out.println("</UL>");          
+	}           
+			catch(SQLException ex) {out.println(ex.getMessage());}
+3。发贴子
+	发根贴按SortId升序排序取第一条减一为新贴子的SortId(要转整数)
+	回复贴子根据回复次数0时为z，1时为y,.......加到你所要回复的贴子的SortId后。增加回复次数。
+
+
+	大体上这就是我的做法，上面的例子仅仅为了说明输出，所以没有涉及其他问题。如分页，删贴子，中文问题等。可能
+其中会有问题，还请大家发表意见，给予我提示。wflm@263.net		

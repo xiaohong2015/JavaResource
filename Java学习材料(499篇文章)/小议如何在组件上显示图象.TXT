@@ -1,0 +1,40 @@
+作者：jeru
+email: jeru@163.net
+日期：2000-12-22 10:14:34
+小议如何在组件上显示图象
+
+●○●○●○●○●○●○●○●○●○●○●○●○●○●○
+○●作者:刘湛○●○日期:2000-12-22●○●jeru@163.net○●
+●○●○●○●○●○●○●○●○●○●○●○●○●○●○
+○●一天进步一小步●○●○●○●○●○充实我的每一天○●
+●○●○●○●○●○●○●○●○●○●○●○●○●○●○
+
+首先要说明的是，在组件上方便的显示图象是 swing 比 AWT 优越的特性之一，暂时我还没看到如何
+在 AWT 中实现这一方法，如果你知道，请来信告诉我。
+
+在 swing 中,button, lable 等组件都可轻易的用图象来改变它的外观，以 button 为例，当创建一
+个 button 对象的时候通常是这样的：
+JButton button = new JButton("Click me");
+这样就创建了一个 button 对象，上面显示的文字是 Click me.
+
+现在我们来稍做改动：
+ImageIcon buttonIcon = new ImageIcon("button.gif", "a background of button");
+JButton button = new JButton(buttonIcon);
+这两行代码就达到了目的，在 button 上显示了图象 button.gif,注意我们用的是 ImageIcon 类，而
+不是 Image 类。ImageIcon 中的第二个参数是对 ImageIcon 对象的描述，这个参数以后可能会被
+assistive 技术用到。
+
+如果想在 button 上同时显示文字和图象，还可以这样：
+JButton button = new JButton("Click me", buttonIcon);
+
+另外，还可以定义图象在 组件上的位置，如：
+JButton button = new JButton("Click me", buttonIcon, JButton.CENTER);
+
+最后，在顺便的讲一下如何改变你的 applet/application 上角的那个小图标，怎么样，看那杯咖啡厌烦了把？
+让我们来换上自己的图标吧,我用的是setIconImage方法。
+在 applet中，定义了一个image对象后就可以直接以它为参数来使用 setIconImage() 方法了，
+而在 application 中，还需要由 ImageIcon 类转换到 Image 对象去。可能是我笨，不知道如何在application中
+有什么简单的办法可以直接使用 Image 类，谁知道请写信给我，十分感谢。
+URL imgURL = getClass().getResource("title.gif");
+ImageIcon icon = new ImageIcon(imgURL);    
+setIconImage(icon.getImage());

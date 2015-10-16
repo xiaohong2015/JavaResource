@@ -1,0 +1,26 @@
+作者：罗亭
+email: tingluo@263.net
+日期：2000-12-8 17:48:13
+
+标题：jdbc3中的RowSet 接口规范  
+来自：sun的jdbc3.0 spec
+
+RowSet 接口增加了对javaBean组件模式的支持，在一个可视化的Bean组件开发环境中一个RowSet可以作为一个Bean来使用；
+一个RowSet可以在设计时建立和配置并在运行时执行；
+一个RowSet提供了一系列的JavaBean属性来允许一个RowSet实例配置并连接到jdbc数据源并读数据库中的数据，一组setXXX()方法提供了一种方法来向一个RowSet实例传入参数；RowSet 接口支持JavaBean中的事件机制，当RowSet中的某一个重要事件发生，如它的值被修改时，允许同一个应用程序中的另一个组件得到通报。
+
+虽然它成了jdbc API中的一个部分，但RowSet 接口其实是独立存在的，
+上一句我不会翻译[原文如下：The RowSet interface is unique in that it is intended to be implemented using the rest of the JDBC(TM) API. ]
+换句话说，RowSet 接口是一层浮在jdbc Api上执行的软件；RowSet 的具体实现能被任何人，包括jdbc驱动提供商将其作为驱动的一个部分来提供。
+
+.
+.
+.
+
+具体的方法及属性，略……
+
+/*
+*译者：罗亭
+*E文水平差，有误请谅（：
+*转载请注明
+*/

@@ -1,0 +1,154 @@
+作者：八脚鱼
+email: o@test.com
+日期：2001-6-19 10:37:35
+ 
+文章名 JSP 构 架--2种方式：Model I和Model II
+作者：Lance Lavandowska   编译：blueski
+如果你经常去Servlet或JSP的新闻组或者邮件列表，那么一定会看到不少关于Model I 和Model II 方法的讨论。究竟采用哪一种，这取决于你的个人喜好、团队工作策略以及是否采用正统的OOP。
+简单地说，Model I将事务逻辑（business logic）和表示代码（presentation code）融合在一起（如在HTML中）；Model II则提倡最大限度地将所有的代码放到内容表示之外。 
+[B]Model I： 简单的单层次应用[/B] 
+如果是在一个人人都精通Java和HTML的环境中，或者你独自做着所有的工作，假如每个人都有清晰的编程结构和思路，那么这种方法会很有效，不过这样的假设不在本文讨论范围之内。这种方法的第一个优点是如果你的应用改变了，你只需维护一个文件。而最大的缺陷是可读性！除非十分小心，否则你的HTML和Java代码会相互混杂，从而难以维护。 
+
+在下面这个例子中，我们将增加一个 TimeZone 元素，从而使它变成JSP文件，它会返回基于时间的所期待的TimeZone。如果没有提交 TimeZone，那么缺省的是服务器的缺省时间。
+
+=====================================================================
+<xml version="1.0" ?>
+<H1>Time JSP</H1>
+<jsp:scriptlet>
+//the parameter "zone" shall be equal to a number between 0 and 24 (inclusive)
+TimeZone timeZone = TimeZone.getDefault(); //returns the default TimeZone for the server
+if (request.getParameterValues("zone") != null)
+{
+String timeZoneArg = request.getParameterValues("zone")[0];
+timeZone = TimeZone.getTimeZone("GMT+" + timeZoneArg + ":00"); 
+// gets a TimeZone. For this example we're just going to assume 
+// its a positive argument, not a negative one.
+}
+//since we're basing our time from GMT, we'll set our Locale to Brittania, and get a Calendar.
+Calendar myCalendar = Calendar.getInstance(timeZone, Locale.UK);
+</jsp:scriptlet>
+<%= myCalendar.get(Calendar.HOUR_OF_DAY) %>:
+<%= myCalendar.get(Calendar.MINUTE) %>:
+<%= myCalendar.get(Calendar.SECOND) %>
+======================================================================
+相应地，数据也可以从JavaBean取得并加以显示。在下一个例子中我们就可以看到。 
+[B]Model II: 重定向请求（Redirecting Requests）[/B] 
+
+在一个团队开发环境中，有些是HTML设计者，另一些则是Java程序员，这时这一方法显得非常重要。Java程序员可以集中精力创建可重用代码，而HTML设计师可以集中精力于内容表示，彼此相对对立，可以分别动态地修改自己的内容，只要总体的输入输出不变。 
+
+现在我们可以使用Model II来表示Model I的那个例子。这一方法遵循了Model-View-Controller (MVC) 范例 (cite Design Patterns book)。 在这个例子中，我们只有一个类(页或者servlet) 处理请求(Controller)，取得TimeZone，设置所有用于表示的变量，并将控制传递到表示页(View)。作为如此简单的应用，可以没有 "Model"。 
+
+[B]Controller: timeByZone.jsp[/B] 
+
+controller可以是一个servlet或一个JSP页。我推荐使用JSP，因为这样我不必担心每当我做修改时要对类重新编译，但是，你将因此失去granularity（颗粒性），以后要扩展该类也比较困难。 
+
+======================================================================
+<xml version="1.0" ?>
+<!--Worker Class, nobody should see me-->
+<jsp:scriptlet>
+//the parameter "zone" shall be equal to a number between 0 and 24 (inclusive)
+TimeZone timeZone = TimeZone.getDefault(); //returns the default TimeZone for the server
+if (request.getParameterValues("zone") != null)
+{
+String timeZoneArg = request.getParameterValues("zone")[0];
+timeZone = TimeZone.getTimeZone("GMT+" + timeZoneArg + ":00"); 
+// gets a TimeZone. For this example we're just going to assume 
+// its a positive argument, not a negative one.
+}
+TimeBean timeBean = new TimeBean();
+timeBean.setHours = myCalendar.get(Calendar.HOUR_OF_DAY);
+timeBean.setMinutes = myCalendar.get(Calendar.MINUTE);
+timeBean.setSeconds = myCalendar.get(Calendar.SECOND);
+HttpSession mySession = request.getSession();
+mySession.putValue("tempTimeBean", timeBean);
+
+</jsp:scriptlet>
+<jsp:forward page="displayTime.jsp" />
+======================================================================
+[B]View: displayTime.jsp[/B]
+同样地，这个view既可以是一个servlet也可以是一个jsp文件。这里我们从Session中取得并显示它的值。实际上我们会将这做两次，来示范Bean是如何被使用的。 
+
+======================================================================
+<xml version="1.0" ?>
+<H1>Time JSP</H1>
+<jsp:useBean class="TimeBean" id="tempTimeBean" scope="session" /> 
+<jsp:getProperty name="tempTimeBean" property="hours">:
+<jsp:getProperty name="tempTimeBean" property="minutes">:
+<jsp:getProperty name="tempTimeBean" property="seconds">
+<!-- these would have printed "null" if tempTimeBean was not instantiated by timeByZone.jsp -->
+
+<jsp:scriptlet>
+HttpSession mySession = request.getSession();
+TimeBean timeBean = mySession.getValue("tempTimeBean");
+if (timeBean != null)
+{ // check to make sure its not null, to avoid NullPointerExceptions
+out.print(timeBean.getHours());
+out.print(":");
+out.print(timeBean.getMinutes());
+out.print(":");
+out.print(timeBean.getSeconds());
+}
+else
+{
+out.println("Press your Back button and select a TimeZone");
+}
+</jsp:scriptlet>
+======================================================================
+第二种方法（在内部使用了代码）可能有些笨重，但允许开发者确保输出不至于很糟糕（例如"null:null:null null")，假定Session bean还没有被实例化以及没有进行值的设置。 这种情况发生在客户端直接调用了View页。问题是使用脚本scriptlets可以允许更强的控制。如果你确信你可以控制url存取，那么bean方法当然更适合于开发，并使 View页更方便于HTML设计者的协同工作。 
+ 
+上面的是"传统的" Model II设计。所有的变量都包装了并放在Session对象中。这有2个不足： 
+ 1) 如果客户端拒绝参与的话，Session是不可得到的。 
+ 2) 除非Session变量被显式地移走，否则它回一直存在，直到Session被破坏或过期。 
+
+第一种案例很可能发生在这样的场合，即使用了cookies作为声明的结构（mechanism）而开发者没有能够提供声明的结构的替代表单（form），即URL改写。 
+
+第二个案例甚至更为严重，因为它可能引起很大的内存消耗，如果Sessions被定义为保存比标准存留时间更长的话（(标准存留时间是30分钟）。即使是30分钟的Session，这种Model也可能在大的应用中引起灾难性的内存泄露。为什么呢？在Session对象内部设置的对象被实例化了，并且在Session终止以前一直没有被移去。因为它们仍然有关联references（Session对象）指向它们，所以无法被垃圾收集（garbage-collected）。在Model II 模型中，很多对象被放到Session中（要么直接地，要么通过JavaBean）。随着Session的进行，更多的页被存取，内存使用会增加并持续下去直到客户端终止了Session或者Session过期。要一直等到Session变得非法，放在那的对象才能被垃圾收集，而那些损失的内存本可以用于任何其它的用途。. 
+
+改进的方法之一是将Beans或者其它变量放到Request对象中去，并使用RequestDispatcher.include()而不是RequestDispatcher.forward()。这样做以后，View 页具有和Controller一样的存取请求的对象。传统的Model II设计的不足可以被排除。
+
+一个最后的评注：尽管有如上所述，我个人仍有些不喜欢Model II 的范例，如果它用通常方法开发的话。 客户端被引送到某一个地址，然后又被转向到另一个不同的类，我不喜欢创建这样的系统。基于这样的原因，我修改了设计，使它变成了以下的样子： 
+
+[B]Controller: timeByZone2.jsp[/B] 
+
+和前面一样，controller使用Request值来取得必要的数据，并且将数据放到请求的对象中去。这回的区别是View页将使用RequestDispatcher.include()来调用Controller。在这种方法中，客户端再也不做重定向，请求不是“链接chained”的。相当于class/jsp请求了另一方来为它做一些工作，然后继续。
+
+======================================================================
+<xml version="1.0" ?>
+<!--Worker Class, nobody should see me-->
+<jsp:scriptlet>
+//the parameter "zone" shall be equal to a number between 0 and 24 (inclusive)
+TimeZone timeZone = TimeZone.getDefault(); //returns the default TimeZone for the server
+if (request.getParameterValues("zone") != null)
+{
+String timeZoneArg = request.getParameterValues("zone")[0];
+timeZone = TimeZone.getTimeZone("GMT+" + timeZoneArg + ":00"); 
+// gets a TimeZone. For this example we're just going to assume 
+// its a positive argument, not a negative one.
+}
+TimeBean timeBean = new TimeBean();
+timeBean.setHours = myCalendar.get(Calendar.HOUR_OF_DAY);
+timeBean.setMinutes = myCalendar.get(Calendar.MINUTE);
+timeBean.setSeconds = myCalendar.get(Calendar.SECOND);
+request.setAttribute("tempTimeBean", timeBean);
+</jsp:scriptlet>
+======================================================================
+[B]View: displayTime2.jsp[/B] 
+
+和displayTime.jsp非常相似，但timeByZone2.jsp在也的顶部被调用。请注意 <jsp:useBean /> 中的"scope"已经被换成了"request"。
+
+======================================================================
+<xml version="1.0" ?>
+<H1>Time JSP</H1>
+
+<jsp:include page="timeByZone2.jsp" />
+
+<jsp:useBean class="TimeBean" id="tempTimeBean" scope="request" /> 
+<jsp:getProperty name="tempTimeBean" property="hours">:
+<jsp:getProperty name="tempTimeBean" property="minutes">:
+<jsp:getProperty name="tempTimeBean" property="seconds">
+<!-- these would have printed "null" if tempTimeBean was not instantiated by timeByZone2.jsp -->
+
+====================================================================== 
+
+在一个在建系统中，我们已经使用这种方法来创建类的链，每一个都只对它所处理的工作负责。通过辨别公用的表示格式，我们创建了一个View对象，即使在很高层次的JSP中它也可以重复使用。我们的目标就是建立一些可重用的页，同时减少用于表示的类的数量。 
+

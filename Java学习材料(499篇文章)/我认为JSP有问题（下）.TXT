@@ -1,0 +1,148 @@
+作者：redact
+email: redact@163.net
+日期：2000-12-26 14:30:55
+我认为JSP有问题（下）
+（作者：小龙亭主Blueski编译　2000年12月22日 14:22）
+
+　　（续上篇） 
+
+　　问题 #3: 简单工作仍然很累人 
+
+　　即使是很简单的工作，例如包含 header和 footer，在JSP中仍然很困难。假设有一个"header"和一个"footer"模板要包含到所有页面，而每一个模板要在content中包含当前的页标题。 
+
+　　在JSP中最佳办法是： 
+
+　　<% String title = "The Page Title"; %> 
+
+　　<%@ include file="/header.jsp" %> 
+
+　　...你的页面内容... 
+
+　　<%@ include file="/footer.jsp" %> 
+
+　　页面设计者要记住不能遗漏第一行的分号并要将title定义为一个字符串。此外，/header.jsp和/footer.jsp必须在根目录下并且必须是可存取的完整文件。 
+
+　　在WebMacro中包含headers和footers做起来比较简单： 
+
+　　#set $title = "The Page Title" 
+
+　　#parse "header.wm" 
+
+　　Your content here 
+
+　　#parse "footer.wm" 
+
+　　这里对设计者来说没有要牢记的分号或对title的定义，.wm文件可以放在可自定义的搜索路径下。 
+
+　　问题 #4: 很粗燥的循环 
+
+　　在JSP中循环很困难。这里是用JSP重复打印出每一个ISP对象名字。 
+
+　　<% 
+
+　　Enumeration e = list.elements(); 
+
+　　while (e.hasMoreElements()) { 
+
+　　out.print("The next name is "); 
+
+　　out.println(((ISP)e.nextElement()).getName()); 
+
+　　out.print("<br>"); 
+
+　　} 
+
+　　%> 
+
+　　也许什么时候会有用户自定义标记来做这些循环。对"if"也是如此。JSP页可能看上去成了很古怪的java代码。而同时，webmacro循环很漂亮： 
+
+　　#foreach $isp in $isps { 
+
+　　The next name is $isp.Name <br> 
+
+　　} 
+
+　　如果必要的话，#foreach指令可被自定义的 #foreach-backwards指令很容易地取代。 
+
+　　用jsp的话很可能变这样：（这里是一个可能的 <foreach>标记） 
+
+　　<foreach item="isp" list="isps"> 
+
+　　The next name is <jsp:getProperty name="isp" property="name"/> <br> 
+
+　　</foreach> 
+
+　　设计者当然地会选择前者。 
+
+　　问题 #5: 无用的出错信息 
+
+　　JSP常有一些令人惊讶的出错信息。这是因为页面首先被转换成为一个servlet然后才进行编译。好的JSP 工具可以相对增加找到出错位置的可能性，但即使是最好的工具也无法使所有出错信息都能容易地被读懂。由于转化的过程，一些错误对工具来说可能根本不可能被识别。 
+
+　　例如，假设JSP页面需要建立一个对所有页通用的标题。以下代码并没有错： 
+
+　　<% static String title = "Global title"; %> 
+
+　　但Tomcat会提供以下出错信息： 
+
+　　work/%3A8080%2F/JC_0002ejspJC_jsp_1.java:70: Statement expected. 
+
+　　static int count = 0; 
+
+　　^ 
+
+　　此信息认为以上脚本被放入 _jspService()方法而静态变量不允许放入方法中。该语法应该是 <%! %>。页面设计者很难读懂这些出错信息。即使最好的平台在这方面也做得很不够。即使所有 Java代码都从页中移出也无法解决问题。另外，以下表达式有什么错？ 
+
+　　<% count %> 
+
+　　tomcat给出： 
+
+　　work/8080/_0002ftest_0002ejsptest_jsp_0.java:56: Class count not found in 
+
+　　type declaration. 
+
+　　count 
+
+　　^ 
+
+　　work/8080/_0002ftest_0002ejsptest_jsp_0.java:59: Invalid declaration. 
+
+　　out.write("\r\n"); 
+
+　　^ 
+
+　　换句话说，其实只不过是遗失了一个标记而已。应该是 <%= count %>。 
+
+　　由于template engine可以在template文件中直接产生而没有任何戏剧性的向代码转化，所以可以非常容易地给出适当的出错报告。依次类推，当c语言的命令被打入Unix shell的命令行，你并不希望shell会生成一个C程序来运行这个命令，而只是需要shell简单地解释命令并加以执行，如有错误也直接给出。 
+
+　　问题 #6: 需要一个编译器 
+
+　　JSP需要一个置放在webserver中的编译器。由于Sun拒绝放弃包含了他们的javac编译器的tools.jar库， 这其中就变得有问题了。Web服务器可以包含进一个第三方的编译器如ibm的jikes。但这样的编译器并不能在所有平台上顺利工作(用 C++写成的) 也不利于建立纯Java 的web服务器。JSP还有一个预编译选项可以起到一定作用，但并不完美。 
+
+　　问题 #7: 空间的浪费 
+
+　　JSP消耗了额外的内存和硬盘空间。对服务器上每30K的JSP文件，必须要有相应的大于30K的类文件产生。实际上使得硬盘空间加倍。考虑到JSP文件随时可以很容易地通过 <%@ include>包含一个大的数据文件，这样的关注有着很现实的意义。同时，每一个JSP的类文件数据必须加载到服务器的内存中，这意味着服务器的内存必须永远地将整个JSP文档树保存下去。少数一些JVM有能力将类文件数据从内存中移去；但是，程序员通常无法控制这样的规则来重新申明，而且对大的站点来说重新申明可能不是很有效。对template engines由于没有产生第二个文件，所以节省了空间。Template engines还为程序员提供对templates在内存中进行缓存的完全控制。 
+
+使用template engine也有一些问题 
+　　Template的问题 #1: 没有严格定义 
+
+　　template engine该如何工作并没有严格定义。可是，但相对jsp来说，其实这并不很重要，和 JSP不同的是，template engines对web服务器没有任何特殊要求 -- 任何支持servlet的服务器都可以支持template engines (包括API 2.0服务器如Apache/JServ，它们并不能完全支持 JSP)! 如果为最好的template engine设计提供健康的竞争本可以引起一场耀眼的革新，特别是有开放源码的促进，（可以让思想相互推动和促进），那么今天的WebMacro就会象Perl一样，没有严格定义但公开源码组织的推动就是它的标准。 
+
+　　Template的问题 #2: 没有获得公认 
+
+　　Template engines并未被广泛知晓。JSP已经占据了极大的商业市场，并且深入人心。而使用g template engines只能是一种未被了解的替代技术。 
+
+　　Template的问题 #3: 尚未调配好 
+
+　　Template engines还没有被高度地调配好。没有对template engine 和JSP两者进行性能测试和比较。理论上说一个调配完好的template engine实现应该和一个调配好的JSP相匹配；但是，考虑到第三方为jsp已经作出了这么深远的推动，结果只有jsp被很好地调配好了。 
+
+JSP的角色 
+　　当然，JSP必然会有其地位。即使从名称上也可以看出JSP和ASP的相似性，它们只有一个字母的差别。所以如果要让使用asp的人们转向java,非常相似的jsp环境将对此起到很大的推动作用，和asp保持这种对应关系所能起到的作用应该也是被当时推出jsp的设计者重点考虑到的。 
+
+　　然而这里想要强调的一点是：有利于转入新环境的工作者，和实际上是否使用了该环境的最佳方式，这两者是有很大不同的。 
+
+　　JSP的发展已经日益表明，它正成为最重要的java技术之一，它让人们离开ASP的世界 -- 由此，Sun将支持这一强有力的商业case, Java相关技术支持者也将给予更大力的支持。 
+
+　　然而遗憾的是，其实这并非java平台的最佳解决方案。这将使java解决方案变得好象是没有java的解决方案了。 
+
+　　<全文完> 
+

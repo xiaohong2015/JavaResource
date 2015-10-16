@@ -1,0 +1,174 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：2001-6-15 13:26:01
+[b]如何用 servlet 打开非 HTML 格式的文档
+一种向 Web 客户端发送非 HTML 格式文档的简单方法[/b]
+[b]By Marla Bonar([email]marla.bonar@javaworld.com[/email])[/b]
+
+[BLOCKQUOTE][I][/I][b]摘要[/b]
+Java Servlet 编程可以很方便地将 HTML 文件发送到客户端 Web 浏览器。然而许多站点还允许访问非 HTML 格式的文档，包括 Adobe PDF、Microsoft Word 和 Micorsoft Excel 等。事实上这些非 HTML 格式只要能用 MIME 类型表示，就可以利用 servlet 来发送。本文将以 PDF 和 Microsoft Word 文件为例，向你介绍如何使用 servlet 传送非 HTML 格式文件，以及与防火墙交互的方法。[/i][/I][/BLOCKQUOTE]你只要将文件写到 servlet 的输出流中，就可以利用 servlet 在浏览器中打开一个文件。尽管这看起来非常简单，在打开非 HTML 格式文档（比如二进制数据或多媒体文件）的时候，仍要注意一些要点。 
+首先从获得 servlet 的输出流开始： 
+    ServletOutputStream out = res.getOutputStream();
+
+互联网上使用 MIME (multipurpos Internet mail extension 多目的互联网邮件扩展协议）来传送混合格式、多媒体和二进制数据文件。如果要在 servlet 的 response 对象中打开某个文档，就必须设置该文档的 MIME 类型。下面这个例子中我们将打开 PDF 文档。 
+[b]MIME 类型[/b]
+Web 浏览器使用 MIME 类型来识别非 HTML 文档，并决定如何显示该文档内的数据。将插件 (plug-in) 与 MIME 类型结合使用，则当 Web 浏览器下载 MIME 类型指示的文档时，就能够启动相应插件处理此文档。某些 MIME 类型还可以与外部程序结合使用，浏览器下载文档后会启动相应的外部程序。 
+MIME 类型非常有用。它们允许 Web 浏览器处理不同格式的文档，却不需要事先嵌入相关知识。Java Servlets 可以使用 MIME 类型来向浏览器传送非 HTML 文件，比如 Adobe PDF 和 Micorsoft Word。使用正确的 MIME 类型能够保证这些非 HTML 文件被正确的插件或外部程序显示。本文末的[url href=http://www.cn.ibm.com/developerWorks/java/jw-tips/tip094/index.shtml#resources]资料[/url]部分提供了一些网址，指向一些已定义 MIME 类型列表和关于 MIME 类型的文章。 
+PDF 文件的 MIME 类型是 "application/pdf"。要用 servlet 来打开一个 PDF 文档，需要将 response 对象中 header 的 content 类型设置成 "application/pdf": 
+    // MIME type for pdf doc
+    res.setContentType( "application/pdf" ); 
+
+若要打开一个 Microsoft Word 文档，你就要将 response 对象的 content 类型设置成 "application/msword": 
+    // MIME type for MSWord doc
+    res.setContentType( "application/msword" );
+
+如果是一个 Excel 文档，则使用 MIME 类型 "application/vnd.ms-excel"。其中 vnd 表示该应用程序的制造者，必须将它包含在 MIME 类型里才能够打开该类型文档。 
+有时候浏览器不能识别文档的 MIME 类型。通常这是由于没有安装这些文档需要的插件而导致的。这种情况下，浏览器会弹出一个对话框，询问用户是否需要打开该文件或是将它保存到本地磁盘上。 
+[b]Content disposition[/b]
+一种叫做 content-disposition 的 HTTP response header 允许 servlet 指定文档表示的信息。使用这种 header ，你就可以将文档指定成单独打开（而不是在浏览器中打开），还可以根据用户的操作来显示。如果用户要保存文档，你还可以为该文档建议一个文件名。这个建议名称会出现在 Save As 对话框的“文件名”栏中。如果没有指定，则对话框中就会出现 servlet 的名字。更多关于 content-disposition header 的信息，可以参阅[url href=http://www.cn.ibm.com/developerWorks/java/jw-tips/tip094/index.shtml#resources]资料[/url]。 
+在 servlet 中，你需要将 header 设置成下面这样： 
+    res.setHeader("Content-disposition",
+                  "attachment; filename=" +
+                  "Example.pdf" );
+    // attachment - since we don't want to open
+    // it in the browser, but
+    // with Adobe Acrobat, and set the
+    // default file name to use.
+
+如果你要打开的是 Microsoft Word 文件，你可以设成： 
+    res.setHeader("Content-disposition",
+                  "attachment; filename" +
+                  "Example.doc" );
+
+[b]封装非 HTML 文档[/b]
+完成上述工作后，剩下的就非常简单了。你需要根据待传送文件的名字，创建一个 java.net.URL 对象。交给 URL 构造器的字符串必须是指向该文件的一个有效 URL 地址。在这个例子中，我要打开 Adobe employment 格式的文档： 
+    String fileURL = 
+"http://www.adobe.com/aboutadobe/careeropp/pdfs/adobeapp.pdf;"
+
+你的 URL 字符串也可以类似于 http://www.gr.com/pub/somefile.doc 或 http://www.gr.com/pub/somefile.xls。但必须确保待传送文件类型与先前在 HTTP response 对象中设置的 MIME 类型一致。 
+    URL url = new URL ( fileURL );
+
+[b]防火墙[/b]
+如果需要通过防火墙，最后一件要考虑的事情就是你的 URL 链接。首先应当搜集所用代理服务器的相关信息，例如主机名称和端口号等。更多关于如何通过防火墙建立链接的信息，可以参看下面的[url href=http://www.cn.ibm.com/developerWorks/java/jw-tips/tip094/index.shtml#resources]资料[/url]部分。 
+如果使用的是 Java 2，你应该从 URL 对象类中创建一个 URLConnection 对象，并设置下列系统属性： 
+    URLConnection conn = url.openConnection();
+
+    // Use the username and password you use to
+    // connect to the outside world
+    // if your proxy server requires authentication.
+    String authentication = "Basic " + new
+sun.misc.BASE64Encoder().encode("username:password".getBytes());
+
+    System.getProperties().put("proxySet", "true");
+
+    System.getProperties().put("proxyHost", PROXY_HOST); // your proxy host
+    System.getProperties().put("proxyPort", PROXY_PORT); // your proxy port
+    conn.setRequestProperty("Proxy-Authorization", authentication);
+
+如果你使用的是 JDK 1.1，则不能设置这些系统属性。这种情况下，你可以根据所用代理服务器的信息创建 java.net.URL 对象： 
+    url = new URL("http", PROXY_HOST,
+                  Integer.parseInt(PROXY_PORT),
+                  fileURL );
+    // assumes authentication is not required
+
+[b]深入工作[/b]
+开始阅读你传送的文档之前，首先要从 URLConnection (或 URL) 对象中获得输入流 InputStream。在这个例子中，用 BufferedInputStream 将 InputStream 封装起来。 
+如果你采用 URLConnection，可以尝试如下代码： 
+    BufferedInputStream bis = new
+        BufferedInputStream(conn.getInputStream());
+
+如果你使用 URL，则可用下列代码： 
+    BufferedInputStream bis = new
+        BufferedInputStream(url.openStream());
+
+一旦你完成上述操作，就只要简单地将 InputStream 中的字节，写入到 servlet 的输出流 OutputStream 中： 
+    BufferedOutputStream bos = new 
+        BufferedOutputStream(out);
+
+    byte[] buff = new byte[2048];
+    int bytesRead; 
+
+    // Simple read/write loop.
+    while(-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+        bos.write(buff, 0, bytesRead);
+    }
+
+在最后的代码块中，关闭这些流。 
+这个例子是利用 doPost 来实现的（doPost 是 HttpServlet 子类的一个方法）： 
+public void doPost(HttpServletRequest req, 
+                   HttpServletResponse res)
+   throws ServletException, IOException
+{
+    ServletOutputStream out = 
+        res.getOutputStream ();
+
+//---------------------------------------------------------------
+// Set the output data's mime type
+//---------------------------------------------------------------
+
+    res.setContentType( "application/pdf" ); // MIME type for pdf doc
+
+//---------------------------------------------------------------
+// create an input stream from fileURL
+//---------------------------------------------------------------
+
+    String fileURL = 
+        "http://www.adobe.com/aboutadobe/careeropp/pdfs/adobeapp.pdf";
+
+//------------------------------------------------------------
+// Content-disposition header - don't open in browser and
+// set the "Save As..." filename.
+// *There is reportedly a bug in IE4.0 which ignores this...
+//------------------------------------------------------------
+    res.setHeader("Content-disposition",
+                  "attachment; filename=" +=
+                  "Example.pdf" );
+
+//-----------------------------------------------------------------
+// PROXY_HOST and PROXY_PORT should be your proxy host and port
+// that will let you go through the firewall without authentication.
+// Otherwise set the system properties and use URLConnection.getInputStream().
+//-----------------------------------------------------------------
+    BufferedInputStream bis = null; 
+    BufferedOutputStream bos = null;
+
+    try {
+        URL url = new URL( "http", PROXY_HOST, 
+                           Integer.parseInt(PROXY_PORT), fileURL );
+
+        // Use Buffered Stream for reading/writing.
+        bis = new BufferedInputStream(url.openStream());
+        bos = new BufferedOutputStream(out);
+
+        byte[] buff = new byte[2048];
+        int bytesRead;
+
+        // Simple read/write loop.
+        while(-1 != (bytesRead = bis.read(buff, 0, buff.length))) {
+            bos.write(buff, 0, bytesRead);
+        }
+
+    } catch(final MalformedURLException e) {
+        System.out.println ( "MalformedURLException." );
+        throw e;
+    } catch(final IOException e) {
+        System.out.println ( "IOException." );
+        throw e;
+    } finally {
+        if (bis != null)
+            bis.close();
+        if (bos != null)
+            bos.close();
+    }
+}
+
+[b]结论[/b]
+正如你所读到的，用 servlet 来打开非 html 文档相当简单。即使是要通过防火墙也是如此。只要设置了正确的 MIME 类型，就可以使用同样的代码来打开图片或其他多媒体文件。当今的互联网上包含了大量信息，其中许多数据被存储为非 HTML 格式。使用 servlet 能够克服 HTML 的限制，简单方便地向用户传送这些非 HTML 格式的信息。 
+[TABLE][TR][TD][b]关于作者[/b]
+Marla Bonar([email]marla.bonar@javaworld.com[/email]),亚利桑那州 Greenbrier & Russel in Phoenix 的一位顾问，自 JDK 1.0.2 出现以来就一直从事 Java 编程工作。她是面向对象体系结构和设计以及软件模式的忠实拥护者。在她父亲的鼓励下，成为一名软件工程师。 [/TD][/TR][/TABLE]
+[b]资料[/b] [UL][LI]更多关于 MIME 的信息可以在 RFC：2045，2046，2047，822中找到。要查看这些 RFC，你可以访问： 
+[url]http://www.rfc-editor.org/rfcsearch.html[/url] [LI]更多关于 content-disposition 头部的信息，参看 RFC 2183： 
+[url href=http://www.cn.ibm.com/developerWorks/java/jw-tips/tip094/rfc2183.txt]rfc2183.txt[/url][/LI][/UL][b]若是通过防火墙来建立链接，更详尽的信息可以参看下面几个 Java 要点： [/b][UL][LI]"Java Tip 42: 编写通过基于代理服务器工作的防火墙的 Java 应用程序," Ron Kurr [i](JavaWorld):[/i] 
+[url]http://www.javaworld.com/javaworld/javatips/jw-javatip42.html[/url] [LI]"Java Tip 46: 使用 Java 1.2 的 Authenticator 类," John Zukowski [i](JavaWorld):[/i] 
+[url]http://www.javaworld.com/javaworld/javatips/jw-javatip46.html[/url] [LI]"Java Tip 47: URL 的再确认," John Zukowski [i](JavaWorld):[/i] 
+[url href=http://www.cn.ibm.com/developerWorks/java/jw-tips/tip047/index.shtml]http://www.ibm.com/developerWorks/cn/java/jw-tips/tip047/index.shtml[/url] [/LI][/UL]

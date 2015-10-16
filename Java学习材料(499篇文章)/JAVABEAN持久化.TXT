@@ -1,0 +1,11 @@
+作者：jspfuns
+日期：2000-8-10 17:36:11
+当一个JavaBean在构造工具内被用户化，并与其它Bean建立连接之后，它的所有状态都应当可被保存，下一次被load进构造工具内或在运行时，就应当是上一次修改完的信息。为了能做到这一点，要把Bean的某些字段的信息保存下来，在定义Bean时要使它实现java.io.Serializable接口。例如： 
+
+public class Button implements java.io.Serializable {
+}
+
+实现了序列化接口的Bean中字段的信息将被自动保存。若不想保存某些字段的信息则可在这些字段前冠以transient或static关键字，transient和static变量的信息是不可被保存的。通常，一个Bean所有公开出来的属性都应当是被保存的，也可有选择地保存内部状态。 Bean开发者在修改软件时，可以添加字段，移走对其它类的引用，改变一个字段的private/protected/public状态，这些都不影响类的存储结构关系。然而，当从类中删除一个字段，改变一个变量在类体系中的位置，把某个字段改成transient/static，或原来是transient/static，现改为别的特性时，都将引起存储关系的变化。 
+5 JavaBean的存储格式 
+
+JavaBean组件被设计出来后，一般是以扩展名为jar的Zip格式文件存储，在jar中包含与JavaBean有关的信息，并以MANIFEST文件指定其中的哪些类是JavaBean。以jar文件存储的JavaBean在网络中传送时极大地减少了数据的传输数量，并把JavaBean运行时所需要的一些资源捆绑在一起 本章主要论述了JavaBeans的一些内部特性及其常规设计方法，参考的是JavaBeans规范1.0A版本。随着世界各大ISV对JavaBeans越来越多的支持，规范在一些细节上还在不断演化，但基本框架不会再有大的变动。

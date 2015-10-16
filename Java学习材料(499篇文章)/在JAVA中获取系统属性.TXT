@@ -1,0 +1,138 @@
+作者：五一
+日期：2001-6-9 13:27:20
+在Java中获取系统属性
+
+大庆油田有限责任公司 苏洋  
+01-5-22 上午 11:12:51
+
+--------------------------------------------------------------------------------
+ 
+
+Java语言以其面向对象、跨平台、可移植性好、安全性高等优点，受到众多编程人员的青睐，越来越多的人将其作为应用软件开发语言的首选。 
+在Java应用程序运行时，特别是需要在跨平台工作环境下运行时，需要确定操作系统类型、用户JDK版本和用户工作目录等随工作平台变化的信息，来保证程序正确运行。一般情况下，可以利用JDK提供的系统属性类（Properties）中的方法，快速地获取工作环境信息。另外，程序开发人员还可以定义与应用程序相关的系统属性文件，在用户程序执行过程中动态地加载程序员定义的属性文件来控制程序运行。 
+本文通过对系统属性类的分析，结合实际例子介绍如何定义系统属性文件，并讨论安全策略文件的定义。 
+属性类 
+Java Properties类的继承关系如下： 
+java.lang.Object 
+＋－－java.util.Dictionary 
+＋－－java.util.Hashtable 
+＋－－java.util.Properties 
+在应用程序开始执行时，程序首先读取系统的默认属性。如果定义了用户属性文件，则应用程序加载该属性文件。程序运行过程中可以根据执行情况动态地修改属性定义，并在程序结束运行前，保存属性文件。 
+获取属性的方法： 
+●contains(Object value)、containsKey(Object key)：如果给定的参数或属性关键字在属性表中有定义，该方法返回True，否则返回False； 
+●getProperty(String key)、getProperty(String key, String default)：根据给定的属性关键字获取关键字值； 
+●list(PrintStream s)、list(PrintWriter w)： 在输出流中输出属性表内容； 
+●size()：返回当前属性表中定义的属性关键字个数。 
+设置属性的方法： 
+●put(Object key, Object value) ：向属性表中追加属性关键字和关键字的值； 
+●remove(Object key) ：从属性表中删除关键字。 
+获取系统属性 
+系统属性是指与用户程序相关的操作系统配置信息以及软件信息。通常与用户程序相关的属性关键字包括： 
+●file.separator : 文件分隔符， Windows环境下为“\"，Unix环境下为“/”； 
+●user.home ：用户主目录； 
+●java.home ：Java实时运行环境的安装目录； 
+●java.ext.dirs ：JDK的安装目录； 
+●os.name ：操作系统名称； 
+●user.name ：用户登录名称； 
+●os.version ：操作系统版本； 
+●path.separator ：当前操作系统的路径分隔符； 
+●user.dir ：当前用户程序所在目录。 
+下面结合例子说明获取系统属性的方法。 
+/＊getSystemProperties.java＊/ 
+import java.util.Properties;  
+public class getSystemProperties 
+{ 
+public static void main(String args[]) 
+{  
+//通过获得系统属性构造属性类 prop 
+Properties prop = new Properties(  
+System.getProperties() ); 
+//在标准输出中输出系统属性的内容 
+prop.list(System.out); 
+} 
+//根据获取的系统属性确定程序执行流程 
+…… 
+} 
+上述程序执行后，在Windows环境中产生类似如下的输出： 
+user.home=C:\WIN95 
+java.home=D:\JDK1.2\JRE 
+java.ext.dirs=D:\JDK1.2 
+os.name=Windows 95 
+user.name=Office 
+java.vm.name=Classic VM 
+os.version=4.10 
+path.separator=; 
+file.separator=\ 
+user.dir=D:\JavaTest 
+属性文件的操作方法 
+Java程序开发人员可以通过定义属性文件来设置程序运行的参数。属性文件是程序外部文件，在应用程序初始运行时，可以通过读取属性文件来获取有关程序运行的参数。例如，在程序运行时需要在程序外部控制程序的执行流程，这时可以通过定义属性文件的方法达到目的。下面结合例子说明属性文件的操作方法： 
+/＊PropertyFile.java＊/ 
+//引入相关类 
+import java.io.＊; 
+import java.util.Properties; 
+public class PropertyFile 
+{ 
+//定义文件输入和输出流 
+static FileInputStream fis; 
+static FileOutputStream fos; 
+public static void main(String args[]) 
+{  
+//生成新的属性对象 
+Properties prop = new Properties(); 
+try 
+{  
+//生成文件输入和输出流，输入流指向用户已经定义的属性文件，输出流指向由应用程序新定义的属性文件 
+fis = new FileInputStream 
+(“firstProp.txt”); 
+fos = new FileOutputStream 
+(“secondProp.txt”); 
+} 
+catch(FileNotFoundException e) 
+{ 
+System.out.println(“Cannot create the file stream”); 
+} 
+try 
+{ 
+//从输入文件加载系统属性 
+prop.load(fis); 
+//根据程序执行情况更改属性关键字的值 
+prop.put(“Switch”,“1”); 
+//输出新属性文件secondProp.txt 
+prop .save ( fos ,“－－ a new properties file－”); 
+} 
+catch(IOException e) 
+{ 
+System.out.println(“Exception in repleace the keyword”); 
+} 
+} 
+} 
+在程序执行之前，用户必须首先定义属性文件firstProp.txt，该文件内容如下： 
+Switch= 0 
+Version= 1.0 
+Directory= JavaTest 
+程序运行后，输出新的属性文件secondProp.txt，该文件内容如下（注意观察两个文件关键字Switch内容的区别）： 
+＃－－a new properties file－－ 
+＃Sun Mar 11 21:22:40 CST 2001 
+Switch= 1 
+Version= 1.0 
+Directory= JavaTest 
+从上例可以看出，通过JDK提供的属性类Properties可以方便地在程序外部对应用程序的执行流程进行控制，从而简化了编程难度，使程序流程可控性更好。 
+安全策略文件 
+Java提供的应用程序环境的安全策略，使得不同的代码对系统资源拥有不同的访问许可。Java应用程序安全策略由Policy对象来表达，通过定义安全策略文件来实现。Java 1.2的安全策略文件分为三级：系统安全策略文件、用户安全策略文件和缺省安全策略文件。当Java应用程序启动后，按照先后顺序加载安全策略内容。下面结合典型的安全策略文件内容对安全策略文件的定义进行说明： 
+grant 
+{  
+//对系统和用户目录设置“读”的权限 
+permission java.util.PropertyPermission “user.dir”, 
+“read”; 
+permission java.util.PropertyPermission “user.home”,“read”; 
+permission java.util.PropertyPermission “java.home”,“read”; 
+permission java.util.PropertyPermission “java.class. 
+path”,“read”; 
+permission java.util.PropertyPermission “user.name”,“read”; 
+//其他安全策略内容 
+}; 
+上述安全策略文件定义了应用程序对用户目录、用户登录目录、JDK安装目录、用户名称等系统内容具有读的权限。 
+
+（网页编辑：徐向阳） 
+
+

@@ -1,0 +1,49 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：2001-5-17 11:45:45
+这个连接池是直接从JIVE中取出来的，进行了一下修改，使得连接参数直接在程序中设定而不是从属性文件中读取。
+
+[b]用法：[/b]
+先设定自己的连接参数，在DbConnectionDefaultPool.java文件的loadProperties方法中。注意你也需要设定连接池的log文件的存放位置。
+
+String driver="org.gjt.mm.mysql.Driver";//这是使用的JDBC驱动
+String server="jdbc:mysql://192.100.100.1/qingtuo";//使用的URL
+//String server="jdbc:mysql://192.168.0.1/qingtuo";
+String username="qingtuo";
+String password="qingtuo";
+String minConnections="3";//最小连接数
+String maxConnections="20";//最大连接数
+String logPath="c:\\temp\\qingtuoDbLog.log";//日志文件位置
+//String logPath="/tmp/qingtuoDbLog.log";
+String connectionTimeout="0.5";//定时清除无用连接间隔（以天为单位）
+
+[b]然后[/b]
+在你的程序中只需要将这个包com.qingtuo.db.pool import进来，再向下面这样用就行了。
+
+	Connection con = null;
+	PreparedStatement pstmt = null;
+	ResultSet rs=null;
+	try {
+		con = DbConnectionManager.getConnection();
+		//这里写你的SQL语句
+	}
+	catch (SQLException sqle) {
+		throw sqle;
+	}
+	finally {
+		try {
+			pstmt.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			con.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+[b]优点[/b]
+虽然很多应用服务器也有连接池，但这样做的好处是，更加通用一些。

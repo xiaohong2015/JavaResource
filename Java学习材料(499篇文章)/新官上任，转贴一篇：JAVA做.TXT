@@ -1,0 +1,167 @@
+作者：javabeans
+日期：00-4-28 20:38:59
+Java中的网络编程是一个很重要的部分，也是其编程优越性的地方之一。在Java中有一个专门的Java.net类库来管理网络编程的有关方法。
+　　下面先介绍在Java中怎样用socket进行客户与服务器通信。最后再介绍一个一个最简单的通话程序。
+
+一.怎样用socket进行客户与服务器通信
+　　在Java中用socket进行客户/服务器之间的通信编程。Socket是两个实体之间进行通信的有效端点。通过socket可以获得源IP地址和源端口、终点IP地址和终点端口。用户可以将多个socket连入同一个端口，以便对于单个端口可以有多个连接。通过socket客户/服务器编程可以创建一个能被许多人使用的分布式程序，并且所有客户均可以用统一的前端进行工作，并与服务器进行通信。
+　　要想与服务器通信必须具备三个条件：服务器程序、客户程序和连接它们的socket程序。这三个部分缺一不可。但是，客户与服务器之间的通信有很多的方式，其中另一个方法是把客户作为索取者，把服务器作为给予者。下面我们看一看Java的服务器编程。
+　　在Java中，服务器有3个主要的功能：
+　　1.在Java.net类库中通过构造一个ServerSocket类的实例使服务器能够检测到指定端口的信息。用ServerSocke中的accept()方法可以使服务器检测到指定端口的活动。另外，服务器还负责检测要求与它连接的客户。
+·Socket类的实例代表客户与服务器连接成功。通过编程可以使多个用户通过同一个端口与服务器相连，其中都是Socket 类的实例。
+　　2.可以分别用Socket类的getInputStream()和getOutStream()方法来发送和捕捉数据。其使用方法如下：
+
+　　try{
+　　　　ServerSocket myServerSocket=new ServerSocket(100);
+　　　　Socket my100Socket=myServerSocket.accept();
+　　}catch(Exception e){}
+
+　　在上面的代码中，首先构造一个ServerSocket类的实例，并传递给它一个整数作为服务器指定可以使用的给定端口，如下：
+
+　　ServerSocket myServerSocket=new ServerSocket(100)；
+
+　　在Java程序中如果每次构造ServerSocket时都能保持捕捉异常事件，则就随时指定了准备使用的端口。下面的代码使用accept()方法来检测端口的活动。
+
+　　Socket my100Socket=myServerSocket.accept();
+
+　　Accept()方法直到接收到用户的连接请求，才继续执行中断的执行程序。一旦客户的连接成功，my100Socket就代表该连接，并且可以发送和接收数据。
+最后，我们看一看客户是怎样请求连接的。其连接方法如下：
+
+　　try{
+　　　　Socket mySocket=new Socket("www.cpcw.com",100);
+　　}catch(Exception e ){}
+
+　　通过上面的代码可能看出，也是通过Socket类来实现的。下面我们通过一个网络编程的实例来说明如何进行网络通信。
+
+二.一个最简单的通话程序
+
+通话器服务器:
+import java.net.*;
+import java.io.*;
+import java.lang.*;
+
+public class myserver{
+public static void main(String args[]){
+ServerSocket server;
+Socket socket;
+String s;
+InputStream Is;
+OutputStream Os;
+DataInputStream DIS;
+PrintStream PS;
+
+try{
+//在端口4321注册服务
+server=new ServerSocket(4321);
+socket=server.accept(); 　　//监听窗口,等待连接
+
+System.out.println("server ok");
+System.out.println("************************************************");
+System.out.println("");
+
+//获得对应Socket的输入/输出流
+Is=socket.getInputStream();
+Os=socket.getOutputStream();
+//建立数据流
+DIS=new DataInputStream(Is);
+PS=new PrintStream(Os);
+DataInputStream in=new DataInputStream(System.in);
+while(true){
+System.out.println("");
+System.out.println("please wait client's message...");
+System.out.println("");
+s=DIS.readLine(); //读入从client传来的字符串
+System.out.println("client said:"+s); //打印字符串
+if(s.trim().equals("BYE"))break; //如果是"BYE",就退出
+System.out.print("you say:");
+s=in.readLine(); //读取用户输入的字符串
+PS.println(s); //将读取得字符串传给client
+if(s.trim().equals("BYE"))break; //如果是"BYE",就退出
+
+}
+
+//关闭连接 
+DIS.close(); //关闭数据输入流
+PS.close(); //关闭数据输出流
+Is.close(); //关闭输入流
+Os.close(); //关闭输出流
+socket.close(); //关闭sockey
+}
+catch(Exception e){
+System.out.println("Error:"+e);
+}
+}
+} 
+
+
+通话器客户端 
+import java.net.*;
+import java.io.*;
+import java.lang.*;
+
+public class myclient{
+public static void main(String args[]){
+if (args.length<1){ //判断命令加参数没有
+System.out.println("you forget the name of the server!");
+System.out.println("see also: myclient yxf");
+System.exit(1); //如果没加参数就退出
+}
+
+Socket socket;
+String s="yxfsoft@263.net";
+String len;
+InputStream Is;
+OutputStream Os;
+DataInputStream DIS;
+PrintStream PS;
+try{
+//向主机名为args[0]的服务器申请连接
+//注意端口号要与服务器保持一致:4321
+socket=new Socket(args[0],4321);
+
+System.out.println("client ok");
+System.out.println("************************************************");
+System.out.println("");
+
+//获得对应socket的输入/输出流
+Is=socket.getInputStream();
+Os=socket.getOutputStream();
+//建立数据流
+DIS=new DataInputStream(Is);
+PS=new PrintStream(Os);
+DataInputStream in=new DataInputStream(System.in);
+
+while(true){
+System.out.print("you say:");
+s=in.readLine(); //读取用户输入的字符串
+PS.println(s); //将读取得字符串传给server
+if(s.trim().equals("BYE"))break; //如果是"BYE",就退出
+else 
+{
+System.out.println("");
+System.out.println("please wait server's message...");
+System.out.println("");
+}
+s=DIS.readLine(); //从服务器获得字符串 
+System.out.println("server said:"+s); //打印字符串
+if(s.trim().equals("BYE"))break; //如果是"BYE",就退出
+
+}
+
+//关闭连接
+DIS.close(); //关闭数据输入流
+PS.close(); //关闭数据输出流
+Is.close(); //关闭输入流
+Os.close(); //关闭输出流
+socket.close(); //关闭socket 
+}
+catch(Exception e){
+System.out.println("Error:"+e);
+}
+}
+}
+
+　　下载源文件:客户端工程,服务器工程。编程环境为VisualJ++6.0。
+　　请读者先在一台机器上运行myserver.exe(myserver.exe在服务器工程内),然后在同一台机器或与第一台机器连了网的机器上打开控制台(Dos窗口),然后转到myclient.exe(myclient.exe在客户端工程内)所在的目录,如下运行客户端程序: myclient serverhostName 或 myclient serverhostIp ,serverhostName为运行服务器程序的机器名, serverhostIp为运行服务器程序的机器的IP地址。运行后就可以相互通话了。这个通话程序只能轮换着说话，读者可以在它的基础上丰富其功能。 
+ 
+原作者：小锋

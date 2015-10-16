@@ -1,0 +1,97 @@
+作者：jspfuns
+日期：2000-8-10 17:37:25
+<!-- Login Manager -->
+
+<JAVA TYPE="class">
+
+public static boolean checkUserPermission(HttpSession mySession, HttpServletRequest request, HttpServletResponse response)
+{
+
+if (mySession.getValue("hasPermission") == null || !((Boolean) mySession.getValue("hasPermission")).booleanValue())
+{
+String requestedUrl = HttpUtils.getRequestURL(request).toString();
+String queryString = request.getQueryString();
+if (queryString != null)
+{
+requestedUrl = requestedUrl + "?" + queryString;
+}
+requestedUrl = response.encodeUrl(requestedUrl);
+mySession.putValue("requestedUrl", requestedUrl);
+
+return false;
+}
+else
+{
+return true;
+}
+}
+
+</JAVA>
+
+<%
+// THIS IS A JSP FILE
+
+String goodUser = "bill";
+String goodPass = "bobo";
+
+HttpSession mySession = request.getSession(true);
+
+String errorMessage = "Please Login To Access The Page You Requested";
+
+boolean loginAttempt = false;
+
+String myMethod = request.getMethod();
+if (request.getParameterValues("click") != null && request.getParameterValues("click")[0].trim().equals("Log In"))
+{
+loginAttempt = true;
+}
+
+
+if (loginAttempt)
+{
+String username = request.getParameterValues("user")[0].trim();
+String password = request.getParameterValues("pass")[0].trim();
+//out.println("username = |" + username + "| & password = |" + password + "|<BR>");
+
+if (goodUser.equals(username) && goodPass.equals(password))
+{
+response.sendRedirect((String)mySession.getValue("requestedUrl"));
+mySession.putValue("hasPermission", new Boolean(true));
+errorMessage = "Unable to redirect: " + (String)mySession.getValue("requestedUrl");
+}
+else
+{
+errorMessage = "You did not get the Username or Password right";
+}
+
+}
+else
+{
+errorMessage = "Haven't tried logging in yet.";
+if (mySession.getValue("requestedUrl") == null)
+{
+mySession.putValue("requestedUrl", "/index.jsp");
+}
+//out.println("set userReferrer to " + mySession.getValue("redirectTo") + "<BR>");
+}
+%>
+
+<CENTER>
+<font color=red><%=errorMessage%></font>
+<TABLE align=center>
+<FORM action="adminLogin2.jsp" method=post name="login">
+<TR><TD>Username:</TD><TD><input type=text name=user value=""></TD></TR>
+<TR><TD>Password:</TD><TD><input type=password name=pass value=""></TD></TR>
+<TR><TD colspan=2 align=center><input type=submit name=click value="Log In"></TD></TR>
+</FORM>
+
+</TABLE>
+</CENTER>
+Original URL: <%= (String)mySession.getValue("requestedUrl") %>
+
+<script language="javascript">
+// <!--
+if (document.forms.login != null)
+document.forms.login.user.focus();
+// -->
+</script>

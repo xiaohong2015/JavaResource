@@ -1,0 +1,84 @@
+作者：whitefox
+email: whitefox.jiang@corp.elong.com
+日期：2000-07-18 14:40:14
+发信人: hht (Duke), 信区: Java 
+标  题: JDK1.2关于JDBC中文问题的解决方案&Re yzhang 
+发信站: 网易虚拟社区 (Mon Jan 11 13:29:43 1999), 转信 
+
+忙了几天,终于对JDK1.2的JDBC中文问题有了初步的了解,虽然还有问题存在,但我 
+想大家可能都着急了吧?:)所以就把我的初步想法先贴出来,欢迎大家补充. 
+JDK1.2的中文问题主要是由于引入了Unicode引起的(其实在1.1版本中就有了),U 
+nicode的字符由16bit构成,关于Unicode更详细的信息有兴趣者可以到www.unico 
+de.org查阅,在1.0版本中,一个中文是由两个char(8bit)组成的,而1.1以上版本中 
+是由一个char(16bit)组成的.这一点大家可以用System.out.println(s.length( 
+))语句来证实,其中s为中文字串. 
+现在来说说解决办法,首先声明这些结果只是在我的环境里测试通过,如果在各位 
+的环境里有问题,请务必告知. 
+我的环境是JDK1.2+Win95+Sybase JDBC Driver(PowerJ2.5附带)+Oracle JDBC D 
+river(Oracle8.0.3附带). 
+我的第一个体会是用JDBC-ODBC桥接访问数据库中文输入有问题,我还没解决,我用 
+的JDBCODBC Driver是JDK1.2自带的. 
+第二个体会是用JDBC直接联数据库,这时可能有两种情况: 
+1,中文输入没问题(Oracle8),即可以在SQL语句中直接写中文,如: 
+statement.executeUpdate("inser into tablename values("测试",....) 
+2,中文输入有问题(Sybase11),看错误可知是Unicode转换引起的,解决办法是将U 
+nicode转换为ASCII形式,即一个汉字拆成两个char,用到两个类ByteToCharConve 
+rter和CharToByteConverter,在sun.io.*中,可以在JDK home\jre\lib\i18n.jar 
+中找到,没有文档,我也实在网上找到用法的. 
+在输入时,用ChineseStringToAscii转换为ASCII码字串,查询时用AsciiToChines 
+eString转换为Unicode字串.源代码如下: 
+public static String AsciiToChineseString(String s) { 
+    char[] orig = s.toCharArray(); 
+    byte[] dest = new byte[orig.length]; 
+    for (int i=0;i<orig.length;i++) 
+      dest[i] = (byte)(orig[i]&0xFF); 
+    try { 
+      ByteToCharConverter toChar = ByteToCharConverter.getConverter("g 
+b2312"); 
+      return new String(toChar.convertAll(dest)); 
+    } 
+    catch (Exception e) { 
+      System.out.println(e); 
+      return s; 
+    } 
+  } 
+
+  public static String ChineseStringToAscii(String s) { 
+    try { 
+      CharToByteConverter toByte = CharToByteConverter.getConverter("g 
+b2312"); 
+      byte[] orig = toByte.convertAll(s.toCharArray()); 
+      char[] dest = new char[orig.length]; 
+      for (int i=0;i<orig.length;i++) 
+        dest[i] = (char)(orig[i] & 0xFF); 
+      return new String(dest); 
+    } 
+    catch (Exception e) { 
+      System.out.println(e); 
+      return s; 
+    } 
+  } 
+主程序片断如下: 
+try{ 
+Statement stmt; 
+Class.forName("com.sybase.jdbc.SybDriver"); 
+Connection conn =DriverManager.getConnection ("jdbc:sybase:Tds:202.9 
+7.228.249:5000/todo","sa","");   
+stmt = conn.createStatement (); 
+String s="何海涛";  
+s=ChineseStringToAscii(s); 
+     stmt.executeUpdate ("insert into russia values('"+s+"',1,1,'"+s+ 
+"')"); 
+}catch(Exception e){ 
+System.out.println(e); 
+} 
+在读数据时用String s=AsciiToChineseString(rs.getString(1)) 
+-------------------- 
+因为手头只能对这两种数据库进行测试,所以对别的数据库可能出现的情况不能保 
+证.不过我估计基本是上面这两种情况.另外,用JDK1.2有的公司提供的Driver也升 
+级了,比如Sybase原来的Driver就不好使.原理就是这样,在实际操作中要靠自己摸 
+索了.上面两个方法参考了台湾某BBS的一篇文章. 
+另外,yzhang不知你要的是什么版本,你可以在jconnect软件安装的目录下找JDBC 
+ Driver包,可能的格式是zip或jar,把他拷出来就行了.我的就是从PowerJ中拷出 
+来的 
+

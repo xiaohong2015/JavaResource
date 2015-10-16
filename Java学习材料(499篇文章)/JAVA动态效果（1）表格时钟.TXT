@@ -1,0 +1,80 @@
+作者：ZZH0915
+日期：2000-9-19 12:23:46
+<body onLoad="startit()">
+<script LANGUAGE="JavaScript">
+<!--
+var isn1=null;
+var isn2=false;
+today=new Date();
+function stopit()
+{
+if(isn2)
+{
+clearTimeout(isn1);
+}
+isn2=false;
+}
+function startit()
+{
+stopit();
+isnclock();
+}
+function isnclock()
+{
+var now=new Date();
+var hrs=now.getHours();
+var min=now.getMinutes();
+var sec=now.getSeconds();
+document.clckh.disp1.value=""+((hrs>12)?hrs-12:hrs);
+document.clckh.disp2.value=((min<10)?"0":"")+min;
+document.clckh.disp3.value=((sec<10)?"0":"")+sec;
+document.clckh.disp4.value=(hrs>=12)?"下午":"上午";
+isn1=setTimeout("isnclock()",1000);
+isn2=true;
+}
+function isnArray()
+{
+argnr=isnArray.arguments.length
+for(var i=0;
+i<argnr;
+i++)
+{
+this[i+1]=isnArray.arguments[i];
+}
+}
+var isnMonths=new isnArray("1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月");
+var isnDays=new isnArray("星期一","星期二","星期三","星期四","星期五","星期六","星期日");isnDays[0]="星期日";
+//-->
+</script>
+
+
+<form NAME="clckh" onSubmit="0">
+<table BORDER="2">
+<tr>
+<td>时间</td>
+<td><div align="center"><center><p>点</td>
+<td align="center"><div align="center"><center><p>分</td>
+<td align="center"><div align="center"><center><p>秒</td>
+<td align="center">　</td>
+</tr>
+<tr align="center">
+<td>　</td>
+<td VALIGN="TOP"><input TYPE="text" NAME="disp1" SIZE="2"></td>
+<td VALIGN="TOP"><input TYPE="text" NAME="disp2" SIZE="2"></td>
+<td VALIGN="TOP"><input TYPE="text" NAME="disp3" SIZE="2"></td>
+<td VALIGN="TOP"><input TYPE="text" NAME="disp4" SIZE="3"></td>
+</tr>
+<script LANGUAGE="JavaScript">
+<!--
+var thisyear=today.getYear();
+if (thisyear< 2000)
+thisyear=1900+thisyear;
+document.write("<TR><TD>日期</TD><TD COLSPAN=4>"
++isnDays[today.getDay()]+","+isnMonths[today.getMonth()+1]
++","+today.getDate()+"月," +thisyear+"年");
+//-->
+</script>
+
+</table>
+</form>  
+

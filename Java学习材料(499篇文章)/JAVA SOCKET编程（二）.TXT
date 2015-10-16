@@ -1,0 +1,147 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:44:36
+Java面向连接的类
+
+Sockets有两种主要的操作方式:面向连接的和无连接的.面向连接的sockets操作就像一部电话,他们必须建立一个连接和一人呼叫.所有的事情在到达时的顺序与它们出发时的顺序时一样.无连接的sockets操作就像是一个邮件投递,,没有什么保证,多个邮件可能在到达时的顺序与出发时的顺序不一样.
+
+到底用哪种模式是邮应用程序的需要决定的.如果可靠性更重要的话,用面向连接的操作会好一些.比如文件服务器需要他们的数据的正确性和有序性.如果一些数据丢失了,系统的有效性将会失去.一些服务器,比如间歇性地发送一些数据块.如果数据丢了的话,服务器并不想要再重新发过一次.因为当数据到达的时候,它可能已经过时了.确保数据的有序性和正确性需要额外的操作的内存消耗,额外的费用将会降低系统的回应速率.
+
+无连接的操作使用数据报协议.一个数据报是一个独立的单元,它包含了所有的这次投递的信息.把它想象成一个信封吧,它有目的地址和要发送的内容.这个模式下的socket不需要连接一个目的的socket,它只是简单地投出数据报.无连接的操作是快速的和高效的,但是数据安全性不佳.
+
+面向连接的操作使用TCP协议.一个这个模式下的socket必须在发送数据之前与目的地的socket取得一个连接.一旦连接建立了,sockets就可以使用一个流接口:打开-读-写-关闭.所有的发送的信息都会在另一端以同样的顺序被接收.面向连接的操作比无连接的操作效率更低,但是数据的安全性更高.
+
+SUN一直是网络建设的支持者,所以在Java中支持sockets就不足为奇了.实际上,Java降低了建立一个sockets程序的难度.每一个传输模式都被封装到了不同的类中.面向连接的类将会首先被我们讨论. 
+
+
+在Java中面向连接的类有两种形式,它们分别是客户端和服务器端.客户端这一部分是最简单的,所以我们先讨论它.
+
+列表9.1列出了一个简单的客户端的程序.它向一个服务器发出一个请求,取回一个HTML文档,并把它显示在控制台上.
+
+9.1一个简单的socket客户端
+
+import java.io.*; 
+import java.net.*; 
+/** 
+* 一个简单的从服务器取回一个HTML页面的程序 
+* 注意:merlin是本地机器的名字 
+*/ 
+public class SimpleWebClient { 
+public static void main(String args[]) 
+{ 
+try 
+{ 
+// 打开一个客户端socket连接
+Socket clientSocket1 = new Socket("merlin", 80); 
+System.out.println("Client1: " + clientSocket1); 
+// 取得一个网页 
+getPage(clientSocket1); 
+} 
+catch (UnknownHostException uhe) 
+{ 
+System.out.println("UnknownHostException: " + uhe); 
+} 
+catch (IOException ioe) 
+{ 
+System.err.println("IOException: " + ioe); 
+} 
+} 
+/** 
+*通过建立的连接请求一个页面,显示回应然后关闭socket 
+*/ 
+public static void getPage(Socket clientSocket) 
+{ 
+try 
+{ 
+// 需要输入和输出流 
+DataOutputStream outbound = new DataOutputStream( 
+clientSocket.getOutputStream() ); 
+DataInputStream inbound = new DataInputStream( 
+clientSocket.getInputStream() ); 
+// 向服务器发出HTTP请求 
+outbound.writeBytes("GET / HTTP/1.0\r\n\r\n"); 
+// 读出回应 
+String responseLine; 
+while ((responseLine = inbound.readLine()) != null) 
+{ 
+// 把每一行显示出来 
+System.out.println(responseLine); 
+if ( responseLine.indexOf("") != -1 ) 
+break; 
+} 
+// 清除 
+outbound.close(); 
+inbound.close(); 
+clientSocket.close(); 
+} 
+catch (IOException ioe) 
+{ 
+System.out.println("IOException: " + ioe); 
+} 
+} 
+} 
+
+
+回忆一个,一个客户端向一个正在监听的服务器socket发出一个连接.客户端的sockets是用Socket类建立的.下面的程序建立了一个客户端的socket并且连接到了一个主机:
+
+Socket clientSocket = new Socket("merlin", 80);
+
+第一个参数是你想要连接的主机的名称,第二个参数是端口号.一个主机名称指定了目的的名称.端口号指定了由哪个应用程序来接收.在我们的情况下,必须指定80,因为它是默认的HTTP协议的端口.另外的知名的端口列在表9.1中,看:
+
+知名的端品:
+
+echo 7
+
+daytime 13
+
+daytime 13
+
+ftp 21 
+
+telnet 23 
+
+smtp 25 
+
+finger 79 
+
+http 80 
+
+pop3 110 
+
+因为Socket类是面向连接的,它提供了一个可供读写的流接口.java.io包中的类可以用来访问一个已连接的socket:
+
+DataOutputStream outbound = new DataOutputStream( 
+clientSocket.getOutputStream() ); 
+DataInputStream inbound = new DataInputStream( clientSocket.getInputStream() 
+); 
+
+一旦流建立了,一般的流操作就可以做了:
+
+outbound.writeBytes("GET / HTTP/1.0\r\n\r\n); 
+String responseLine; 
+while ( (responseLine = inbound.readLine()) != null) 
+{ 
+System.out.println(responseLine); 
+} 
+
+以上的小程序请求了一个WEB页面并且把它显示出来.当程序完成之后,连接必须关闭. 
+
+outbound.close(); 
+inbound.close(); 
+clientSocket.close(); 
+
+注意socket流必须首先关闭.所有的的socket流必须在socket关闭之前关闭.这个小程序非常地简单,但是所有的客户端程序都必须遵首下面的基本的步骤: 
+
+1.建立客户端socket连接.
+
+2.得到socket的读和写的流.
+
+3.利用流.
+
+4.关闭流.
+
+5.关闭socket.
+
+使用一个服务器端的socket只是有一点复杂,它将在下面讲到. 
+
+ 

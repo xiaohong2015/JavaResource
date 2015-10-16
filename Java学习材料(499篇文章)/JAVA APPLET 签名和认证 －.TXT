@@ -1,0 +1,77 @@
+作者：netkey
+日期：2001-5-25 11:44:10
+在java中的 applet 的认证和签名 确实麻烦。。
+ java.sun.com  的tutorial 上有用apple 在本地写一个文件的例子：
+ http://java.sun.com/docs/books/tutorial/security1.2/tour1/
+ 但只能用AppletViewer 可以看:
+ appletviewer http://java.sun.com/docs/books/tutorial/security1.2/tour1/example-1dot2/WriteFile.html
+
+
+  又在[阿费]的帮助下找到可以用ie or Nescape 查看你的applet 的例子：
+  http://www.intelligentsearch.org/namesearch_from_java.htm#_Toc490550108
+
+大致过程如下：：
+
+服务器端：
+ 
+1。 Compile the java classes --写applet并编译。
+    javac *.class
+2.   Place the class files in a JAR file    --打包：
+    jar cvf  yourjarname.jar  yourdir/*.class
+    1). Create a Keystore and Keys for signing the JAR file 
+        keytool –genkey –keystore ist.keystore –alias IST
+    2). Sign the JAR file                  －－对jar 签名
+        jarsigner –keystore ist.keystore ist.jar IST
+    3). Create the Public Key Certificate  －－创建公钥
+        keytool –export –keystore ist.keystore –alias IST –file IstPubKey.cert
+
+
+客户端：
+
+   1。Import the Public Key Certificate －－导入公钥
+      keytool –import –alias IST –file IstPubKey.cert –keystore client.store
+
+
+   2。Modifing a policy file  －－修改 policy文件
+   3。 Run the applet   --运行applet
+   !!! 这还只能用Applet viewer 查看你的applet 
+   
+用ie访问：
+First, the <APPLET> tag will not be able to activate the Java Plug-in for use in IE. This tag should be substituted by the <OBJECT> tag
+ －－－由于IE 的java Plug-in 不能被<APPLET>标签激活。你还要将他换成<OBJECT>标签。
+
+ these changes to the HTML file can also be done with the help of HTMLConverter. You can go to download this software from http://java.sun.com/products/plugin/index.html. 
+---- 这样你还要去下一个HTMLConverter
+---- 将经过转换的html 和 class 文件copy 到你的服务器上。
+－－ 好了。终于可以享受一下成果了。
+     用ie 访问：http://yourserver: youreport/WriteFile.html
+     还不行？？ 
+     －－IE 还要下载Plug-in 才能执行，
+     在1小时加26分46秒后：
+     kao ,终于在本地写了一个文件。
+
+////////////////////////////////////////////
+ 感谢：
+  【wmlf】 和 【阿费】提供的资料和帮助
+
+////////////////////////////////////////////
+ 我的问题：
+
+1。如果我写的applet，放在网上，
+他还必需下载或自己修改java.security and java.policy 
+然后放到 ：
+<java home>/lib/security 下（如果安装了jdk)
+<use dir>/.java.policy (没有 jdk)
+
+那不是太麻烦了？？？？
+谁还会用你的applet ????
+2。是不是我对applet 认证理解不对，，本来applet的认证没这样繁？？
+
+   
+ 
+   
+
+
+  
+
+

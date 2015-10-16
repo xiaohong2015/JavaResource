@@ -1,0 +1,37 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-8-10 17:05:05
+作者：何志强[hhzqq@21cn.com]
+日期：2000-08-10
+版本：1.0
+
+一、软件下载
+　　JDK 1.2.2
+　　　　http://www.blackdown.org/java-linux.html
+　　　　http://www.mirror.ac.uk/sites/ftp.blackdown.org/java-linux/
+　　　　http://www.mirror.ac.uk/sites/ftp.blackdown.org/java-linux/JDK-1.2.2/i386/rc4/jdk-1.2.2-RC4-linux-i386-glibc-2.1.2.tar.bz2
+　　Tomcat 3.1
+　　　　http://jakarta.apache.org/tomcat/
+　　　　http://jakarta.apache.org/builds/tomcat/release/v3.1/bin/jakarta-tomcat.tar.gz
+二、安装JDK
+　　1、将下载的JDK解压到JDK安装目录，例：
+　　　　　cd /usr/local/
+　　　　　tar xIvf /software/jdk/jdk-1.2.2-RC4-linux-i386-glibc-2.1.2.tar.bz2
+　　2、设置好JAVA_HOME环境变量，它的值为JDK安装目录，如编辑/etc/profile，增加下面几行：
+　　　　　JAVA_HOME=/usr/local/jdk1.2.2
+　　　　　export JAVA_HOME
+　　3、将JDK的bin目录追加到PATH环境变量中，如编辑/etc/profile，增加下面几行：
+　　　　　PATH=/usr/local/jdk1.2.2/bin:$PATH
+　　　　　export PATH
+三、安装Tomcat
+　　1、将下载的Tomcat解压到Tomcat安装目录，例：
+　　　　　cd /usr/local
+　　　　　tar xzvf /software/tomcat/jakarta-tomcat.tar.gz
+　　2、设置好TOMCAT_HOME环境变量，它的值为Tomcat安装目录，如编辑/etc/profile，增加下面几行：
+　　　　　TOMCAT_HOME=/usr/local/jakarta-tomcat
+　　　　　export TOMCAT_HOME
+　　3、Tomcat安装目录的bin子目录下的startup.sh用于启动服务,shutdown.sh为停止服务,服务的缺省端口为8080
+　　4、退出并重新登陆，启动服务，然后在浏览器上输入http://localhost:8080/来检查是否已经安装成功，例：
+　　　　　cd $TOMCAT_HOME/bin
+　　　　　./startup.sh
+　　　　　lynx http://localhost:8080/

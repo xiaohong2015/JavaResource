@@ -1,0 +1,153 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:32:31
+<jsp:plugin> 
+
+执行一个applet或Bean,有可能的话还要下载一个Java插件用于执行它. 
+
+JSP 语法
+<jsp:plugin 
+
+
+  type="bean | applet" 
+
+
+  code="classFileName" 
+
+
+  codebase="classFileDirectoryName" 
+
+
+  [ name="instanceName" ] 
+
+
+  [ archive="URIToArchive, ..." ] 
+
+
+  [ align="bottom | top | middle | left | right" ] 
+
+
+  [ height="displayPixels" ] 
+
+
+  [ width="displayPixels" ] 
+
+
+  [ hspace="leftRightPixels" ] 
+
+
+  [ vspace="topBottomPixels" ] 
+
+
+  [ jreversion="JREVersionNumber | 1.1" ] 
+
+
+  [ nspluginurl="URLToPlugin" ] 
+
+
+  [ iepluginurl="URLToPlugin" ] > 
+
+
+  [ <jsp:params> 
+
+
+  [ <jsp:param name="parameterName" 
+
+value="{parameterValue | <%= expression %>}" /> ]+ 
+
+
+  </jsp:params> ] 
+
+
+  [ <jsp:fallback> text message for user </jsp:fallback> ] 
+
+
+</jsp:plugin> 
+
+
+例子
+
+<jsp:plugin type=applet code="Molecule.class" codebase="/html"> 
+
+<jsp:params> 
+
+  <jsp:param name="molecule" value="molecules/benzene.mol" /> 
+
+</jsp:params> 
+
+<jsp:fallback> 
+
+  <p>Unable to load applet</p> 
+
+</jsp:fallback> 
+
+</jsp:plugin> 
+
+
+描述
+
+<jsp:plugin>元素用于在浏览器中播放或显示一个对象（典型的就是applet和Bean),而这种显示需要在浏览器的java插件。 
+
+当Jsp文件被编译，送往浏览器时，<jsp:plugin>元素将会根据浏览器的版本替换成<object>或者<embed>元素。注意，<object>用于HTML 4.0 ，<embed>用于HTML 3.2. 
+
+一般来说，<jsp:plugin>元素会指定对象是Applet还是Bean,同样也会指定class的名字，还有位置，另外还会指定将从哪里下载这个Java插件。具体如下: 
+
+
+属性
+
+
+type="bean | applet" 
+.将被执行的插件对象的类型，你必须得指定这个是Bean还是applet,因为这个属性没有缺省值. 
+
+code="classFileName" 
+将会被Java插件执行的Java Class的名字，必须以.class结尾。这个文件必须存在于codebase属性指定的目录中. 
+
+codebase="classFileDirectoryName" 
+将会被执行的Java Class文件的目录（或者是路径)，如果你没有提供此属性，那么使用<jsp:plugin>的jsp文件的目录将会被使用. 
+
+name="instanceName" 
+这个Bean或applet实例的名字，它将会在Jsp其它的地方调用. 
+
+archive="URIToArchive, ..." 
+一些由逗号分开的路径名，这些路径名用于预装一些将要使用的class,这会提高applet的性能. 
+
+align="bottom | top | middle | left | right" 
+图形，对象，Applet的位置,有以下值: 
+
+
+
+bottom 
+top   
+middle   
+left   
+right   
+height="displayPixels" width="displayPixels" 
+Applet或Bean将要显示的长宽的值，此值为数字，单位为象素. 
+
+hspace="leftRightPixels" vspace="topBottomPixels" 
+Applet或Bean显示时在屏幕左右，上下所需留下的空间，单位为象素. 
+
+jreversion="JREVersionNumber | 1.1" 
+
+Applet或Bean运行所需的Java Runtime Environment (JRE) 的版本. 
+
+缺省值是 1.1. 
+
+nspluginurl="URLToPlugin" 
+
+Netscape Navigator用户能够使用的JRE的下载地址，此值为一个标准的URL，如http://www.aspcn.com/jsp 
+
+iepluginurl="URLToPlugin" 
+IE用户能够使用的JRE的下载地址，此值为一个标准的URL，如http://www.aspcn.com/jsp 
+
+
+<jsp:params>   [ <jsp:param name="parameterName" 
+value="{parameterValue | <%= expression %>}" /> ]+   </jsp:params> 
+
+你需要向applet或Bean传送的参数或参数值。 
+
+<jsp:fallback> text message for user </jsp:fallback> 
+一段文字用于Java 
+
+插件不能启动时显示给用户的，如果插件能够启动而applet或Bean不能，那么浏览器会有一个出错信息弹出.
+

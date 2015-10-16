@@ -1,0 +1,34 @@
+作者：丑丑牛
+日期：00-4-28 16:58:26
+主要流程
+1。 你要有一个Frame对象
+2。调用java.awt.Toolkit.getPrintJob(Frame parent,String jobname,Properties props); 得到PrintJob
+3。调用PrintJob.getGraphics() 得到Graphics 实例
+4。在Graphics 实例上drawLine(), drawString()， 为所欲为
+5。一页打完调用dispose()
+6. 打印工作完成， 调用end();
+
+下面抄个例程给你
+：
+
+
+import java.awt.*;
+import java.applet.*;
+
+public class PrintHelloWorld extends Applet
+{
+   public void init()
+   { 
+     Frame aFrame = new Frame();
+     PrintJob job = ToolKit.getPrintJob(aFrame,"hello",null);
+     Graphics g = job.getGraphics();
+     g.drawString("Hello world",50,100);
+     g.dispose();
+     job.end();
+
+   }
+}
+
+注意：
+IE的好多安全权限要放开吆
+

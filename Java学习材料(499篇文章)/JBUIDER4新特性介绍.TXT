@@ -1,0 +1,22 @@
+作者：luflying
+email: zhang_yng@citiz.net
+日期：2000-11-24 12:37:22
+Jbuider4有很多以前版本没有的新特性，另外还根据程序开发者的要求，在某些地方做了增强： 
+　　
+　　1、Web程序的开发，企业JavaBean和大程序的团队开发是Jbuider4新特性的重点。
+　　2、增强了开放的API工具，更易与开发者使用。
+　　3、增加了对应用服务器的支持
+　　4、对用户界面，特别是对File|Open菜单中的向导，做了重新的设计。
+　　5、增加了一些调试功能
+　　6对JdataStore和JDBC Explorer进行了改进，数据库的操作更简单。
+
+下面详细的说明Jbuider4的新性能。
+
+一、 Web应用程序的开发：
+　　Jbuilder4支持Web应用程序的开发，增加了对XML的支持，提供了更好的Servlet和JSP的支持。通过InternetBeans Express和一些组件，能够在Java和html之间进行无缝数据转换。
+　　Jbuilder4内置了Tomcat3.1,可以动态的调试Servlet和JSP程序。
+　　每一个Servlet都有一个别名(Servlet-name)和init()初始化函数的参数，能够离开SHTML独立执行。
+　　Jbuilder4提供了增强的JSP支持，很容易的就可以直接调试JSP源代码。
+　　提供了XML的支持。能够简单快速的编写XML文件。XML关键字的高亮度显示很容易的对整个XML文件的结构了如指掌。
+　　通过InternetBeans Express控件，可以动态的产生WEB页面的内容。
+

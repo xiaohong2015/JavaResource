@@ -1,0 +1,174 @@
+作者：asp2001
+email: asp2001@163.net
+日期：2000-8-9 18:49:59
+用Java绘制K线 
+
+黑龙江省牡丹江王哲 
+---- Java语言中的Applet（Java小程序）和Application（Java应用程序）是在结构和功能上都存在很大差异的两种不同的编程方式。Applet应用于Web页上，可做出多姿多彩的页面特效，给网站增辉添色；Application则与其他编程语言（如VB、VC）一样，可编制各种应用程序。 
+
+---- 本文要讨论的是第一种情况，在Web页上用Java Applet绘制K线图。 
+
+---- K线是股市行情分析中的一种参数指标，用股票每日的开盘价、最高价、最低价、收盘价及成交量等数据进行作图，配合五日、十日均线便可反映出一个阶段内该支股票的涨跌走势。 
+
+---- Java Applet所做的K线图多应用于证券类型的网站，以方便网上股民的分析操作。不过由于我国网速的关系，目前有些证券类网站把K线图做成了图片以节省下载的时间。当然，其绘制K线所用的工具（Java Applet）及绘制方法还是相同的。 
+
+---- 在编写绘制K线的Java Applet时，有几处关键问题要解决，即：1）多线程的使用；2）布局管理器的选择；3）数据输入、输出流的应用；4）设置、监听鼠标与键盘事件。 
+
+---- 下面通过一个实例，来详细阐述整个编程过程和方法。 
+
+---- 一、使用多线程 
+
+---- 一个完整的Java Applet包含四个方法，Init()、Start()、Stop()、Destroy()（即：初始化、开始、停止、清除），构成一个完整的生命周期，其运行次序也是由上而下顺序执行。 
+
+---- 在绘制K线图的过程中，除了要绘制窗体及代表股票升降的阴线、阳线矩形外，还要监听鼠标事件并同时绘制一个自由移动的“十字”游标，来定位显示所检索股票每日的各种价格数值（如开盘价、收盘价等）；这时，为了避免闪烁和减少重新计算的等待时间，除了重绘跟随鼠标移动的“十字”游标外，对页面的布局及阴线、阳线矩形等不进行重绘；这就需要应用多线程来完成该项任务。 
+
+---- 1．关于多线程的一些基本概念： 
+
+---- 多线程实际上就是启动另一个进程，其运行的过程独立于主程序之外，并从主程序的Start()方法载入、由Run()方法调用执行。实现多线程的方法有两种，即：创建Thread类的子类（类的继承）和实现runnable接口。 
+
+---- 为便于使用，Java把所有有关线程的功能封装成Java类库中的一个类：Java.lang.Thread。通过这个类，Java可以创建、控制和终止线程，完成有关多线程的所有操作。 
+
+---- 在Java语言中，一个子类只能继承一个超类（父类），由于我们所要编写的Java Applet是应用于网页中的，首先必须继承浏览器类（java.applet）；因此，在本例中我们通过实现runnable接口的方法来实现多线程，实现的语句如下： 
+
+---- public class StockApplet extends java.applet.Applet implements Runnable 
+
+---- 2．多线程的应用： 
+
+---- 首先，在Init()方法中对要创建的线程（M_pointThread）进行定义及初始化： 
+
+    Thread M_pointThread=null;
+
+---- 然后，在Start()和Stop()方法中加入以下代码： 
+---- //当打开浏览器页面开始载入Java Applet代码时，执行start()方法 
+
+    public void start()    
+    {
+if (M_pointThread==null)   //如果线程尚未产生
+{
+M_pointThread=new Thread(this);  //则创建一个新线程
+M_pointThread.start();   //启动该线程
+          }
+     }
+//在当前页面关闭或转向其他Web页面时，
+调用stop()方法，以释放系统资源
+     public void stop()
+     {
+	         if (M_pointThread!=null)  
+ //如果线程尚在运行
+	          {
+            M_pointThread.stop(); 
+  //停止该线程
+
+            M_pointThread=null;    
+//释放线程所占资源
+	           }
+      }
+
+
+---- 3．编写线程运行的代码： 
+public void run()
+{
+   M_graphics=getGraphics();
+   M_graphics.setXORMode(Color.white);  
+ //采用异或方法绘制“十字”游标
+   while(true)
+   {
+	   try
+ 	 {
+if(MouseMove==true)   //侦测到鼠标的移动后，
+执行以下代码
+{   //当鼠标位于以下区域（Java Applet布局）
+内时，执行画线操作
+if(x0 >50 && x0< 600){M_graphics.drawLine
+(x0,30,x0,380);}
+if(y0 >30 && y0 <380){M_graphics.drawLine
+(50,y0,600,y0);}
+if(X >50 && X< 600){M_graphics.drawLine
+(X,30,X,380);}
+if(Y >30 && Y< 380){M_graphics.drawLine
+(50,Y,600,Y);}
+MouseMove=fase;
+x0=X;     //传递当前座标参数
+		   y0=Y; 
+        }
+}catch(NullPointerException npe){}  
+  //捕获可能出现的异常
+  }
+
+
+---- 二、布局管理器 
+---- 本例中的Java Applet运行时，要在页面上Java Applet的运行区域内绘制相应的“标签”来显示不同的数值，并要加入一个“文本框”来接收输入的股票代码。对这些“标签”和“文本框”位置及大小的设定，便属于布局管理的应用范畴。 
+
+---- Java语言中提供的布局管理器种类有：边界式布局、卡片式布局、流式布局和网格式布局等，各有不同的特点，可根据实际需要选用；但有最大自由设计空间的是“无布局管理器”——即不使用任何布局格式，而通过手工方式添加组件到页面布局的绝对位置上。本例中使用的便是“无布局管理器”。 
+
+---- 在使用“无布局管理器”时，首先要作出声明，即： 
+
+setLayout(null);
+
+然后用reshape()方法指定组件的具体位置和尺寸，
+基本语句如下所示：
+Label label1=new Label();   
+      //定义标签
+	this.add(label1);  
+              //把标签加入布局管理器
+	label1.reshape(10,10,30,30);   
+    //在指定位置绘制标签
+
+---- 对于多个标签和文本框，参照此格式添加即可。 
+---- 三、输入、输出数据流 
+
+---- Java Applet在客户端浏览器上运行时，要从服务器端读取股票的相关数据进行做图，这就涉及到Java数据流的运用。 
+
+---- Java.io包提供了多个用于与各种I/O设备交换信息的类，其最顶层的两个类便是输入流类（InputStream）和输出流类（OutputStream）。 
+
+---- 为了便于实现，在本例中我们先在服务器端把股票数据库（如：show128.dbf）中的有关字段写入一文本文件中（其格式为：第一行为股票的汉字名称，以后每一行内包括：开盘日期、开盘价、最高价、最低价、收盘价、成交量），并以该支股票的代码作为文件名（如：600001.txt）；然后，再用Java Applet从服务器端的文本文件中读取数据。这样，就把对服务器端数据库的访问转化为对文件的I/O操作，实现的语句如下： 
+
+URL urlc=new URL("http://127.0.0.1/temp
+/"+FileName+".txt"); 
+	BufferedReader 
+bis=new BufferedReader
+(new InputStreamReader(urlc.openStream()));
+
+---- 注：第一条语句中的http://127.0.0.1/temp/ 为在本机执行调试操作的URL地址，在上传到服务器上后要做相应的修改；FileName为要读取的文本文件名。 
+---- 第二条语句定义了读取输入数据流的方法。 
+
+---- 四、监听键盘及鼠标事件 
+
+---- 在Java Applet小程序中，单击按钮、键入文本、使用鼠标或执行任何与界面相关的动作时，就发生一个事件，小程序就会作出适当的反应。 
+
+---- 在本例中，我们通过使用action()方法来获得Java Applet小程序运行时所发生的事件。语句格式如下： 
+
+public boolean action(Event evt,Object arg)
+	{
+		FileName=text1.getText();   
+//提取文本框中输入的参数
+		ReadData();
+//调用读数据流数据的方法
+		return true; 
+     //处理完毕，不需要其他方法再做处理
+	}
+
+---- 上面的action()方法中含有两个参数：一个是Event类的一个对象evt；另一个是Object类的一个对象arg。Event对象告诉我们发生了哪种事件，而Object对象将进一步告诉我们有关该事件的情况。每当有Event监听的事件发生时，Java Applet便自动调用该action()方法。 
+---- 至此，在掌握了上述编程中的一些要点后，我们便可以成功地编制出一个完整的绘制K线的Java Applet小程序了（完整的源代码附后）。 
+
+---- 五、编制HTML文档（Stock.html） 
+
+---- 程序编制完成后，另外要做的是设置在Web页面上调用Java Applet的页面，即编制HTML文档。Stock.html文档的示例代码如下： 
+
+< HTML >< HEAD >< TITLE >股票K线图< /TITLE >< /HEAD >
+< body bgcolor=#00ffff >
+< APPLET 
+code=StockApplet.class codeBase=C:\javatemp\Project1\ 
+ name=StockApplet 
+style="FONT-FAMILY: sans-serif;
+ HEIGHT: 410px; WIDTH: 610px"  >
+	< /APPLET >
+	< /body >
+< /HTML >
+
+---- 在< APPLET >< /APPLET >标签对内，是对Java Applet小程序的调用代码。其中的StockApplet.class是经编译后生成的class文件，codeBase指向的是class文件所存放的路径。如果class文件与HTML文档存放在同一目录下，则可以省略这一项。 
+---- 至此，编制Java Applet小程序的工作便全部完成。 
+
+---- 在个人计算机上进行调试时，首先要安装个人Web服务，然后，把StockApplet.class与HTML文档一起拷贝到本机的WWW服务目录下（如：C:\Inetpub\wwwroot\），打开浏览器，在地址栏内输入http://127.0.0.1/Stock.html，回车，进行测试操作（注意：此时要在Stock.html文档中删除codeBase一项，否则会产生class文件未找到的错误）。 
+
+---- 调试通过后，便可上传至服务器投入运行了。 

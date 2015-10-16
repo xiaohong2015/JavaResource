@@ -1,0 +1,39 @@
+作者：iamsun
+email: 111@111.111
+日期：2001-3-9 10:57:10
+j2ee技术
+    
+    java2的企业版是一系列中间件服务组合起来的强健的系统，这使得服务器方应用程序开发人员的工
+
+作非常简单。j2ee包括的技术如下：
+    Enterprise JavaBeans (EJB)
+    EJB定义了服务器方组件编写的规则和，同时定义了如何管理组件和应用程序以及他们之间如何通信
+
+。EJB促进了组件交易市场的发展，在这里，组件提供商可以出售可重用的组件。
+    Java Remote Method Invocation (RMI) and RMI-IIOP
+    RMI允许内部通信并且提供和其他服务通信的能力。RMI-IIOP是使用IIOP协议的RMI的精简扩充，可
+
+以和corba整合在一起。
+    Java Naming and Directory Interface (JNDI)
+    JNDI鉴别组件或者其他网络资源的位置。
+    Java Database Connectivity (JDBC)
+    JDBC是一个关系数据库的桥，允许操作关系型数据库
+    Java Transaction API (JTA) and Java Transaction Service (JTS)
+    JTA和JTS规范允许组件支持交易保护。
+    Java Messaging Service (JMS)
+    JMS 允许分布式对象异步通信。
+    Java Servlets and Java Server Pages (JSPs)
+    Servlets 和 JSPs 是网络组件，观念上符合面向请求/回应计算，象通过http协议和client端通信
+
+。
+    Java IDL.
+    java IDL是sun公司实现基于java的corba技术。Java IDL 允许和其他语言的应用整合，同时也允许
+
+基于corba的分布式计算。
+　　JavaMail 
+　　JavaMail服务允许你通过你的java程序发送平台独立和协议独立的e-mail信息。
+　　Connectors 
+    Connectors 使的j2ee能够很好的和大型机系统上运行的高端应用整合在一起，比如ＥＲＰ系统。
+　　The Extensible Markup Language (XML)
+    好几种j2ee技术都是用xml的组织和描述信息的，比如：EJB1.1 ,JSP等等。
+　　

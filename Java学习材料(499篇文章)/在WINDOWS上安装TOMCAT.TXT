@@ -1,0 +1,36 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-8-10 17:04:25
+者：何志强[hhzqq@21cn.com]
+日期：2000-07-19
+　　　2000-08-10
+版本：1.0
+
+一、软件下载
+　　JDK 1.2.2
+　　　　http://java.sun.com/products/jdk/1.2/download-windows.html
+　　　　ftp://ftp.java.sun.com/pub/jdk/1.2.2/nn234097-122006/jdk-1_2_2_006-win.exe
+　　JDK 1.2.2 Documentation
+　　　　http://java.sun.com/products/jdk/1.2/download-docs.html
+　　　　ftp://ftp.java.sun.com/pub/jdk/1.2/aslwei001/jdk1_2_2-001-doc.zip
+　　Tomcat 3.1
+　　　　http://jakarta.apache.org/tomcat/
+　　　　http://jakarta.apache.org/builds/tomcat/release/v3.1/bin/jakarta-tomcat.zip
+二、安装JDK
+　　1、运行下载的JDK可执行文件，如果是Windows 9x，请注意目录名不可以超过8位，并且不应有.字符，例如目录名不可以为jdk1.2.2，这会影响到环境变量的设置，可以将其改为jdk
+　　2、设置环境变量JAVA_HOME，它的值为JDK安装目录完整路径(不要以\结尾)
+　　3、将JDK的BIN目录追加到PATH环境变量中
+三、安装Tomcat
+　　1、将下载的Tomcat压缩文档解压到安装目录，如果是Windows 9x，请注意目录名不可以超过8位，例如目录名不可以为jakarta-tomcat，这会影响到环境变量的设置，可以将其改名为tomcat
+　　2、设置环境变量TOMCAT_HOME，它的值为Tomcat安装目录完整路径(不要以\结尾)
+　　3、Tomcat安装目录的bin子目录下的startup.bat用于启动服务,shutdown.bat为停止服务,服务的缺省端口为8080
+　　4、启动服务，然后在浏览器上输入http://localhost:8080/来检查是否已经安装成功
+四、环境变量设置
+　　Windows 9x：
+　　　　在C:\autoexec.bat中设置，如：
+　　　　　　set JAVA_HOME=C:\JDK
+　　　　　　set PATH=%JAVA_HOME%\bin;%PATH%
+　　　　　　set TOMCAT_HOME=C:\TOMCAT
+　　　　设置完后请重新启动计算机
+　　NT：
+　　　　在“控制面板”的“系统”窗口中的“环境”栏中设置，设置完后不用重启计算机

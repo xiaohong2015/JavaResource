@@ -1,0 +1,112 @@
+作者：diego lynn
+日期：2001-3-25 11:01:04
+Do I need to change my application to work with JavaTM Web Start? 
+
+If your application is written to the JavaTM 2 platform, and is delivered as a set of JAR files, there should be no need to revise your application. 
+
+Make sure that all your application resources (such as images and resource bundles, for example) are retrieved from a JAR file, since JavaTM Web Start launches an application by invoking the public static void main(String[] args) method.  
+
+And if your application needs unrestricted access to the system, (for example, network or disk access), you will need to sign your code. back to top 
+
+Is there a migration path from applets to applications? OR Does JavaTM Web Start support applets? 
+
+JavaTM Web Start is primarily designed for application deployment. You specify all requirements for your application in the JNLP file, and off you go. We do provide the ability to launch Applets in much the same way as the traditional AppletViewer. The built-in AppletViewer is there to provide an easy migration path for existing Applets that want to take advantage of JavaTM Web Start. However, it is not intended to be a full implementation of the Plug-In. The Plug-In is the primary launching vehicle for Applets. The built-in AppletViewer in JavaTM Web Start has certain limitation, e.g., you can not specify class files as resources and policy files are not accepted. back to top 
+
+Is there a way to pass VM properties to JavaTM Runtime? 
+
+JavaTM Web Start allows certain JVM flags to be set in the JNLP file. Allowing the complete set could compromise security as well as limit portability across different platforms and implementations. Properties (-D) can be set using the 
+
+<property name="..." value=".."/> 
+element in the <resources> section. The maximum and initial heap size can be set using the initial-heap-size and max-heap-size attributes of the j2se element, e.g., 
+<j2se version="..." max-heap-size="100M"/>   back to top 
+
+I don't want to rely on server time stamp. How can I specify versioned JAR and how can I get incremental updates of JARs? 
+
+JavaTM Web Start 1.0 supports versioned JARs and incremental update. You have the ability to specify exact versions of the JAR files you want, instead of relying on the time-stamp information to know if an update is available. 
+
+Using version-id's also allows you to provide incremental updates from one version to another. 
+
+See the JNLP specification for the details: 
+http://java.sun.com/aboutJava/communityprocess/jsr/jsr_056_jnlp. html 
+back to top 
+
+Are JAR files shared between applications? 
+
+Each JAR file that a JNLP Client (such as JavaTM Web Start) downloads, is uniquely identified with a URL. If two JNLP files uses the same URL, then the resource will only be downloaded once and shared. This is similar to the caching implementations with Internet browsers. back to top 
+
+Is JRE 1.1 supported? 
+
+JavaTM Web Start relies heavily on the new security model introduced with Java 2, and would be very hard (if not impossible) to implement on top of JRE 1.1.x. Therefore, the answer is no. back to top 
+
+How can I provide my own splash screen? 
+
+JavaTM Web Start needs to put up the initial splash screen, since at that point there is no application specific code. Downloading the application code might take a few seconds to several minutes. That is too long to wait to get the initial splash screen. 
+
+It is important that all applications launched through JavaTM Web Start have an initial common look, so the security paradigm that this model implies, can be properly communicated to the end user. 
+
+An application can be written, so the initial download is rather small, e.g., in the order of 10 - 20 K. The initial download will then put up the initial application splash screen, and then proceeds to download the rest of the application. back to top 
+
+How can I save the Application state on the local system? 
+
+A sandboxed application can store state, using the PersistenceService APIs. 
+
+This API is somewhat similar to cookies for HTML pages. Thus, it will be a secure way of persistently store information locally on the client computer.  
+
+Please refer to the Specification and Developers Guide for more information: 
+
+http://java.sun.com/aboutJava/communityprocess/jsr/jsr_056_jnlp. html 
+
+http://java.sun.com/products/javawebstart/docs/developersguide.h tml#dev 
+back to top 
+
+If my application needs a specific JRE to run, how do I specify this in my JNLP file? 
+
+A <j2se version="..."> specifies a platform version. Currently, there are two revisions of the Java 2 platform, 1.2 and 1.3. 
+
+The 1.2 platform is implemented by e.g Sun JRE's 1.2, 1.2.1, 1.2.2-w, etc. 
+
+The 1.3 platform is implemented by e.g Sun JRE's 1.3.0 so far. 
+
+You can request a specific product version by including a vendor URL. For Sun's JREs that will be 
+
+http://jsp.java.sun .com/servlet/javawsExtensionServer 
+
+Thus, the following J2SE tag will request any Sun 1.2.2 implementation. 
+
+<j2se version="1.2.2*" href="http://jsp.java.sun.com/servlet/javawsExtensionServer"/> 
+
+You can see all the versions of the installed JREs by inspecting the preferences panel of JavaTM Web Start's built-in application manager. back to top 
+
+How can I specify my resource using relative URLs to the Web page? 
+
+This is currently not possible since the URLs in the <jar> elements are all relative to the in the codebase attribute. However, the codebase attribute cannot be relative. However, we are looking at alternate solutions to solve this problem in a future release. back to top 
+
+How do I specify a version of a Standard Extension? 
+
+The JNLP specification defines an extension mechanism that covers standard extension. Thus, you will be able to specify exactly a version of an extension you need and have it automatically downloaded and installed. The JNLP specification describes this in detail: 
+http://java.sun.com/aboutJava/communityprocess/jsr/jsr_056_jnlp. html 
+back to top 
+
+Can I rely on Class-Path in the Manifest file? 
+
+JavaTM Web Start does not support the Class-Path entry in the manifest file. The Class-Path attribute is entirely file-centric, where as JavaTM Web Start and JNLP is Web-centric, i.e., based on URLs. Thus, the two models do not merge easily. 
+
+Instead of relying on the Class-Path entry, you can list multiple JAR files in the JNLP file, e.g.,: 
+<resources> 
+    <jar href="A.jar"/> 
+    <jar href="B.jar"/> 
+</resources> 
+
+The JNLP specification describes how JavaTM Web Start works in detail: 
+http://java.sun.com/aboutJava/communityprocess/jsr/jsr_056_jnlp. html 
+
+In a JNLP file, you can factor out dependencies on a set of JAR files to another JNLP file using the <extension... > element. Thus, you can achieve the same kind of re-usability and ease of maintenance as you do with the Class-Path entry. This is specified in the specification. 
+
+JNLP also implements a just-in-time downloading mechanism, just as for Applets. For each resource in a JNLP file, you can specify which parts should be eagerly or lazily downloaded, i.e., before the application is launched and which ones can be downloaded later. Default is eager download. Furthermore, the specification includes an API for which you can programatically query JavaTM Web Start about which resources are available and request them to be downloaded. Thus, you can write download/network aware applications. back to top 
+
+Can I use JavaTM Web Start even if my Application depends or uses native code (.dlls, .so)? 
+
+JavaTM Web Start can be used to deploy JavaTM Technology-based applications that also depends on native code. The <nativelib ...> element can be used to specify native libraries (such as DLLs or .so files) that an application depends on. See the Developer's Guide for details. 
+
+http://java.sun.com/products/javawebstart/docs/developersguide.h tmlback to top 
+

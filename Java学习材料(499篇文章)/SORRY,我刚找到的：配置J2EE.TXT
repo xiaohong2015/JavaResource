@@ -1,0 +1,28 @@
+作者：大哥
+email: programmers@sina.com
+日期：2001-7-9 10:07:02
+这一段时间在学习J2EE＆EJB，我最感兴趣的还是做JDBC的EJB，但是由于我手头上没有J2EE默认的Cloudscape，也不敢装Oracle，我的机器太次，跑J2EE已是满负荷运转，绝不能再加大家伙！因此我想继续使用小巧玲珑的Mysql。 
+
+首先当然是系统环境软件的安装，我就不多说了，在下面我给出了几种软件的下载地址。需要特别强调的是，请一定要注意你安装的Mysql的版本，我们平常用的大都是“mysql-shareware-3.22.30-win”这个版本，但J2EE需要3.23.15以上的Mysql，这个是我花费大半天时间得到的教训。 
+
+经我的多次实验，J2EE的配置文件default properties中应按如下设置： 
+jdbc.drivers=org.gjt.mm.mysql.Driver 
+jdbc.datasources=jdbc/TestDb|jdbc:mysql://localhost:3306/test?user=jian&password=jian 
+以上语句很简单，用过Mysql的jdbc driver的人一看就明，所要注意的是其中的“jdbc/TestDb”实际上就是JNDI用来标识该数据库的名字。 
+
+在EJB中调用就很简单了: 
+DataSource ds = (DataSource) ic.lookup("jdbc/TestDb"); 
+
+其实配置正确后回过头来再看，觉得真是很简单，但正是正确之前的一段摸索历程耗费了我很多的精力，所谓黎明前的黑暗吧。 
+从我使用的情况来看，这个版本的J2EE的错误提示机制特差，看上去不知所云，而且并不稳定，比如用它的装配工具生成的JAR包，虽然可用，但每次总被系统弹出窗口警告说是“无效的Windows NT映像”，弄得烦不胜烦，还有，明明按我上述配置已经能顺利运行连接Mysql的EJB，但error.log和dos窗口总是会记载说“Cannot find principal mapping information for data source with JNDI name jdbc/TestDb”。不过虽然有警告和错误日志记载，但只要你程序能够顺利地运行，尽可不去理会那么多，毕竟，J2EE还只是一个新生事物，没有经过长时间广范围的评测和使用。 
+
+由于本人水平有限，谬误之处烦劳予以纠正。 
+
+运行环境 
+Platform: Winnt 4.0 
+J2EE: JavaTM 2 SDK, Enterprise Edition Version 1.2.1 
+JDK: j2sdk1.3.0 
+Mysql: mysql-3.23.23-beta-win 
+Driver: mm.mysql-2.0.2 
+
+

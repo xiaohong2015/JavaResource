@@ -1,0 +1,322 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 1:15:04 PM
+发布者:flyfox 
+
+Tip:通过socket访问数据库,分 Clinet, Display,sqlServer三个类 
+
+Client.java 
+
+import java.awt.*; 
+import java.io.*; 
+import java.net.*; 
+import java.applet.*; 
+
+public class Client extends Applet 
+{ 
+public TextArea chat_txt; 
+private TextField sql_txt; 
+private Button connect,execute; 
+private Socket soc= null; 
+private PrintStream ps= null; 
+Listen listen; 
+
+public void init() 
+{ 
+chat_txt= new TextArea(); 
+sql_txt= new TextField(20); 
+connect= new Button("Connect"); 
+execute= new Button("Execute"); 
+execute.disable(); 
+
+Panel pp= new Panel(); 
+pp.setLayout(new FlowLayout()); 
+pp.add(sql_txt); 
+pp.add(connect); 
+pp.add(execute); 
+
+add("North",pp); 
+add("Center",chat_txt); 
+} 
+
+public boolean action(Event evt,Object obj) 
+{ 
+if(evt.target instanceof Button) 
+{ 
+String label= (String)obj; 
+if(label.equals("Connect")) 
+{ 
+
+try{ 
+soc= new Socket(InetAddress.getLocalHost(),4700); 
+ps= new PrintStream(soc.getOutputStream()); 
+ps.println("HELLO"); 
+ps.flush(); 
+listen= new Listen(this,soc); 
+listen.start(); 
+}catch(Exception e) 
+{ 
+chat_txt.setText(e.toString()); 
+disconnect(); 
+} 
+connect.setLabel("Disconnect"); 
+execute.enable(); 
+}else if(label.equals("Disconnect")) 
+disconnect(); 
+else if(label.equals("Execute")) 
+{ 
+if(sql_txt.getText()!= null) 
+{ 
+ps.println("FIND"); 
+ps.flush(); 
+ps.println(sql_txt.getText()); 
+ps.flush(); 
+} 
+} 
+} 
+return false; 
+} 
+
+public void disconnect() 
+{ 
+if(soc!= null) 
+{ 
+try{ 
+listen.stop(); 
+ps.println("QUIT"); 
+ps.flush(); 
+soc.close(); 
+}catch(Exception e){} 
+finally{ 
+listen.stop(); 
+listen= null; 
+soc= null; 
+} 
+execute.disable(); 
+connect.setLabel("Disconnect"); 
+} 
+} 
+} 
+
+class Listen extends Thread 
+{ 
+Socket socket= null; 
+DataInputStream dis= null; 
+Client parent= null; 
+
+public Listen(Client p,Socket s) 
+{ 
+parent= p; 
+socket= s; 
+try{ 
+dis= new DataInputStream(socket.getInputStream()); 
+}catch(Exception e){} 
+} 
+
+public void run() 
+{ 
+String line= null; 
+
+while(true) 
+{ 
+try{ 
+line= dis.readLine(); 
+}catch(Exception e){} 
+if(line!= null) 
+parent.chat_txt.appendText(line); 
+} 
+} 
+} 
+
+
+Display.java 
+
+/******************************************** 
+格式化输出数据库记录,出自<<使用java进行SQL数据库程序设计>> 
+返回值为格式化的字符串 
+********************************************/ 
+import java.sql.*; 
+
+class Display extends Object 
+{ 
+ResultSet theResultSet; 
+String theResult; 
+
+public void display() 
+{} 
+
+public void setResult(ResultSet result) 
+{ 
+theResultSet= result; 
+} 
+
+public String getString() 
+throws SQLException,NoClassDefFoundError 
+{ 
+theResult= ""; 
+ResultSetMetaData metaData= theResultSet.getMetaData(); 
+int colcount = metaData.getColumnCount(); 
+int colSize[]= new int[colcount]; 
+String colLabel[]= new String[colcount]; 
+int colType[]= new int[colcount]; 
+String colTName[]= new String[colcount]; 
+int colPrec[]= new int[colcount]; 
+int colScale[]= new int[colcount]; 
+
+theResult +="\n"; 
+for(int i= 1;i<= colcount;i++) 
+{ 
+colSize[i-1] = metaData.getColumnDisplaySize(i); 
+colLabel[i-1]= metaData.getColumnLabel(i); 
+colType[i-1] = metaData.getColumnType(i); 
+colTName[i-1]= metaData.getColumnTypeName(i); 
+colPrec[i-1] = metaData.getPrecision(i); 
+colScale[i-1]= metaData.getScale(i); 
+
+if(colSize[i-1]<1+ colLabel[i-1].length()) 
+colSize[i-1]= 1+colLabel[i-1].length(); 
+theResult+= rightPad(colLabel[i-1],colSize[i-1]); 
+} 
+
+theResult +="\n\n"; 
+int row= 0; 
+
+while(theResultSet.next()) 
+{ 
+row++; 
+for(int i=1;i<= colcount;i++) 
+{ 
+String colvalue= theResultSet.getString(i); 
+if(colvalue== null) 
+colvalue=""; 
+theResult+= rightPad(colvalue,colSize[i-1]); 
+} 
+theResult+="\n"; 
+} 
+theResult+="\n(" +row+ "rows included)\n"; 
+return theResult; 
+} 
+
+private String rightPad(String s,int len) 
+{ 
+int curlen= s.length(); 
+if(curlen>len) 
+return repString("*",len); 
+return (s+repString(" ",(len-curlen))); 
+} 
+
+private String repString(String s,int times) 
+{ 
+String result=""; 
+for(int i=0;i<times;i++) 
+result+= s; 
+return result; 
+} 
+} 
+
+
+sqlServer.java 
+
+import java.awt.*; 
+import java.sql.*; 
+import java.io.*; 
+import java.net.*; 
+import Display; 
+
+public class sqlServer 
+{ 
+public static void main(String[] args) 
+{ 
+System.out.println("Waiting for connection"); 
+
+try{ 
+ServerSocket session= new ServerSocket(4700); 
+handleRequests handler= null; 
+System.out.println("Waiting for connection"); 
+while(true) 
+{ 
+Socket socket= null; 
+socket= session.accept(); 
+if(socket== null) 
+continue; 
+System.out.println("Connection made"); 
+handler= new handleRequests(socket); 
+handler.start(); 
+} 
+}catch(Exception e) 
+{ 
+System.out.println("客户连接失败"+e); 
+} 
+} 
+} 
+
+class handleRequests extends Thread 
+{ 
+private DataInputStream in= null; 
+private PrintStream out= null; 
+private Socket socket= null; 
+
+Connection theConnection= null; 
+Statement theStatement= null; 
+ResultSet theResultSet= null; 
+Display display= null; 
+
+public handleRequests(Socket s) 
+throws IOException 
+{ 
+socket= s; 
+in= new DataInputStream(socket.getInputStream()); 
+out= new PrintStream(socket.getOutputStream()); 
+} 
+
+public void openConnection() 
+{ 
+try{ 
+Class.forName("sun.jdbc.odbc.JdbcOdbcDriver"); 
+if(theConnection!= null) 
+theConnection.close(); 
+theConnection= DriverManager.getConnection("jdbc:odbc:test","admin","1234"); 
+theStatement= theConnection.createStatement(); 
+display= new Display(); 
+}catch(Exception e) 
+{ 
+System.out.println(e); 
+} 
+} 
+
+public void run() 
+{ 
+openConnection(); 
+try{ 
+String line= null; 
+while(true) 
+{ 
+line = in.readLine(); 
+if(line!= null) 
+line= line.trim(); 
+if(line.equals("FIND")) 
+{ 
+line = in.readLine(); 
+line= line.trim(); 
+theResultSet= theStatement.executeQuery(line); 
+display.setResult(theResultSet); 
+out.print(display.getString()); 
+out.flush(); 
+} 
+if(line.equals("QUIT")) 
+break; 
+if(line.equals("HELLO")) 
+{ 
+out.println("Welcome to join us"); 
+out.flush(); 
+} 
+} 
+in.close(); 
+out.close(); 
+socket.close(); 
+}catch(Exception e) 
+{ 
+System.out.println(e); 
+} 
+} 
+}

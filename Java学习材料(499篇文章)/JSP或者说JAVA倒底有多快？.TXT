@@ -1,0 +1,209 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：2001-5-30 12:16:20
+//作者:sonymusic
+//原载于豆腐技术站（www.asp888.net）
+package sony.utils;
+
+import java.util.*;
+import javax.servlet.jsp.*;
+/**
+* 一个计时类。
+* 创建日期：(2000-11-6 13:09:38)
+* 作者：SonyMusic(sonymusic@china.com)
+*/
+public class Timing{
+private ArrayList nameArray=new ArrayList();
+private ArrayList timeArray=new ArrayList();
+private javax.servlet.jsp.JspWriter out;
+private boolean inJsp=false;
+/**
+* 这个构造器是在JAVA中用的。
+*/
+public Timing() {
+super();
+this.inJsp=false;
+}
+/**
+* Timing 构造，这个构造　器是在JSP中用的。
+*/
+public Timing(javax.servlet.jsp.PageContext pageContext) {
+super();
+this.out=pageContext.getOut();
+this.inJsp=true;
+}
+/**
+* 此处插入方法说明。
+* 创建日期：(2000-11-6 13:40:36)
+* @param name java.lang.String
+*/
+public void add(String name) {
+if(name==null || name.length()==0) name="Default";
+//if(name.length()>7) name=name.substring(0,7);
+nameArray.add(name);
+timeArray.add(Calendar.getInstance());
+}
+/**
+* 这里是在JAVA中用法。
+* 创建日期：(2000-11-6 14:39:43)
+* @param args java.lang.String[]
+*/
+public static void main(String[] args) {
+Timing time=new Timing();
+time.add("Start");
+Random ran=new Random();
+int i=0,j=0;
+for(i=0;i<10000000;i++)
+j+=ran.nextInt();
+time.add("After 100");
+for(i=0;i<100000;i++)
+j+=ran.nextInt();
+time.add("After 100000");
+for(i=0;i<100000;i++)
+j+=ran.nextInt();
+time.add("After 100000");
+time.show();
+}
+/**
+* 此处插入方法说明。
+* 创建日期：(2000-11-6 13:43:24)
+*/
+public void show() {
+if(inJsp)
+showInJsp();
+else
+showInJava();
+
+}
+/**
+* 此处插入方法说明。
+* 创建日期：(2000-11-6 13:46:06)
+*/
+private void showInJava() {
+if(nameArray.isEmpty()){
+System.out.println("尚未增加计时点！");
+return;
+}
+Calendar oldCal=null,cal=null,firstCal;
+//=Calendar.getInstance()
+String name;
+firstCal=(Calendar)timeArray.get(0);
+System.out.println("序号\t\t名称\t\t\t\t时间\t\t\t\t耗时(秒)");
+for(int i=0;i<nameArray.size();i++){
+name=(String)nameArray.get(i);
+cal=(Calendar)timeArray.get(i);
+System.out.print(i+1);
+System.out.print("\t\t\t");
+System.out.print(name+"\t\t\t\t");
+System.out.print(cal.get(Calendar.HOUR_OF_DAY)+":"+cal.get(Calendar.MINUTE)+":"+cal.get(Calendar.SECOND)+"."+cal.get(Calendar.MILLISECOND));
+System.out.print("\t\t\t\t");
+if(oldCal==null){
+System.out.println("无");
+}
+else{
+long diffTime=cal.getTime().getTime()-oldCal.getTime().getTime();
+System.out.println((double)diffTime/1000);
+}
+oldCal=cal;
+}
+System.out.println("");
+if(nameArray.size()==1){
+System.out.println("只增加了一个计时点，无法统计时间！");
+}
+else{
+long diffTime=oldCal.getTime().getTime()-firstCal.getTime().getTime();
+System.out.println("总计耗时： "+(double)diffTime/1000+" 秒");
+}
+}
+/**
+* 此处插入方法说明。
+* 创建日期：(2000-11-6 13:57:56)
+*/
+private void showInJsp() {
+try {
+if (nameArray.isEmpty()) {
+return;
+}
+Calendar oldCal = null, cal = null, firstCal;
+String name;
+long diffTime;
+firstCal = (Calendar) timeArray.get(0);
+System.out.println("序号\t\t名称\t\t\t\t时间\t\t\t\t耗时(秒)");
+String str = "";
+str += "<table width=\"400\" border=\"1\" cellspacing=\"0\" cellpadding=\"0\">"; 
+str += "<tr><td>序号</td><td>名称</td><td>时间</td><td>耗时(秒)</td></tr>";
+for (int i = 0; i < nameArray.size(); i++) {
+str += "<tr>";
+name = (String) nameArray.get(i);
+cal = (Calendar) timeArray.get(i);
+str += "<td>";
+str += i + 1;
+str += "</td>";
+str += "<td>" + name + "</td>";
+str += "<td>"
++ cal.get(Calendar.HOUR_OF_DAY)
++ ":"
++ cal.get(Calendar.MINUTE)
++ ":"
++ cal.get(Calendar.SECOND)
++ "."
++ cal.get(Calendar.MILLISECOND)
++ "</td>"; 
+if (oldCal == null) {
+//System.out.println("无");
+str += "<td>无</td>";
+} else {
+diffTime = cal.getTime().getTime() - oldCal.getTime().getTime();
+str += "<td>" + (double) diffTime / 1000 + "</td>";
+}
+oldCal = cal;
+str += "</tr>";
+}
+str += "<tr><td colspan=\"4\">";
+
+if (nameArray.size() == 1) {
+str += "只增加了一个计时点，无法统计时间！";
+} else {
+diffTime = oldCal.getTime().getTime() - firstCal.getTime().getTime();
+str += "总计耗时： " + (double) diffTime / 1000 + " 秒";
+}
+str += "&nbsp;</td></tr>";
+str += "</table>";
+out.println(str);
+} catch (java.io.IOException e) {
+}
+
+}
+}
+
+
+以下是在JSP中的用法
+
+<%@ page contentType="text/html;charset=gb2312"%>
+<%@ page import="sony.utils.*,java.util.*"%>
+<html>
+<head>
+<title>Untitled</title>
+</head>
+
+<body>
+<%
+Timing time=new Timing(pageContext);
+time.add("Start");
+Random ran=new Random();
+int i=0,j=0;
+for(i=0;i<1000000;i++)
+j+=ran.nextInt();
+
+time.add("After 100");
+for(i=0;i<100000;i++)
+j+=ran.nextInt();
+time.add("After 100000");
+for(i=0;i<100000;i++)
+j+=ran.nextInt();
+time.add("After 100000");
+
+time.show();
+%>
+</body>
+</html>

@@ -1,0 +1,131 @@
+作者：jeru
+email: jeru@163.net
+日期：7/13/2001 5:48:41 PM
+二, 结构型模式 (Structural Patterns)
+这一类的模式关心类和对象之间怎么组织起来形成大的结构. 主要使用继承来组织接口或实现. 
+
+我们再接着思考一下, 用户之间应该有所区别, 有 Guest 用户, 可以让他来看一看, 但不能发贴子, 正式用户可以发贴子, 查看自己的个人信息, 版面管理者(称之为版主)应该可以控制贴子, 比如加上适当的标记, 收入精华区, 甚至删除贴子等等, 而系统管理者应该具有更高的权限, 比如开新的版面, 删除用户等操作. 怎么实现这个功能呢? 我们知道, Jive 中所有实际的操作都是由 database 目录下的类所实现的,如果把权限控制加到数据库这一层的话, 这一层不但臃肿, 而且写好以后, 如果要改的话, 需要修改的地方很多, 还容易出错, 所以可以在这一层之上再加一层, 单独进行权限控制. 这样就把 "该不该做" 和 "怎么做" 分割开来, 利于以后修改. 其实这也是面象对象的一个思想 -- 一个对象不要负担太多的责任. 这种方法在设计模式中称为 Proxy (代理) 模式. 好比生产厂家和代理商的关系. (当然, 在 Jive 中这个比喻不太合适). Proxy 的目的就是给另一个对象提供一个代理来控制对它的访问. 
+Proxy 模式一直贯穿 Jive 的始终, 几乎所涉及到的对象都需要. 其结构如图 2所示. 
+从前面已经知道, ForumFactory 是整个系统的开始. 再来看看 ForumFactory 的代码: From ForumFactory.java
+
+ForumFactory.getInstance() 的最后:
+
+        ForumFactoryProxy proxy = new ForumFactoryProxy(
+                                    factory,
+                                    authorization,
+                                    factory.getPermissions(authorization)
+                                  );
+        return proxy;
+ 
+
+前面得到的 factory 是 DbForumFactory 的实例, 这里把这个实例又用ForumFactoryProxy 封装起来. 最后返回一个 ForumFactoryProxy 的实例. 也就是说 jsp skin 的设计者所用的 ForumFactory 实际上是 ForumFactoryProxy. 接着看看 ForumFactoryProxy 里发生了什么事, 那一个小片段做例子: 
+其构造函数中的 Factory 就是一个 DbForumFactory 的实例, 由它来做具体的工作. Authorization 可以认为是一个认证过的当前用户(指实际的浏览器的使用者),ForumPermissions 可以认为是当前用户的权限. 
+    public Forum createForum(String name, String description)
+            throws UnauthorizedException
+    {
+        //这里就对权限进行了检查, 具有系统管理员权限, 则可以进行相应的操作,
+        //否则抛出异常.
+
+        if (permissions.get(ForumPermissions.SYSTEM_ADMIN)) {
+            Forum newForum = factory.createForum(name, description);
+            return new ForumProxy(newForum, authorization, permissions);
+        }
+        else {
+            throw new UnauthorizedException();
+        }
+    }
+
+    public Forum getForum(int ID) throws ForumNotFoundException,
+            UnauthorizedException
+    {
+        Forum forum = factory.getForum(ID);
+        ForumPermissions forumPermissions = forum.getPermissions(authorization);
+        //Create a new permissions object with the combination of the
+        //permissions of this object and tempPermissions.
+        ForumPermissions newPermissions =
+                new ForumPermissions(permissions, forumPermissions);
+        //Check and see if the user has READ permissions. If not, throw an
+        //an UnauthorizedException.
+        if (!(
+            newPermissions.get(ForumPermissions.READ) ||
+            newPermissions.get(ForumPermissions.FORUM_ADMIN) ||
+            newPermissions.get(ForumPermissions.SYSTEM_ADMIN)
+            ))
+        {
+            throw new UnauthorizedException();
+        }
+
+        // 同上所述.
+        // 这里得到的 forum, 是一个 DbForum 的实例, 跟 ForumFactory 一样,
+        // 返回一个封装过的代理对象, 来对 forum 进行权限控制.
+
+        return new ForumProxy(forum, authorization, newPermissions);
+    }
+ 
+
+
+其他所有的对象都是类似的. 这里就不再赘述. 
+
+三, 行为型模式 (Behavioral Patterns)
+这一类的模式关心的是算法以及对象之间的任务分配. 它所描述的不仅仅是对象或类的设计模式, 还有它们之间的通讯模式. 
+
+1, 下来看看怎么从一个 Forum 中得到一些 Thread. 当然这里要涉及到数据库, 我们先设计一个最简单的数据库表, 表名: thread, 字段 ThreadID int, ForumID int, 其他内容我们不关心. 然后比如 Forum 中的一个方法, getThreads() 来返回当前 Forum 所有的 Thread. 然后就可以这样做:            public ForumThread[] getThreads()
+           {
+                1, 从数据库里面查询, 取出所有的 ThreadID,
+                2, 根据 ThreadID 构造 ForumThread 对象,
+                3, 返回一个数组.
+           }
+ 
+
+这样做最省事, 最简单了, 但好不好呢? 还得看需求, 比如我要求根据时间排序,就还得修改这个方法, 也就是说需要修改 DbForum 对象. 那为什么不把取 Thread 这个操作单独拿出来呢? 这样的好处就是功能独立化, 使 DbForum 更简单, 符合前面我们所提到的不要让对象负担太多的责任这个原则. 也许你会说, 如果要修改的话, 不是都得修改吗? 放哪里是一样的, 这样没错, 但只限于很小的系统, 如果系统一大, 那么就可能做 DbForum 中的简单查询和一些比较复杂的查询的程序员就不是一个人, 这样牵扯到需要改动的地方较多, 但分离以后, 只需要一个人改很少的地方就可以完成. 回过头来再看看问题, 这里要返回一群 ForumThread 对象, 而且它们之间还可能有一定的先后关系, 怎么来做这个工作呢? Iterator 设计模式是一个合适的选择. Iterator 模式提供了一个连续访问一大群对象的方法, 而不需要知道它们的表现形式, 比如按什么方式排序等等. 
+好了, 来看看 Jive 的具体实现. 由于 Java 本身已经有这样的接口, Iterator 接口, 所以只要实现这个接口就可以了.
+From DbForum:
+
+    public Iterator threads() {
+        return new DbForumIterator(this, factory);
+    }
+
+
+From DbForumIterator:  (做了改动)
+
+public class DbForumIterator implements Iterator {
+
+     public DbForumIterator(...)
+     {
+        ...
+     }
+
+     public boolean hasNext()       //是否还有元素
+     {
+       ...
+     }
+
+     public Object next()      // 得到下一个元素
+     {
+       ...
+     }
+
+     ...
+
+}
+ 
+那么 jsp 中可以这样访问:     Iterator threads = aForum.threads();
+    while (threads.hasNext())
+    {
+        ForumThread thread = (ForumThread)threads.next();
+        做一些操作.
+    }
+ 
+从中可以看出, 通过使用 Iterator 把 Threads 的一些具体细节进行了封装, 提供统一的接口. Jive 中这个设计模式也是用的非常多, 多个用户显示, 多个版面显示, 多个线索, 多个贴子都需要由它来实现. 
+
+小结:
+上面我们一起探讨了一下设计模式在 Jive 中的应用情况, 当然只是很简单, 很肤浅, 也很片面, 不过总算能对设计模式有些认识. 实际上, 设计模式就是吸收许多前人的经验, 把设计中一些重要的和重复出现的一些模式总结起来, 给出一个系统的命名,给出相应的解释和评价, 这个工作最先由 4 位软件大师所做, 他们合写了一本书 --Design Pattern: Elements of Reusable Object-Oriented Software, 后来, 人们把他们称为 GoF (Gang Of Four). 
+
+对于设计模式, 可能在我们的实际项目中自觉不自觉地在使用着, 比如 Factory Method 模式, Abstract 模式, Singleton 模式, Iterator 模式, 等等, 只是概念不是非的明确, 设计可能还有不太合理的地方, 处于一种跟着感觉走的状态, 相信很多有经验的设计者, 原来没有接触设计模式, 一旦接触以后, 会有一种恍然大悟的想法, 哈, 原来是这么回事. 学习设计模式, 能很好地帮助我们设计, 在相同的问题, 相同的背景下,可以直接使用它, 有的时候不知道该选择哪种好, 就需对问题进行更深一层的分析, 进行综合权衡, 对设计模式也要进行更深刻的理解, 才能得到好的结果, 这也是一个进步的过程. 
+
+对于笔者来说, 刚刚接触设计模式, 有了一点粗浅的理解, 就冒昧写了这篇算是一点心得的东西, 也是对自己的挑战, 中间犯的一些错误, 还请指正, 谢谢. 
+
+参考文献:
+
+Design Pattern: Elements of Reusable Object-Oriented Software, 
+Jive 源代码 

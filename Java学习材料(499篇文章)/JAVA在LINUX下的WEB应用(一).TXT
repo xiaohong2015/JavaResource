@@ -1,0 +1,145 @@
+作者：blackwhites
+日期：2000-10-25 18:00:05
+RedHat下安装apache jserv 1.1.2 
+
+虽然apache jserv的开发小组现在都从事tomcat的开发，而且apache jserv只支持servlet 2.0 
+
+的标准，并且要加其他的软件(gnujsp)才能支持jsp;但是apache jserv在现阶段比tomcat稳定， 
+
+因此现在apache jserv+gnujsp比较适合应用于web。如果想使用servlet2.2和jsp1.1的话，请 
+
+使用tomcat，参看tomcat的安装。本文介绍apache jserv 1.1.1在RedHat下的安装。 
+
+一、需要的软件： 
+
+jdk_1.2.2从http://java.sun.com下载 
+
+apache_1.3.12从www.apache.org下载 
+
+apache jserv-1.1.1从java.apache.org下载 
+
+jsdk2.0(只能是2.0)从http://java.sun.com下载 
+
+二、安装过程 
+
+请先安装好jdk，具体可参考jdk安装，注意设置好CLASSPATH和PATH 
+
+拷贝apache,apache jserv源码包到/tmp下 
+
+#tar xvzf apache_1.3.12.tar.gz 
+
+#tar xvzf ApacheJServ-1.1.2.tar.gz 
+
+1、静态编译，即编译进apache 
+
+#cd apache_1.3.12 
+
+#./configure --prefix=/usr/local/apache 
+
+配置apache jserv编译参数 
+
+#cd ../ApacheJServ-1.1.2 
+
+#./configure  
+
+--prefix=/usr/local/jserv  
+
+--with-apache-src=../apache_1.3.12  
+
+--with-jdk-home=/usr/local/jdk  
+
+--with-java-platform=2  
+
+--with-JSDK=/usr/local/JSDK/lib/jsdk.jar 
+
+#make 
+
+#make install 
+
+编译apache和apache jserv 
+
+#cd ../apache_1.3.12 
+
+#./configure  
+
+--prefix=/usr/local/apache  
+
+--activate-module=src/modules/jserv/libjserv.a 
+
+#make 
+
+#make install 
+
+运行#/www/bin/httpd -l检查一下mod_jserv是否编译进apache了 
+　　2、动态编译(DSO模式） 
+
+#cd apache_1.3.12 
+
+#./configure 
+
+--prefix=/usr/local/apache 
+
+--enable-shared=max 
+
+#make 
+
+#make install 
+
+配置apache jserv编译参数 
+
+#cd ../ApacheJServ-1.1.2 
+
+#./configure  
+
+--prefix=/usr/local/jserv  
+
+--with-apxs=/usr/local/apache/bin/apxs  
+
+--with-jdk-home=/usr/local/jdk  
+
+--with-java-platform=2  
+
+--with-JSDK=/usr/local/JSDK/lib/jsdk.jar 
+
+#make 
+
+#make install 
+
+如果你想使用mod_ssl请加入--with-EAPI选项 
+
+三、更改配置文件 
+
+在/www/conf/httpd.conf中加入 
+
+Include /usr/local/jserv/etc/jserv.conf 
+
+如果你用DSO模式安装的话，请把jserv.conf中 
+
+LoadModule jserv_module /usr/local/jserv/libexec/mod_jserv.so前面的注释去掉 
+
+启动apache 
+
+用浏览器测试http://yourserver/servlets/IsItWorking 
+
+看见了Yes,It's working!了吗？你成功了！！ 
+
+你可以更改jserv.conf中的 
+
+SetHandler jserv-status 
+
+order deny,allow 
+
+deny from all 
+
+加入你的信任主机allow from xxxx 
+
+这样在信任主机上通过http://yourserver/jserv/(注意后面这个"/"不能少）可以看到你的 
+
+apache jserv的配置信息。 
+
+接着在/usr/local/jserv/servlets下放入你自己的servlet class实验一下效果吧，测试结果 
+
+表明在redhat6.2下没有中文显示问题，一切ok! 
+
+其他关于servlet zone的设置、load balance等等请参考apache jserv文档和java.apache.org网站 
+

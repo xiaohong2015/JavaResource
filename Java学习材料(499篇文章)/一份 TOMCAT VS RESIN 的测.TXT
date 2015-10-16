@@ -1,0 +1,33 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-2-9 18:53:49
+----- Original Message -----
+From: Griggs, James <griggsj@netgenshopper.com>
+To: <tomcat-dev@jakarta.apache.org>
+Sent: Tuesday, February 08, 2000 3:37 PM
+Subject: Tomcat vs. Resin
+
+
+> I ran an informal test for 9 hours last night on a Win98 PC comparing the
+> latest tomcat(apache.org) code and the latest resin
+> (caucho.com) both using Suns JDK 1.2.  I used 2 instances of socrates to
+> simulate 100 users requesting a hello.jsp file at random intervals.
+> Tomcat and Resin were running at the same time on different ports.
+>
+> Result: Tomcat: Resin:
+> Total Requests Handled 26094 6546375
+> Total Requests Dropped 4691 0
+> Requests per Second .1 195
+> Average Latency 98.17 .15
+>
+> I'm assuming the dramatic difference in requests handled is due to a 60
+> second timeout on dropped requests.
+>
+> I'm wondering if anyone can explain the dramatic difference in the
+results?
+> Am I doing something wrong here to cripple Tomcat?  (... and since I know
+> the question will be asked: I have no affiliation with Caucho ;o)
+>
+> Jim Griggs
+> jim@netgenShopper.com
+>

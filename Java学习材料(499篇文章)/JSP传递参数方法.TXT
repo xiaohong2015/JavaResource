@@ -1,0 +1,11 @@
+作者：whitefox
+email: whitefox.jiang@corp.elong.com
+日期：2000-7-5 23:14:28
+<jsp:forward page="url">
+        <jsp:param name="parametername" value="parametervalue"/>
+</jsp:forward>
+
+
+or
+
+response.sendRedirect("url?name=value.....") 

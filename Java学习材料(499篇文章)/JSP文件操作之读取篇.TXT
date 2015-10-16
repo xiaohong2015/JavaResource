@@ -1,0 +1,160 @@
+×÷Õß£ºasp3000
+email: coolknight@263.net
+ÈÕÆÚ£º2000-8-8 12:00:20
+jspÎÄ¼þ²Ù×÷Ö®¶ÁÈ¡Æª(±¾Õ¾ÎÄÕÂ)
+
+×ªÔØÇë×¢Ã÷À´Ô´
+À´Ô´ jspÖÐ¹úÂÛÌ³ http://jspbbs.yeah.net
+
+Read.jsp
+
+<html>
+<head>
+<title>Read a file</title>
+</head>
+<body bgcolor="#000000">
+
+<jsp:useBean id="reader" class="DelimitedDataFile" scope="request">
+  <jsp:setProperty name="reader" property="path" value="/path/to/afile.txt" />
+</jsp:useBean>
+
+<h3>Contents of the file:</h3>
+
+<p>
+
+<% int count = 0; %> 
+<% while (reader.nextRecord() != -1) { %>
+  <% count++; %>      
+  <b>Line <% out.print(count); %>:</b> <% out.print(reader.returnRecord()); %><br>¡¡¡¡¡¡¡¡
+<% } %>  
+</p>
+</body>
+</html>
+
+
+
+import java.io.*;
+import java.util.StringTokenizer;
+
+public class DelimitedDataFile 
+{
+   /**
+    * DelimitedDataFile.java
+    * Written by Morgan Catlin  Email: mfcatlin@csclub2.stthomas.edu
+    *   April 6, 1999
+    * 
+    * Variables:
+    *   String currentRecord = the record the bean is currently working on
+    *   BufferedReader file = the file the bean is working with
+    *   String path = the path to the file (ie. /home/you/afile.txt)
+    *   StringTokenizer token = the currentRecord tokenized
+    * 
+    * Methods:
+    *   public void setPath() - creates a BufferedReader that reads the file in path
+    *   public String getPath() - returns path
+    *   public void fileClose() - closes the file that is being read
+    *   public int nextRecord() - reads the next record(line) in the file, 
+    *                              and returns the number of tokens in the record 
+    *                              or else returns -1 if there aren't anymore records
+    *   public double returnDouble() - returns the next token as a double
+    *   public int returnInt() - returns the next token as an int
+    *   public String returnString() - returns the next token as a String
+    *   public String returnRecord() - returns the entire record as a String
+    */
+   
+          private String           currentRecord = null;
+          private BufferedReader   file;
+          private String           path;
+          private StringTokenizer  token;
+   
+          public DelimitedDataFile()
+                {
+¡¡¡¡¡¡¡¡                file = new BufferedReader(new InputStreamReader(System.in),1);
+                } // constructor 1 
+          public DelimitedDataFile(String filePath) throws FileNotFoundException
+                {
+¡¡¡¡¡¡¡¡                // gets file
+¡¡¡¡¡¡¡¡                path = filePath;
+¡¡¡¡¡¡¡¡                file = new BufferedReader(new FileReader(path));
+                } // constructor DelimitedDataFile
+¡¡¡¡¡¡¡¡
+¡¡¡¡¡¡¡¡  public void setPath(String filePath)
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡{
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡// sets the file
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡path = filePath;
+                        try {
+                             file = new BufferedReader(new
+                             FileReader(path));
+                        } catch (FileNotFoundException e) {
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡System.out.println("file not found");
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡}
+¡¡¡¡¡¡¡¡
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡} // method setPath
+
+     ¡¡¡¡¡¡¡¡  public String getPath() {
+¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡return path;
+          } // method getPath
+   
+          public void fileClose() throws IOException
+                {
+¡¡¡¡¡¡¡¡                // closes file
+¡¡¡¡¡¡¡¡                file.close();
+                } // method fileClose
+   
+          public int nextRecord()
+                {
+¡¡¡¡¡¡¡¡                // this method reads the next record and returns the number of
+¡¡¡¡¡¡¡¡                // tokens or else returns -1
+¡¡¡¡¡¡¡¡
+¡¡¡¡¡¡¡¡                int returnInt = -1;
+¡¡¡¡¡¡¡¡                try
+¡¡¡¡¡¡¡¡                    {
+¡¡¡¡¡¡¡¡                        currentRecord = file.readLine();
+¡¡¡¡¡¡¡¡                    } // end try
+¡¡¡¡¡¡¡¡
+¡¡¡¡¡¡¡¡                catch (IOException e)
+¡¡¡¡¡¡¡¡                    {
+¡¡¡¡¡¡¡¡                        System.out.println("readLine problem, terminating.");
+¡¡¡¡¡¡¡¡                    } // end catch
+¡¡¡¡¡¡¡¡
+¡¡¡¡¡¡¡¡                if (currentRecord == null)
+¡¡¡¡¡¡¡¡                    returnInt = -1;
+¡¡¡¡¡¡¡¡                else
+¡¡¡¡¡¡¡¡                    {
+¡¡¡¡¡¡¡¡                         token = new StringTokenizer(currentRecord);
+¡¡¡¡¡¡¡¡                         returnInt = token.countTokens();
+¡¡¡¡¡¡¡¡                    } // end else
+¡¡¡¡¡¡¡¡                return returnInt;
+                } // method nextRecord
+   
+          public double returnDouble()
+                {
+¡¡¡¡¡¡¡¡                // this method returns the next token as a double
+¡¡¡¡¡¡¡¡                double doubleReturn = Double.valueOf(token.nextToken()).doubleValue();
+¡¡¡¡¡¡¡¡                return doubleReturn;
+                } // method returnDouble
+   
+          public int returnInt()
+                {
+¡¡¡¡¡¡¡¡                // this method returns the next token as an int
+¡¡¡¡¡¡¡¡                int returnint = Integer.parseInt(token.nextToken());
+¡¡¡¡¡¡¡¡                return returnint;
+                } // method returnInt
+   
+          public String returnString()
+                {
+¡¡¡¡¡¡¡¡                // this method returns the next token as a String
+¡¡¡¡¡¡¡¡                String stringReturn = token.nextToken();
+¡¡¡¡¡¡¡¡                return stringReturn;
+                } // method returnString
+  ¡¡¡¡¡¡¡¡  
+          public String returnRecord()
+               {
+                       // this method returna the entire record as a string
+                       return currentRecord;
+               }  // method returnRecord
+    } // class DelimitedDataFile
+
+×ªÔØÇë×¢Ã÷À´Ô´
+À´Ô´ jspÖÐ¹úÂÛÌ³ http://jspbbs.yeah.net 
+

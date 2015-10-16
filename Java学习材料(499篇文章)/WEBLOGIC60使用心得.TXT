@@ -1,0 +1,54 @@
+作者：blackwhites
+日期：2001-6-6 18:02:05
+weblogic默认应用程序的配置
+
+1.在以下目录存放jsp文件
+C:\bea\wlserver6.0\config\mydomain\applications\DefaultWebApp_myserver\test.jsp
+在browser中浏览http://localhost:7001/test.jsp
+在C:\bea\wlserver6.0\config\mydomain\applications\DefaultWebApp_myserver\WEB-INF\_tmp_war_myserver_myserver_DefaultWebApp_myserver\jsp_servlet生成_test.class
+
+2.在以下目录存放servlet
+C:\bea\wlserver6.0\config\mydomain\applications\DefaultWebApp_myserver\WEB-INF\classes\HelloWorldServlet.class
+配置web.xml
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN" "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+<web-app>
+  <display-name>Examples Web Application</display-name>
+  <servlet>
+    <servlet-name>HelloWorldServlet</servlet-name>
+    <servlet-class>HelloWorldServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>HelloWorldServlet</servlet-name>
+    <url-pattern>/HelloWorldServlet/*</url-pattern>
+  </servlet-mapping>
+</web-app>
+在browser中浏览http://localhost:7001/HelloWorldServlet
+
+weblogic自建立应用程序的配置
+假设目录为C:\bea\wlserver6.0\config\examples\applications\examplesWebApp
+
+1.JSP的配置
+在以上目录存放jsp文件ShowDate.jsp，并在以下目录存放相应的字节码文件
+C:\bea\wlserver6.0\config\examples\applications\examplesWebApp\WEB-INF\classes\jsp_servlet\_showdate.class
+你可以自行建立、编译，不过推荐使用weblogic.jspc，请参照examples\jsp\build.cmd
+在browser中浏览http://localhost:7001/examplesWebApp/ShowDate.jsp，请注意大小写
+
+2.servlet的配置
+C:\bea\wlserver6.0\config\examples\applications\examplesWebApp\WEB-INF\classes\HelloWorldServlet.class
+配置web.xml
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN" "http://java.sun.com/j2ee/dtds/web-app_2_2.dtd">
+<web-app>
+  <display-name>Examples Web Application</display-name>
+  <servlet>
+    <servlet-name>HelloWorldServlet</servlet-name>
+    <servlet-class>HelloWorldServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>HelloWorldServlet</servlet-name>
+    <url-pattern>/HelloWorldServlet/*</url-pattern>
+  </servlet-mapping>
+</web-app>
+在browser中浏览http://localhost:7001/examplesWebApp/HelloWorldServlet
+
+>>==全文完==<<
+>>==作者：陈海峰==<<

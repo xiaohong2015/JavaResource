@@ -1,0 +1,93 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:31:13
+<jsp:forward>
+
+
+重定向一个HTML文件，JSP文件，或者是一个程序段. 
+
+
+
+
+
+
+JSP 语法
+
+
+
+
+<jsp:forward page={"relativeURL" | "<%= expression %>"} /> 
+
+
+or 
+
+
+<jsp:forward page={"relativeURL" | "<%= expression %>"} > 
+
+
+<jsp:param name="parameterName" 
+
+
+          value="{parameterValue | <%= expression %>}" />+ 
+
+
+</jsp:forward> 
+
+
+
+
+例子
+
+
+
+<jsp:forward page="/servlet/login" /> 
+
+
+
+
+<jsp:forward page="/servlet/login"> 
+
+
+
+
+<jsp:param name="username" value="jsmith" /> 
+
+
+
+
+</jsp:forward> 
+
+
+
+
+
+描述
+
+
+<jsp:forward>标签从一个JSP文件向另一个文件传递一个包含用户请求的request对象.<jsp:forward>标签以下的代码，将不能执行. 
+
+
+你能够向目标文件传送参数和值，在这个例子中我们传递的参数名为username,值为scott,如果你使用了<jsp:param>标签的话，目标文件必须是一个动态的文件，能够处理参数. 
+
+
+如果你使用了非缓冲输出的话，那么使用<jsp:forward>时就要小心。如果在你使用<jsp:forward>之前，jsp文件已经有了数据，那么文件执行就会出错. 
+
+
+
+
+
+属性
+
+
+
+page="{relativeURL | <%= expression %>}" 
+这里是一个表达式或是一个字符串用于说明你将要定向的文件或URL.这个文件可以是JSP,程序段，或者其它能够处理request对象的文件(如asp,cgi,php). 
+
+
+
+
+<jsp:param name="parameterName" value="{parameterValue | <%= expression %>}" />+ 
+向一个动态文件发送一个或多个参数，这个文件一定是动态文件. 
+
+
+如果你想传递多个参数，你可以在一个JSP文件中使用多个<jsp:param>。name指定参数名，value指定参数值.

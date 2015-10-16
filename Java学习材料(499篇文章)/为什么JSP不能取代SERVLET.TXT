@@ -1,0 +1,14 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 12:58:04 PM
+为什么jsp不能取代servlet 
+
+Blueski编译 
+
+JSP动态Web内容可能是动态Web内容的一项伟大的技术，并可将内容和表示presentation相分离，有些人仍然觉得奇怪，为什么servlets仍然有必要和JSP同时实施。 
+
+其实servlets的实用性并不是一个问题。它们在服务器端处理方面的表现非常优秀，而且，由于它们引人注目的安装方式而继续存在着。事实上，你可以将JSP看作一种servlets的高级抽象，它以Servlet 2.1 API扩展的形式来实现。 
+
+你仍然不应该不加选择地使用servlets；它们可能并不适用于每个人。例如，当一个页面设计者可以很简单地使用方便的HTML或XML工具来编写JSP页面时，servlets可能更适合那些在后端的开发者，因为他们经常使用某种IDE来编写-- 这是一种通常需要较高编程经验的处理工作。 
+
+当发布servlets时，甚至开发者都不得不小心确保在presentation和内容之间不存在紧密结合。你通常可以通过增加一个第三方发行包如htmlKona来做到这一点。但即使可以做到这一点，虽然可以通过简单的屏幕上的调整提供一些灵活性，仍无法为你保证在presentation自身格式上的变化。例如，如果你的presentation从HTML改变到DHTML，你将仍然需要确保发行包和新的格式相一致，在最坏的case -- scenario中，如果一个发行包无法得到，你将结束在动态web的内容中对presentation使用手写代码。 

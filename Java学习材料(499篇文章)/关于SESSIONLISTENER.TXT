@@ -1,0 +1,71 @@
+作者：罗亭
+email: tinluo@263.net
+日期：2001-5-11 13:50:44
+此文建议加入精华区
+
+//问题
+谢谢您，可是用session怎么能将客户端的正在浏览的url不断发送到服务器端呢？难道要在客户端做个什么东西，在嵌个浏览器？please give me a hint，thx！
+
+//回答，用sessionListener[Session监听器来实现]
+
+//下边是一个监器的源码，实现了在线人数，依此原理，你能做你想要做的
+
+package core;
+
+/**
+ * Title:        core
+ * Description:
+ * Copyright:    Copyright (c) 2001
+ * Company:  ****
+ * @author 罗亭
+ * @version 1.0
+ */
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public final class CounterListener implements HttpSessionListener {
+    private int count = 10;
+    private ServletContext context = null;
+
+    public synchronized void sessionCreated(HttpSessionEvent se) {
+        count++;
+        log("sessionCreated('" + se.getSession().getId() + "'LuoTing's Log)"+"  count="+count);
+        se.getSession().setAttribute("count",new Integer(count));
+    }
+
+    public synchronized void sessionDestroyed(HttpSessionEvent se) {
+        count--;
+        se.getSession().setAttribute("count",new Integer(count));
+    }
+
+    public int getCount() {
+        return this.count;
+    }
+
+    public void addCount(){
+      count++;
+    }
+
+    private void log(String message) {
+
+	if (context != null)
+	    context.log("SessionListener: " + message);
+	else
+	    System.out.println("SessionListener: " + message);
+
+    }
+}
+
+//这就是一个监听器的源码，已经在Tomcat4.01上测试过[Tomcat3.1是不成的，其余app server的实现情况，得看它的DOCS]
+
+//这个监听器需在你的web.xml中注册
+//like this
+
+    <listener>
+        <listener-class>core.SessionListener</listener-class>
+    </listener>
+
+//放置的位置你放到它的示例后边即可
+
+Good Lucky

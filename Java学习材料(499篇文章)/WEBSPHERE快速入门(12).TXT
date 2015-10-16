@@ -1,0 +1,85 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-16 11:33:19
+4.3 调用 Servlet
+    要调用 Servlet 或 Web 应用程序，请使用下列任一种方法：由 URL 调用、在 <FORM> 标记中调用、在 <SERVLET>标记中调用、在 JSP 文件中调用、在 ASP 文件中调用。
+    1. 由 URL 调用 Servlet
+    这里有两种用 Servlet 的 URL 从浏览器中调用该 Servlet 的方法： 
+    (1) 指定 Servlet 名称：当用 WebSphere应用服务器 管理器来将一个 Servlet 实例添加（注册）到服务器配置中时，必须指定“Servlet 名称”参数的值。例如，可以指定将 hi 作为 HelloWorldServlet 的 Servlet 名称。要调用该 Servlet，需打开 http://your.server.name/servlet/hi。也可以指定 Servlet 和类使用同一名称（HelloWorldServlet）。在这种情况下，将由 http://your.server.name/servlet/HelloWorldServlet 来调用 Servlet 的实例。
+    (2) 指定 Servlet 别名：用 WebSphere应用服务器 管理器来配置 Servlet 别名，该别名是用于调用 Servlet 的快捷 URL。快捷 URL 中不包括 Servlet 名称。 
+    2. 在 <FORM> 标记中指定 Servlet
+    可以在 <FORM> 标记中调用 Servlet。HTML 格式使用户能在 Web 页面（即从浏览器）上输入数据，并向 Servlet 提交数据。例如：
+<FORM METHOD="GET" ACTION="/servlet/myservlet">
+  <OL>
+    <INPUT TYPE="radio" NAME="broadcast" VALUE="am">AM<BR>
+    <INPUT TYPE="radio" NAME="broadcast" VALUE="fm">FM<BR>
+  </OL>
+（用于放置文本输入区域的标记、按钮和其它的提示符。）
+</FORM>
+     ACTION 特性表明了用于调用 Servlet 的 URL。关于METHOD 的特性，如果用户输入的信息是通过 GET 方法向 Servlet 提交的，则 Servlet 必须优先使用 doGet() 方法。反之，如果用户输入的信息是通过 POST 方法向 Servlet 提交的，则 Servlet 必须优先使用 doPost() 方法。使用 GET 方法时，用户提供的信息是查询字符串表示的 URL 编码。无需对 URL 进行编码，因为这是由表单完成的。然后 URL 编码的查询字符串被附加到 Servlet URL 中，则整个 URL 提交完成。URL 编码的查询字符串将根据用户同可视部件之间的交互操作，将用户所选的值同可视部件的名称进行配对。例如，考虑前面的 HTML 代码段将用于显示按钮(标记为 AM 和 FM)，如果用户选择 FM 按钮，则查询字符串将包含 name=value 的配对操作为broadcast=fm。因为在这种情况下，Servlet 将响应 HTTP 请求，因此 Servlet 应基于 HttpServlet 类。Servlet 应根据提交给它的查询字符串中的用户信息使用的 GET 或 POST 方法，而相应地使用 doGet() 或 doPost() 方法。 
+    3．在 <SERVLET> 标记中指定 Servlet
+    当使用 <SERVLET> 标记来调用 Servlet 时，如同使用 <FORM> 标记一样，无需创建一个完整的 HTML 页面。作为替代，Servlet 的输出仅是 HTML 页面的一部分，且被动态嵌入到原始 HTML 页面中的其它静态文本中。所有这些都发生在服务器上，且发送给用户的仅是结果 HTML 页面。建议在 Java 服务器页面（JSP）文件中使用 <SERVLET> 标记。请参阅有关 JSP 技术
+    原始 HTML 页面中包含 <SERVLET> 和 </SERVLET> 标记。 Servlet 将在这两个标记中被调用，且 Servlet 的响应将覆盖这两个标记间的所有东西和标记本身。如果用户的浏览器可以看到 HTML 源文件，则用户将看不到 <SERVLET> 和 </SERVLET> 标记。要在 Domino Go Webserver 上使用该方法，请启用服务器上的服务器端包括功能。部分启用过程将会涉及到添加特殊文件类型 SHTML。当 Web 服务器接收到一个扩展名为 SHTML 的 Web 页面请求时，它将搜索 <SERVLET> 和 </SERVLET> 标记。对于所有支持的 Web 服务器，WebSphere应用服务器 将处理 SERVLET 标记间的所有信息。下列 HTML 代码段显示了如何使用该技术。 
+<SERVLET NAME="myservlet" CODE="myservlet.class" CODEBASE="url" initparm1="value">
+<PARAM NAME="parm1" VALUE="value">
+</SERVLET>
+    使用 NAME 和 CODE 属性带来了使用上的灵活性。可以只使用其中一个属性，也可以同时使用两个属性。 NAME 属性指定了 Servlet 的名称（使用 WebSphere应用服务器 管理器配置的），或不带 .class 扩展名的 Servlet 类名。CODE 属性指定了 Servlet 类名。使用 WebSphere应用服务器 时，建议指定 NAME 和 CODE，或当 NAME 指定了 Servlet 名称时，仅指定 NAME。如果仅指定了 CODE，则会创建一个 NAME=CODE 的 Servlet 实例。装入的 Servlet 将假设 Servlet 名称与 NAME 属性中指定的名称匹配。然后，其它 SHTML 文件可以成功地使用 NAME 属性来指定 Servlet 的名称，并调用已装入的 Servlet。NAME 的值可以直接在要调用 Servlet 的 URL 中使用。如果 NAME 和 CODE 都存在，且 NAME 指定了一个现有 Servlet，则通常使用 NAME 中指定的 Servlet。由于 Servlet 创建了部分 HTML 文件，所以当创建 Servlet 时，将可能会使用 HttpServlet 的一个子类，并优先使用 doGet() 方法（因为 GET 方法是提供信息给 Servlet 的缺省方法）。另一个选项是优先使用 service() 方法。另外，    CODEBASE 是可选的，它指定了装入 Servlet 的远程系统的 URL。请使用 WebSphere应用服务器 管理器来从 JAR 文件配置远程 Servlet 装入系统。 
+    在上述的标记示例中，initparm1 是初始化参数名，value 是该参数的值。可以指定多个“名称-值”对的集合。利用 ServletConfig 对象（被传递到 Servlet 的 init() 方法中）的 getInitParameterNames() 和 getInitParameter() 方法来查找参数名和参数值的字符串数组。在示例中，parm1 是参数名，并在初始化 Servlet 后被才被设置某个值。因为只能通过使用“请求”对象的方法来使用以 <PARAM> 标记设置的参数，所以服务器必须调用 Servlet service() 方法，以从用户处传递请求。要获得有关用户的请求信息，请使用 getParameterNames()、getParameter() 和 getParameterValues() 方法。
+    初始化参数是持续的。假设一台客户机通过调用一个包含某些初始化参数的 SHTML 文件来调用 Servlet。并假设第二台客户机通过调用第二个 SHTML 文件来调用同一个 Servlet，且该 SHTML 中未指定任何初始化参数。那么第一次调用 Servlet 时所设置的初始化参数将一直可用，并且通过所有其它 SHTML 文件而调用的所有后继 Servlet 都不会更改该参数。直到 Servlet 调用了 destroy() 方法后，才能重新设置初始化参数。例如，如果另一个 SHTML 文件指定了另一个不同的初始化参数值，虽然已此时已装入了 Servlet，但该值仍将被忽略。
+    4．在 JSP 文件中调用 Servlet
+可以从 JavaServer 页面（JSP）文件中调用 Servlet。请参阅JSP技术部分。
+5．在 ASP 文件中调用 Servlet
+    如果在 Microsoft Internet Information Server（IIS）上有遗留的 ASP 文件，并且无法将 ASP 文件移植成 JSP 文件时，可用 ASP 文件来调用 Servlet。在 WebSphere应用服务器 中的 ASP 支持包括一个用于嵌入 Servlet 的 ActiveX 控制，下面介绍ActiveX 控制AspToServlet 的方法和属性。 
+该方法说明如下：
+    (1) String ExecServletToString(String servletName)；执行 ServletName，并将其输出返回到一个字符串中。 
+    (2) ExecServlet(String servletName)；执行 ServletName，并将其输出直接发送至 HTML 页面。 
+	 (3) String VarValue(String varName)；获得一预置变量值（其它格式）。
+	 (4) VarValue(String varName, String newVal)；设置变量值。变量占据的总大小应小于 0.5 个千字
+节（Kbyte）。且仅对配置文件使用这些变量。 
+    其属性如下： 
+    = Boolean WriteHeaders；若该属性为真，则 Servlet 提供的标题被写入用户处。缺省值为假。 
+    = Boolean OnTest；若该属性为真，服务器会将消息记录到生成的 HTML 页面中。缺省值为假。
+下列ASP 脚本示例是以 Microsoft Visual Basic Scripting（VBScript）书写的。
+<%
+    ' Small sample asp file to show the capabilities of the servlets and the ASP GateWay ...
+%>
+<H1> Starting the ASP->Java Servlet demo</H1> 
+<% 
+    ' Create a Servlet gateway object and initialize it ...
+    Set javaasp = Server.CreateObject("AspToServlet.AspToServlet")
+    ' Setting these properties is only for the sake of demo.
+    ' These are the default values ...
+    javaasp.OnTest = False
+    javaasp.WriteHeaders = False
+    ' Add several variables ...
+    javaasp.VarValue("gal") = "lag" 
+    javaasp.VarValue("pico")= "ocip"
+    javaasp.VarValue("tal") = "lat" 
+    javaasp.VarValue("paz") = "zap"
+    javaasp.VarValue("variable name with spaces") = "variable value with spaces"
+%>
+<BR>
+Lets check the variables
+<% 
+    Response.Write("variable gal = ")
+    Response.Write(javaasp.VarValue("gal")) 
+%>
+<BR>
+<% 
+    Response.Write("variable pico = " & javaasp.VarValue("pico")) 
+%>
+ 
+<BR>
+<HR>
+<%
+    galout = javaasp.ExecServletToString("SnoopServlet") 
+    If javaasp.WriteHeaders = True Then 
+%>
+Headers were written <%
+    Else
+%>
+Headers were not written <%
+    End If 
+    Response.Write(galout)
+%>
+<H1> The End ...</H1>

@@ -1,0 +1,121 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:37:49
+　　六、 JavaBean 
+
+　　JSP网页吸引人的地方之一就是能结合JavaBean技术来扩充网页中程序的功能。 
+
+　　JavaBean是一种Java类 (class)，通过封装属性和方法成为具有某种功能或者处理某个业务的对象。JavaBean被组织成为package（数据包）以便进行管理，实际上就是把一组JavaBean一起放在某某目录中，每个类的定义前加上package某某，本例中为test。目录test必须放在系统环境CLASSPATH包含的目录下，系统才能找到其中的JavaBean。JSWDK在缺省状态下将\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\ 加入CLASSPATH。建立自己的JavaBean和package时，就放在这个目录中也不失为一种简易的方法。 
+
+　　下面介绍一个简单的JavaBean框架。用文本编辑器创建一个文本文件helloWorld.java，并保存在\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\test目录下，其内容如下： 
+
+package test; 
+public class helloWorld { 
+public String name = "My first bean"; 
+public String getHi() 
+{ 
+return "Hello from " + name; 
+} 
+} 
+
+ 
+
+　　helloWorld.java编辑好后，在DOS状态下，进入目录\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\，用JDK的javac命令编译helloWorld.java如下： 
+
+　　javac helloWorld.java 
+
+　　注意，Java是区分大小写的，在程序中，编译命令行中字母的大小写都不能写错。 
+
+　　编译成功就表示建立了一个JavaBean。下面看如何在JSP中使用这个JavaBean。用文本编辑器创建一个文本文件hi-bean.jsp，并保存在\jswdk-1.0.1\webpages\test目录下，其内容如下： 
+
+＜html＞ 
+＜head＞ 
+＜title＞JavaBean 试验＜/title＞ 
+＜/head＞ 
+＜body＞ 
+＜jsp:useBean id="helloBean" scope="session" class="test.helloWorld" /＞ 
+＜%= helloBean.getHi() %＞ 
+＜hr＞ 
+＜% 
+helloBean.name = "JSP"; 
+out.print(helloBean.getHi()); 
+%＞ 
+＜/body＞ 
+＜/html＞ 
+ 
+
+　　在JSP网页中，使用 ＜jsp:useBean ... /＞语法来创建JavaBean对象，并命名为helloBean。读者可从这个简单的例子中看出设置、获取JavaBean属性，以及调用JavaBean方法的做法。在浏览器的地址栏中键入http://localhost:8080/test/hi-bean.jsp，得到结果如图3所示。 
+
+　　注意，如果修改和重新编译了JavaBean程序，则需要关闭和重新启动JSWDK的Web服务器以后修改的结果才会有效。如果仅仅修改JSP文件，则不用重新启动JSWDK的Web服务器. 
+
+　　虽然，这仅仅完成了一个非常简单的JavaBean框架，但是遵循这个框架可以设计出多种多样的JavaBean。例如，从JSP中访问数据通常就是通过JavaBean来实现的。 
+
+　　七、 数据库连接 
+
+　　数据库连接对动态网站来说是最为重要的部分，Java中连接数据库的技术是JDBC(Java Database Connectivity)。很多数据库系统带有JDBC驱动程序，Java程序就通过JDBC驱动程序与数据库相连，执行查询、提取数据等等操作。Sun公司还开发了JDBC-ODBC bridge，用此技术Java程序就可以访问带有ODBC驱动程序的数据库，目前大多数数据库系统都带有ODBC驱动程序，所以Java程序能访问诸如Oracle、Sybase、MS SQL Server和MS Access等数据库。下面介绍如何用Access实现一个动态FAQ（常见问题及答案）网站。 
+
+　　首先建立一个Access数据库faq.mdb，其中的表faqs有字段id（自动增量型，并设为主关键字）、subject（文字型，长度200）、answers（备注型）。这个表中可以存放一些编程知识的常见问题及答案。 
+
+　　然后，在Control Panel（控制面板）的ODBC Datasource模块中加入System DSN，取名faq，并指向faq.mdb。 
+
+　　创建一个JavaBean，名为faq.java，并保存在\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\test目录下。faq.java 的内容如下： 
+
+package test; 
+import java.sql.*; 
+
+public class faq { 
+String sDBDriver = "sun.jdbc.odbc.JdbcOdbcDriver"; 
+String sConnStr = "jdbc:odbc:faq"; 
+Connection conn = null; 
+ResultSet rs = null; 
+
+public faq() { 
+try { 
+Class.forName(sDBDriver); 
+} 
+catch(java.lang.ClassNotFoundException e) { 
+System.err.println("faq(): " + e.getMessage()); 
+} 
+} 
+
+public ResultSet executeQuery(String sql) { 
+rs = null; 
+try { 
+conn = DriverManager.getConnection(sConnStr); 
+Statement stmt = conn.createStatement(); 
+rs = stmt.executeQuery(sql); 
+} 
+catch(SQLException ex) { 
+System.err.println("aq.executeQuery: " + ex.getMessage()); 
+} 
+return rs; 
+} 
+} 
+ 
+
+　　用上一节介绍的方法编译faq.java以后，在\jswdk-1.0.1\webpages\test目录下创建JSP文件faq.jsp，其内容如下： 
+
+＜html＞ 
+＜head＞ 
+＜meta http-equiv="Content-Type" content="text/html; charset=gb2312"＞ 
+＜title＞我的FAQ !＜/title＞ 
+＜/head＞ 
+＜body＞ 
+＜p＞＜b＞这是我的FAQ!＜/b＞＜/p＞ 
+＜%@ page language="java" import="java.sql.*" %＞ 
+＜jsp:useBean id="workM" scope="page" class="test.faq" /＞ 
+＜% 
+ResultSet RS = workM.executeQuery("SELECT * FROM faqs"); 
+String tt; 
+while (RS.next()) { 
+tt = RS.getString("Answer"); 
+out.print("＜LI＞" + RS.getString("Subject") + "＜/LI＞"); 
+out.print("＜pre＞" + tt + "＜/pre＞"); 
+} 
+RS.close(); 
+%＞ 
+ 
+
+　　在浏览器的地址栏中键入http://localhost:8080/test/faq.jsp，faq.jsp调用JavaBean，从数据库中读出内容并输出。 
+
+　　限于篇幅，本文不能列举JSP-JavaBean-JDBC/ODBC-数据库的复杂例子，读者可以从本文最后所推荐的网址中找到并下载到数据库连接范例。 

@@ -1,0 +1,209 @@
+作者：丑丑牛
+日期：00-4-28 18:02:12
+用JSP构建动态网站 孙以义 杜鹃 
+
+一、 什么是JSP JSP(JavaServer Pages)是由Sun Microsystems公司倡导、许多公司参与一起建立的一种动态网页技术标准，其网址为http://www.javasoft.com/products/jsp。 在传统的网页HTML文件(*.htm,*.html)中加入Java程序片段(Scriptlet)和JSP标记(tag)，就构成了JSP网页(*.jsp)。Web服务器在遇到访问JSP网页的请求时，首先执行其中的程序片段，然后将执行结果以HTML格式返回给客户。程序片段可以操作数据库、重新定向网页以及发送 email 等等，这就是建立动态网站所需要的功能。所有程序操作都在服务器端执行，网络上传送给客户端的仅是得到的结果，对客户浏览器的要求最低，可以实现无Plugin，无ActiveX，无Java Applet，甚至无Frame。 本文将介绍利用JSP技术开发动态网页的方法，还将简要分析JSP技术和 Microsoft 公司的 ASP 技术的不同之处。 
+二、 如何安装和启动 为了实验JSP技术，首先需要建立运行环境，这个过程相当简单：
+1、在 http://java.sun.com/jdk/处下载JDK(Java 2 SDK、Standard Edition、v 1.2.2)。 
+2、在http://java.sun.com/products/jsp/处下载JSWDK(JavaServer Web Development Kit 1.0.1)。Linux用户可以在ttp://jakarta.apache.org/处下载Tomcat 3.0。 
+3、安装 以Windows NT环境为例，JDK的安装是首先运行下载得到的jdk1_2_2-win.exe，然后修改系统环境参数，在PATH参数中加入[x:]\jdk1.2.2\bin以及增加新的环境参数 CLASSPATH=[x:]\jdk1.2.2\lib\tools.jar，其中[x:]是安装JDK的硬盘符（c:、d: 等）。 JSWDK的安装仅需将jswdk1_0_1-win.zip带目录释放到硬盘根目录下（c:\、d:\ 等），然后就可以在硬盘上找到\jswdk-1.0.1\目录。将来如果不想保留JSWDK，删除这个目录就可以了，没有任何系统文件和注册表遗留问题。更详细的安装过程以及Solaris/Unix和Linux下JDK、Tomcat的安装可以参考下载得到的文件包中的安装说明。 
+4、启动 以Windows NT环境为例，在\jswdk-1.0.1\目录下执行startserver.bat，就可启动JSWDK中一个支持JSP网页技术的Web服务器。为了不与现有的Web服务器（例如IIS、PWS等）冲突，JSWDK的Web服务器使用了8080端口。 在浏览器的地址栏中键入http://localhost:8080或者http://127.0.0.1:8080后，如果能看到 JSWDK 的欢迎页就说明JSP实验环境已经建成，可进入下一步实验。 要关闭Web服务器则运行stopserver.bat。
+三、 JSP简单示例 JSWDK中包含的Web服务器的文档目录在缺省状态下为\jswdk-1.0.1\webpages，主文档在缺省状态下为index.html和index.jsp。也就是说访问http://localhost:8080等于访问\jswdk-1.0.1\webpages\index.html。 用文本编辑器，如Windows中的记事本(Notepad)，创建一个文本文件hi.jsp，保存在\jswdk-1.0.1\webpages\目录下，其内容如下： 
+<html>
+<head>
+<title>Hi-JSP实验</title>
+</head>
+<body> 
+<%
+String Msg = "This JSP test.";  
+out.print("Hello World!");
+%>
+<h2><%=Msg%></h2>
+</body>
+</html> 
+
+在浏览器的地址栏中键入http://localhost:8080/hi.jsp，JSWDK中的Web服务器会执行JSP 文件中用<%以及%>括起来的Java程序语句，其中out.print是将文字输出到网页，语句<%= 变量 | 表达式 %>的作用是将Java Scriptlet中变量或表达式的值输出到网页，执行结果如图1。 图1 将变量Msg赋值为中文字符串，用<%= %>输出，或者用out.print输出中文字符串，则在英文版NT4及Redhat 6.1下实验运行结果正常，而在中文NT 4.0和中文98下，则反而会出现乱码。
+四、 统一的网站界面 JSP支持服务器端的文件包含，即可以在一个JSP文件中插入多个其他文件，用来实现统一的网站界面。修改上述hi.jsp并另存为mypage.jsp：
+<%@ include file="top.htm" %>
+<%
+String Msg = "This JSP test.";
+out.print("Hello World!");
+%>
+<h2><%=Msg%></h2>
+<%@ include file="bot.htm" %>
+
+用可视化HTML编辑器，例如FrontPage、Dreamweave等设计网站的框架结构，将设计好的框架结构文件分割成两个部分，上面一半保存为top.htm, 下面一半保存为bot.htm，代码如下面所示：
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>我的主页</title>
+</head>
+<body>
+<table border="0" width="100%"  cellpadding="4" cellspacing="0" align="center">
+  <tr>
+    <td width="100%" colspan="2" bgcolor="#837ED1" align="center"><font face="隶书"
+    color="#FFFF00" size=5>主页标题</font>
+    </td>
+  </tr>
+  <tr>
+    <td bgcolor="#837ED1" width="15%" valign="top" align="center"><br>
+    <font color="#FFFFFF">选项</font><p><font color="#FFFFFF">选项</font></p>
+    <p><font color="#FFFFFF">选项</font></p>
+    <p><font color="#FFFFFF">......</font></p>
+    <p>　</p>
+    </td>
+    <td width="85%" valign="top">
+----------------------------------------------------------------------------------------------------------------
+    </td>
+  </tr>
+</table>
+</body>
+</html>
+ 
+在浏览器的地址栏中键入http://localhost:8080/mypage.jsp，得到结果如图2。 图2 这样网站的界面就能统一起来，而设计者可以集中精力在功能模块上处理用户登录、连接数据库、发送email等等。每个JSP文件都有如下结构： 
+
+
+<%@ include file="top.htm" %>
+<%
+// 实现某些功能
+%>
+<%@ include file="bot.htm" %>
+
+维护网站的界面也相对比较容易，只要修改top.htm和bot.htm，就能影响到所有网页。
+
+五、 服务器参数设置
+JSWDK的Web服务器参数保存在\jswdk-1.0.1\webserver.xml中，用Windows写字板打开并编辑这个文件就可以修改缺省设置值。本节内容主要针对JSWDK，Linux下Tomcat的设置方法略有不同。
+JSWDK缺省的文档目录是\jswdk-1.0.1\webpages，在此目录下可以建立子目录，例如\jswdk-1.0.1\webpages\test，就能在浏览器中用http://localhost/test访问这个目录，为了使得这个子目录能执行JSP程序，还必须在webserver.xml中的<Service></Service>节加入：
+<WebApplication id="test" mapping="/test" docBase="webpages/test" />
+并且，还必须建立\jswdk-1.0.1\webpages\test\WEB-INF目录，并从\jswdk-1.0.1\webpages\WEB-INF目录中复制过来以下四个文件：mappings.properties、mime.properties、servlets.properties以及webapp.properties。完成这些过程，才能通知JSWDK的Web服务器执行http://localhost/test 中的JSP程序。
+
+六、 JavaBean
+JSP网页吸引人的地方之一就是能结合JavaBean技术来扩充网页中程序的功能。
+JavaBean是一种Java类 (class)，通过封装属性和方法成为具有某种功能或者处理某个业务的对象。JavaBean被组织成为package（数据包）以便进行管理，实际上就是把一组JavaBean一起放在某某目录中，每个类的定义前加上package某某，本例中为test。目录test必须放在系统环境CLASSPATH包含的目录下，系统才能找到其中的JavaBean。JSWDK在缺省状态下将\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\ 加入CLASSPATH。建立自己的JavaBean和package时，就放在这个目录中也不失为一种简易的方法。
+下面介绍一个简单的JavaBean框架。用文本编辑器创建一个文本文件helloWorld.java，并保存在\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\test目录下，其内容如下：
+package test;
+public class helloWorld {
+public String name = "My first bean"; 
+public String getHi()
+{
+return "Hello from " + name;
+} 
+}
+
+helloWorld.java编辑好后，在DOS状态下，进入目录\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\，用JDK的javac命令编译helloWorld.java如下：
+
+javac helloWorld.java
+
+注意，Java是区分大小写的，在程序中，编译命令行中字母的大小写都不能写错。
+编译成功就表示建立了一个JavaBean。下面看如何在JSP中使用这个JavaBean。用文本编辑器创建一个文本文件hi-bean.jsp，并保存在\jswdk-1.0.1\webpages\test目录下，其内容如下：
+
+<html>
+<head>
+<title>JavaBean 试验</title>
+</head>
+<body> 
+<jsp:useBean id="helloBean" scope="session" class="test.helloWorld" />
+<%= helloBean.getHi() %>
+<hr>
+<%
+helloBean.name = "JSP";
+out.print(helloBean.getHi());
+%>
+</body>
+</html>
+
+在JSP网页中，使用 <jsp:useBean ... />语法来创建JavaBean对象，并命名为helloBean。读者可从这个简单的例子中看出设置、获取JavaBean属性，以及调用JavaBean方法的做法。在浏览器的地址栏中键入http://localhost:8080/test/hi-bean.jsp，得到结果如图3所示。
+注意，如果修改和重新编译了JavaBean程序，则需要关闭和重新启动JSWDK的Web服务器以后修改的结果才会有效。如果仅仅修改JSP文件，则不用重新启动JSWDK的Web服务器.
+
+虽然，这仅仅完成了一个非常简单的JavaBean框架，但是遵循这个框架可以设计出多种多样的JavaBean。例如，从JSP中访问数据通常就是通过JavaBean来实现的。
+
+七、 数据库连接
+数据库连接对动态网站来说是最为重要的部分，Java中连接数据库的技术是JDBC(Java Database Connectivity)。很多数据库系统带有JDBC驱动程序，Java程序就通过JDBC驱动程序与数据库相连，执行查询、提取数据等等操作。Sun公司还开发了JDBC-ODBC bridge，用此技术Java程序就可以访问带有ODBC驱动程序的数据库，目前大多数数据库系统都带有ODBC驱动程序，所以Java程序能访问诸如Oracle、Sybase、MS SQL Server和MS Access等数据库。下面介绍如何用Access实现一个动态FAQ（常见问题及答案）网站。
+首先建立一个Access数据库faq.mdb，其中的表faqs有字段id（自动增量型，并设为主关键字）、subject（文字型，长度200）、answers（备注型）。这个表中可以存放一些编程知识的常见问题及答案，如图4。
+图 4
+
+然后，在Control Panel（控制面板）的ODBC Datasource模块中加入System DSN，取名faq，并指向faq.mdb。
+创建一个JavaBean，名为faq.java，并保存在\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\test目录下。faq.java 的内容如下：
+
+package test;
+import java.sql.*;
+
+public class faq {
+String sDBDriver = "sun.jdbc.odbc.JdbcOdbcDriver";
+String sConnStr = "jdbc:odbc:faq";
+Connection conn = null;
+ResultSet rs = null;
+
+public faq() {
+try {
+Class.forName(sDBDriver); 
+}
+catch(java.lang.ClassNotFoundException e) {
+System.err.println("faq(): " + e.getMessage());
+}
+}
+
+public ResultSet executeQuery(String sql) {
+rs = null;
+try {
+conn = DriverManager.getConnection(sConnStr); 
+Statement stmt = conn.createStatement();
+rs = stmt.executeQuery(sql);
+} 
+catch(SQLException ex) { 
+System.err.println("aq.executeQuery: " + ex.getMessage());
+}
+return rs;
+}
+}
+用上一节介绍的方法编译faq.java以后，在\jswdk-1.0.1\webpages\test目录下创建JSP文件faq.jsp，其内容如下：
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>我的FAQ !</title>
+</head>
+<body>
+<p><b>这是我的FAQ!</b></p>
+<%@ page language="java" import="java.sql.*" %>
+<jsp:useBean id="workM" scope="page" class="test.faq" />
+<%
+ResultSet RS = workM.executeQuery("SELECT * FROM faqs");
+String tt;
+while (RS.next()) {
+tt = RS.getString("Answer");
+out.print("<LI>" + RS.getString("Subject") + "</LI>");
+out.print("<pre>" + tt + "</pre>");
+}
+RS.close();
+%>
+在浏览器的地址栏中键入http://localhost:8080/test/faq.jsp，faq.jsp调用JavaBean，从数据库中读出内容并输出，得到结果如图5所示.
+
+限于篇幅，本文不能列举JSP-JavaBean-JDBC/ODBC-数据库的复杂例子，读者可以从本文最后所推荐的网址中找到并下载到数据库连接范例。
+
+八、 技术分析
+Microsoft 公司的 ASP 技术也是动态网页开发技术。JSP和ASP从形式上非常相似，ASP程序员一眼就能认出<% %>以及<%= %>。但是深入探究下去会发现它们很多的差别，其中最主要的有以下三点：
+1、 JSP的效率和安全性更高
+ASP以源码形式存放，以解释方式运行，每次ASP网页调用都需要对源码进行解释，运行效率不高。另外，IIS的漏洞曾使得许多网站源程序大曝光，包括笔者以前用ASP开发的网站，ASP程序全部被人下载了去。
+JSP在执行以前先被编译成字节码 (byte code)，字节码由Java虚拟机(Java Virtual Machine)解释执行，比源码解释的效率高；服务器上还有字节码的Cache机制，能提高字节码的访问效率。第一次调用JSP网页可能稍慢，因为它被编译成Cache，以后就快得多了。同时，JSP源程序不大可能被下载，特别是JavaBean程序完全可以放到不对外的目录中。
+2、 JSP的组件 (Component) 方式更方便
+ASP通过COM来扩充复杂的功能，如文件上载、发送email以及将业务处理或者复杂计算分离出来成为独立可重复利用的模块。JSP通过JavaBean实现了同样的功能扩充。
+在开发方面，COM的开发远比JavaBean复杂和繁琐，学会ASP不难，但学会开发COM可不简单。而JavaBean就简单多了，从本文上述示例中可以看出开发JavaBean很方便。
+在维护方面，COM必须在服务器上注册，如果修改了COM程序，就必须重新注册，甚至必须关机和重新启动。JavaBean则不需要注册，放在CLASSPATH包含的目录中就行了。如果JavaBean进行了修改，则JSWDK和Tomcat现在还需要关闭和重新运行（但不是关机），但开发者已经许诺将在以后的版本中做到不需要关闭服务器。
+另外JavaBean是完全的OOP，可以针对不同的业务处理功能方便地建立一整套可重复利用的对象库，例如用户权限控制、email自动回复等等。
+3、 JSP的适应平台更广
+ASP目前仅适用于NT和IIS。虽然Unix下有ChiliSoft的插件来支持ASP，但是ASP本身的功能有限，必须通过ASP+COM的组合来扩充，Unix下的COM实现起来非常困难。
+JSP则不同，几乎所有平台都支持Java，JSP+JavaBean可以在所有平台下通行无阻。NT下IIS通过一个插件，例如JRUN(http://www3.allaire.com/products/jrun/)或者ServletExec(http://www.newatlanta.com/)，就能支持JSP。著名的Web服务器Apache已经能够支持JSP。由于Apache广泛应用在NT、Unix和Linux上，因此JSP有更广泛的运行平台。虽然现在NT操作系统占了很大的市场份额，但是在服务器方面Unix的优势仍然很大，而新崛起的Linux更是来势不小。
+从一个平台移植到另外一个平台，JSP和JavaBean甚至不用重新编译，因为Java字节码都是标准的与平台无关的。笔者将在NT下实验的JSP网页原封不动地拿到Linux下就运行起来了，感觉非常满意。
+九、 结论
+综上所述，JSP可谓是构建动态网站的一个利器，故推荐给读者，祝愿你们掌握JSP，开发出优秀的网站。ASP程序员也请试一下，JSP里也有session、request、response/out等对象，亲自试试看如何。
+
+附文
+这里是关于JSP的重要参考资料，有兴趣的读者可以进一步阅读。
+http://java.sun.com/products/jsp/faq.html
+http://www.esperanto.org.nz/jsp/jspfaq.html
+http://www.zdnet.com/pcweek/stories/news/0,4153,410709,00.html
+http://developer.netscape.com/viewsource/kuslich_jsp
+/kuslich_jsp.html
+http://web2.java.sun.com/products/jsp/jsp-asp.html
+http://www.asptoday.com/articles/19991022.htm

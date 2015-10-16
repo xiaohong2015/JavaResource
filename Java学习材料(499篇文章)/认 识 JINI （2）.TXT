@@ -1,0 +1,39 @@
+作者：luflying
+email: zhang_yng@citiz.net
+日期：2000-11-24 11:51:07
+二、体系结构 
+
+Jini system 是由基础建设（ infrastructure）、程式设计模型（ programming model ）、服务（ services） 三方面所构成。
+基础建设（ infrastructure） 
+Jini 基础建设的核心包含以下几个部分： 
+
+Discovery Protocol： 
+提供了如何让网路上任何种类的资源加入联盟的方式。
+
+eXtended RMI ： 
+Jini的元件彼此沟通时所使用的机制。
+
+Distributed Security： 
+定义了Jini 联盟成员的使用权限。
+
+Lookup Service： 
+用来展现联盟中的所有成员，以及帮助使用者寻找网路资源，或者负责提供联盟中的资源给使用者用。
+
+程式设计模型（ programming model ） 
+Jini 提供一些分散式的程式设计模型，而 Jini 的基础构造，就是利用这些模型来组合。模型所提供的介面（Interface），包括以下几个类型： 
+
+Leasing Interface： 
+负责管理物件被使用的时间。
+
+Two Phase Commit Interface ： 
+是一个轻量级的（light-weight）、物件导向的（ object-oriented）介面。负责管理分散式交易（ transaction）的动作，如：roll back 、roll forward 等。
+
+Events Interface： 
+在分散式计算的环境中，必须确保程式执行的先後顺序，利用事件的观念可以帮助我们解决这个问题。
+
+服务（services） 
+有了Jini的架构以及程式设计模型後，我们可以利用这些技术来设计管理网路资源的服务，以促进分散式计算的发展。例如：JavaSpaces、Two Phase Commit Manager。 
+
+
+
+

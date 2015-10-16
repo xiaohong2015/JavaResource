@@ -1,0 +1,203 @@
+作者：easyinfonet
+email: easyinfonet@sina.com
+日期：2001-6-5 16:01:04
+在JSP中使用JavaMail（上）
+
+
+内容： 
+ 
+ 
+ 什么是JavaMail 
+ 第一部分：HTML表格 
+ 划分组件 
+ 用来发送email的HTML源代码  
+ 
+
+你希望在jsp中建立一个邮件发送收取工具吗？下面将介绍的就是在jsp中建立一个邮件发送收取工具。在这篇文章中你可以了解到JavaMail API的一些要点以及如何在JSP中使用它。本文中还包括了在JSP中使用JavaMail的实例。JavaMail是JSP应用软件中相当强大的API。
+阅读这篇文章需要对JSP、JavaBeans和JavaMail有一定的初步了解。当然，有关于JavaMail的知识你可以通过阅读这篇文章来获得。如果你对于以上三项一无所知，但你所使用的服务器支持JSP和JavaMail的话，你可以仅仅通过复制/粘贴来使用它们。 
+
+什么是JavaMail 
+
+JavaMail是Sun发布的用来处理email的API。它可以方便地执行一些常用的邮件传输。 
+
+虽然JavaMail是Sun的API之一，但它目前还没有被加在标准的java开发工具包中（Java Development Kit），这就意味着你在使用前必须另外下载JavaMail文件。除此以外，你还需要有Sun的JavaBeans Activation Framework （JAF）。JavaBeans Activation Framework的运行很复杂，在这里简单的说就是JavaMail的运行必须得依赖于它的支持。在Windows 2000下使用需要指定这些文件的路径，在其它的操作系统上也类似。 
+
+接下来要讲解的是这篇指南的最难理解的部分。 
+
+这篇指南包括三部分：HTML表格、关于JavaMail、JavaMail和JSP的结合。 
+
+第一部分：HTML表格 
+
+第一部分提供了一个最基本的基于HTML的email发送收取程序的例子。第二部分则讲述JavaMail的工作原理。第三部分则介绍将JavaMail加入JSP，创建一个基本的email发送收取程序。 
+
+划分组件 
+
+JSP最重要的特性是能将整个网页划分成一些细小的组件。这里使用的组件包括： 
+
+●一个用来将email的信息发送给JSP的HTML表格； 
+
+●一个JSP页面用来处理和发送信件。 
+
+第一步，就是创建一个HTML表格用来给JSP页面发送信息。你可以将以下的HTML代码复制到你的电脑上： 
+
+用来发送email的HTML源代码
+
+     <HTML>
+     <BODY>
+     <FORM action="sendmail.jsp" method="post">
+     <TABLE align="center">
+      <TR>
+       <TD width="50%">
+        To:<BR><INPUT name="to" size="25">
+       </TD>
+       <TD width="50%">
+        From:<BR><INPUT name="from" size="25">
+       </TD>
+      </TR>
+      <TR>
+       <TD colspan="2">
+        Subject:<BR><INPUT name="subject" size="50">
+       </TD>
+      </TR>
+      <TR>
+       <TD colspan="2">
+        <P>Message:<BR><TEXTAREA name="text" rows=25 cols=85></TEXTAREA></P>
+       </TD>
+      </TR>
+     </TABLE>
+     <INPUT type="submit" name="cb_submit" value=" Send ">
+     <INPUT type="reset" name="cb_reset" value=" Clear ">
+    </FORM>
+    </BODY>
+    </HTML>
+以上这段程序将创建一个包含email基本信息（例如：收件地址、发送地址、主题和内容）的文件。当然你可以根据你自己的需要来决定这个文件包含那些信息。 
+
+这个HTML文件的使用有两点要求：第一点是生成的文件必须发送给接下来将介绍的程序使用。在这个例子中就是sendmail.jsp，但在你使用时，必须用这个文件在系统里的URL来代替它；第二点是必须有空间来允许用户发送email。 
+
+第二部分将对JavaMail的特征进行一些分析，为在第三部分创建JSP程序作准备。所以接下来我们将学习JavaMail
+
+
+在JSP中使用JavaMail（下）
+
+
+
+
+
+内容： 
+ 
+ 
+ 第二部分：关于JavaMail 
+ 第三部分：JavaMail和JSP的结合 
+ 
+
+第二部分：关于JavaMail 
+
+文档的使用
+
+下载的JavaMail API中带的文档是很有用的。你可以在JavaMail下的/docs/javadocs/index.html找到它。第二部分主要将分析邮件程序的组件。你可以通过阅读文档来获得更多这方面的信息。 
+
+组件发送邮件需要使用JavaMail，它使对邮件的操作变得简单易用。 
+
+属性对象 
+
+JavaMail需要创建一个格式为"mail.smtp.host"的文件用来发送信息。 
+
+Properties props = new Properties (); 
+
+props.put("mail.smtp.host", "smtp.jspinsider.com"); 对话对象 
+
+所有的基于JavaMail的程序都至少需要一个或全部的对话目标。 
+
+Session sendMailSession; 
+
+sendMailSession = Session.getInstance(props, null); 
+
+传输
+
+邮件的传输只有送出或受到两种状态。JavaMail将这两种不同状态描述为传输和储存。传输将送出邮件，而储存将收取邮件。 
+
+Transport transport; 
+
+transport = sendMailSession.getTransport("smtp"); 
+
+使用JavaMail能为我们节约大量的时间。JavaMail能代替所有的SMTP的工作。 
+
+注意：JavaMail并不能完全的支持所有的邮件发送收取工作。它目前仅支持IMAP、SMTP和POP3，除此以外你只有等待新的JavaMail版本或自己开发协议。 
+
+信息对象 
+
+信息对象将把你所发送的邮件真实的反映出来。 
+
+Message newMessage = new MimeMessage(sendMailSession); 
+
+这就是我们所需要的全部四个对象。下一步将是如何将对象加入到JSP中。
+
+第三部分：JavaMail和JSP的结合 
+
+创建JSP 
+下面我们将开始将他们结合在一起。最重要的一点是要确认根据页面指示分类。还要记得在邮件上标注java.util.date。
+
+     <%@ page
+       import= " javax.mail.*, javax.mail.internet.*, javax.activation.*, java.util.*"
+     %>
+其次，创建邮件发送的确认信息。确认信息可以是任意的，一般常用"你的邮件已经发送出去了（Your mail has been sent）。" 
+
+信息是如何创建和发送的 
+
+我们在第二部分里已经讨论过信息对象的创建。我们下面将对信息进行操作。这就和设置信息对象的属性一样简单。你可以通过下面的程序来实现这项操作。 
+
+newMessage.setFrom(new InternetAddress(request.getParameter("from"))); 
+
+newMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(request.getParameter("to"))); 
+
+newMessage.setSubject(request.getParameter("subject")); 
+
+newMessage.setSentDate(new Date()); 
+
+newMessage.setText(request.getParameter("text")); 
+
+现在将开始发送信息。通过JavaMail来实现它非常简单。 
+
+transport.send(newMessage); 
+
+将所有的组件结合在一起 
+
+现在所有的组件都已经齐全了。现在将它们都放在JSP里面。要注意每一个错误信息，并将它反馈给用户。代码如下，你可以通过复制它们直接使用：
+
+    Sample JSP email Utility Using JavaMail  
+    <%@ page
+      import=" javax.mail.*, javax.mail.internet.*, javax.activation.*,java.util.*"
+      %>
+    <html>
+    <head>
+    <TITLE>JSP meets JavaMail, what a sweet combo.</TITLE>
+    </HEAD>
+    <BODY>
+    <%
+     try{
+       Properties props = new Properties();
+       Session sendMailSession;
+       Store store;
+       Transport transport;
+      sendMailSession = Session.getInstance(props, null);
+      props.put("mail.smtp.host", "smtp.jspinsider.com");
+      Message newMessage = new MimeMessage(sendMailSession);
+      newMessage.setFrom(new InternetAddress(request.getParameter("from")));
+      newMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(request.getParameter("to")));
+      newMessage.setSubject(request.getParameter("subject"));
+      newMessage.setSentDate(new Date());
+      newMessage.setText(request.getParameter("text"));
+      transport = sendMailSession.getTransport("smtp");
+      transport.send(newMessage);
+       %>
+    <P>Your mail has been sent.</P>
+    <%
+      }
+     catch(MessagingException m)
+      {
+      out.println(m.toString());
+      }
+    %>
+    </BODY>
+    </HTML>
+

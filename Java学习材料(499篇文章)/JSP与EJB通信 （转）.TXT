@@ -1,0 +1,46 @@
+作者：jeru
+日期：2001-3-6 11:23:09
+jsp与ejb通信 
+
+
+Blueski编译 
+
+
+以下是一个snippet代码，演示了JSP页面如何与 EJB session bean进行相互作用。 
+
+<%@ page import="javax.naming.*, javax.rmi.PortableRemoteObject, 
+foo.AccountHome, foo.Account" %> 
+<%!  
+//declare a "global" reference to an instance of the home interface of the session bean 
+AccountHome accHome=null; 
+
+public void jspInit() {  
+//obtain an instance of the home interface 
+InitialContext cntxt = new InitialContext( ); 
+Object ref= cntxt.lookup("java:comp/env/ejb/AccountEJB"); 
+accHome = (AccountHome)PortableRemoteObject.narrow(ref,AccountHome.class); 
+} 
+%> 
+<% 
+//instantiate the session bean 
+Account acct = accHome.create(); 
+//invoke the remote methods 
+acct.doWhatever(...); 
+// etc etc... 
+%> 
+在JSP中java代码应该越少越好。 
+在以上例子中，JSP设计者不得不处理和理解存取EJB的机理。 代替 在一个Mediator中对EJB机制的压缩以及将EJB方法作为Mediator的方法， 
+可以在jsp中使用 Mediator。Mediator通常由EJB设计者编写。Mediator可以提供附加的值如attribute caching等. 
+
+***** 
+
+JSP scriptlet代码必须最小化。如果要在jsp中直接请求ejb可能要在jsp 中写许多代码，包括try...catch等函数块来进行操作。  
+
+使用一个标准的JavaBean作为一个jsp和EJB服务器的中介可以减少在jsp中的java代码的数量，并可提高可重用性。这个JavaBean必须是一个你所存取的EJB的覆盖(wrapper)。 
+
+如果你使用标准的JavaBean，你可以使用 jsp:useBean标记来初始化EJB参数，如服务器URL和服务器 
+安全参数等。  
+
+自定义标记也可以是一种选择。但是，这要求比一个简单JavaBean wrapper更多的编码。 
+该处必须被重新写为尽可能小的代码并保证JSP脚本内容尽可能轻(light)。  
+ 

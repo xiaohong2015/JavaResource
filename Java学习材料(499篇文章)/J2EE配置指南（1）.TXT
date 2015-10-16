@@ -1,0 +1,111 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:20:00
+　　1、介绍
+
+　　本文介绍J2EE环境的配置，所有涉及的文件都在J2EE安装目录下的oncfig目录，这些文件都是文本文件，你可以有任意的文本编辑器来编辑它们。
+
+　　通常情况下，你没有改变这些文件的必要。但是如果你使用的数据库驱动不是cloudscape的时候，你需要遵循本章的内容进行配置。
+
+　　2、JDBC驱动
+
+　　默认的J2EE安装后支持cloudscape数据库（一个sun公司提供的演示数据库），如果你的ejb使用的jdbc不是连接cloudscape数据库，那么你需要按照下面的知道进行配置。（如果你不能确定本版本的J2EE支持你使用的jdbc驱动，请到 11111 看相关信息。）
+
+　　3、驱动的位置
+
+
+　　你必须把驱动文件（.jar文件）copy到 $J2EE_HOME/lib/system目录下。并且保证该文件包含在J2EE_CLASSPATH 的环境变量中。
+
+　　4、J2EE_CLASSPATH 环境变量
+
+　　J2EE server通过JDBC驱动连接数据库。通通过J2EE_CLASSPATH 的环境变量定位驱动文件（.jar文件）的位置。你可以在启动J2EE前在命令行设置这个变量。但是我们推荐你在脚本中设置J2EE_CLASSPATH 变量。编辑用户配置文件在安装的过程中是必须的一步。在unix中，用户配置文件是 /bin/userconfig.sh，windows nt中是bin/userconfig.bat
+
+　　注意：你应该同时在CLASSPATH环境变量中去掉驱动文件（.jar文件）。
+
+　　5、JDBC 1.0 驱动
+
+　　为了配置jdbc1.0驱动，编辑config/default.properties 文件的jdbc.drivers 和 jdbc.datasources两个属性值。再次要注意的是驱动文件必须包含在J2EE_CLASSPATH环境变量中。
+
+　　jdbc.drivers 属性
+
+　　jdbc.drivers 属性的值是有一系列的冒号分割的jdbc驱动的类名。格式如下：
+
+　　jdbc.drivers=:: . . .
+
+　　例如：
+
+　　　jdbc.drivers=oracle.jdbc.driver.OracleDriver:testutil.MyDriver
+
+　　　jdbc.datasources 属性值
+
+　　　jdbc.datasources 属性值由两部分组成，一个是datasource的jndi的名字，一个是数据库的url。典型的情况是：jndi名字是数据库的逻辑名字，rul指定数据库的实际位置。jndi名字和url都是在ejb编码的过程中指定的。rul的格式，请参照jdbc驱动提供商的文档。
+
+　　　jdbc.datasources 的语法如下： 
+
+　　　　jdbc.datasources=|||. . .
+
+　　　|符号有两个作用。第一，它隔开几个jndi_datasource；第二，它隔开每一个jndi_datasource中的jndi_datasource> 和 元素. 
+
+　　　jndi_datasource元素的语法如下：
+
+　　　　jdbc/
+
+　　由jdbc关键字开头，jndi_name是在jndi目录中指定的datasouce名字。
+
+　　例如：
+
+　　　jdbc.datasources=jdbc/Oracle|jdbc:oracle:thin@rtc:1521:acct|jdbc/MyDB|jdbc:test
+
+　　6、支持JTA的JDBC2.0驱动
+
+　　　配置JTA的JDBC2.0的驱动，你需要设置以下属性的值：
+
+　　　　jdbc20.datasources
+
+　　　　xadatasource..jndiname
+
+　　　　xadatasource..classname
+
+　　　　xadatasource..dbuser
+
+　　　　xadatasource..dbpassword
+
+　　　　xadatasource..prop.
+
+　　　同时你也必须在J2EE_CLASSPATH 环境变量中包括jdbc驱动文件。
+
+　　　　jdbc20.datasources 属性
+
+　　　　jdbc20.datasources 属性的值和jndi名字连接，用于定位datasouce的位置（它就是lookup方法的参数）。
+
+　　　　jdbc20.datasources 的语法如下：
+
+jdbc20.datasources=||||的作用有两个，第一，隔开jndi_datasource 和并组成一对，第二，隔开每一对的jndi_datasource> 、元素。
+
+　　　　 和 jndi_XA_datasource有相同的语法：
+
+　　　　jdbc/
+
+　　　　jdbc关键字开头。jndi_name是datasource名字，这个名字指向jndi目录。
+
+　　　　例如：
+
+　　　　jdbc20.datasources=jdbc/Merant|jdbc/XAMerant|jdbc/Finch|jdbc/XAFinch
+
+　　　　xadatasource属性
+
+　　　　xadatasource..jndiname 属性指定XA DataSource的jndi名字。语法如下：
+
+　　　　　xadatasource..jndiname=jdbc/
+
+　　　 n代表每一组xadatasource。第一个jdbc2.0驱动n为0，下一个是1，2等等。jndi_XA_datasource元素和jdbc20.datasources 指定的值对应。The xadatasource..dbuser 和 xadatasource..dbpassword 属性指定数据库用户和密码。通常该用户具有管理员的权限（更多的信息请看 2222 The distributed.transaction.recovery ）。
+
+　　　　xadatasource..prop. 指定和特定的属性值关联的值。实际的值可能是jdbc驱动。
+
+　　例如：
+
+　　　　xadatasource.0.jndiname=jdbc/XAMerant
+
+　　　　xadatasource.0.classname=com.merant.sequelink.jdbcx.datasource.SequeLinkDataSource
+
+　　　　xadatasource.0.prop.url=jdbc:sequelink://mypc:5000/[Oracle]

@@ -1,0 +1,29 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:27:49
+隐藏注释 
+
+
+写在JSP程序中，但不是发给客户。 
+
+JSP 语法
+
+<%-- comment --%> 
+
+例子：
+
+<%@ page language="java" %> 
+<html> 
+<head><title>A Comment Test</title></head> 
+<body> 
+<h2>A Test of Comments</h2> 
+<%-- This comment will not be visible in the page source --%> 
+</body> 
+</html> 
+
+描述
+
+用隐藏注释标记的字符会在JSP编译时被忽略掉。这个注释在你希望隐藏或注释你的JSP程序时是很有用的。
+
+JSP编译器不是会对<%--and--%>之间的语句进行编译的，它不会显示在客户的浏览器中，也不会在源代码中看到在<%-- --%>之间，你可以任意写注释语句，但是不能使用 "--%>",如果你非要使用请用"--%\>".
+

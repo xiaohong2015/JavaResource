@@ -1,0 +1,119 @@
+作者：jspfuns
+日期：2000-8-9 13:12:39
+作者/出处：Blueski编译（包含了2篇文章，前篇用了sun.net.smtp，后一篇用了javamail.
+
+一、我们可以通过任何支持sun规范中的sun.net.smtp包的JSP引擎(如JSWDK)发送mail。 
+(警告:使用内置的internal Sun规范包，这将影响到你的jsp程序的可移植性。) 
+
+以下scriptlet利用SmtpClient类在jsp文件中发送email。 
+
+<%@ page import="sun.net.smtp.SmtpClient, java.io.*" %>
+<%
+String from="gseshadri@hotmail.com";
+String to="govind@jguru.com, govi@bigfoot.com";
+try{
+SmtpClient client = new SmtpClient("mail.xxxxx.xxx");
+client.from(from);
+client.to(to);
+PrintStream message = client.startMessage();
+message.println("To: " + to);
+message.println("Subject: Sending email from JSP!");
+message.println("This was sent from a JSP page!");
+message.println();
+message.println("Cool beans! :-)");
+message.println();
+message.println("Govind Seshadri");
+message.println("jGuru.com");
+message.println();
+client.closeServer();
+}
+catch (IOException e){ 
+System.out.println("ERROR SENDING EMAIL:"+e);
+}
+%>
+
+
+二、 JavaMail是官方的 Java mail API，可参考 http://java.sun.com/products/javamail/。虽然该API比 sun.net.smtp.SmtpClient更丰富或者说更复杂，但它是可移植的。这里重新创建了一个 MailSender类，它包含了 JavaMail API。如下所示：
+
+
+// ms_ prefix is for MailSender class variables
+// str prefix is for String
+// astr prefix is for array of Strings
+// strbuf prefix is for StringBuffers, etc.
+public MailSender(
+String strFrom, // sender
+String[] astrTo, // recipient(s)
+String[] astrBCC, // bcc recipient(s), optional
+String strSubject, // subject
+boolean debugging)
+{
+ms_strFrom = strFrom; // who the message is from
+ms_astrTo = astrTo; // who (plural) the message is to
+ms_debugging = debugging; // who (plural) the message is to
+
+// set the host
+Properties props = new Properties();
+props.put("mail.smtp.host", ms_strSMTPHost);
+
+// create some properties and get the default Session
+Session session = Session.getDefaultInstance(props, null);
+session.setDebug(ms_debugging);
+
+try {
+// create a message
+ms_msg = new MimeMessage(session);
+
+// set the from
+InternetAddress from = new InternetAddress(strFrom);
+ms_msg.setFrom(from);
+
+// set the to
+InternetAddress[] address = new InternetAddress[astrTo.length];
+for (int i = 0; i astrTo.length; ++i)
+{
+address[i] = new InternetAddress(astrTo[i]);
+}
+ms_msg.setRecipients(Message.RecipientType.TO, address);
+
+// set the bcc recipients
+if (astrBCC != null)
+{
+address = new InternetAddress[astrBCC.length];
+for (int i = 0; i astrBCC.length; ++i)
+{
+eh.dbg("astrBCC[" + i + "] is: '" + astrBCC[i] + "'");
+address[i] = new InternetAddress(astrBCC[i]);
+}
+ms_msg.setRecipients(Message.RecipientType.BCC, address);
+}
+
+// set the subject
+ms_msg.setSubject(strSubject);
+
+// set up the string buffer which will hold the message
+ms_strbufMsg = new StringBuffer();
+
+} catch (MessagingException mex) {
+mex.printStackTrace(System.err);
+} catch (Exception ex) {
+ex.printStackTrace(System.err);
+}
+}
+
+public void ms_add(String strText)
+{
+ms_strbufMsg.append(strText);
+}
+
+public void ms_send()
+{
+try {
+// set the content as plain text
+ms_msg.setContent(new String(ms_strbufMsg), "text/plain");
+
+// and away
+Transport.send(ms_msg);
+} catch (Exception ex) {
+System.out.println("Caught exception in MailSender.ms_send: " + ex);
+}
+}

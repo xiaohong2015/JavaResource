@@ -1,0 +1,66 @@
+作者：cityboy
+email: 21cn@371.net
+日期：2001-4-25 2:01:32
+WIN2000 下JSP环境的建立(IIS+resin+j2sdk)
+
+一：下载所需要的软件
+
+1 - resin 1.2.1:
+http://summer.cnjsp.net/download/resin/resin-1.2.1.zip
+
+2 - j2sdk-1_3_0_01 for win: 
+http://summer.cnjsp.net/download/jdk/j2sdk1_3_0-win.exe
+
+
+二：安装软件
+
+1 - 安装j2sdk-1_3_0_01 for win，不用做其他的设置，安装完毕即可
+    如：安装到c:\j2sdk130 目录之下
+
+2 - 安装resin 1.2.1: 解压缩所下载的resin-1.2.1.zip文件包至相关目录
+    如：安装到c:\resin121 目录之下
+
+
+三：设置运行环境
+
+1 - 找到resin目录下的bin目录，双击运行srun.exe，确定即可，该步骤完成
+将isapi_srun.dll文件拷贝至c:\intepub\scripts目录下，并将resin加载进
+IIS中，此时，观察Internet信息服务-〉服务器属性-〉ISAPI筛选器已经有
+resin加载，但尚未启动
+
+2 - 点击 开始-〉运行，输入C:\resin121\bin\srun.exe -install，将srun加
+载为服务，此时观察 服务，将会看到resin servlet runner服务已经加载，但
+尚未启动。如不作此步骤，需运行Srun.exe，将打开两个窗口，虽同样可以调试，
+但非常之不方便。
+
+3 - 修改resin.conf配置文件，找到
+<http-server>
+  <app-dir>doc</app-dir>
+修改为：
+<http-server>
+  <app-dir>c:\inetpub\wwwroot</app-dir>
+
+4 - 重新启动IIS，启动resin servlet runner服务
+
+至此，安装完毕。
+
+
+四：测试--建立test.jsp
+
+<HTML>
+<HEAD>
+<TITLE>Simple Example</TITLE>
+</HEAD>
+<BODY>
+<% out.println("Hello, world!"); %>
+</BODY>
+</HTML>
+
+在浏览器地址栏键入http://localhost:8080/test.jsp，经典的Hello, world!
+就在眼前
+
+
+
+五：相关错误信息：
+Cannot contact Servlet Runner at localhost:6802
+这是由于srun.exe未运行所致

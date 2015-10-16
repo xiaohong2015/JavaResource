@@ -1,0 +1,280 @@
+作者：bdsc
+email: bdscca@yahoo.ca
+日期：2001-7-13 17:08:10
+
+6. 在HTTP中使用SOAP
+这一节讲述了如何在HTTP中使用SOAP。把SOAP绑定到HTTP，无论使用或不用HTTP扩展框架，都有很大的好处：在利用SOAP的形式化和灵活性的同时，使用HTTP种种丰富的特性。在HTTP中携带SOAP消息，并不意味着SOAP改写了HTTP已有的语义，而是将构建在HTTP之上SOAP语义自然地对应到HTTP语义。
+
+SOAP自然地遵循HTTP的请求/应答消息模型使得SOAP的请求和应答参数可以包含在HTTP请求和应答中。注意，SOAP的中间节点与HTTP的中间节点并不等同，即，不要期望一个根据HTTP连接头中的域寻址到的HTTP中间节点能够检查或处理HTTP请求中的SOAP消息。
+
+在HTTP消息中包含SOAP实体时，按照RFC2376[3] HTTP应用程序必须使用媒体类型 "text/xml"。
+
+6.1 SOAP HTTP请求
+虽然SOAP可能与各种HTTP请求方式相结合，但是绑定仅定义了在HTTP POST请求中包含SOAP消息。（第7节中描述了如何在RPC中使用SOAP，第6.3节描述了如何使用HTTP扩展框架）
+
+6.1.1 HTTP头中SOAPAction域
+一个HTTP请求头中的SOAPAction域用来指出这是一个SOAP HTTP请求，它的值是所要的URI。在格式、URI的特性和可解析性上没有任何限制。当HTTP客户发出SOAP HTTP请求时必须使用在HTTP头中使用这个域。
+
+soapaction    = "SOAPAction" ":" [ <"> URI-reference <"> ]
+URI-reference = <as defined in RFC 2396 [4]>
+
+HTTP头中SOAPAction域使服务器（如防火墙）能正确的过滤HTTP中SOAP请求消息。如果这个域的值是空字符串（""），表示SOAP消息的目标就是HTTP请求的URI。这个域没有值表示没有SOAP消息的目标的信息。
+
+例子:
+
+SOAPAction: "http://electrocommerce.org/abc#MyMessage"
+SOAPAction: "myapp.sdl"
+SOAPAction: ""
+SOAPAction:
+
+6.2 SOAP HTTP应答
+SOAP HTTP遵循HTTP 中表示通信状态信息的HTTP状态码的语义。例如，2xx状态码表示这个包含了SOAP组件的客户请求已经被成功的收到，理解和接受。
+
+在处理请求时如果发生错误，SOAP HTTP服务器必须发出应答HTTP 500 "Internal Server Error"，并在这个应答中包含一个SOAP Fault元素（见4.4节）表示这个SOAP处理错误。
+
+6.3 HTTP扩展框架
+一个SOAP消息可以与HTTP扩展框架 [6]一起使用以区分是否有SOAP HTTP请求和它的目标。
+
+是使用扩展框架或是普通的HTTP关系到通信各方的策略和能力。通过使用一个必需的扩展声明和"M-"HTTP方法名前缀，客户可以强制使用HTTP扩展框架。服务器可以使用HTTP状态码510 "Not Extended"强制使用HTTP扩展框架。也就是说，使用一个额外的来回，任何一方都可以发现另一方的策略并依照执行。
+
+用来表示SOAP使用了扩展框架的扩展标志符是：
+
+http://schemas.xmlsoap.org/soap/envelope/
+6.4 SOAP HTTP举例
+例3 使用POST的SOAP HTTP
+
+POST /StockQuote HTTP/1.1
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+SOAPAction: "http://electrocommerce.org/abc#MyMessage"
+
+<SOAP-ENV:Envelope...
+
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+
+<SOAP-ENV:Envelope...
+
+例4 使用扩展框架的SOAP HTTP
+
+M-POST /StockQuote HTTP/1.1
+Man: "http://schemas.xmlsoap.org/soap/envelope/"; ns=NNNN
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+NNNN-SOAPAction: "http://electrocommerce.org/abc#MyMessage"
+
+<SOAP-ENV:Envelope...
+
+HTTP/1.1 200 OK
+Ext:
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+
+<SOAP-ENV:Envelope...
+
+7. 在RPC中使用SOAP
+设计SOAP的目的之一就是利用XML的扩展性和灵活性来封装和交换RPC调用。这一节定义了远程过程调用和应答的统一表示形式。 
+
+虽然可以预计到这种表示形式最可能被用于与第5节中定义的编码方式相结合，但也可能有其它的表示形式。SOAP的encodingStyle属性（见4.3.2节）可以用来表明方法调用和应答都使用这一节所指定的表示方式。
+
+在RPC中使用SOAP和SOAP协议绑定（见第6节）是紧密相关的。在使用HTTP作为绑定协议时，一个RPC调用自然地映射到一个HTTP请求，RPC应答同样映射到HTTP应答。但是，在RPC中使用SOAP并不限于绑定HTTP协议。
+
+要进行方法调用，以下的信息是必需的：
+
+目标对象的URI 
+方法名 
+方法signature（可选） 
+方法的参数 
+头数据（可选） 
+SOAP依靠协议绑定提供传送URI的机制。例如，对HTTP来说，请求的URI指出了调用的来源。除了必须是一个合法的URI之外，SOAP对一个地址的格式没有任何限制。（更多URI的信息参见 [4]）
+
+7.1 RPC和SOAP体
+RPC方法调用和应答都包含在SOAP Body元素中（见4.3节），它们使用如下的表示形式：
+
+一个方法调用用一个结构表示 
+一个方法调用被看作一个单个的结构，每个[in]和[in/out]参数有一个accessor。结构的名和类型与方法相同。 
+每个[in]和[in/out]参数都被看作一个accessor，这个accessor的名和类型与参数的名和类型相对应。它们的出现顺序和方法中定义的参数顺序相同。 
+一个方法应答用一个结构表示。 
+一个方法应答被看作一个单个的结构，返回值和每个[in]和[in/out]参数有一个accessor。第一个accessor是返回值，之后是参数accessor，参数accessor的出现顺序和方法中定义的参数顺序相同。 
+每个参数accessor的名称和类型与参数的名称和类型相对应。返回值accessor的名称并不重要。同样，结构的名称也不重要，不过，通常在方法名称的后面加上字符串"Response"作为结构的名称。 
+方法错误使用SOAP Fault元素（见4.4节）表示。如果绑定的协议有额外的规则表示错误，则这些规则也必须要遵从。 
+正如上面所述，方法调用和应答结构可以按照第5节中规则编码，或者用encodingStyle属性（见4.1.1节）指定编码方式。
+
+应用程序可以处理缺少参数的请求，但是可能返回一个错误。
+
+因为返回结果表示调用成功，错误表示调用失败，所以，在方法应答中同时包含返回结果和错误是错误的。
+
+7.2 RPC和SOAP头
+在RPC编码中，可能会有与方法请求有关但不是正规的方法signature的附加信息。如果这样，它必须作为SOAP头元素的子元素。
+
+使用这种头元素的一个例子是在消息中传递事务ID。由于事务ID不是方法signature的一部分，通常由底层的组件而不是应用程序代码控制，所以没有一种直接的方法在调用中传递这个必要的信息。通过在头中添加一个给定名字的条目，接收方的事务管理器就可以析取这个事务ID，而且不影响远程过程调用的代码。
+
+8. 安全性考虑
+这篇文档中没有涉及完整性和保密性，这些问题将在以后的版本中描述。
+
+9. 参考文献 
+[1] S. Bradner, "The Internet Standards Process -- Revision 3", RFC2026, Harvard University, October 1996
+
+[2] S. Bradner, "Key words for use in RFCs to Indicate Requirement Levels", RFC 2119, Harvard University, March 1997
+
+[3] E. Whitehead, M. Murata, "XML Media Types", RFC2376, UC Irvine, Fuji Xerox Info. Systems, July 1998
+
+[4] T. Berners-Lee, R. Fielding, L. Masinter, "Uniform Resource Identifiers (URI): Generic Syntax", RFC 2396, MIT/LCS, U.C. Irvine, Xerox Corporation, August 1998.
+
+[5] R. Fielding, J. Gettys, J. C. Mogul, H. Frystyk, T. Berners-Lee, "Hypertext Transfer Protocol -- HTTP/1.1", RFC 2616, U.C. Irvine, DEC W3C/MIT, DEC, W3C/MIT, W3C/MIT, January 1997
+
+[6] H. Nielsen, P. Leach, S. Lawrence, "An HTTP Extension Framework", RFC 2774, Microsoft, Microsoft, Agranat Systems
+
+[7] W3C Recommendation "The XML Specification"
+
+[8] W3C Recommendation "Namespaces in XML"
+
+[9] W3C Working Draft "XML Linking Language". This is work in progress.
+
+[10] W3C Working Draft "XML Schema Part 1: Structures". This is work in progress. 
+
+[11] W3C Working Draft "XML Schema Part 2: Datatypes". This is work in progress.
+
+[12] Transfer Syntax NDR, in "DCE 1.1: Remote Procedure Call"
+
+[13] N. Freed, N. Borenstein, "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies", RFC2045, Innosoft, First Virtual, November 1996
+
+A. SOAP封装举例
+A.1 请求编码举例
+例5 类似于例1，但有一个必要的头
+
+POST /StockQuote HTTP/1.1
+Host: www.stockquoteserver.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+SOAPAction: "Some-URI"
+
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <SOAP-ENV:Header>
+       <t:Transaction
+           xmlns:t="some-URI"
+           SOAP-ENV:mustUnderstand="1">
+               5
+       </t:Transaction>
+   </SOAP-ENV:Header>
+   <SOAP-ENV:Body>
+       <m:GetLastTradePrice xmlns:m="Some-URI">
+           <symbol>DEF</symbol>
+       </m:GetLastTradePrice>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+例6 类似于例1，但有多个请求参数
+
+POST /StockQuote HTTP/1.1
+Host: www.stockquoteserver.com
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+SOAPAction: "Some-URI"
+
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <SOAP-ENV:Body>
+       <m:GetLastTradePriceDetailed
+         xmlns:m="Some-URI">
+           <Symbol>DEF</Symbol>
+           <Company>DEF Corp</Company>
+           <Price>34.1</Price>
+       </m:GetLastTradePriceDetailed>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+A.2 应答编码举例 
+例7 与例2类似，但有必要的头部
+
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <SOAP-ENV:Header>
+       <t:Transaction
+         xmlns:t="some-URI"
+         xsi:type="xsd:int" mustUnderstand="1">
+           5
+       </t:Transaction>
+   </SOAP-ENV:Header>
+   <SOAP-ENV:Body>
+       <m:GetLastTradePriceResponse
+         xmlns:m="Some-URI">
+           <Price>34.5</Price>
+       </m:GetLastTradePriceResponse>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+例8 与例2类似，但有一个结构
+
+HTTP/1.1 200 OK
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <SOAP-ENV:Body>
+       <m:GetLastTradePriceResponse
+         xmlns:m="Some-URI">
+           <PriceAndVolume>
+               <LastTradePrice>
+                   34.5
+               </LastTradePrice>
+               <DayVolume>
+                   10000
+               </DayVolume>
+           </PriceAndVolume>
+       </m:GetLastTradePriceResponse>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+例9 与例2类似，但处理必要的头出错
+
+HTTP/1.1 500 Internal Server Error
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+   <SOAP-ENV:Body>
+       <SOAP-ENV:Fault>
+           <faultcode>SOAP-ENV:MustUnderstand</faultcode>
+           <faultstring>SOAP Must Understand Error</faultstring>
+       </SOAP-ENV:Fault>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+例10 与例2类似，但处理Body出错
+
+HTTP/1.1 500 Internal Server Error
+Content-Type: text/xml; charset="utf-8"
+Content-Length: nnnn
+
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/">
+   <SOAP-ENV:Body>
+       <SOAP-ENV:Fault>
+           <faultcode>SOAP-ENV:Server</faultcode>
+           <faultstring>Server Error</faultstring>
+           <detail>
+               <e:myfaultdetails xmlns:e="Some-URI">
+                 <message>
+                   My application didn't work
+                 </message>
+                 <errorcode>
+                   1001
+                 </errorcode>
+               </e:myfaultdetails>
+           </detail>
+       </SOAP-ENV:Fault>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>

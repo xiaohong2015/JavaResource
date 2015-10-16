@@ -1,0 +1,38 @@
+作者：yukuang
+email: yukuang@163.net
+日期：7/27/2001 4:18:43 PM
+以前很不明白Bean的scope属性的含义，今天做了一个实验，终于差不多搞明白了。贴出来与大家共享。
+例子很简单，Bean的功能为取当前时间，其代码为：
+Common.java:
+--------------------
+package XX;
+
+import java.util.Date;
+import java.text.*;
+
+public class Common
+{
+	Date d=new Date();
+	public String now(String s)
+	{
+		SimpleDateFormat formatter = new SimpleDateFormat(s);
+		return formatter.format(d);
+	}
+}
+
+测试页面的代码为：
+date.jsp
+-----------------------------------------------------------
+<jsp:useBean id="cm" scope="XX" class="XX.Common"/>
+<%=cm.now("yyyy-MM-dd HH:mm:ss")  %>
+
+
+测试结果：
+
+1、当scope=application时，我们浏览date.jsp，这时显示出了系统时间。可是不管我们怎么刷新，重新打开一次浏览器，甚至换台机器，它显示的时间始终不变，都是当初的时间(即bean刚创建时得到的系统时间)，因为scope=application，所以Bean的实例在内存中只有一份，此时只要不重新启动WEB服务，输出不会变化。
+
+2、当scope=session时，浏览date.jsp，刷新时显示也不会变化。可是当我们重新打开一浏览器，即一个新的session，系统便再次创建Bean的实例，取得当前系统时间，这时将得到正确的时间。同样，再次刷新新打开的页面(新的session)，显示也不会变化。
+
+3、当scope=page/request(它们的区别只在于包含静态文件时，此处无区别)时，不断刷新页面将不断得到当前系统时间。
+
+以上可以看出不同的scope，Bean有不同的作用域。使用时一定注意，不要将得到经常变动的Bean的scope设为application或session，那将得到不正确的结果.

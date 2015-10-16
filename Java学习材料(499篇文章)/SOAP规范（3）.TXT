@@ -1,0 +1,104 @@
+作者：bdsc
+email: bdscca@yahoo.ca
+日期：2001-7-13 17:06:07
+
+以下是一个同时具有简单和复杂成员类型的例子。它显示两层引用。注意"Author"accssor元素的"href"属性是对相应具有"id"属性的值的引用。"Address"与之类似。
+
+<e:Book>
+   <title>My Life and Work</title>
+   <author href="#Person-1"/>
+</e:Book>
+<e:Person id="Person-1">
+   <name>Henry Ford</name>
+   <address href="#Address-2"/>
+</e:Person>
+<e:Address id="Address-2">
+   <email>mailto:henryford@hotmail.com</email>
+   <web>http://www.henryford.com</web>
+</e:Address>
+
+当"Person"的值和"Address"的值是multi-reference时，上面的形式是正确的。如果它们是single-reference，就必须用嵌入的形式，如下所示：
+
+<e:Book>
+   <title>My Life and Work</title>
+   <author>
+       <name>Henry Ford</name>
+       <address>
+	  <email>mailto:henryford@hotmail.com</email>
+	  <web>http://www.henryford.com</web>
+       </address>
+   </author>
+</e:Book>
+如果添加一个限制，任意两个人都不会有相同的地址，并且地址可以是街道或Email地址，一本书可以有两个作者，编码如下：
+
+<e:Book>
+   <title>My Life and Work</title>
+   <firstauthor href="#Person-1"/>
+   <secondauthor href="#Person-2"/>
+</e:Book>
+<e:Person id="Person-1">
+   <name>Henry Ford</name>
+   <address xsi:type="m:Electronic-address">
+       <email>mailto:henryford@hotmail.com</email>
+       <web>http://www.henryford.com</web>
+   </address>
+</e:Person>
+<e:Person id="Person-2">
+   <name>Samuel Crowther</name>
+   <address xsi:type="n:Street-address">
+       <street>Martin Luther King Rd</street>
+       <city>Raleigh</city>
+       <state>North Carolina</state>
+   </address>
+</e:Person>
+
+序列化可以包含对不在同一个资源的值的引用：
+
+<e:Book>
+   <title>Paradise Lost</title>
+   <firstauthor href="http://www.dartmouth.edu/~milton/"/>
+</e:Book>
+
+以下是描述上面结构的schema片断：
+
+<element name="Book" type="tns:Book"/>
+<complexType name="Book">
+   <!-- Either the following group must occur or else the
+        href attribute must appear, but not both. -->
+   <sequence minOccurs="0" maxOccurs="1">
+       <element name="title" type="xsd:string"/>
+       <element name="firstauthor" type="tns:Person"/>
+       <element name="secondauthor" type="tns:Person"/>
+   </sequence>
+   <attribute name="href" type="uriReference"/>
+   <attribute name="id" type="ID"/>
+   <anyAttribute namespace="##other"/>
+</complexType>
+
+<element name="Person" base="tns:Person"/>
+<complexType name="Person">
+   <!-- Either the following group must occur or else the
+        href attribute must appear, but not both. -->
+   <sequence minOccurs="0" maxOccurs="1">
+       <element name="name" type="xsd:string"/>
+       <element name="address" type="tns:Address"/>
+   </sequence>
+   <attribute name="href" type="uriReference"/>
+   <attribute name="id" type="ID"/>
+   <anyAttribute namespace="##other"/>
+</complexType>
+
+<element name="Address" base="tns:Address"/>
+<complexType name="Address">
+   <!-- Either the following group must occur or else the
+        href attribute must appear, but not both. -->
+   <sequence minOccurs="0" maxOccurs="1">
+       <element name="street" type="xsd:string"/>
+       <element name="city" type="xsd:string"/>
+       <element name="state" type="xsd:string"/>
+   </sequence>
+   <attribute name="href" type="uriReference"/>
+   <attribute name="id" type="ID"/>
+   <anyAttribute namespace="##other"/>
+</complexType>
+

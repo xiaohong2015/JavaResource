@@ -1,0 +1,87 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：7/10/2001 12:59:38 AM
+[H3][#ff0000]关于［开心就好］提出的“如何杀死一只鸡”的问题的讨论意见 [/#][/H3]
+[B]他的问题如下：[/B]
+一个方法：kill()
+希望传递一个鸡的参数，然后在kill方法内将这只鸡杀死，并希望在方法外，这只鸡也是“真”的被杀死了。
+他给出的代码如下，并依据这段代码得出结论：JAVA不是好厨师，杀一只鸡都杀不死。先看代码吧。
+public class test{
+public static void main(String[] args){
+int i=0;
+int j=1;
+Chicken chicken=new Chicken();
+int k=chicken.killChicken(i,j);
+System.out.println(i+"\n"+k);
+}
+}
+class Chicken{
+public int killChicken(int i,int j){
+i++;
+return i+j;
+}
+};
+//the Result is "0,2",it's why?
+
+[B]这段代码有什么问题呢？[/B]
+嗯，相当的多，就找最严重的吧，其实也是他为什么得不出正确答案的原因。
+开心就好提出的问题是如何杀鸡，可是从他的代码所表示的意思来看，其实是先“造”了一只鸡，然后用这只鸡去杀两个数字。这能杀得死吗？
+这里至少犯了两个错误：1，这段代码没有体现出一点OO的思想，既然是“杀鸡”，怎么能“造”一只鸡，来杀数字呢？2，这段代码理解错了JAVA中参数传递的概念。
+OK，再来看看我根据罗亭的代码所改写的代码吧。
+public class Chicken {
+private boolean IsLiving = true;//鸡还活吗？
+/** 判断鸡是否还活着 */
+public boolean isLiving(){
+return this.IsLiving;
+}
+/** 鸡被捅了一刀 */
+public void killed(){
+this.IsLiving = false;
+}
+}
+public class Killer {
+/** 准备吃鸡肉，如果没杀死，当然是吃不到手了 ^o^ */
+public void killChicken(Chicken _Chicken){
+_Chicken.killed();
+}
+public static void main(String[] args){
+Chicken chicken=new Chicken();//这个时候还是活着的
+System.out.println("活着么？"+chicken.isLiving());
+Killer killer=new Killer();//弄把刀来
+killer.killChicken(chicken);//我杀杀杀!
+System.out.println("活着么？"+chicken.isLiving());//死啦!
+}
+}
+[B]运行结果如下：[/B]
+活着么？true
+活着么？false
+[B]原因：[/B]
+在JAVA中，如果方法的参数是基础类型，如int,float等，那么是以传值的方式传递参数的(即，在方法内部改变参数，不会影响方法外的值)。这就是开心所做的测试不成功的原因。
+如果方法的参数是对象的话，就是以传引用的方式传递参数(即，在方法内部，你可以改变参数的值，方法返回后参数的值的改变可以被反映出来)，这就是杀鸡的原理。
+[B]解决：[/B]
+那么，JAVA中如何应对另外两种情况(即，以引用方式来传基础类型，和传值方式来传递对象)呢？
+第一种情况中，需要构造一个对象，
+public class IntegerImpl{
+int value;
+public IntegerImpl(int newValue){
+this.value=newValue;
+}
+public int getInt(){
+return value;
+}
+public void setInt(int newValue){
+value=newValue;
+}
+}
+在方法调用的时候，使用这样的类来作为参数传递即可。注意，java.lang.Integer类并不适用。 第二种情况中，需要在方法一开始，先复制一个参数的复本，以后的操作只对复本进行。如下：
+public killChicken(Chicken oldChicken){
+chicken=oldChicken.clone();
+kill(chicken);
+//方法返回后，这只鸡还是活的。
+}
+[B]结论：[/B]
+不管是需要传值还是传引用，在JAVA中当然都是可以做到的。虽然要将int等类型作为引用传递比较麻烦，不过这种情况并不是很多见。
+而在.net中，ref关键字的作用看似很大，其实并没什么用处，如boss_ch所说，只是MS公司为了保持与C++的某些相似性而设置的。尤其是在传递对象的时候，当传递一只鸡给一个方法去“杀死”的时候，难道默认的居然是先造另一只鸡去杀么？不符合人的常规思维。 最后，以罗亭的话来结尾，
+
+[#330033][I]你看你的代码中杀的是什么？
+眼中无鸡，岂能杀得了鸡？[/I][/#]

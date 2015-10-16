@@ -1,0 +1,29 @@
+作者：NOVEMBER RAIN
+email: haoy@dongyu.com.cn
+日期：2000-11-24 17:25:25
+Image I/O 包及对 JDK 的要求 
+　　如果你的 servlet 要动态生成图象，首先你需要 image I/O，明确的说，你需要生成一图片来响应HTTP请求。核心 Java API 没有直接提供用于保持任何图象的功能。然而，你可以用 Sun 的 Java 1.1 类库来做 image I/O。而且 Sun 的 1.2 版的 image I/O 提供了对 JPEG 图象进行编码和解码的包。因为这些代码在 com.sun 包中，不是核心API的一部分，也不是标准的扩展包，因此，会影响代码的可移植性。
+
+　　使用 jdk 1.2 将比 jdk 1.1 版容易的多，本文介绍 jdk 1.2 下的实现方法。示例有三个步骤：创建、绘制、保存。在本例仅仅示范如何画一个椭圆，当然你可以根据你的需要修改。例子使用了 com.sun.image.codec.jpeg 包生成 JPEG 文件。如果要生成 GIF 文件，你可以使用第三方的包，如 Acme Labs 的 GIF Encoder。
+
+1. 使用适当的尺寸创建一个 BufferedImage 对象：
+BufferedImage 
+　image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+
+2. 在 image 对象上绘制你想要的图象。假设你想要一个白色的背景，你需要画一个白色填充的矩形。否则背景将是缺省的黑色：
+
+　Graphics g = image.getGraphics(); 
+　　g.setColor(Color.white); 
+　　g.fillRect(0,0, width, height);
+　　g.setColor(Color.red); 
+　　g.drawOval(0, 0, width, height); 
+
+3. 使用 com.sun.image.codec.jpeg 包输出 BufferedImage：
+
+　response.setContentType(”image/jpeg”); 
+　ServletOutputStream out = response.getOutputStream(); 　
+　JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out); 
+　encoder.encode(image); 
+　out.close();
+
+

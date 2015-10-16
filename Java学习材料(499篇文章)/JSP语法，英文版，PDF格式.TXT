@@ -1,0 +1,6 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-8-10 14:57:15
+[url]http://java.sun.com/products/jsp/syntax.pdf[/url]
+
+真得学JSP，还得看看JAVA相关的资料哦，：）

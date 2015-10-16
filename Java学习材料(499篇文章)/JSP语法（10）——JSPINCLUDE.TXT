@@ -1,0 +1,99 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:32:05
+<jsp:include> 
+
+
+包含一个静态或动态文件. 
+
+
+
+
+
+
+JSP 语法
+
+
+
+
+<jsp:include page="{relativeURL | <%= expression%>}"   flush="true" /> 
+
+or 
+
+<jsp:include page="{relativeURL | <%= expression %>}"   flush="true" > 
+
+        <jsp:param name="parameterName" 
+
+value="{parameterValue | <%= expression %>}" />+ 
+
+</jsp:include> 
+
+
+
+Examples
+
+
+
+
+<jsp:include page="scripts/login.jsp" /> 
+
+<jsp:include page="copyright.html" /> 
+
+<jsp:include page="/index.html" /> 
+
+
+
+<jsp:include page="scripts/login.jsp"> 
+
+        <jsp:param name="username" value="jsmith" /> 
+
+</jsp:include> 
+
+
+
+
+
+
+
+描述
+
+
+<jsp:include>元素允许你包含动态文件和静态，这两种包含文件的结果是不同的。如果文件仅是静态文件，那么这种包含仅仅是把包含文件的内容加到jsp文件中去，而如果这个文件动态的，那么这个被包含文件也会被Jsp编译器执行(这一切与asp相似) 
+
+
+你不能从文件名上判断一个文件是动态的还是静态的，比如aspcn.asp 
+
+就有可能只是包含一些信息而已，而不需要执行。<jsp:include>能够同时处理这两种文件，因此你就不需要包含时还要判断此文件是动态的还是静态的. 
+
+
+如果这个包含文件是动态的，那么你还可以用<jsp:param>还传递参数名和参数值。 
+
+
+
+
+
+
+属性
+
+
+
+
+page="{relativeURL | <%= expression %>}" 
+参数为一相对路径，或者是代表相对路径的表达式. 
+
+
+
+
+
+flush="true" 
+这里你必须使用flush="true",你不能使用false值.缺省值为false 
+
+
+
+
+
+<jsp:param name="parameterName" value="{parameterValue | <%= expression %> }" />+ 
+<jsp:param>子句能让你传递一个或多个参数给动态文件 
+
+
+你能在一个页面中使用多个<jsp:param>来传递多个参数。

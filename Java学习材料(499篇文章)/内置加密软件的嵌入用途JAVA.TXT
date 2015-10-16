@@ -1,0 +1,16 @@
+作者：罗亭
+email: tinluo@263.net
+日期：2001-6-19 13:51:22
+/** 我看好j2me，你呢？ */
+
+内置加密软件的嵌入用途Java软件今秋问世
+ 
+    Aplix（ http://www.aplix.co.jp/ ）和RSA Security公司（ http://www.rsasecurity.com/japan/ ）据定针对开发嵌入用途Java的安全性功能联手合作。Aplix将在该公司的嵌入用途Java执行环境“Jblend”中作为可选功能导入RSA Security公司的加密软件“RSA BSAFE SSL-C”，并决定于今年秋季上市销售。该公司将把该产品推销给生产配备Java执行功能的手机电话制造商以及各种家电设备的制造商。
+
+　　目前，包括个人电脑在内，配备RSA的BSAFE SSL-C的设备已经超过了10亿台，使得其成为因特网加密软件的事实标准。另一方面，Aplix是日本国内最大的嵌入用途Java开发商。这两个领域的两强牵手合作，将会加快在包括手机在内的各种对应Java的设备配备加密功能的步伐。
+
+　　BSAFE SSL-C是用来使用SSL（安全接口层，Secure Socket Layer）协议加密通信数据的工具组件。通过使用嵌入该软件的JBlend，在对应Java的手机与通信服务商以及因特网邮购网站之间进行通信时可以进行128bit的加密。
+
+　　虽然目前也有配备JBlend和BSAFE SSL-C的手机，但是到目前为止设备制造商需要从Aplix和RSA Security分别购买这两个软件以后在本公司内部验证是否运行正常。今后由于Aplix销售内置BSAFE SSL-C的JBlend。Aplix的郡山龙社长在对此进行说明时表示，“由于可以做为一个整体销售并且保证产品的质量，因此设备制造商无须进行运行验证”。
+
+　　RSA Security还向Java的鼻祖美国Sun Microsystems提供BSAFE SSL-C的专利许可，不过，包括国外的公司在内，Aplix是第一家与RSA Security联手合作的嵌入用途Java供应商。今后，除了Aplix以外，“如果有机会也将与其它嵌入用途Java供应商联手合作”（RSA Security的山野修社长）。  

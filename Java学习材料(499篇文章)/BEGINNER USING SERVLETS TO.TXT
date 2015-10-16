@@ -1,0 +1,254 @@
+作者：spring.z
+email: spring.z@elong.com
+日期：2001-7-3 9:08:37
+Displaying Records from the Database with Java Servlets.
+
+Overview :
+
+In this article I'll explain each step you need to know to display records from the database using Servlets. The steps for displaying records in JSP pages and Java Beans are almost the same. We will first build a small example Microsoft Access database, create a DSN for it and using JDBC ( Java Database Connectivity ) driver connect with it and display the records from a given table. Since 80% of your time developing applications will be spent on interacting with databases, you should pay utmost importance to this article.
+
+Access Database :
+
+You can use any database of your choice but for this article I will stick with Microsoft Access database on a Windows platform. The steps for creating such a database and assigning a DSN have already been explained in detail in an earlier article, you should consult that article for details. I will only briefly mention it here.
+
+Create a new Access database with the name of 'odbc_exmp.mdb' and create a table 'Names' containing three fields 'ID', 'first_name' and 'last_name' where 'ID' is the primary key :
+
+
+
+Go to the control panel and create a new DSN ( Data Source Name ) 'odbc_exmp' for it and point it to the path of your database on your computer.
+
+Populate the 'Names' table with any values like the following so that we can display the records later :
+
+
+
+We are finished with the database. Move on to the next page where we create our Java Servlet to display these records on the user screen.
+
+DisplayServlet :
+
+Create a new DisplayServlet.java file in the /APP_NAME/WEB-INF/classes/com/stardeveloper/servlets/db/ folder. Note /APP_NAME/ is the path of your application within your application server, in Tomcat 4.0 /APP_NAME/ will be /CATALINA_HOME/webapps/star/ where 'star' is the name of the application.
+
+Copy and paste the following code into DisplayServlet.java file and compile it :
+
+package com.stardeveloper.servlets.db;
+
+import java.sql.*;
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class DisplayServlet extends HttpServlet {
+    
+    public void doGet(HttpServletRequest req, HttpServletResponse res) 
+        throws ServletException, IOException {
+        
+        res.setContentType("text/html");
+        PrintWriter out = res.getWriter();
+        
+        out.print("<html><head>");
+        out.print("</head><body>");
+        
+        out.print("<form action=\"");
+        out.print( req.getRequestURI() );
+        out.print("\" method=\"post\">");
+        out.print("<input type=\"submit\" ");
+        out.print("value=\" \">  ");
+        out.print("Display Records</form>");
+        
+        out.print("</body></html>");
+
+        out.close();
+    }
+    
+    public void doPost(HttpServletRequest req, HttpServletResponse res) 
+        throws ServletException, IOException {
+        
+        res.setContentType("text/html");
+        PrintWriter out = res.getWriter();
+        
+        out.print("<html><head>");
+        out.print("</head><body>");
+
+        out.print("<code><pre>");
+        out.print("<font color=green>ID\tFirst ");
+        out.println("Name\tLast Name\n</font>");
+        
+        // debugging info
+        
+        long time1 = System.currentTimeMillis();
+
+        // connecting to database
+
+        Connection con = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+            con = DriverManager.getConnection("jdbc:odbc:odbc_exmp");
+        
+            stmt = con.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM Names");
+            
+            // displaying records
+
+            while(rs.next()) {
+                out.print(rs.getObject(1).toString());
+                out.print("\t");
+                out.print(rs.getObject(2).toString());
+                out.print("\t\t");
+                out.print(rs.getObject(3).toString());
+                out.print("\n");
+            }
+
+    
+        } catch (SQLException e) {
+            throw new 
+            ServletException("Servlet Could not display records.", e);
+        } catch (ClassNotFoundException e) {
+            throw new 
+            ServletException("JDBC Driver not found.", e);
+        } finally {
+            try {
+                if(rs != null) {
+                    rs.close();
+                    rs = null;
+                }
+                if(stmt != null) {
+                    stmt.close();
+                    stmt = null;
+                }                        
+                if(con != null) {
+                    con.close();
+                    con = null;
+                }
+            } catch (SQLException e) {}
+        }
+        
+        // debugging info
+        
+        long time2 = System.currentTimeMillis();
+
+        out.print("</pre></code>");
+        
+        out.print("<p>Search took : ");
+        out.print( (time2 - time1) );
+        out.print(" ms.</p>");
+        
+        out.print("<p\"><a href=\"");
+        out.print( req.getRequestURI() );
+        out.print("\">Back</a></p>");
+
+        out.print("</body></html>");
+        out.close();
+    }
+}
+Start your application server and point your browser to http://localhost:8080/star/servlet/com.stardeveloper.servlets.db.DisplayServlet to see the Servlet display records on your computer. To see the demo please move on to the last page of this article.
+
+Move on to the next page where I explain the steps shown above to connect to the database.
+
+Steps of Connecting to Database :
+
+In the previous page we developed a Servlet 'DisplayServlet' which extends HttpServlet class and overrides doGet() and doPost() methods. In the doGet() method we display a Form to the user to click, after which he will be shown records from our 'odbc_exmp.mdb' database. Nothing much to talk about yet. In doPost() method we make a connection to the database and iterate through it's records. This is the method which needs more explanation.
+
+Step 1 : Loading JDBC Driver :
+
+First step to connect to any database using JDBC is to first load a JDBC driver. Once loaded we use methods of this driver to interact with the database. If JDBC driver is not loaded or could not be loaded we cannot connect to the database. For this example we are using Sun's JDBC/ODBC bridge driver though not a production class driver does allow us to connect to any ODBC compliant database on Windows platform. So the first step will be :
+
+    Connection con = null;
+    Statement stmt = null;
+    ResultSet rs = null;
+        
+    try {
+        Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+        
+Notice that we first declare the three objects we will be using, Connection, Statement and ResultSet objects. All of them are found in the java.sql package. We then start a try block to catch any exceptions that may be thrown. Last line is the main step where we dynamically load the JDBC driver using Class.forName() method. sun.jdbc.odbc.JdbcOdbcDriver is the JDBC driver we are using.
+
+Step 2 : Making Connection :
+
+Ok we have loaded the JDBC driver it is time to make connection to the database. We do this using DriverManager.getConnection() method. As an argument to this method we provide 'path' to the database we are going to connect with.
+
+    con = DriverManager.getConnection("jdbc:odbc:odbc_exmp");
+The path to our database is 'jdbc:odbc:odbc_exmp'. If you have to substitute some other DSN then replace 'odbc_exmp' with the newer one e.g. 'jdbc:odbc:newDSN'.
+
+Step 3 : Retrieving Records :
+
+We are connected to the database, how to display records? well to display records we will have to create just two more objects, Statement and ResultSet. Statement object encapsulates the SQL query we want to execute and ResultSet object is the real object which carries our records which we want to display.
+
+    stmt = con.createStatement();
+    rs = stmt.executeQuery("SELECT * FROM Names");
+We create the Statement object using Connection.createStatement() method. Once created we provide it with the SQL query we want to use to retrieve records, which in this case is "SELECT * FROM Names". This query retrieves all records from the 'Names' table. Statement.executeQuery() method returns a ResultSet object containing the records retrieved using that query.
+
+Last 3 steps are explained on the next page.
+
+Step 4 : Displaying Records :
+
+We now have a ResultSet object filled with records retrieved from the database, so how to show them? This is how we iterate through the records :
+
+    while(rs.next()) {
+        out.print(rs.getObject(1).toString());
+        out.print("\t");
+        out.print(rs.getObject(2).toString());
+        out.print("\t\t");
+        out.print(rs.getObject(3).toString());
+        out.print("\n");
+    }
+Using a while loop we iterate through the records. Notice that ResultSet.next() methods does two things. One that it returns a boolean ( true / false ) value indicating more records are there to be shown and second that it moves the database cursor one row forward so that next time when we call ResultSet.getObject() method we get object from the next row.
+
+Within the while loop we access records for each field of the table 'Names' using ResultSet.getObject(n) method where 'n' is the number of field from left to right. Since our table 'Names' had three fields we use this method thrice in the loop and each time incrementing it by one to show record from each field. We then use Object.toString() method to display a String value back to the user.
+
+Step 5 : Catching Exceptions :
+
+We connected to the database, retrieved records, showed it to the user, now what? catch the exceptions that may be thrown during unforseen situations.
+
+    } catch (SQLException e) {
+        throw new 
+        ServletException("Servlet Could not display records.", e);
+    } catch (ClassNotFoundException e) {
+        throw new 
+        ServletException("JDBC Driver not found.", e);
+    }
+Step 6 : Closing Connection :
+
+In the end we close connection to the database.
+
+    finally {
+        try {
+            if(rs != null) {
+                rs.close();
+                rs = null;
+            }
+            if(stmt != null) {
+                stmt.close();
+                stmt = null;
+            }                        
+            if(con != null) {
+                con.close();
+                con = null;
+            }
+        } catch (SQLException e) {}
+    }
+We close all the objects we created earlier and trap all the exceptions that might have been thrown.
+
+This is pretty much it. These are all the steps you need to know to display records from the database using JDBC. In the next page I sum up what we have learned in this tutorial.
+
+Summary :
+
+In this tutorial we developed a 'DisplayServlet' which displays records from 'Names' table in 'odbc_exmp.mdb' database. We discussed all the steps of making a connection to the database to closing that connection in detail. Following are the steps we discussed :
+
+Load the JDBC driver 
+Make a Connection 
+Retrieve Records 
+Display Records 
+Catch Exceptions 
+Close Connection 
+Tip :
+
+To establish a connection to any database you need to have a JDBC driver with you. In most cases this will be provided to you by the database vendor e.g. in case of Oracle 8i. But some database providers haven't created JDBC drivers themselves due to political reasons e.g. Microsoft SQL Server, in which case you have to buy JDBC drivers from some other JDBC driver vendor at some price. Quite a few JDBC drivers of open source RDBMS are available for free e.g. MySQL and PostgreSQL.
+
+JDBC driver is of four types ( I, II, III, IV ). Type IV is the fastest of all and you should always look for type IV JDBC driver, drill this into your brain; always use type IV JDBC driver. Almost all RDMS have type IV JDBC drivers available so there is no reason as to why not to use them.
+
+Ok fellows this is it. Kindly post your questions in the Forum. Enjoy!
+
+There is no associated material for download 
+Click here to see the demo 
+

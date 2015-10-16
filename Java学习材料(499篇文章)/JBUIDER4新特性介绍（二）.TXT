@@ -1,0 +1,35 @@
+作者：luflying
+email: zhang_yng@citiz.net
+日期：2000-11-24 12:40:17
+二、 企业JavaBeans
+　　在Jbuilder4中，可以更容易的创建(create)配置(deploy)企业JavaBean。提供了一系列的向导来进行创建，处理，配置企业JavaBean的流程。把IAS的配置描述编辑器集成到Jbuilder4的开发环境中（不过，并没有把IAS4.1内置到Jbuilder4中，需要另外下载安装）。Jbuilder4还支持BEA的WebLogic Server 5.1。
+　　Jbuider4的一个新的特性就是EJB Group功能。每一个EJB Group都代表了一个可配置的JAR文件。通过EJB Group，可以对已有的EJB在EJB Group之间进行移植。一个project工程中可以有多个EJB Group。
+　　Entity Bean Modeler可以创建一个映射到现存表的实体Entity Bean。可以产生所有必须的java代码，更新EJB Group中配置描述。在Jbuilder4中，可以：
+
+　　1、用EJB 向导创建Session Bean和Entity Bean
+　　2、用Entity Bean Modeler将Entity Bean映射到现有的table中。
+　　3、通过EJB Group向导创建EJB Group。这样，就可以在一个应用程序里面放多个的Enterprise JavaBean。
+　　4、可以将一个Enterprise JavaBean从一个EJB Group移植到另一个EJB Group
+　　5、一个应用程序里面可以有多个的EJB Group。
+　　6、用Make和Rebuild就可以自动的创建可配置的JAR文件。
+　　7、可以在node viewer中查看JAR的内容。
+　　8、通过Test Client wizard可以在本地的容器或者与EJB1.1兼容的应用服务器中测试Enterprise JavaBean。
+　　9、运行或调式EJB的时候会自动的配置EJB。
+
+三、 支持应用服务器
+　　Jbuilder4允许选择支持的应用服务器。保持着对每个应用服务器的配置。在Project|Project Properties菜单中，run标签中的EJB标签。缺省的选择是IAS，但是 也可以在Jbuilder4的集成开发环境中直接使用BEA的WebLogic5.1。在tool|Enterprise Setup菜单中，选择Application Server标签，然后可以选择WebLogic5.1，并指定路径。
+　　也可以通过OpenTools API,插入其它的应用服务器。
+
+四、 团队开发功能
+　　工程文件（*.jpr和*.jpx）可以分为两部分，private和shared。Windows, watch, breakpoints保存在private私有部分，而libraries和编译选项保存在公有shared部分。
+　　版本追踪和控制：Jbuilder4对每一个版本都提供更改的支持。要查看一个文件的版本信息，单击底部的histroy标签，里面有每个文件的历史修改记录。Jbuilder自动的保持着文件的备份。可以设定备份的个数。Histroy页面就用这些备份来管理着历史的修改记录。可以访问上一个版本文件。也可以查看两个版本之间做了哪些修改。
+　　Jbuilder4的企业版还提供了CVS（Concurrent Versions System并发版本系统）
+
+五、 OpenTools API开放工具API
+　　增强了OpenTools API,使其更简单，更容易使用。可以做默认的path这样的小修改，也可以设计自己的向导这样的复杂的修改。
+
+六、 运行和调试
+　　在Run|Configurations菜单中可以创建另外的配置项。
+　　调试的功能也显著的增强了，所有的调试列表都支持复选，在split view中可以看到数据可线程。可以将线程，断点的浮动窗口接在一起。
+
+

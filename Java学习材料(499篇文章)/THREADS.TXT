@@ -1,0 +1,190 @@
+作者：jeru
+email: jeru@163.net
+日期：7/3/2001 10:03:12 AM
+7) Threads 
+Objective 1) 
+Write code to define, instantiate and start new threads using both java.lang.Thread and java.lang.Runnable
+
+·	Java is fundamentally multi-threaded.
+·	Every thread corresponds to an instance of java.lang.Thread class or a sub-class.
+·	A thread becomes eligible to run, when its start() method is called. Thread scheduler co-ordinates between the threads and allows them to run.
+·	When a thread begins execution, the scheduler calls its run method.
+Signature of run method – public void run()
+·	When a thread returns from its run method (or stop method is called – deprecated in 1.2), its dead. It cannot be restarted, but its methods can be called. (it’s just an object no more in a running state) 
+·	If start is called again on a dead thread, IllegalThreadStateException is thrown.
+·	When a thread is in running state, it may move out of that state for various reasons. When it becomes eligible for execution again, thread scheduler allows it to run.
+
+·	There are two ways to implement threads.
+1.	Extend Thread class
+public class Thread extends Object implements Runnable
+	Thread()
+	Thread(Runnable target)
+	Thread(Runnable targe, String name)
+	Thread(String name)
+	Thread(ThreadGroup group, Runnable target)
+	Thread(ThreadGroup group, Runnable target, String name)
+	Thread(ThreadGroup group, String name)
+
+·	Create a new class, extending the Thread class.
+·	Provide a public void run method, otherwise empty run in Thread class will be executed.
+·	Create an instance of the new class.
+·	Call start method on the instance (don’t call run – it will be executed on the same thread)
+
+2.	Implement Runnable interface
+public interface Runnable
+	only one method:   public void run
+·	Create a new class implementing the Runnable interface.
+·	Provide a public void run method.
+·	Create an instance of this class.
+·	Create a Thread, passing the instance as a target – new Thread(object)
+·	Target should implement Runnable, Thread class implements it, so it can be a target itself.
+·	Call the start method on the Thread.
+
+·	JVM creates one user thread for running a program. This thread is called main thread. The main method of the class is called from the main thread. It dies when the main method ends. If other user threads have been spawned from the main thread, program keeps running even if main thread dies. Basically a program runs until all the user threads (non-daemon threads) are dead.
+·	A thread can be designated as a daemon thread by calling setDaemon(boolean) method. This method should be called before the thread is started, otherwise IllegalThreadStateException will be thrown.
+·	A thread spawned by a daemon thread is a daemon thread.
+·	Threads have priorities. Thread class have constants MAX_PRIORITY (10), MIN_PRIORITY (1), NORM_PRIORITY (5)
+·	A newly created thread gets its priority from the creating thread. Normally it’ll be NORM_PRIORITY.
+·	getPriority and setPriority are the methods to deal with priority of threads.
+·	Java leaves the implementation of thread scheduling to JVM developers. Two types of scheduling can be done.
+1.	Pre-emptive Scheduling.
+Ways for a thread to leave running state -
+·	It can cease to be ready to execute ( by calling a blocking i/o method)
+·	It can get pre-empted by a high-priority thread, which becomes ready to execute.
+·	It can explicitly call a thread-scheduling method such as wait or suspend.
+
+·	Solaris JVM’s are pre-emptive.
+·	Windows JVM’s were pre-emptive until Java 1.0.2
+
+2.	Time-sliced or Round Robin Scheduling
+·	A thread is only allowed to execute for a certain amount of time. After that, it has to contend for the CPU (virtual CPU, JVM) time with other threads.
+·	This prevents a high-priority thread mono-policing the CPU.
+·	The drawback with this scheduling is – it creates a non-deterministic system – at any point in time, you cannot tell which thread is running and how long it may continue to run.
+
+·	Mactinosh JVM’s 
+·	Windows JVM’s after Java 1.0.2
+
+Of the two methods of creating a new thread the use of Runnable is probably more common. The other method for creating a thread is to create a class that is descended from Thread. This is easy to do but it means you cannot inherit from any other class,
+
+Objective 2) 
+Recognize conditions that might prevent a thread from executing.
+·	Different states of a thread:
+1.	Yielding
+·	Yield is a public static void method. Operates on current thread.  For static method, call Thread.yield() is ok, don’t need call t.yield(), where t is instance of Thread, but compiler will pass it.
+·	Moves the thread from running to ready state.
+·	If there are no threads in ready state, the yielded thread may continue execution, otherwise it may have to compete with the other threads to run.
+·	Run the threads that are doing time-consuming operations with a low priority and call yield periodically from those threads to avoid those threads locking up the CPU.
+2.	Sleeping
+·	Sleep is also a public static void method.
+·	Sleeps for a certain amount of time. (passing time without doing anything and w/o using CPU) 
+·	Two overloaded versions – one with milliseconds, one with milliseconds and nanoseconds.
+·	Throws an InterruptedException.(must be caught)
+·	After the time expires, the sleeping thread goes to ready state. It may not execute immediately after the time expires. If there are other threads in ready state, it may have to compete with those threads to run. The correct statement is the sleeping thread would execute some time after the specified time period has elapsed.
+·	If interrupt method is invoked on a sleeping thread, the thread moves to ready state. The next time it begins running, it executes the InterruptedException handler.
+3.	Suspending
+·	Suspend and resume are instance methods and are deprecated in 1.2
+·	A thread that receives a suspend call, goes to suspended state and stays there until it receives a resume call on it.
+·	A thread can suspend it itself, or another thread can suspend it.
+·	But, a thread can be resumed only by another thread.
+·	Calling resume on a thread that is not suspended has no effect.
+·	Compiler won’t warn you if suspend and resume are successive statements, although the thread may not be able to be restarted. 
+4.	Blocking
+·	Methods that are performing I/O have to wait for some occurrence in the outside world to happen before they can proceed. This behavior is blocking.
+·	If a method needs to wait an indeterminable amount of time until some I/O takes place, then the thread should graciously step out of the CPU. All Java I/O methods behave this way.
+·	A thread can also become blocked, if it failed to acquire the lock of a monitor.
+5.	Waiting
+·	wait, notify and notifyAll methods are not called on Thread, they’re called on Object. Because the object is the one which controls the threads in this case. It asks the threads to wait and then notifies when its state changes. It’s called a monitor.
+·	Wait puts an executing thread into waiting state.(to the monitor’s waiting pool)
+·	Notify moves one thread in the monitor’s waiting pool to ready state. We cannot control which thread is being notified. notifyAll is recommended.
+·	NotifyAll moves all threads in the monitor’s waiting pool to ready.
+·	These methods can only be called from synchronized code, or an IllegalMonitorStateException will be thrown. In other words, only the threads that obtained the object’s lock can call these methods.
+
+The sleep method is static and pauses execution for a set number of milliseconds. There is a version that is supposed to pause for a set number of nanoseconds,  Here is an example of putting a Thread to sleep, note how the sleep method throws InterruptedException. 
+public class TSleep extends Thread{
+public static void main(String argv[]){
+       TSleep t = new TSleep();
+       t.start();
+       }
+      public void run(){
+          try{
+             while(true){
+                  this.sleep(1000);
+                  System.out.println("looping while");
+                 }
+            }catch(InterruptedException ie){}
+       }
+}
+
+
+
+Objective 3) 
+Write code using synchronized wait notify and notifyAll to protect against concurrent access problems and to communicate between threads. Define the interaction between threads and between threads and object locks when executing synchronized wait notify or notifyAll.
+
+Locks, Monitors and Synchronization
+·	Every object has a lock (for every synchronized code block). At any moment, this lock is controlled by at most one thread.
+·	A thread that wants to execute an object’s synchronized code must acquire the lock of the object. If it cannot acquire the lock, the thread goes into blocked state and comes to ready only when the object’s lock is available.
+·	When a thread, which owns a lock, finishes executing the synchronized code, it gives up the lock.
+·	Monitor is an object that can block and revive threads, an object that controls client threads. Asks the client threads to wait and notifies them when the time is right to continue, based on its state. In strict Java terminology, any object that has some synchronized code is a monitor.
+·	2 ways to synchronize:
+1.	Synchronize the entire method
+·	Declare the method to be synchronized - very common practice.
+·	Thread should obtain the object’s lock.
+2.	Synchronize part of the method
+·	Have to pass an arbitrary object which lock is to be obtained to execute the synchronized code block (part of a method).
+Synchronized(target) {statements}
+·	We can specify “this” in place object, to obtain very brief locking – not very common
+·	If target is null, then the NullPointerException is thrown.
+
+·	wait – points to remember
+§	calling thread gives up CPU
+§	calling thread gives up the lock
+§	calling thread goes to monitor’s waiting pool
+§	wait also has a version with timeout in milliseconds. Use this if you’re not sure when the current thread will get notified, this avoids the thread being stuck in wait state forever.
+·	notify – points to remember
+§	one thread gets moved out of monitor’s waiting pool to ready state
+§	notifyAll moves all the threads to ready state
+§	Thread gets to execute must re-acquire the lock of the monitor before it can proceed.
+·	Note the differences between blocked and waiting.
+
+Blocked	Waiting
+Thread is waiting to get a lock on the monitor.(or waiting for a blocking i/o method)	Thread has been asked to wait. (by means of wait method)
+Caused by the thread tried to execute some synchronized code. (or a blocking i/o method)	The thread already acquired the lock and executed some synchronized code before coming across a wait call.
+Can move to ready only when the lock is available. ( or the i/o operation is complete)	Can move to ready only when it gets notified (by means of notify or notifyAll)
+
+·	Points for complex models:
+1.	Always check monitor’s state in a while loop, rather than in an if statement.
+2.	Always call notifyAll, instead of notify.
+·	wait and sleep must be enclosed in a try/catch for InterruptedException.
+·	A single thread can obtain multiple locks on multiple objects (or on the same object)
+·	A thread owning the lock of an object can call other synchronous methods on the same object. (this is another lock) Other threads can’t do that. They should wait to get the lock.
+·	Non-synchronous methods can be called at any time by any thread.
+·	Synchronous methods are re-entrant. So they can be called recursively.
+·	Synchronized methods can be overrided to be non-synchronous. synchronized behavior affects only the original class.
+·	Locks on inner/outer objects are independent. Getting a lock on outer object doesn’t mean getting the lock on an inner object as well, that lock should be obtained separately.
+·	Locks on static synchronized method called Class wide lock.  The class wide lock and the instance lock being independent of each other. 
+·	wait and notify should be called from synchronized code. This ensures that while calling these methods the thread always has the lock on the object. If you have wait/notify in non-synchronized code compiler won’t catch this. At runtime, if the thread doesn’t have the lock while calling these methods, an IllegalMonitorStateException is thrown.
+·	Deadlocks can occur easily. e.g, Thread A locked Object A and waiting to get a lock on Object B, but Thread B locked Object B and waiting to get a lock on Object A. They’ll be in this state forever.
+·	It’s the programmer’s responsibility to avoid the deadlock. Always get the locks in the same order.
+·	While ‘suspended’, the thread keeps the locks it obtained – so suspend is deprecated in 1.2
+·	Use of stop is also deprecated, instead use a flag in run method. Compiler won’t warn you, if you have statements after a call to stop, even though they are not reachable.
+
+A typical example of using the wait/notify protocol to allow communication between Threads appears to involve apparently endless loops such as
+//producing code
+while(true){
+try{ 
+        wait();
+        }catch (InterruptedException e) {}
+}
+
+//some producing action goes here
+notifyAll();
+
+Conditions that might prevent a thread from executing : 
+   x  The thread is not the highest priority thread and so cannot get CPU time. 
+   x  The thread is waiting on a condition because someone invoked wait() for the thread. 
+   x  The thread has explicitly yielded control by invoking yield() to allow another thread of the same priority to run.
+   x  The thread has been put to sleep using the sleep() method 
+   x  Someone has suspended the thread using the suspend() method. (deprecated in Java 2) 
+   x  It is blocked for file I/O 
+   x  There is more than one thread with the same highest priority and JVM is switching between these threads, at the moment, the thread in question is awaiting CPU time. 
+

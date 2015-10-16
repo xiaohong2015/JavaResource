@@ -1,0 +1,82 @@
+作者：邵望
+日期：2000-12-24 21:44:55
+大体思路 
+1）创建ServletOutputStream对象out,用于以字节流的方式输出图像 
+2）查询数据库，用getBinaryStream方法返回InputStream对象in 
+3）创建byte数组用作缓冲，将in读入buf[],再由out输出 
+  
+注：下面的例程中数据库连接用了ConnectionPool,以及参数的获得进行了预处理 
+  
+package net.seasky.music; 
+  
+import javax.servlet.*; 
+import javax.servlet.http.*; 
+import java.io.*; 
+import java.util.*; 
+import java.sql.*; 
+import net.seasky.util.*; 
+import net.seasky.database.DbConnectionManager; 
+  
+public class CoverServlet extends HttpServlet { 
+  private static final String CONTENT_TYPE = "image/gif"; 
+  public void init(ServletConfig config) throws ServletException { 
+    super.init(config); 
+  } 
+  
+  public void doGet(HttpServletRequest request, HttpServletResponse response 
+) throws ServletException, IOException { 
+    response.setContentType(CONTENT_TYPE); 
+    int albumID; 
+    ServletOutputStream out = response.getOutputStream(); 
+    try { 
+      albumID = ParamManager.getIntParameter(request,"albumID",0); 
+    } 
+    catch (Exception e) { 
+      response.sendRedirect("../ErroePage.jsp"); 
+      return; 
+    } 
+    try { 
+      InputStream in=this.getCover(albumID); 
+      int len; 
+      byte buf[]=new byte[1024]; 
+      while ((len=in.read(buf,0,1024))!=-1) { 
+        out.write(buf,0,len); 
+      } 
+    } 
+    catch (IOException ioe) { 
+      ioe.printStackTrace() ; 
+    } 
+  } 
+  
+  private InputStream getCover(int albumID) { 
+    InputStream in=null; 
+    Connection cn = null; 
+    PreparedStatement pst = null; 
+    try { 
+      cn=DbConnectionManager.getConnection(); 
+      cn.setCatalog("music"); 
+      pst=cn.prepareStatement("SELECT img FROM cover where ID =?"); 
+      pst.setInt(1,albumID); 
+      ResultSet rs=pst.executeQuery(); 
+      rs.next() ; 
+      in=rs.getBinaryStream("img"); 
+    } 
+    catch (SQLException sqle) { 
+      System.err.println("Error in CoverServlet : getCover()-" + sqle); 
+      sqle.printStackTrace() ; 
+    } 
+    finally { 
+      try { 
+        pst.close() ; 
+        cn.close() ; 
+      } 
+      catch (Exception e) { 
+        e.printStackTrace(); 
+      } 
+    } 
+    return in; 
+  } 
+  
+  public void destroy() { 
+  } 
+} 

@@ -1,0 +1,46 @@
+作者：令少爷
+email: dj12@8848.net
+日期：2001-6-18 11:13:28
+Jbuilder4.0 使用心得之一 
+
+*问题描述： 
+在进行Java程序开发时，不可避免会使用到第三者开发的源程序包(如lulusoft.common)，如何将第三者的源程序包正确集成到到自己的源程序中?使用第三者的源程序包，一般情况下并不修改其源程序，认为其源程序是正确的，并要可以在自己的多个项目文件(.jpr)中使用。 
+
+*表述假定： 
+为方便下面的描述，我们假定如下。 
+1.自己的项目描述： 
+工程名称：Myproject.jpx 
+Src目录：../jbuilder4/Myproject/src/ 
+Lib目录：../jbuilder4/Myproject/lib/ 
+Bak目录：../jbuilder4/Myproject/bak/ 
+Doc目录：../jbuilder4/Myproject/doc/ 
+
+2.第三者源程序包描述： 
+包名定义:HTMLPARSER 
+组织结构：com.3rd.html.parser.*  
+存放位置：D:\Java3rdPackage 
+
+
+*解决方法： 
+A. 如果仅在自己的一个单独的项目文件(.jpr)中使用的话，处理方法很简单。设置方法描述如下： 
+1.新建自己的工程。 
+2.将第三者的源程序按其目录结构加入到自己的工程的源程序目录中。示例如下： 
+将此源程序包 com.3rd.html.parser.* (含目录结构与源程序，不含\Java3rdPackage)拷贝到自己新建项目之源程序目录(../jbuilder4/Myproject/src/)中。 
+3.在JBuilder4的IDE环境的操作条中，单击[Refresh]刷新按钮，源程序包将出现在自已的项目文件中。 
+
+B.如果要在自己的多个项目文件(.jpr)文件中使用第三者的源程序包，也使用以上的方法的话，将会造成一套第三者源程序包在多个项目的Src目录中重复拷贝。如果自己修改了第三者源程序包的话，将会使第三者源程序包出现版本差异。为了解决这个问题，可以将第三者源程序包与自己的项目分开存放，设置方法描述如下： 
+
+1.定义第三者源程序包为Libariry。 
+在JBuilder IDE环境中，进行菜单操作[Tools]-[Config Libariries...]； 
+在弹出的[Config Libariries]对话框中，单击[New]，根据Libariry Wizard进行库设置。设置新包名为HTMLPARSER。在设置时要注意的是其Source指定时，只须指定到其目录结构的前一级(即只须指定Source为d:\Java3rdPackage)；而其Lib应为空(因为可以由源程序编译自动生成lib的.class文件)。 
+
+2.在自己的项目中进行设置。  
+在JBuilder IDE环境中，进行菜单操作[Project]-[Project Properties...]; 
+在弹出的[Project Properties]对话框中，在Source栏增加第三者源程序包的所在目录(D:\Java3rdPackage)；在[Required Libaries]栏中增加新包名HTMLPARSER，关闭对话框。 
+在项目窗(Project Panel)中，选中项目文件Myproject.jpx； 
+右击鼠标；在弹出菜单中，单击[Add files|Packages...]； 
+在弹出的[Add files or Packages to project]对话框中，单击[packages]页，选取com.3rd.html.parser包，单击[OK]按钮; 
+回到在项目窗(Project Panel)中，可见项目文件Myproject.jpx中增加了com.3rd.html.parser包。 
+在JBuilder4的IDE环境的操作条中，单击[Refresh]刷新按钮，源程序包将变成Automatic source package包，也出现在自已的项目文件中。 
+
+至此，大功告成。 

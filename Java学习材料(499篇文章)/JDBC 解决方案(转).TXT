@@ -1,0 +1,45 @@
+作者：令少爷
+email: dj12@8848.net
+日期：2001-7-10 9:13:02
+JDBC 解决方案
+
+
+Java的兴起和发展加速了Internet与Intranet应用的开发。越来越多的企业使用不受平台限制的Java语言，开发复杂的商务 
+关键任务。 
+
+作为Java语言的创始者，JavaSoft公司早就预见到市场需要一项针对Java的数据存取技术，并早已与MERANT公司联手开发 
+Java JDBC技术，作为Java数据库连接技术的一项标准。 
+
+JDBC的四种解决方案 
+JDBC是通用的SQL(结构化查询语言)数据库访问框架，带有简单且功能强大的应用程序接口(API)。利用JDBC API，Java开发 
+人员可以在单一的标准化功能库中编码，生成独立于数据库管理系统(DBMS)的Java应用系统。 
+JDBC以X/Open组织的标准定义SQL调用级接口(Call Level Interface，CLI)。X/Open组织的宗旨是提供基于开放式系统的 
+数据存取标准，实现相互兼容。JDBC就是使用单一标准化界面存取多种数据源，以实现应用系统间的互操作。 
+
+JavaSoft将JDBC驱动程序细分为四大类，分别是JDBC/ODBC Bridge、NativeAPI PartlyJava、NetProtocol All 
+Java及Native Protocol AllJava。 
+
+JDBC/ODBC Bridge是一项瘦编译元件，能将JDBC功能调用转换为ODBC功能调用。使用JDBC/ODBC Bridge，Java开发人员编 
+写的兼容JDBC的应用系统及小型应用程序，可与目前市场上任何ODBC连接解决方案一并使用。 
+
+NativeAPI PartlyJava驱动程序主要将JDBC调用转换为指定专用数据库系统的客户机API，从而利用SQL＊NET、I 
+Connect及OpenClient分别连接到Oracle、Informix及Sybase等数据库上。使用PartlyJava驱动程序的最大优点是，可 
+利用企业内现有的数据库中间件。 
+
+NetProtocol AllJava驱动程序可将JDBC调用转换成为不受任何数据库限制的网络协议，服务器可把这一网络协议编译 
+为数据库协议。这项JDBC解决方案只有一个单一通用的全Java驱动程序，可连接许多不同的数据库。采取哪种网络协议作为 
+中介，取决于JDBC驱动程序供应商。 
+
+NativeProtocol AllJava驱动程序是数据库专用JDBC驱动程序，可将JDBC调用转换为数据库可直接使用的网络协议， 
+客户机因此可直接访问数据库服务器。从根本上说，NativeProtocol AllJava驱动程序能以一个纯粹本地的Java JDBC 
+客户机，全面取代客户机API，如SQL＊NET、IConnect及OpenClient等。 
+
+在不同环境下执行JDBC驱动程序 
+业界现有多种选择建立JDBC连接。选择JDBC解决方案主要应考虑所使用的Java程序的结构特点。 
+Java的最大优点是其不受平台限制的通用特性，若选用包含非Java元件的执行方案，或选用指定数据库类型的执行方案， 
+会严重影响通用性。 
+
+在选择的过程中，应兼顾短期和长期目标。对于寻求近期目标的用户，如果选择条件牵涉C语言和C＋＋语言，那么必须同 
+时考虑特定数据库供应商的API或其他专用技术，这时NetProtocol AllJava解决方案可能是相对较可靠的策略，有助 
+于充分实现跨网络的数据连接。 
+

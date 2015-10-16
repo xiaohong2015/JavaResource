@@ -1,0 +1,410 @@
+作者：wflm
+日期：2001-6-2 13:40:04
+利用Java实现串口全双工通讯 (投稿)
+
+Qingye Jiang (John)
+SMTH ID: qyjohn
+E-mail : qjiang@tsinghua.edu
+
+一个嵌入式系统通常需要通过串口与其主控系统进行全双工通讯，譬如一个流水线
+控制系统需要不断的接受从主控系统发送来的查询和控制信息，并将执行结果或查
+询结果发送回主控系统。本文介绍了一个简单的通过串口实现全双工通讯的Java类
+库，该类库大大的简化了对串口进行操作的过程。
+
+本类库主要包括：SerialBean.java (与其他应用程序的接口), SerialBuffer.java
+(用来保存从串口所接收数据的缓冲区), ReadSerial.java (从串口读取数据的程序)。
+另外本类库还提供了一个例程SerialExample.java 作为示范。在下面的内容中将逐
+一对这几个部分进行详细介绍。
+
+1. SerialBean
+
+SerialBean是本类库与其他应用程序的接口。该类库中定义了SerialBean的构造方
+法以及初始化串口，从串口读取数据，往串口写入数据以及关闭串口的函数。具体
+介绍如下：
+
+public SerialBean(int PortID)
+
+本函数构造一个指向特定串口的SerialBean，该串口由参数PortID所指定。
+PortID = 1 表示COM1，PortID = 2 表示COM2，由此类推。
+
+public int Initialize()
+
+本函数初始化所指定的串口并返回初始化结果。如果初始化成功返回1，否
+则返回-1。初始化的结果是该串口被SerialBean独占性使用，其参数被设置
+为9600, N, 8, 1。如果串口被成功初始化，则打开一个进程读取从串口传
+入的数据并将其保存在缓冲区中。
+
+public String ReadPort(int Length)
+
+本函数从串口(缓冲区)中读取指定长度的一个字符串。参数Length指定所返
+回字符串的长度。
+
+public void WritePort(String Msg)
+
+本函数向串口发送一个字符串。参数Msg是需要发送的字符串。
+
+public void ClosePort()
+
+本函数停止串口检测进程并关闭串口。
+
+SerialBean的源代码如下：
+
+package serial;
+
+import java.io.*;
+import java.util.*;
+import javax.comm.*;
+
+/**
+*
+* This bean provides some basic functions to implement full dulplex
+* information exchange through the srial port.
+*
+*/
+
+public class SerialBean
+{
+
+static String PortName;
+CommPortIdentifier portId;
+SerialPort serialPort;
+static OutputStream out;
+static InputStream in;
+
+SerialBuffer SB;
+ReadSerial RT;
+
+/**
+*
+* Constructor
+*
+* @param PortID the ID of the serial to be used. 1 for COM1,
+* 2 for COM2, etc.
+*
+*/
+
+public SerialBean(int PortID)
+{
+PortName = "COM" + PortID;
+}
+
+/**
+*
+* This function initialize the serial port for communication. It starts a
+* thread which consistently monitors the serial port. Any signal captured
+* from the serial port is stored into a buffer area.
+*
+*/
+
+public int Initialize()
+{
+
+int InitSuccess = 1;
+int InitFail = -1;
+
+try
+{
+
+portId = CommPortIdentifier.getPortIdentifier(PortName);
+
+try
+{
+serialPort = (SerialPort)
+portId.open("Serial_Communication", 2000);
+} catch (PortInUseException e)
+{
+return InitFail;
+}
+
+//Use InputStream in to read from the serial port, and OutputStream
+//out to write to the serial port.
+
+try
+{
+in = serialPort.getInputStream();
+out = serialPort.getOutputStream();
+} catch (IOException e)
+{
+return InitFail;
+}
+
+//Initialize the communication parameters to 9600, 8, 1, none.
+
+try
+{
+serialPort.setSerialPortParams(9600,
+SerialPort.DATABITS_8,
+SerialPort.STOPBITS_1,
+SerialPort.PARITY_NONE);
+} catch (UnsupportedCommOperationException e)
+{
+return InitFail;
+}
+} catch (NoSuchPortException e)
+{
+return InitFail;
+}
+
+// when successfully open the serial port, create a new serial buffer,
+// then create a thread that consistently accepts incoming signals from
+// the serial port. Incoming signals are stored in the serial buffer.
+
+SB = new SerialBuffer();
+RT = new ReadSerial(SB, in);
+RT.start();
+
+// return success information
+
+return InitSuccess;
+}
+
+/**
+*
+* This function returns a string with a certain length from the incoming
+* messages.
+*
+* @param Length The length of the string to be returned.
+*
+*/
+
+public String ReadPort(int Length)
+{
+String Msg;
+Msg = SB.GetMsg(Length);
+return Msg;
+}
+
+/**
+*
+* This function sends a message through the serial port.
+*
+* @param Msg The string to be sent.
+*
+*/
+
+public void WritePort(String Msg)
+{
+int c;
+try
+{
+for (int i = 0; i < Msg.length(); i++)
+out.write(Msg.charAt(i));
+} catch (IOException e) {}
+}
+
+/**
+*
+* This function closes the serial port in use.
+*
+*/
+
+public void ClosePort()
+{
+RT.stop();
+serialPort.close();
+}
+}
+
+2. SerialBuffer
+
+SerialBuffer是本类库中所定义的串口缓冲区，它定义了往该缓冲区中写入数据和
+从该缓冲区中读取数据所需要的函数。
+
+public synchronized String GetMsg(int Length)
+
+本函数从串口(缓冲区)中读取指定长度的一个字符串。参数Length指定所
+返回字符串的长度。
+
+public synchronized void PutChar(int c)
+
+本函数望串口缓冲区中写入一个字符，参数c 是需要写入的字符。
+
+在往缓冲区写入数据或者是从缓冲区读取数据的时候，必须保证数据的同
+步，因此GetMsg和PutChar函数均被声明为synchronized并在具体实现中采
+取措施实现的数据的同步。
+
+SerialBuffer的源代码如下：
+
+package serial;
+
+/**
+*
+* This class implements the buffer area to store incoming data from the serial
+* port.
+*
+*/
+
+public class SerialBuffer
+{
+private String Content = "";
+private String CurrentMsg, TempContent;
+private boolean available = false;
+private int LengthNeeded = 1;
+
+/**
+*
+* This function returns a string with a certain length from the incoming
+* messages.
+*
+* @param Length The length of the string to be returned.
+*
+*/
+
+public synchronized String GetMsg(int Length)
+{
+LengthNeeded = Length;
+notifyAll();
+
+if (LengthNeeded > Content.length())
+{
+available = false;
+while (available == false)
+{
+try
+{
+wait();
+} catch (InterruptedException e) { }
+}
+}
+
+CurrentMsg = Content.substring(0, LengthNeeded);
+TempContent = Content.substring(LengthNeeded);
+Content = TempContent;
+LengthNeeded = 1;
+notifyAll();
+return CurrentMsg;
+}
+
+/**
+*
+* This function stores a character captured from the serial port to the
+* buffer area.
+*
+* @param t The char value of the character to be stored.
+*
+*/
+
+public synchronized void PutChar(int c)
+{
+Character d = new Character((char) c);
+Content = Content.concat(d.toString());
+if (LengthNeeded < Content.length())
+{
+available = true;
+}
+notifyAll();
+}
+}
+
+3. ReadSerial
+
+ReadSerial是一个进程，它不断的从指定的串口读取数据并将其存放到缓冲区中。
+
+public ReadSerial(SerialBuffer SB, InputStream Port)
+
+本函数构造一个ReadSerial进程，参数SB指定存放传入数据的缓冲区，参
+数Port指定从串口所接收的数据流。
+
+public void run()
+
+ReadSerial进程的主函数，它不断的从指定的串口读取数据并将其存放到
+缓冲区中。
+
+ReadSerial的源代码如下：
+
+package serial;
+
+import java.io.*;
+
+/**
+*
+* This class reads message from the specific serial port and save
+* the message to the serial buffer.
+*
+*/
+
+public class ReadSerial extends Thread
+{
+private SerialBuffer ComBuffer;
+private InputStream ComPort;
+
+/**
+*
+* Constructor
+*
+* @param SB The buffer to save the incoming messages.
+* @param Port The InputStream from the specific serial port.
+*
+*/
+
+public ReadSerial(SerialBuffer SB, InputStream Port)
+{
+ComBuffer = SB;
+ComPort = Port;
+}
+
+public void run()
+{
+int c;
+try
+{
+while (true)
+{
+c = ComPort.read();
+ComBuffer.PutChar(c);
+}
+} catch (IOException e) {}
+}
+}
+
+4. SerialExample
+
+SerialExample是本类库所提供的一个例程。它所实现的功能是打开串口COM1，对
+其进行初始化，从串口读取信息对其进行处理后将处理结果发送到串口。
+
+import serial.*;
+import java.io.*;
+
+/**
+*
+* This is an example of how to use the SerialBean. It opens COM1 and reads
+* six messages with different length form the serial port.
+*
+*/
+
+class SerialExample
+{
+public static void main(String[] args)
+{
+//TO DO: Add your JAVA codes here
+
+SerialBean SB = new SerialBean(1);
+String Msg;
+
+SB.Initialize();
+for (int i = 5; i <= 10; i++)
+{
+Msg = SB.ReadPort(i);
+SB.WritePort("Reply: " + Msg);
+}
+SB.ClosePort();
+}
+}
+
+5. 编译与调试
+
+本类库中使用了Java Communication API (javax.comm)。这是一个Java扩展类库，
+并不包括在标准的Java SDK当中。如果你尚未安装这个扩展类库的话，你应该从Sun
+公司的Java站点下载这个类库并将其安装在你的系统上。在所下载的包里面包括一个
+安装说明，如果你没有正确安装这个类库及其运行环境的话，运行这个程序的时候你
+会找不到串口。
+
+正确安装Java Communication API并将上述程序编译通过以后，你可以按如下方法测
+试这个程序。如果你只有一台机器，你可以利用一条RS-232电缆将COM1和COM2连接起
+来，在COM1上运行SerialExample，在COM2上运行Windows提供的超级终端程序。如果
+你有两台机器的话，你可以利用一条RS-232电缆将两台机器的COM1(或者是COM2)连接
+起来，在一端运行例程，另外一端运行Windows提供的超级终端程序。如果有必要的
+话，可以对SerialExample中所声明的串口进行相应改动。
+
+本程序在Windows 2000 + Java SDK 1.3环境下编译通过并成功运行。
+

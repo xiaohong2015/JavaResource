@@ -1,0 +1,295 @@
+作者：jspfuns
+日期：2000-8-10 17:49:53
+10) How do you invoke a JSP page from a servlet? TOC 
+
+
+
+(Contributed by: Thomas-Bernhard.O-Hare@Dresdner-Bank.com)
+
+After scanning through archives of the JSP mailing list to no effect I finally remembered that I'd pasted this example into a document I wrote. It was originally sent by Satish Dharmaraj of Sun to show the model 2 approach (as described in the 0.92 specification): how to pass data from a servlet
+to a JSP.
+
+Create a directory called model1/ under the samples/ directory. Place foo.jsp and Foo.java inside this directory.
+
+Compile FooServlet.java and place FooServlet.class in TOP/servlets/directory.
+
+Then invoke using http://host:8080/servlet/FooServlet
+
+In this example, FooServlet creates a list and then stores the result in Foo.class. Foo.Class is then passed as a datasource to foo.jsp.
+
+The sources are:
+
+1) FooServlet.java
+
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import model1.Foo;
+
+public class FooServlet extends HttpServlet
+{
+public void service(HttpServletRequest req, HttpServletResponse res)
+throws ServletException, IOException
+{
+String s[] = new String[] {"blue", "green", "red"};
+Foo f = new Foo(s);
+req.setAttribute("foo", f);
+
+getServletContext().getRequestDispatcher("/samples/model1/foo.jsp").forward
+(req, res);
+}
+}
+2) foo.jsp
+
+<html>
+<usebean name=foo type=model1.Foo lifespan=page>
+</usebean>
+<ul>
+<loop property=foo:list propertyelement=x>
+<li> <display property=x>
+</loop>
+</ul>
+</html>
+3) Foo.java
+
+package model1;
+
+public class Foo {
+String s[];
+public String[] getList() { return s; }
+public Foo(String s[]) { this.s = s; }
+}
+(from "O碒are, Thomas Bernhard" <Thomas-Bernhard.O-Hare@Dresdner-Bank.com>)
+11) How do you pass data (including beans) to a JSP from a servlet? TOC 
+
+
+
+There are actually three different ways to do it, depending on how long the reference should last, and which JSP pages (and servlets, for that matter) should be able to see it. In each of the cases, assume that "myBean" is a reference to the bean you want to send, and that "theBean" is the key I'm going to use to store the bean under (from the servlet perspective), and use as the identity of the bean in the JSP page.
+
+These techniques are portable to any environment compliant with the servlet API 2.1 and JSP 1.0 specifications. In each case, the passing
+works from servlet->JSP, servlet->servlet, JSP->JSP, or JSP->servlet transitions.
+
+(1) Request Lifetime
+
+Use this technique to pass beans that are relevant to this particular request to a bean you are calling through a request dispatcher (using either "include" or "forward"). This bean will disappear after processing this request has been completed.
+
+SERVLET:
+request.setAttribute("theBean", myBean);
+RequestDispatcher rd =
+getServletContext().getRequestDispatcher('/thepage.jsp");
+rd.forward(request, response);
+JSP PAGE:
+<jsp:useBean id="theBean" scope="request" class="....." />
+(2) Session Lifetime
+
+Use this technique to pass beans that are relevant to a particular session (such as in individual user login) over a number of requests. This bean will disappear when the session is invalidated or it times out, or when you remove it.
+
+SERVLET:
+HttpSession session = request.getSession(true);
+session.putValue("theBean", myBean);
+/* You can do a request dispatcher here,
+or just let the bean be visible on the
+next request */
+JSP PAGE:
+<jsp:useBean id="theBean" scope="session" class="..." />
+(3) Application Lifetime
+
+Use this technique to pass beans that are relevant to all servlets and JSP pages in a particular app, for all users. For example, I use this to make a JDBC connection pool object available to the various servlets and JSP pages in my apps. This bean will disappear when the servlet engine is shut down, or when you remove it.
+
+SERVLET:
+getServletContext().setAttribute("theBean", myBean);
+JSP PAGE:
+<jsp:useBean id="theBean" scope="application" class="..." />
+Craig McClanahan
+
+12) How can I pool connections to my database? TOC 
+
+
+
+Controlling connections to the database is a desirable thing - having to connect to the database for each page is is expensive, and keeping a connection in a session variable is far too expensive in terms of client connections to the database. Thus, people often create pools for connections to the database that the client comes in and gets and then returns when complete (making sure a try/catch is used to ensure the connection is returned!).
+
+My personal bias indicates that you shouldn't pool connections to your database inside JSP, you should be using a middleware layer and communicating to it (like RMI or CORBA). However, people do write entire applications in JSP and beans that reside in the web server, so how do you do it?
+
+From: Bradley Wood <Brad@MARKETING.CO.UK>
+
+probably instantiate this as a singleton in the global.jsa and then call it.
+
+for more on this and how its called check the downloadable code examples for this book at www.ora.com
+
+import java.sql.*;
+import java.util.*;
+
+public class ConnectionPool {
+private Hashtable connections;
+private int increment;
+private String dbURL, user, password;
+
+public ConnectionPool(String dbURL,
+String user,
+String password,
+String driverClassName,
+int initialConnections,
+int increment)
+// int max?
+throws SQLException, ClassNotFoundException {
+// Load the specified driver class
+Class.forName(driverClassName);
+this.dbURL = dbURL;
+this.user = user;
+this.password = password;
+this.increment = increment;
+connections = new Hashtable();
+
+// Put our pool of Connections in the Hashtable
+// The FALSE value indicates they're unused
+for(int i = 0; i < initialConnections; i++) {
+connections.put(DriverManager.getConnection(dbURL, user, password),
+Boolean.FALSE);
+}
+}
+
+public Connection getConnection() throws SQLException {
+Connection con = null;
+Enumeration cons = connections.keys();
+synchronized (connections) {
+while(cons.hasMoreElements()) {
+con = (Connection)cons.nextElement();
+Boolean b = (Boolean)connections.get(con);
+if (b == Boolean.FALSE) {
+// So we found an unused connection.
+// Test its integrity with a quick setAutoCommit(true) call.
+// For production use, more testing should be performed,
+// such as executing a simple query.
+try {
+con.setAutoCommit(true);
+}
+catch(SQLException e) {
+// Problem with the connection, replace it.
+con = DriverManager.getConnection(dbURL, user, password);
+}
+
+// Update the Hashtable to show this one's taken
+connections.put(con, Boolean.TRUE);
+// Return the connection
+return con;
+} // if
+} // while
+} // synchro
+
+// If we get here, there were no free connections.
+// We've got to make more.
+for(int i = 0; i < increment; i++) {
+connections.put(DriverManager.getConnection(dbURL, user, password),
+Boolean.FALSE);
+}
+
+// Recurse to get one of the new connections.
+return getConnection();
+}
+
+public void returnConnection(Connection returned) {
+Connection con;
+Enumeration cons = connections.keys();
+while (cons.hasMoreElements()) {
+con = (Connection)cons.nextElement();
+if (con == returned) {
+connections.put(con, Boolean.FALSE);
+break;
+}
+}
+} // returnConnection
+
+} // class
+From: Andre Richards <AndreRic@mweb.co.za>
+
+A very good example on connection pooling when using Servlets can be found at : 
+
+http://webdevelopersjournal.com/columns/connection_pool.html
+
+I succesfully used it in JSP 0.91 as follows :
+
+<script RUNAT="SERVER">
+DBConnectionManager connMgr = DBConnectionManager.getInstance();
+</script>
+
+<%
+Connection con = connMgr.getConnection("freetds"); 
+if (con == null) { 
+out.println("Can't get connection");
+return;
+}
+try {
+Statement stmt = con.createStatement();
+ResultSet rs = stmt.executeQuery ("SELECT Hello FROM World");
+while(rs.next()) {
+out.println(rs.getString("Hello"));
+}
+stmt.close();
+rs.close();}
+catch (SQLException e) {
+e.printStackTrace(out)
+}
+connMgr.freeConnection("freetds", con);
+%>
+13) How do I use other languages in my JSP? TOC 
+
+
+
+JSP is *Java* Server Pages, and the tags for other languages were taken out in 0.92. That said, two implementations (as of writing) support other languages:
+
+- PolyJsp, 0.92, http://www.plenix.org/polyjsp, free + open source
+- Resin. A JSP 0.92 implementation for compiled JavaScript, http://www.caucho.com/, free for personal use
+
+14) How can I set a cookie in JSP? TOC 
+
+
+
+This should work:
+
+response.setHeader("Set-Cookie", "cookie string");
+To give the response-object to a bean, write a method setResponse
+(HttpServletResponse response)
+- to the bean, and in jsp-file:
+
+<%
+bean.setResponse (response);
+%>
+(from Aapo Kyr鰈?<aapo.kyrola@SATAMA.COM>)
+
+15) Can JSP and Servlet share same Session and Beans? TOC 
+
+
+
+Example: I used Beans and Session with my servlet, JSP can use same Beans and Session or not?
+
+From: Robert Hodges <hodges@TILDENPARK.COM>
+
+This can be done, but you are likely to run into problems with class loaders. For instance, we have Apache/JServ which uses the AdaptiveClassLoader along with GNU-JSP which has a different class loader. If you just casually allocate objects in a servlet and then pick them up in JSP pages, you'll most likely get the dreaded ClassCastException, which signals the VM's pleasure when you try to cast a class that was brought in by a different class loader.
+
+Note that there are sometimes problems even within JSP, as GNU-JSP drops the class loader every time you recompile a page, so if you allocated a class instance using one version of the page, then recompiled and tried to fish that instance back again, you would either (1) not find it or (2) get the ClassCastException (but see para #1 above).
+
+If you really need to pass information around, the best way for Apache and GNU-JSP is to do the following:
+
+Have one server per person when developing. 
+Make sure that all your Java classes, including servlet code, load through the system class path. This means they load through the primordial loader, which does not go away or change. 
+Make sure that your compiled JSP pages go to another location than your regular Java classes. That way, the JSP loader will just pick them up through the primordial loader. 
+In this scheme, you will need to reboot the Web server each time you make a change to the regular Java classes or else great confusion will ensue. (And possibly outrage among your users, I might add.)
+
+If you need to share a Web Server between multiple people, or cannot reboot whenever you make class changes, the solution is much more complex. I can post a treatise on one approach at a later time (big project, deadline Friday) if there is interest.
+
+16) How do I plug JSP into Microsoft's IIS Web Server? TOC 
+
+
+
+IBM's WebSphere, LiveSoftware's JRun and New Atlanta's ServletExec all provide plug ins for IIS 4.0.
+
+Tomcat, the "reference" implementation of JSP 1.1 from the Jakarta Project also has an ISAPI plug-in. Tomcat does not (as of 3.1) support multi-homing.
+
+Resin also provides support for multi-homing (very well at that!) 
+
+17) Are there any newsgroups that discuss JSP? TOC 
+
+
+
+Live Software has a new newsgroup for JSP discussion at news://news.livesoftware.com/livesoftware.jsp
+

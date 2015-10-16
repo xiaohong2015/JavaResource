@@ -1,0 +1,32 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：2001-2-15 13:29:54
+应该这样检查你的环境和你的操作：
+
+1、你的文件名对吗？
+JAVA要求你的文件和你的类名严格对应的。
+比如 public class HelloWorld{ .....
+那么文件名一定只能是HelloWorld.java，看仔细了！
+
+2、你的程序中有main方法吗？参数什么的对吗？
+main方法的声明应该是这样子的：
+public static void main(String[] args) 
+事实上如果你用开发工具来做的话，是不会错的。如果你用UltraEdit之类的来写程序的话，就一个字不要改的照抄吧！
+
+3、记住，javac后面跟的参数是文件名，但java 后面跟的是类名！
+这是我开始学JAVA是犯的错，java HelloWorld.class，然后就报错。后来才弄明白，应该是java HelloWorld。
+
+4、设置了classpath了吗？
+不仅是在安装JDK时要设置的内容，一般来说最好还要自己设置一个目录来存放自己的类文件的。比如d:\class目录。
+设置classpath=%classpath%;d:\class
+那么，现在将HelloWorld.class文件COPY到d:\class目录下，再java HelloWorld应该就OK了。
+
+5、结合第3点和第4点
+如果你的类是属于某一个包的，比如这样一个类sony.test.HelloWorld，那么按照我在第4点中说的目录来说，就应该将HelloWorld.class文件存放到d:\class\sony\test\目录下。
+执行的时候应该参考第3点中说的，按类名执行：java sony.test.HelloWorld。
+
+明白了吗？一直我也想不出还会有什么理由造成这个出错信息了！如果有哪位兄弟想到了就补充一下吧！
+其实如果你使用了一些比较好的编程工具的话，根本就没有机会碰到这个错误的，至少我在使用了VisualAge for Java之后，就没有这样的事情了。
+
+好啦，不说了，祝同志们好运吧！
+过了这第一道门，后面的就比较简单啦！

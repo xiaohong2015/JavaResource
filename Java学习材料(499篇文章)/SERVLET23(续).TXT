@@ -1,0 +1,62 @@
+作者：八脚鱼
+email: o@test.com
+日期：2001-6-29 9:54:44
+标记库 
+新的规范中几个有关标记库的概念得到了澄清，而且规范的许多地方作了整理。对于标记库，新的规范还有一个重要的补充——迭代（iterator）标记。在当前的JSP 1.1规范中，如果标记要执行“循环”它就必须是一个BodyTag。然而，标记可能不必处理它的标记体，定义BodyTag导致容器生成效率低下的代码（setBodyContent()和其他一些方法仍将被调用）。为解决这个问题，JSP 1.2引入了迭代标记。
+
+JSP 1.2规范引入了两个新的常量，即EVAL_BODY_BUFFERED和EVAL_BODY_AGAIN。EVAL_BODY_BUFFERED作为一个具有更明确含义的名字取代EVAL_BODY_TAG，两者的值是一样的。它意味着以前编写的代码仍旧可以运行。另外，它也意味着现在实现doStartTag()时应该返回EVAL_BODY_BUFFERED而不是EVAL_BODY_TAG。
+
+EVAL_BODY_AGAIN也有与EVAL_BODY_BUFFERED同样的值，但它的名字同样具有更明确的含义。当标记想要让容器迭代（即反复执行）它的标记体时doAfterBody()方法应该返回这个值。
+
+javax.servlet.jsp.IterationTag是JSP 1.2规范定义的新接口，要定义迭代行为就必须实现这个接口。IterationTag接口扩展SimpleTag并增加了一个doAfterBody()方法，BodyTag现在从IterationTag而不是SimpleTag继承。
+
+实现迭代时，在BodyTag或者IterationTag中，doAfterBody()方法应该返回EVAL_BODY_AGAIN以强制容器再次执行标记，返回SKIP_BODY则终止迭代。为IterationTag编写的代码很简单，如Listing 5所示。
+
+
+【Listing 5】
+
+public class SimpleIterator extends TagSupport implements IterationTag {
+  int loopCount;
+}
+public void setLoopCount(int loopCount) {
+  this.loopCount = loopCount;
+}
+
+public int doStartTag() {
+  return EVAL_BODY_INCLUDE;
+}
+
+public int doAfterBody() {
+  while(--loopCount > 0) return EVAL_BODY_AGAIN;
+  return SKIP_BODY;
+}
+} 
+
+　　doStartTag()返回EVAL_BODY_INCLUDE，doAfterBody()返回EVAL_BODY_AGAIN以实现迭代，迭代完成时则返回SKIP_BODY。注意当前还没有与TagSupport、BodyTagSupport相配的IterationTagSupport类，不过这并不会真正带来什么麻烦。
+
+　　标记库的当前版本支持非常有限的合法性检验机制。TagExtraInfo类里面可以定义一个isValid方法，这个方法在页面编译的时候被调用，你可以用它检查属性名字、值、类型等。JSP 1.2规范提供了更强大的合法性检验机制。你可以定义一个检验器类，在它里面定义一个方法，这个方法通过参数得到包含标记库内一个或者多个标记的整个页面的XML描述，参见Listing 6的实例。这个方法在编译页面的时候被调用（它是一次性的调用。也就是说，你只付出一次调用的代价，而不是每次用户请求页面的时候都要调用）。
+
+
+【Listing 6】
+
+public class SimpleIteratorValidator extends TagLibraryValidator {
+
+public String validate( String prefix, String uri, PageData page) {
+    java.io.InputStream is = page.getInputStream();
+    boolean b = validateJSP(is);
+
+    // 一切正常
+    if(b) return null;
+     else return "Some Validation Error";
+}
+} 
+
+Listing 6的检验器扩展了javax.servlet.jsp.tagext.TagLibraryValidator，而且它覆盖了validate()。validate()方法的参数中传入了待检验标记的前缀以及相关的URI。第三个参数PageData允许你访问一个InputStream，这个InputStream包含XML格式的JSP页面。如果一切正常，validate方法返回null；如果检验不能通过，则它返回一个错误字符串。注意这是一个在页面编译时出现的错误，它只可能在开发阶段出现。
+
+新的规范还涉及了其他一些问题。例如，JSP 1.2规范最终将定义一个JSP页面的XML描述。JSP页面的XML描述不仅对合法性检验很有用（如上面例子所示），而且对于工具软件供应商来说也很有用，因为它简化了JSP编辑器的开发。
+
+新的JSP规范还允许我们把监听器定义成标记，而不是本文前面所出现的独立的类。JSP规范现在包含了一章关于本地化的内容，例如，它定义了为页面指定字符编码（Encoding）方式的能力。
+
+新的规范中还加入了一个TryCatchFinally接口。这个接口允许标记在出现意料不到的异常时更好地进行资源清理工作。
+
+JSP 1.2和Servlet 2.3规范实现了两个目标。它们澄清了当前规范中容易混淆的几个问题，增加了一些开发者需要的新功能。主要的变化包括监听器、过滤器以及经过修改的标记库模型。新的规范放在http://java.sun.com/aboutJava/communityprocess/first/jsr053/index.html供任何人阅读和评议，你不妨找来一读，看看它是否能够使你的工作更加轻松、简单。

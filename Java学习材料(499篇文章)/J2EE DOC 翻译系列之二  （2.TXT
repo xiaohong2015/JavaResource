@@ -1,0 +1,93 @@
+作者：freehero
+email: jdxmoon@163.net
+日期：2000-12-4 19:56:42
+声明：本文档由freehero翻译，未经作者同意不能用于商业用途，您可以自由的复制和传播，文档只供您理解j2ee，因作者能力有限，建议您同时阅读英文文档，对于因为翻译的错误代来的后果作者不负任何责任，欢迎您来信讨论freehero@163.net（转载请保留）   
+
+
+
+    3。对于一个有很长的内容列表的组件连说，你有可能在打包的过程中遇到命令行的参数长度的限制
+
+。避免的方法：把帮助的类加入到一个.jar库文件中，然后把这个.jar文件加入到应用程序的.ear文件中
+
+。
+    4。如果在一个含有ejb .jar文件的企业bean中有jndi名字，然后一个新的bean添加到这个同样的
+
+.jar文件中。jndi的名字数据可能丢失。解决的方法：尽量在指定jndi名字之前完成ejb .jar文件。
+    5。在新建一个ejb的向导的通用对话框中，类的名称有可能丢失。丢失的情况发生在你后退然后前进
+
+的动作中。
+    6。当你在核实的过程中新增文件的时候，有时候文件选择的状态有可能不正确。使用文件选择器选
+
+择一个目录后，你可能没有新增正确的文件。解决的方法：通过在另外一个工具的中引用这个文件，来刷
+
+新cache。例如：从file菜单，选择add ejb jar到应用程序，click 取消，然后到核实的对话框中。
+    7。杂新增企业bean的响动中，如果选择了错误的类，然后你回退选择正确的项目，有时候这个选择
+
+的类的container-managed persistence属性有可能不正确。解决的方法：或者重新启动向导，或者选择
+
+另外一种类型的bean。
+   
+    安全问题的bug
+    当用户重新定向到基于窗体的对话框页面的时候，如果没有注册（比如选择了浏览器的back），于是
+
+会被拒绝。解决的方法：从新启动浏览器。
+  
+
+     jsp的bug
+     在特定的条件下，server启动的时候加载servlets有可能失败。j2ee server启动的时候可以加载一
+
+个servlet并且调用这个servlet的init方法。但是结果是不可预料的。这些加载的servlets包括在
+
+web.xml文件的<load-on-startup元素。
+     
+     RMI-IIOP Bugs
+     1。如果你的jdk安装了RMI-IIOP部分，j2ee将不能工作。解决的办法是安装一个干净的jdk。
+     2。j2ee的客户和server不能在基于IIOP1.0 协议的orb的产品中实现。
+
+    其他软件的bug
+    1。在solaris平台上，如果环境变量没有包括setenv JIT_ARGS="bco=off"，j2ee jit将会引起
+
+cloudscape的失败。
+    2。在切换j2ee server从non-recoverable  的模式到recoverable模式之前，要注意首先运行
+
+cleanup脚本。
+    3。运行j2ee，jdk是十分必要的。在一些系统中当安装jdk是时候，用户可以选择stand-alone JRE的
+
+模式。这样的模式不能运行j2ee。另外一个问题是：如果jre的root设置成jdk的安装目录，错误有可能发
+
+生。在这种情况下，当你运行的时候一切是好的，但是deploy的时候，会有如下错误：
+    java.rmi.RemoteException: Error processing ejb jar:access denied:
+    (java.io.FilePermission e:\testjava\lib\ext read)
+    4。当https服务没有启动的时候，j2ee server会打印一个错误，你可以忽略如果你不需要https。
+    5。在企业bean中，如果父类的参数或者返回值不是serializabl的，在父类中不要调用
+
+deserialization。要确定所有的父类是serializable。
+    6。web组件的server.policy 文件和j2ee要符合。这个文件给出了
+
+${com.sun.enterprise.home}/public_htm/ 下的权限。应用这个文件，遵从下面的步骤：
+    a：在lib/security/server.policy文件中，删除下面的行：
+    grant codeBase "file:${com.sun.enterprise.home}/public_html/-" {
+        permission java.security.AllPermission;
+    }
+    b：替换删除的行的内容如下：
+    grant codeBase "file:${com.sun.enterprise.home}/public_html/-" {
+        permission java.lang.RuntimePermission "loadLibrary.*";
+        permission java.lang.RuntimePermission "accessClassInPackage.*";
+
+        permission java.lang.RuntimePermission "queuePrintJob";
+        permission java.lang.RuntimePermission "modifyThreadGroup";
+
+        permission java.io.FilePermission "<<ALL FILES>>", "read,write";
+
+        permission java.net.SocketPermission "*", "connect";
+
+        // "standard" properies that can be read by anyone
+        permission java.util.PropertyPermission "*", "read";
+
+        // set the JSSE provider for lazy authentication of app. clients.
+        permission java.security.SecurityPermission "putProviderProperty.JSSE";
+        permission java.security.SecurityPermission "insertProvider.JSSE";
+};
+
+
+

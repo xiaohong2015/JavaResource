@@ -1,0 +1,21 @@
+作者：梦
+email: mfgqd@263.net
+日期：8/17/2001 5:31:06 PM
+
+[b][#000080]问题：[/#]
+[/b]朝三暮四郎 于 2001-8-17 17:23:50 加贴在 JAVA技术 ←返回版面    
+请教javamail发信的身份验证问题！！！
+
+javamail中的demo都是不要身份验证的，
+我看了几遍http://java.sun.com/products/javamail/1.2/docs/javadocs/index.html
+还是不知道怎么改！！！
+
+
+[b][#000080]回答：[/#]
+[/b]这样使用即可：
+props.put("mail.smtp.auth", "true"); 
+
+
+
+Transport transport = session.getTransport("smtp");
+transport.connect(host, username, password);

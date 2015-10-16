@@ -1,0 +1,18 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：2001-5-23 12:32:18
+只需要保持下面几处地方设置统一，你的JSP就不会有中文问题
+1、JSP的charset，
+2、你的JSP　SERVER编译JSP是使用的字符集，默认和操作系统是一样的。你可能需要进行修改
+3、你的BEAN编译时候所采用的字符集，一般用JAVAC编译，都是和操作系统一样的，但你可以通过带参数来改变。如果用其它的编程工具，可以编译的话，你可能需要修改其默认参数。
+4、和数据库连接时，大多数JDBC驱动程序都可以设置其字符集的，这样JDBC驱动会自己进行转换，也不会出现汉字问题。
+以jConnect为例，就有这样一个属性参数：
+CHARSET
+ Specifies the character set for strings passed through TDS. If you specify a CHARSET, it must match a CHARSET listed in syscharsets.
+
+If null, jConnect uses the server’s default CHARSET.
+明白？jdbc-odbc桥也有这样的参数的(charSet)。 不同的驱动，请参阅文档。
+
+
+一般来说，只要你做到了以上几点，你的JSP几乎（根本各人的配置吧）不会再有中文问题了！
+不过我还是LINUX下的RESIN中碰到一个小问题，那就是URL中不能传递中文。我没有想通。

@@ -1,0 +1,61 @@
+作者：令少爷
+email: dj12@8848.net
+日期：7/10/2001 9:54:02 AM
+一、	所需软件
+以WINDOWS 98为例，其它环境类似。
+a)	JDK1.2.2；
+JAVA开发工具。
+b)	apache_1_3_12_win32.exe;
+WEB 服务器。
+c)	jakarta-tomcat 3.1;
+支持JSP、SERVLET。
+d)	ApacheJServ-1.1.1.exe；
+用来连接apache和TOMCAT。
+e)	jsdk20-win32.exe；
+支持SERVLET。
+f)	ORACLE8i的服务器版和ORACLE8.1.7版的JDBC驱动classes12.zip；
+数据库软件。
+二、	具体步骤
+a)	将JDK装在c:\jdk1.2.2目录下；
+b)	TOMCAT的安装与配置；
+1．	将TOMCAT的压缩文件解压到c:\根目录下，在C盘下就会出现一个jakatar-tomcat的目录，将其改为tomcat。
+2．	在c:\tomcat\webapps目录下创建hnzq目录，在hnzq目录下创建jsp和classes目录。
+3．	编缉c:\tomcat\bin目录下的server.xml文件，找到ContextManager这个tag,在<ContextManager>的结束标记前面加上以下标记：
+
+<Context path=”/hnzq” docBase=”webapps/hnzq” debug=”0” reloadable=”true”>
+</Context>
+
+4．	编缉C盘根目录下的autoexec.bat，设置以下环境变量：
+SET JAVA_HOME=C：\JDK1.2.2；
+SET TOMCAT_HOME=C：\TOMCAT;
+			修改PATH环境变量：
+				SET PATH=%PATH%;JAVA_HOME\BIN;JAVA_HOME
+把以下路径加到classpath中：
+JAVA_HOME\LIB\TOOLS.JAR;
+JAVA_HOME\LIB\DT.JAR;
+TOMCAT_HOME\WEBAPPS\HNZQ\CLASSES;
+5．	将ORACLE8.1.7的JDBC驱动文件及所有BEAN的类和包按原有路径拷贝到c:\tomcat\webapps\hnzq\classes\目录下。
+6．	将所有的JSP文件按原有路径拷贝到c:\tomcat\webapps\hnzq\jsp\目录下。
+7．	执行c:\tomcat\bin目录下的startup.bat文件，执行完后，startup.bat会在一个DOS窗口启动TOMCAT，如果在执行时出现Out of environment space的提示，将DOS窗口的缓冲区大小设为2816或更高就OK了。这时在浏览器的地址栏输入：http://localhost:8080/  然后回车，就可看到一只可爱的小猫，说明TOMCAT已经启动成功了。
+c)	apache的安装；
+1．	将Apache Web Server 安装在c:\apache目录下。
+2．	将jsdk20-win32.exe 安装在c:\jsdk2.0目录下。
+3．	将ApacheJServ-1.1.1.exe 安装在c:\ Apache JServ 1.1.1目录下，安装过程中需要指定JVM所在的目录，即JAVA_HOME\BIN目录；还需要指定JSDK所在目录c:\jsdk2.0。
+d)	连接apache和tomcat;
+1．	用文本编缉器打开c:\apache\conf\httpd.conf文件，在文件的最后加上如下指令：
+   Include “Tomcat_home\conf\tomcat-apache.conf”
+e)	运行；
+1．	先执行c:\tomcat\bin\startup.bat，等待出现另一个DOS窗口后TOMCAT就启动了。
+2．	新开一个DOS窗口，进入c:\apache\目录，执行apache.exe文件，此时出现如下出错信息：
+  apj*:can’t be specified more than once per host
+其中*号代表一些字符串，如ApJServLogLevel，用文本编缉器打开c:\ Apache JServ 1.1.1\jserv.conf文件，将apj*的相关行注释掉就可以了，直到没有出错信息为止。
+3．	经过以上步骤后，Apache+Tomcat就可以正常工作了。此时在浏览器的地址栏输入：http://localhost/hnzq/jsp/gssy/index.htm/ 就可以看到整个网页了。
+三、	注意事项及其它
+a)	ORACLE的JDBC驱动只能是8.1.7或更高版本的驱动才能支持JDBC2.0。
+b)	因为Apache JServ 1.1.1不能认识JSDK2.1或其它版本，所以只能用JSDK2.0。
+c)	如需以上所有软件或其它未尽事宜请联系：
+j2ee@8848.net
+
+
+
+													令少爷

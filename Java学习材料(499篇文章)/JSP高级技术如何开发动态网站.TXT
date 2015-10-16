@@ -1,0 +1,372 @@
+作者：jspfuns
+日期：2000-8-10 17:23:22
+近年来，Jsp技术现在已经成为一种卓越的动态网站开发技术。Java开发者出于各种理由喜爱使用jsp。有人喜爱其“一次开发，处处使用”的性能，另外的人觉得jsp使java成为一种易学的服务器端scripting语言。但是，jsp最大的长处在它将页面的表现和页面的商业逻辑分开了。本章中，我们将深入地讨论如何使用jsp模式2体系结构来开发网站。这一模式可以被看作是通用模式浏览控制模式（popular Model-View-Controller,MVC）模式的服务器端实现。
+
+
+
+Servlets有何缺陷？
+
+当jsp成为开发动态网站的主要技术时，可能有人会问为何在jsp技术中我们不强调servlets。Servlets的应用是没有问题的。它们非常适于服务器端的处理和编程，并且它们会长期驻留在他们现在的位置。但是，从结构上说，我们可以将jsp看作是servlet的一个高层的抽象实现，特别是在servlet 2.2 API下。但是，你仍然不能无拘束地使用servlet；它们并不适合每一个人。例如，页面设计者可以方便地使用html或者xml工具开发jsp页面，但servlet却更适合于后端开发者使用，他们的工具是ide——一个需要更多编程训练的开发领域。当发布servlet时，每个开发者必须小心地确定在页面表现和页面逻辑之间没有紧密的关联出现。你可以使用第三方html包装工具，如htmlkona来混合html和servlet代码。即使如此，这点灵活性还不足以让你自由地改变风格本身。例如，你希望从html改变到dhtml，则包装本身需要被小心地测试，以确保新的格式可以正确使用。在最坏的情况下，包装不可用，你就需要应变马来表现动态内容。所以，需要一种新的解决方案。你将会看到，一种方案就是混合jsp和servlet的使用。
+
+
+
+不同的方式
+
+早期的jsp标准给出了两种使用jsp的方式。这些方式，都可以归纳为jsp模式1和jsp模式2，主要的差别在于处理大量请求的位置不同。在模式1中（图1），jsp页面独自响应请求并将处理结果返回客户。这里仍然有表现和内容的分离，因为所有的数据依靠bean来处理。尽管模式1 可以很好的满足小型应用的需要，但却不能满足大型应用的要求。大量使用模式1，常常会导致页面被嵌入大量的script或者java代码。特别是当需要处理的商业逻辑很复杂时，情况会变得严重。也许对于java程序员来说，这不算大的问题。但如果开发者是前端界面设计人员——在大型项目中，这非常常见，——则代码的开发和维护将出现困难。在任何项目中，这样的模式多少总会导致定义不清的响应和项目管理的困难。
+
+
+在图2中显示的模式2 结构，是一种面向动态内容的实现，结合了servlet 和jsp技术。它利用了两种技术原有的优点，采用jsp来表现页面，采用servlets来完成大量的处理。这里，servlet扮演一个控制者的角色，并负责响应客户请求。接着，servlet创建jsp需要的bean和对象，再根据用户的行为，决定将那个jsp页面发送给用户。特别要注意，jsp页面中没有任何商业处理逻辑；它只是简单地检索servlet先前创建的bean 或者对象，再将动态内容插入预定义的模版。从开发的观点看，这一模式具有更清晰的页面表现，清楚的开发者角色划分，可以充分地利用开发小组中的界面设计人员。事实上，越是复杂的项目，采用模式2 的好处就越突出。
+
+
+为了清楚地了解模式2 的开发过程，我们举一个网上音乐商店的例子。
+
+我们创建一个叫”音乐无国界”的销售音乐制品的商店。“音乐无国界”在线商店的主界面，是一个叫“音乐无国界”的页面（代码1）。你会看到，这个页面完全着眼于用户界面，与处理逻辑无关。另外，注意另外一个jsp页面，Cart.jsp（在代码2中），用<jsp:include page="Cart.jsp" flush="true" />.嵌入Eshop.jsp中。
+
+
+
+Listing 1:
+EShop.jsp 
+
+<%@ page session="true" %>
+<html>
+<head>
+<title>Music Without Borders</title>
+</head>
+<body bgcolor="#33CCFF">
+<font face="Times New Roman,Times" size="+3">
+Music Without Borders
+</font>
+<hr><p>
+<center>
+<form name="shoppingForm" 
+action="/examples/servlet/ShoppingServlet" 
+method="POST">
+<b>CD:</b> 
+<select name=CD>
+<option>Yuan | The Guo Brothers | China | $14.95</option>
+<option>Drums of Passion | Babatunde Olatunji | Nigeria | $16.95</option>
+<option>Kaira | Tounami Diabate| Mali | $16.95</option>
+<option>The Lion is Loose | Eliades Ochoa | Cuba | $13.95</option>
+<option>Dance the Devil Away | Outback | Australia | $14.95</option>
+<option>Record of Changes | Samulnori | Korea | $12.95</option>
+<option>Djelika | Tounami Diabate | Mali | $14.95</option>
+<option>Rapture | Nusrat Fateh Ali Khan | Pakistan | $12.95</option>
+<option>Cesaria Evora | Cesaria Evora | Cape Verde | $16.95</option>
+<option>Ibuki | Kodo | Japan | $13.95</option>
+</select>
+<b>Quantity: </b><input type="text" name="qty" SIZE="3" value=1>
+<input type="hidden" name="action" value="ADD">
+<input type="submit" name="Submit" value="Add to Cart">
+</form>
+</center>
+<p>
+<jsp:include page="Cart.jsp" flush="true" />
+</body>
+</html>
+
+
+
+Listing 2:
+Cart.jsp 
+
+<%@ page session="true" import="java.util.*, shopping.CD" %>
+<%
+Vector buylist = (Vector) session.getValue("shopping.shoppingcart");
+if (buylist != null && (buylist.size() > 0)) {
+%>
+<center>
+<table border="0" cellpadding="0" width="100%" bgcolor="#FFFFFF">
+<tr>
+<td><b>ALBUM</b></td>
+<td><b>ARTIST</b></td>
+<td><b>COUNTRY</b></td>
+<td><b>PRICE</b></td>
+<td><b>QUANTITY</b></td>
+<td></td>
+</tr>
+<%
+for (int index=0; index < buylist.size();index++) {
+CD anOrder = (CD) buylist.elementAt(index);
+%>
+<tr>
+<td><b><%= anOrder.getAlbum() %></b></td>
+<td><b><%= anOrder.getArtist() %></b></td>
+<td><b><%= anOrder.getCountry() %></b></td>
+<td><b><%= anOrder.getPrice() %></b></td>
+<td><b><%= anOrder.getQuantity() %></b></td>
+<td>
+<form name="deleteForm"
+action="/examples/servlet/ShoppingServlet"
+method="POST">
+<input type="submit" value="Delete">
+<input type="hidden" name= "delindex" value='<%= index %>'>
+<input type="hidden" name="action" value="DELETE">
+</form> 
+</td>
+</tr> 
+<% } %>
+</table>
+<p>
+<form name="checkoutForm"
+action="/examples/servlet/ShoppingServlet"
+method="POST">
+<input type="hidden" name="action" value="CHECKOUT">
+<input type="submit" name="Checkout" value="Checkout">
+</form>
+</center>
+<% } %>
+
+
+
+这里，Cart.jsp按照MVC的模式1处理基于SESSION的购物车的表现。请看Cart.jsp开始处的代码：
+
+<%
+Vector buylist = (Vector) session.getValue("shopping.shoppingcart");
+if (buylist != null && (buylist.size() > 0)) {
+%>
+
+本质上，这段代码从SESSION中取出“购物车”。如果“购物车”为空或者没有被创建，它就什么也不显示。所以，在用户第一次访问应用时，其界面如图：
+
+
+如果“购物车”不为空，用户选择的商品从车中取出，依次显示在页面上：
+
+<%
+for (int index=0; index < buylist.size(); index++) {
+CD anOrder = (CD) buylist.elementAt(index);
+%>
+
+一旦生成一个物品的说明，就使用JSP按照事先设定的模板将其插入静态HTML页面。下图显示了用户选购一些物品后的界面：
+
+
+
+
+需要注意的一个重要的地方是所有关于Eshop.jsp,Cart.jsp的处理有一个控制SERVLET，ShoppingServlet.java，代码在源程序3中：
+
+Listing 3:
+ShoppingServlet.java 
+
+import java.util.*;
+import java.io.*;
+import javax.servlet.*;
+import javax.servlet.http.*;
+import shopping.CD;
+public class ShoppingServlet extends HttpServlet {
+public void init(ServletConfig conf) throws ServletException {
+super.init(conf);
+}
+public void doPost (HttpServletRequest req, HttpServletResponse res)
+throws ServletException, IOException {
+HttpSession session = req.getSession(false);
+if (session == null) {
+res.sendRedirect("http://localhost:8080/error.html");
+}
+Vector buylist=
+(Vector)session.getValue("shopping.shoppingcart");
+String action = req.getParameter("action");
+if (!action.equals("CHECKOUT")) {
+if (action.equals("DELETE")) {
+String del = req.getParameter("delindex");
+int d = (new Integer(del)).intValue();
+buylist.removeElementAt(d);
+} else if (action.equals("ADD")) {
+//any previous buys of same cd?
+boolean match=false;
+CD aCD = getCD(req);
+if (buylist==null) {
+//add first cd to the cart
+buylist = new Vector(); //first order
+buylist.addElement(aCD);
+} else { // not first buy
+for (int i=0; i< buylist.size(); i++) {
+CD cd = (CD) buylist.elementAt(i);
+if (cd.getAlbum().equals(aCD.getAlbum())) {
+cd.setQuantity(cd.getQuantity()+aCD.getQuantity());
+buylist.setElementAt(cd,i);
+match = true;
+} //end of if name matches
+} // end of for
+if (!match) 
+buylist.addElement(aCD);
+}
+}
+session.putValue("shopping.shoppingcart", buylist);
+String url="/jsp/shopping/EShop.jsp";
+ServletContext sc = getServletContext();
+RequestDispatcher rd = sc.getRequestDispatcher(url);
+rd.forward(req, res);
+} else if (action.equals("CHECKOUT")) {
+float total =0;
+for (int i=0; i< buylist.size();i++) {
+CD anOrder = (CD) buylist.elementAt(i);
+float price= anOrder.getPrice();
+int qty = anOrder.getQuantity();
+total += (price * qty);
+}
+total += 0.005;
+String amount = new Float(total).toString();
+int n = amount.indexOf('.');
+amount = amount.substring(0,n+3);
+req.setAttribute("amount",amount);
+String url="/jsp/shopping/Checkout.jsp";
+ServletContext sc = getServletContext();
+RequestDispatcher rd = sc.getRequestDispatcher(url);
+rd.forward(req,res);
+}
+}
+private CD getCD(HttpServletRequest req) {
+//imagine if all this was in a scriptlet...ugly, eh?
+String myCd = req.getParameter("CD");
+String qty = req.getParameter("qty");
+StringTokenizer t = new StringTokenizer(myCd,"|");
+String album= t.nextToken();
+String artist = t.nextToken();
+String country = t.nextToken();
+String price = t.nextToken();
+price = price.replace('$',' ').trim();
+CD cd = new CD();
+cd.setAlbum(album);
+cd.setArtist(artist);
+cd.setCountry(country);
+cd.setPrice((new Float(price)).floatValue());
+cd.setQuantity((new Integer(qty)).intValue());
+return cd;
+}
+}
+
+
+每次用户用Eshop.jsp增加一个商品，页面就请求控制SERVLET。控制SERVLET决定进一步的行动，并处理增加的商品。接着，控制SERVLET实例化一个新的BEAN CD代表选定的商品，并在返回SESSION前更新购物车对象。
+
+Listing 4:
+CD.java 
+
+package shopping;
+public class CD {
+String album;
+String artist;
+String country;
+float price;
+int quantity;
+public CD() {
+album="";
+artist="";
+country="";
+price=0;
+quantity=0;
+}
+public void setAlbum(String title) {
+album=title;
+}
+public String getAlbum() {
+return album;
+}
+public void setArtist(String group) {
+artist=group;
+}
+public String getArtist() {
+return artist;
+}
+public void setCountry(String cty) {
+country=cty;
+}
+public String getCountry() {
+return country;
+}
+public void setPrice(float p) {
+price=p;
+}
+public float getPrice() {
+return price;
+}
+public void setQuantity(int q) {
+quantity=q;
+}
+public int getQuantity() {
+return quantity;
+}
+}
+
+
+注意，我们的SERVLET中具有附加的智能，如果一个物品被重复选择，不会增加新的记录，而是在以前的记录上更新计数。控制SERVLET也响应Cart.jsp中的行为，如修改数量，删除商品，还有结帐。如果结帐，控制通过下述语句转向Checkout.jsp页面（源程序5）：
+
+String url="/jsp/shopping/Checkout.jsp";
+ServletContext sc = getServletContext();
+RequestDispatcher rd = sc.getRequestDispatcher(url);
+rd.forward(req,res);
+
+Listing 5:
+Checkout.jsp 
+
+<%@ page session="true" import="java.util.*, shopping.CD" %>
+<html>
+<head>
+<title>Music Without Borders Checkout</title>
+</head>
+<body bgcolor="#33CCFF">
+<font face="Times New Roman,Times" size=+3>
+Music Without Borders Checkout
+</font>
+<hr><p>
+<center>
+<table border="0" cellpadding="0" width="100%" bgcolor="#FFFFFF">
+<tr>
+<td><b>ALBUM</b></td>
+<td><b>ARTIST</b></td>
+<td><b>COUNTRY</b></td>
+<td><b>PRICE</b></td>
+<td><b>QUANTITY</b></td>
+<td></td>
+</tr>
+<%
+Vector buylist = (Vector) session.getValue("shopping.shoppingcart");
+String amount = (String) request.getAttribute("amount");
+for (int i=0; i < buylist.size();i++) {
+CD anOrder = (CD) buylist.elementAt(i);
+%>
+<tr>
+<td><b><%= anOrder.getAlbum() %></b></td>
+<td><b><%= anOrder.getArtist() %></b></td>
+<td><b><%= anOrder.getCountry() %></b></td>
+<td><b><%= anOrder.getPrice() %></b></td>
+<td><b><%= anOrder.getQuantity() %></b></td>
+</tr>
+<%
+}
+session.invalidate();
+%>
+<tr>
+<td> </td>
+<td> </td>
+<td><b>TOTAL</b></td>
+<td><b>$<%= amount %></b></td>
+<td> </td>
+</tr>
+</table>
+<p>
+<a href="/examples/jsp/shopping/EShop.jsp">Shop some more!</a>
+</center>
+</body>
+</html>
+
+
+结帐页面简单地从SESSION中取出购物车，然后显示每个物品和总金额。这里的关键是要结束SESSION，因此在页面中有一个session.invalidate()调用。这一处理有两个原因。首先，如果不结束SESSION，用户的购物车不会被初始化，如果用户要继续购买，车中会保留他已经支付过的商品。另外，如果用户不结帐就离开了，则SESSION会继续占用有效的资源直到过期。过期时间一般是30分钟，在一个大的站点上，这样的情况会很快导致资源耗尽。当然，这是我们不愿看到的。
+
+
+注意，所有的资源分配在这个例子中是基于SESSION的。所以，你必须确保控制SERVLET不被用户访问，即使是意外的访问也不允许。这可以在控制检查到一个非法访问时用一个简单的重定向错误页面来处理。见源代码6。
+
+Listing 6:
+error.html 
+
+<html>
+<body>
+<h1>
+Sorry, there was an unrecoverable error! 
+
+Please try <a href="/examples/jsp/shopping/EShop.jsp">again</a>.
+</h1>
+</body>
+</html>
+
+
+小结
+
+本章的讨论显示，使用模式2，JSP和SERVLET可以在功能上最大限度的分开。正确地使用模式2，导致一个中心化的控制SERVLET，以及只完成显示的JSP页面。另一方面，模式2的实现很复杂。因此，在简单的应用中，可以考虑使用模式1。

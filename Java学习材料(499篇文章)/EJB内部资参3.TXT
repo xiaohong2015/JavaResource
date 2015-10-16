@@ -1,0 +1,253 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-1-12 18:10:41
+EJB开发概述 
+1、EJB的开发 
+先泛泛而论，讲一讲EJB的开发步骤。 
+
+1.1 SessionBean的开发 
+第一步， 写远程接口（remote interface）, 
+继承EJBObject接口，把需要调用的public方法写在里面(这些方法将在SessionB 
+ean中实现)，注意要声明throws java.rmi.RemoteException。 
+例如： 
+
+package jsper.ejb; 
+
+
+
+import java.rmi.*; 
+
+import javax.ejb.*; 
+
+public interface MyEJB extends EJBObject 
+{ 
+
+public String sayHello() throws java.rmi.RemoteException; 
+
+} 
+
+第二步， 写Home接口（生成EJBObject引用的factory) 
+至少生成一个create方法, 注意要声明throws java.rmi.RemoteException和jav 
+ax.ejb.CreateException。 
+比如： 
+
+
+
+package jsper.ejb; 
+
+import java.rmi.*; 
+import javax.ejb.*; 
+
+
+public interface MyEJBHome extends EJBHome 
+{ 
+
+
+
+MyEJB create() throws java.rmi.RemoteException, javax.ejb.CreateExcept 
+ion; 
+
+} 
+
+第三步， 写真正的Session Bean的实现(实现定义在远程接口中的方法)， 需要 
+实现javax.ejb.SessionBean接口 
+注意：不能用implents MyEJB的方式直接实现远程接口,此处不用抛出RemoteExc 
+eption 
+package jsper.ejb; 
+
+import java.rmi.RemoteException; 
+import javax.ejb.*; 
+public class MyEJBClass implements SessionBean { 
+
+　 
+　public MyEJBClass() { 
+　} 
+　//定义在SessionBean 中的方法 
+　public void ejbCreate() throws RemoteException, CreateException { 
+　} 
+
+　public void ejbActivate() throws RemoteException { 
+　} 
+
+　public void ejbPassivate() throws RemoteException { 
+　} 
+
+　public void ejbRemove() throws RemoteException { 
+　} 
+
+public void setSessionContext(SessionContext ctx) 
+throws RemoteException { 
+
+　} 
+
+　//此处是具体的实现 
+
+　public String sayHello() 
+
+　{ 
+
+　　System.out.println("Hello"); 
+　} 
+} 
+第四步，写一个发布用的配置文件ejb-jar.xml 
+需要提供的信息： 
+Bean Home name -- The nickname that clients use to lookup your bean's 
+home object. 
+Enterprise bean class name -- The fully qualified name of the enterpri 
+se bean class. 
+　 Home interface class name 
+　 Remote interface class name 
+Re-entrant -- Whether the enterprise bean allow re-entrant calls. This 
+setting must be false for session beans(it applies to entity beans on 
+ly) 
+　 stateful or stateless 
+　 Session timeout --　The length of time (in seconds) before a client 
+should time out when calling methods on your bean. 
+最后你还可以提供属于自己的配置信息供自己控制EJB的工作方式。 
+
+例子： 
+
+
+
+
+
+　　 
+　　　 
+helloEjb 
+com.jsper.ejb.MyEJBHome 
+com.jsper.ejb.MyEJB 
+com.jsper.ejb.MyEJBClass 
+Stateless 
+Container 
+　　　 
+　　 
+　　 
+　 
+
+第五步，将你的所有文件用jar工具生成jar文件 
+
+ejb-jar.xml须在顶级的META-INF子目录 
+这句话比较咬嘴， 举个例子 
+
+mylib----META-INF--*.XML 
+| 
+|com--coucouniu--ejb---EJBClass 
+　　　|-EJBHome 
+　　　|-EJB 
+　　　 
+在生成.jar文件时 
+
+sh>cd mylib　　//注意此处所在目录 
+sh>jar cv0f myejb.jar * 
+
+请注意： 到这一步我们做出的东西都是和和特定的EJB Server是无关的， 只是 
+和遵循EJB的标准有关 
+
+
+
+第六步，使用特定平台的发布工具生成发布使用的jar文件。 
+不同的中间件产品此步骤非常不同， 产生的结果都是生成只有自己的EJB Serve 
+r能理解的远程接口和Home接口实现等等东西，打包在一个jar文件中 
+一般是很简单的 
+第七步，把.jar文件发布到EJB Server 
+
+根据不同的中间件产品此步骤非常不同， 可以分为启动时发布和运行时发布两种 
+，一般是很简单的, 以weblogic为例： 
+1、在weblogic.properties 文件中配置使weblogic 启动时自动装载。 
+添加一个条目比如： 
+weblogic.ejb.deploy=C:/weblogic510/myserver/ejb_basic_beanManaged.jar， 
+\ 
+　　C:/weblogic510/myserver/ejb_basic_test.jar 
+　　 
+2、使用deploy或DeployerTool动态装载/卸载/更新 
+
+第八步，写客户端的程序（我迄今为止的理解） 
+在我们使用发布工具把EJB发布到EJB Container的过程中，会绑定一个名字到Co 
+ntainer的目录服务中，现在我们要调用时从这个目录服务中把EJBHome对象取出 
+， 这里分为从本地和外部两种情况： 
+一种是客户端本地调用EJB。 比如和EJB引擎和Servlet引擎是整合在同一个Appl 
+ication Server中， 这时当一个Servlet要调用EJB时无须验证，即可得到EJBHo 
+me接口的实现 
+　Context ic = new InitialContext(); 
+　　　System.out.println("Looking for the EJB published as 'hello'"); 
+
+　　　com.jsper.ejb.MyEJBHome homeInterface = (com.jsper.ejb.MyEJBHome 
+) ic.lookup(“hello”); //发布时绑定的名字是hello 
+　这样就可从目录服务中得到Home接口的实现， 也是我们最常用的方式， 可移 
+植性很好 
+
+外部调用的话首先要经过身份验证， 
+比如Oracle8i ： 
+
+String ejbUrl = "sess_iiop://localhost:2481:ORCL/test/MyEJB"; 
+　　String username = "scott"; 
+　　String password = "tiger"; 
+
+　　// Setup the environment 
+　　Hashtable environment = new Hashtable(); 
+　　// Tell JNDI to speak sess_iiop 
+　　environment.put(javax.naming.Context.URL_PKG_PREFIXES, "oracle.aur 
+ora.jndi"); 
+　　// Tell sess_iiop who the user is 
+　　environment.put(Context.SECURITY_PRINCIPAL, username); 
+　　// Tell sess_iiop what the password is 
+　　environment.put(Context.SECURITY_CREDENTIALS, password); 
+　　// Tell sess_iiop to use credential authentication 
+environment.put(Context.SECURITY_AUTHENTICATION, ServiceCtx.NON_SSL_LO 
+GIN); 
+// Lookup the URL 
+　　com.jsper.ejb.MyEJBHome homeInterface = null; 
+　　try { 
+　　　System.out.println("Creating an initial context"); 
+　　　Context ic = new InitialContext(environment); 
+　　　System.out.println("Looking for the EJB published as 'test/MyEJB 
+'"); 
+　　　homeInterface = (com.jsper.ejb.MyEJBHome) ic.lookup(ejbUrl); 
+　　} 
+　　catch (ActivationException e) { 
+　　　System.out.println("Unable to activate : " + e.getMessage()); 
+　　　e.printStackTrace(); 
+　　　System.exit(1); 
+　　} 
+再比如weblogic的调用方式： 
+try 
+{ 
+　　// Get an InitialContext 
+　　String url="t3://localhost:7001"; 
+　　Properties h = new Properties(); 
+　　h.put(Context.INITIAL_CONTEXT_FACTORY, 
+"weblogic.jndi.WLInitialContextFactory"); 
+　　h.put(Context.PROVIDER_URL, url); 
+
+Context ctx =　new InitialContext(h); 
+
+　　System.out.println("Getting the EJBHome object..."); 
+　　　com.jsper.ejb.EJBHome tmp= (com.jsper.ejb.EJBHome)ctx.lookup("he 
+llo"); 
+
+//create three element array of COUNT object 
+　　EJB ejb =tmp.create(); 
+　　System.out.println(ejb.sayHello()); 
+} 
+catch(Exception e) 
+{ 
+e.printStackTrace(); 
+} 
+由于和具体的目录服务、协议相关，为了达到可移植的目的，只好多做一些工作 
+，幸好一般不需要做这些工作。 
+
+
+
+
+
+
+附图 
+
+EJB的调用模型 
+
+
+Passivation of stateful session bean 
+
+Activation of stateful session bean 
+
+ 

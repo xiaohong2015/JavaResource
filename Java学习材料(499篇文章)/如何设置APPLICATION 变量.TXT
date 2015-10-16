@@ -1,0 +1,120 @@
+作者：jspfuns
+日期：2000-8-12 12:23:32
+application变量是对一个web application有效的全局变量，在保存一些全局有效的值时非常有用。与session变量不同，application变量可以用application.getAttribute()和application.setAttribute()来访问。
+
+在JSP中，可以自动引用application变量，指代当前的web 应用。（有关web 应用，我将在另外的地方讨论。）
+
+在引用application 变量时，必须使用同步。并且，需要测试一个application属性是否已经存在。请仔细研究下面的代码，在下面，设置了一个叫“change"的application 属性，保存一个整型值。关于在servlet中使用application变量，方法与下面的代码一致，不过，需要先说明一个application如下:
+
+servletContext application=getServletContext();
+
+后面的一段函数是env.java的片断，可以看看在servlet中如何使用application变量的。
+
+Integer count = null;
+
+synchronized (application) {
+
+  count = (Integer) application.getAttribute("change");
+
+  if (count == null)
+
+    count = new Integer(0);
+
+  count = new Integer(count.intValue() + 1);
+
+  application.setAttribute("change", count);
+
+}
+
+ 
+
+private void printApplication(PrintWriter pw, HttpServletRequest req)
+
+    throws IOException
+
+  {
+
+   ServletContext application = getServletContext();
+
+ 
+
+pw.println("<h1>Application Information:</h1>");
+
+    pw.println("<table>");
+
+    pw.print("<tr><td>Major Version<td>");
+
+    pw.println(application.getMajorVersion());
+
+  pw.print("<tr><td>Minor Version<td>");
+
+  pw.println(application.getMinorVersion());
+
+pw.print("<tr><td>Server Info<td>");
+
+    pw.println(application.getServerInfo());
+
+    pw.print("<tr><td>Real Path (of pathinfo)<td>");
+
+    pw.println(application.getRealPath(req.getPathInfo()));
+
+    pw.print("<tr><td>Mime-type (of pathinfo)<td>");
+
+    pw.println(application.getMimeType(req.getPathInfo()));
+
+    pw.println("</table>");
+
+ 
+
+    pw.println("<h1>Application Variables:</h1>");
+
+    pw.println("<table>");
+
+ 
+
+  Enumeration e = application.getAttributeNames();
+
+while (e.hasMoreElements()) {
+
+      String name = (String) e.nextElement();
+
+    pw.print("<tr><td>");
+
+      pw.print(name);
+
+      pw.print("<td>");
+
+      pw.println(application.getAttribute(name));
+
+    }
+
+ 
+
+    pw.println("</table>");
+
+}
+
+ 
+
+%>
+
+ 
+
+<html>
+
+<head><title>Counter</title></head>
+
+<body bgcolor=#ffffff>
+
+ 
+
+<h1>Welcome, visitor: <%= count %></h1>
+
+ 
+
+</body>
+
+</html>
+
+ 
+

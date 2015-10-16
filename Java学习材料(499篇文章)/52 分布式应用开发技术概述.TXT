@@ -1,0 +1,50 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2000-11-14 23:14:46
+5.2 分布式应用开发技术概述 
+目前分布对象技术已经成为建立应用框架(Application Framework)和软构件(Software Component)的核心技术，在开发大型分布式应用系统中表现出强大的生命力，并形成了三项具有代表性的主流技术，即OMG的CORBA(Common Object Request Broker Architecture)、Microsoft的ActiveX/DCOM (Distributed Compound Object Model)和SUN公司的Java/RMI。 
+5.2.1  CORBA、DCOM、RMI 
+1．CORBA 
+----OMG是一个非盈利性国际组织，致力于使CORBA成为"无所不在的中间件"。1989年成立时仅有8家公司参与，而今天已经是拥有900多个机构成员的"议会式"标准化组织，世界上几乎所有最有影响的计算机公司（如IBM、Microsoft和HP等）、著名的工商企业（如Boeing、Citibank和FordMotor等）和大学研究机构都是这个组织的成员。OMG所制定的分布对象计算标准规范包括CORBA/IIOP 、对象服务、公共实施和领域接口规范。遵照这些规范开发出的分布计算软件环境可以在几乎所有的主流硬件平台和操作系统上运行。现在，CORBA/IIOP已成为Internet上实现对象互访的技术标准，OMG的IIOP也已成为许多公司（如Oracle、Netscape、Sun和IBM等）进行系统集成的基本协议。1995年以来，基于CORBA软件的企业级应用发展迅猛，大有覆盖DCE之势。目前世界上有一定影响的CORBA软件制造商已有10多家。 
+2．DCOM 
+ActiveX/DCOM是由Microsoft推出的对象构件模型，最初用于集成Microsoft的办公软件，目前已发展成为Microsoft世界的应用系统集成标准，并集中反映在其产品ActiveX中。在分布计算技术上，OMG的优势比Microsoft至少领先2～3年。目前，只有OMG的技术能够支持异构环境中大型分布式应用的开发，而Microsoft的DCOM技术尚不能胜任。Microsoft的优势主要表现在应用和市场能力上。从未来市场策略考虑，Microsoft决定支持OMG提出的OLE/COM与CORBA的互操作标准，从而使COM的对象能够与CORBA的对象进行通信。今后3～5年内，OMG和Microsoft的分布对象技术将共存，并在许多方面相互渗透。 
+3．RMI 
+--- -按照Sun和Javasoft对Java的界定，Java是一个应用程序开发平台，它提供了可移植、可解释、高性能和面向对象的编程语言及运行环境。RMI(RemoteMethodInvocation)是分布在网络中的各类Java对象之间进行方法调用的ORB机制。CORBA技术与Java技术存在天然的联系，因为Sun是OMG的创始成员，CORBA标准中的许多内容（例如IDL标准、IIOP标准）是以SUN公司提交的方案为核心制定的。CORBA与Java/RMI的主要区别在于以下两个方面： 
+·    程序设计语言无关性是CORBA的重要设计原则，而Java/RMI依赖于Java语言和Java虚拟机； 
+·    Java/RMI技术的最大成就是使对象能够在Internet上迁移和执行，而CORBA2.0标准中只考虑对象的远程访问，没有对象作为"值"传递的承诺。 
+----由于这两个技术的天然联系和各自的优势，CORBA技术与Java技术的融合已成为必然。 
+5.2.2  发展趋势 
+----与Internet技术结合是分布对象技术值得重视的发展趋势。Internet技术的发展，特别是90年代中期WWW技术的广泛应用，给分布对象技术的应用开辟了更广阔的空间，Object Web成为人们关注的新热点。从技术的角度看，WWW应用已经经历了Hypertext Web和Interactive Web两种形态，但都存在很大的局限性，突出地表现为应用接入能力受到限制。Java的出现为在浏览器上运行程序提供了新的途径，标志着ObjectWeb时代的开始。就以网络为中心的分布式应用的发展而言，这种把对象下载到浏览器中执行的机制也有局限。主要表现在大量的遗留应用不是用Java写的，自然无法下载到浏览器中运行；同时，某些重要的应用，包括信息共享与管理类的应用(如数据库系统)以及信息采集与信号监测应用(如实施网络管理的Agent)在逻辑上不能下载到客户端运行；另外，需要"减肥"的客户机可能难以承受越来越庞大的应用系统。尽管Java的RMI解决了访问异地Java对象的问题，但如何管理和访问异地其他大量非Java对象的问题并没有解决。另外，JavaRMI没有提供分布对象事务管理等服务。1996年下半年，Java与CORBA开始携手，共同奠定ObjectWeb时代的技术基础。 
+----何谓ObjectWeb？对此目前并没有公认的定义，但可以从应用和技术两个角度给出一定意义上的解释。 
+----1．应用内涵 
+----ObjectWeb是继HypertextWeb和InteractiveWeb之后新的Web应用，包括"保守的"和"理想的"两类应用形态。 
+·    保守的应用形态 
+用户能够按照对象设计者的思路自由、便捷地在Internet上操纵感兴趣的对象； 
+·    理想的应用形态 
+用户能够按照自己的需要自由、便捷地在Internet上操纵感兴趣的对象。 
+----与HypertextWeb和InteractiveWeb比较，Objec tWeb应用给用户的突出感受是操纵的实体不再局限于含有"超链"的文档，作用于实体的操作行为不再局限于"下载"一类的文件传输行为。下面给出两个应用(虽然目前还没有成熟的应用，但实现该应用的技术途径已经成熟)的简单陈述，以帮助对bjectWeb的理解。 
+---  -(1)开放的Internet/Intranet管理 
+----  典型的分布式系统管理采用Agent/Manager体系结构，Agent运行在被管理的设备(如服务器、路由器和智能交换机等)上，Manager通过与Agent的交互实施分布式系统管理。但问题是Manager不能管理采用新标准的新设备，这对于Internet管理是不合适的。开放的Internet/Intranet管理有两方面的含义：第一是指Agent能够在Internet上公布其管理功能的接口，并接受任何合法的Manager按照标准的远程对象访问协议(如CORBA/IIOP)所进行的访问；第二是指Manager能够访问任何时刻加入Internet的Agent，只要该Agent支持Internet上标准的远程对象访问协议，并在加入Internet时按照标准的协议公布其接口。这时，Manager就是管理对象的浏览器。我们注意到Sun公司前不久公布的Jini能够实现该应用构思。 
+- -- -(2)Web组合文档 
+--- -传统的组合文档(如MicroSoft的Office95)是台式应用，没有跨网络引用组件的功能。而目前流行的Web浏览器基于超文本结构，不能像组合文档一样自由组合和操作对象。Web组合文档较之传统的组合文档增加了跨网络引用组件的能力，这意味着复杂的组合文档应用能够在手持PC或其他瘦客户机上运行。例如，一个汽车设计专家在远离自己的设计中心讲学时，能够通过随身携带的笔记本计算机，现场演示从设计中心服务器上选择若干汽车部件，修改后组合一种新型的汽车，并现场调用设计中心的仿真系统对新设计的汽车进行各种仿真演示。 
+---- 2。技术内涵 
+--- -ObjectWeb技术主要包括对象开发技术和对象访问技术。从当前技术现状看，ObjectWeb技术成分如表1.1所示。 
+表1-1 ObjectWeb技术构成 
+    Hypertest Web/Interactive Web    ObjectWeb 
+对象    超文本    COM对象，Java对象、CORBA对象、各类组件 
+对象访问    HTTP/CGI    DCOM、RMI、CORBA/IIOP、HTTP/CGI 
+----"对象"与"对象访问"的关系可以用"货物运输系统"来类比。"对象"是ObjectWeb上的"货"。Internet上已存在大量的超文本，相对而言COM对象、Java对象、CORBA对象和各类组件则少得多。由于台式环境中的COM对象非常丰富，今后几年DCOM对象可能首先会在Internet上丰富起来。按照Java技术现在的发展势头，Internet上的Java对象也会很快多起来。由于CORBA对象具有语言、操作系统和硬件平台无关性的特点，它是最容易将大量的遗留应用和C＋＋、Smalltalk对象带入ObjectWeb的技术；随着Java与CORBA的携手，Java对象又会成为CORBA对象的特例；COM对象与CORBA对象的互操作标准已经制定。CORBA对象将迎来大发展的时期。 
+----  "对象访问"技术是ObjectWeb上的"车"。HTTP用于下载HTML页面和JavaApplet。Microsoft的对象RPC、RMI和CORBA/IIOP协议分别是远程访问DCOM对象、Java对象和CORBA对象的协议。从访问异地应用的意义上讲，HTTP/CGI也可视为一种对象访问协议，只是功能和性能存在很大局限。RMI与CORBA正在逐步融合，有人称融合后的对象访问技术为Java/CORBA。今后一个时期，在ObjectWeb领域占主导地位的技术将是ActiveX/DCOM和Java/CORBA。ActiveX/DCOM的应用丰富，占据了PC用户的绝对优势，一旦大力投入ObjectWeb的开发，市场优势不可阻挡。Java/CORBA的技术优于ActiveX/DCOM，发展势头和潜力不可低估。也许，在ObjectWeb领域ActiveX/DCOM与Java/CORBA的关系会像操作系统领域NT与Unix的关系一样。发展Java/CORBA的当务之急是应用开发，把握未来的最好办法是创造未来 
+5.2.3 三种主流技术比较 
+1．CORBA 
+CORBA有几个基本的优点：与开发语言无关的独立性，与开发者无关的独立性和与操作系统无关的独立性。CORBA的ORB在当前每一种主流操作系统上均有实现（仅就Microsoft的各种操作系统来说，CORBA获得的支持甚至超越了DCOM）。除此之外，CORBAORB可以访问多种语言实现的对象（包括C++、COBOL、Smalltalk和Java）。借助于IIOP，某一开发者（比如说Visigenic）开发的CORBAORB能够获取，操作远程的由其他的开发者（比如说IONA）开发的对象。JavaORB允许客户端在没有安装任何特别软件的情况下实现Java客户端应用程序。（JavaORB的类可与小应用一起动态下载，也可能与浏览器捆绑在一起。） 
+2．DCOM:Microsoft的法宝 
+目前，Microsoft的分布式组件对象模型（Distributed Componont Object Model）仅运行于两种操作系统之上：Windows95和WindowsNT4。Microsoft正在与第三方开发商协作，以将DCOM移到其它的操作系统上（包括MVS和几种UNIX操作系统）。象CORBA一样，DCOM是独立于语言的，它用Microsoft的对象描述语言（ODL）通过接口对对象加以描述。 
+与CORBA相比，DCOM有三个缺点。首先，它由单一开发者（微软）定义并控制，这大大限制了DCOM使用者的选择范围（比方说开发工具和风格）。其次，DCOM缺乏众多的平台支持，这极大程度地制约了代码的可重用性和DCOM应用的可扩展性。最后，与CORBA相比，DCOM是一种非常不成熟的技术。尽管微软目前正为DCOM加入消息和事务支持，但这些功能在1994年的CORBA2.0就已经实现了，并且正由几家不同的CORBA软件开发商所发行。 
+为了使一个Java的小应用/应用程序得以访问服务端的DCOM对象，开发者不得不使用IE浏览器和Windows95/NT平台，只有这样才能支持客户机软件。这样的限制当然削弱了应用程序在Web上的可用性。而另一方面，DCOM的一个优势在于，对WindowsNT/95用户免费。过去的历史已经表明，这是与Microsoft竞争的重大障碍。 
+3．RMI：Sun的Java-Only解决方案 
+Remote Method Invocation是最新的JDK1.1中的重要特色。RMI使得Java客户能够访问远程服务对象。这听起来似乎十分类似于CORBA，但两者并不一样。其关键在于服务器端的应用程序也必须用Java编写，且只能使用JDK1.1中提供的工具。你根本无法把过去编制的代码加到新程序中去，除此之外，RMI还有许多其它缺陷。 
+与CORBA不同，RMI没有服务这一概念。另外，根据RMI写出的Java服务器对象往往性能低劣，这个缺点源于Java虚拟机。（有趣的是，JavaCORBA服务器比RMI服务器表现出更好的性能。）RMI也不包括象CORBAORB那样的对象击活功能。 
+实际上，RMI及Java技术更可能向OMG的标准靠拢，而不是背道而驰。Sun已经宣布，Java事务服务（JavaTransactionServeces）将建立在OMG的对象事务服务（ObjectTransactionServeces）。该公司还曾发布其长远计划：使RMI对象可以通过IIOP互通讯。 
+总而言之，RMI对于用纯Java书写的小规模的应用程序来说，是一种可行方案。但CORBA提供了集成的基础，这种集成是指新开发的代码和已有对象的集成，同时允许将来加以扩展。在做出取此舍彼的选择之前，必须权衡上面的各种因素，并仔细审视每种技术的现状。 
+

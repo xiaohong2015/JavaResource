@@ -1,0 +1,29 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:23:22
+Windows NT 4.0，Windows 2000 professional,windows 2000 server 
+jdk1_2_2-001-win.exe 
+tomcat.zip(3.0) 
+
+一、软件下载 
+　　JDK 
+　　　　http://java.sun.com/products/jdk/1.2/ 
+　　Tomcat 
+　　　　http://jakarta.apache.org/builds/tomcat/release/v3.0/tomcat.zip 
+
+二、软件安装 
+　　（一）JDK 
+　　　　1、双击jdk1_2_2-001-win.exe文件进行安装，使用缺省配置进行安装，JDK的缺省安装目录为 
+　　　　　 C:\jdk1.2.2，JRE的缺省安装目录为C:\Program Files\JavaSoft\JRE\1.2； 
+　　　　2、重启计算机； 
+　　　　3、更新下列环境变量：把C:\jdk1.2.2\bin目录追加到PATH中；把 
+　　　　　 .;C:\jdk1.2.2\lib\tools.jar;C:\jdk1.2.2\lib\dt.jar加入到CLASSPATH中。更新 
+　　　　　 方法：控制面板－＞系统－＞环境－＞系统变量； 
+　　（二）Tomcat 
+　　　　1、用WinZIP等解压缩软件把tomcat.zip解压缩到一个目录下，我把它解压缩到C:\，它会自动 
+　　　　　 创建tomcat子目录，这样在C盘就多了一个目录C:/tomcat，我用$TOMCAT标识； 
+　　　　3、修改Tomcat运行的端口号，注意Tomcat自己有一个独立的HTTP服务器，它必须使用一个还未被使用的端口号，我这里的8081还未被占用，我用$TOMCAT_PORT标识，分配给Tomcat： 
+　　　　　 　　1)打开$TOMCAT/server.xml； 
+　　　　　 　　2)修改ContextManager： 
+　　　　4、双击$TOMCAT目录下的startup.bat来启动Tomcat； 
+　　　　5、在浏览器上输入http://localhost:$TOMCAT_PORT/，能看到Tomcat Version 3.0这一页就表示Tomcat安装成功了；

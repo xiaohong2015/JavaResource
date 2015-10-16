@@ -1,0 +1,12 @@
+作者：freehero
+email: jdxmoon@163.net
+日期：2000-11-29 14:34:46
+1。到www.inetsoftware.de download  Opta2000.zip  ,zip以后一个.jar文件和几个.java的测试例子。同时有一个xa目录，是j2ee的例子。
+2.配置default.proprtise文件
+2。cd  xa
+3.javac -c %j2ee_classpath%;Opta2000.jar  EJB  HOme  Interface  
+4.deploy   it
+5.mk  client
+6.run client
+
+详细的步骤在  inetsoftware.de  上有（j2se的配置）

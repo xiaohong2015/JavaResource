@@ -1,0 +1,32 @@
+作者：87zd
+email: jspsky@8848.net
+日期：2001-5-6 16:26:05
+--------------------------------------------------------------------------------
+　　IIS WEB以其管理操作简单和对ASP的支持而受不少人的喜欢。这里介绍怎么用resin使IIS支持jsp和servlet。
+　　一、分别安装配置iis和resin1.1使各自都单独能正常运行。iis和resin1.1的安装后路径如下：c:\apache 和 c:\resin1.1。
+　　二、配置IIS
+　　　　1.拷贝iis_srun.dll 到IIS scripts目录"c:\inetpub\scripts"; 
+　　　　2.在c:\inetpub\scripts目录下创建配置文件(resin.ini)用于指定resin的配置文件的位置。
+　　　　　resin.ini内容如下：
+
+　　　　　　　 CauchoConfigFile c:/resin1.1/conf/resin.conf
+　　三、配置resin
+　　　　<caucho.com>
+　　　　<http-server app-dir='C:\Inetpub\wwwroot'>
+　　　　<servlet-mapping rl-pattern='/servlets/*' servlet-name='invoker'/>
+　　　　<servlet-mapping rl-pattern='*.xtp' ervlet-name='com.caucho.jsp.XtpServlet'/>
+　　　　<servlet-mapping rl-pattern='*.jsp' servlet-name='com.caucho.jsp.JspServlet'/>
+　　　　</http-server>
+　　　　</caucho.com>
+　　四、测试
+　　　　1、 运行IIS,启动resin的jsp引擎（运行c:\resin1.1\bin\srun.exe）
+　　　　2、 把一个jsp文件(test.jsp )放入IIS的C:\Inetpub\wwwroot目录下.
+　　　　test.jsp如下：
+　　　　　<%@ page language=java?>
+　　　　　2+2=<%=2+2%> 
+
+浏览http://localhost：port/test.jsp。你将看到：2+2=4<——这个结果
+
+注：port为端口号，调试环境nt4.0+iis+resin1.1 
+ 
+

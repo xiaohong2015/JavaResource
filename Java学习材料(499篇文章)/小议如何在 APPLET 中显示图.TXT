@@ -1,0 +1,71 @@
+作者：jeru
+日期：2000-12-20 12:58:02
+小议如何在 Applet 中显示图象
+
+*************************************************************
+**                                        **
+** 作者：刘湛        一天进步一小步             **
+** 日期：2000-12-19        ==============              ** 
+** jeru@163.net        充实我的每一天             **
+**                          **
+*************************************************************
+
+一。在 Applet 中显示图象需要引入以下包,并调用ImageObserver接口.：
+import java.awt.image.*; 
+import java.awt.image.ImageObserver; 
+import java.net.URL; 
+
+public class MyApplet extends Applet implements ImageObserver { ...
+
+二。定义图象路径
+URL imgURL = getDocumentBase()；
+将路径设为和你的html文件在相同。
+URL imgUrl = getClassBase()；
+将路径设为和你的html文件在相同。
+
+三。获取图象
+img = getImage(imgURL,imgName); 
+当然，有可能你想将自己的图象文件放到一个目录里去，那么你可以这样做
+img = getImage(imgURL, "img" + imgName);
+
+四。显示图象
+最基本方法是调用 drawImage(),这个方法在Graphics类中有定义,最简单的调用形式如下：
+g.drawImage(image, xPosition, yPosition, this);
+最后一个参数呼叫了ImageObserver. 
+
+五，最后的补充
+以上所说的都是最基本的，当然有时候你甚至想把你的图象文件打成jar包，这时，你就需要用到
+getResourceAsStream() 方法了。
+InputStream in = getClass().getResourceAsStream("image.gif");
+byte buffer[] = new byte[in.available()];
+for (int i = 0; n = in.available(); i < n; i ++)
+  buffer[i] = (byte)in.read();
+Image img = createImage(buffer);
+
+六。 一个完整的小实例
+
+import java.awt.*; 
+import java.applet.*; 
+import java.awt.image.*; 
+import java.awt.image.ImageObserver; 
+import java.net.URL; 
+
+//使用ImageObserver接口
+public class MyApplet extends Applet implements ImageObserver{
+  Image img;   
+  String imgPath = "";
+  int xpoint = 100, ypoint = 100;
+      
+  public void init() {        
+    setBackground(Color.white); //设置背景色
+    setForeground(Color.blue); //设置前景色
+    imgPath = "img/" + "test.gif"; //设置图象文件路径 
+  } 
+  
+  public void paint(Graphics g) {
+    URL imgURL = getDocumentBase(); 
+    img = getImage(imgURL, imgPath);     
+    g.drawImage(img,xpoint,ypoint,this);        
+  }
+}
+

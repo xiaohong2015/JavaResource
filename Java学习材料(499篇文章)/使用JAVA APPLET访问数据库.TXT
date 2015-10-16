@@ -1,0 +1,190 @@
+作者：wflm
+日期：2001-6-5 14:28:58
+使用Java Applet访问数据库
+
+    学习任何的程序语言，当然都得与数据库，Java刚刚诞生的时候，对数据库的支持并不是很好，经过这几年的发展，它对数据库的支持也已经完全达到了成熟的境地。由于这里主要是介绍Java Applet小程序， 因此，不可能用大的篇幅去给大家介绍数据库的知识了，怎么样去建立与设计数据库，还是请大家自己找点书看看吧！这儿，对不住了。
+
+    我们这儿以Microsoft Access数据库为例子来说明怎么实现一个数据库的打开与读取的知识。
+
+第一步：
+    使用Microsoft Access创建一个数据库,也就是我的这个例子要用到的，内容就随便了。
+
+第二步：也就是编程序了。
+
+1)定义变量，变量的定义如下： 
+
+  TextArea theVisits=new TextArea (6,80);   
+                              //显示数据库的内容 
+  TextField theStatus=new TextField ("",80); 
+                            //显示打开数据库的信息。相当于程序的状态栏 
+  Connection theConnection; //数据库的连接方法 
+  Statement theStatement;   //代表一个发送到数据库来执行的数据库命令 
+  ResultSet theResult;         //读取的数据结果，也就是数据库返回的结果 
+  ResultSetMetaData theMetaData; 
+                        //包含了有关数据库命令执行后 返回结果的有用信息。 
+  String theDataSource; //包含了被访问数据库或者数据源的名称，用URL形式表示 .
+  String theUser;           //数据库的用户名 
+  String thePassword;      //数据库的密码 
+2)实现界面，可以用开始时给大家介绍的方法来实现，界面的实现相对来说，
+
+比较的简单了，如下：
+
+public void init() 
+  {
+ 	 add(theVisits); 
+	  add(theStatus);
+	  theVisits.setEditable (false);   //设置文本区域不可以被用户写入
+	  theStatus.setEditable (false);   //设置文本区域不可以被用户写入
+	  openConnection();                //打开数据库的连接
+	  execSqlCommand("select * from MyTable");  //从数据库中读取内容
+	  closeConnection();               //关闭已经打开的数据库
+    }
+3)打开某个数据库的连接
+
+public void openConnection()
+	{
+	theDataSource="jdbc:odbc:MyAccess";
+	theUser="";
+	thePassword="";
+	try
+	{
+	Class.forName("Sun.jdbc.odbc.JdbcOdbcDriver");
+theConnection=DriverManager.getConnection(theDataSource,theUser,thePassword);
+		theStatus.setText("Status:OK");
+	}
+	catch (Exception e)
+		{
+		handleException(e);
+		}
+	}
+
+     包含数据源名称的字符串格式为一个特殊的语句：
+
+jdbc:<subpotocol>:<subname>
+
+     协议 名jdbc必须提供，子协议和子名称根据使用数据源类型而变化。
+JDBC DriverManager使用子协议来选择书记源响应的驱动程序。子协议
+的通常值为“odbc”和“oracle“，子名称包含了该驱动程序使用的附加
+信息。通常情况，该子名称是某个网络名称，例如，用于其它Web服务：
+
+jdba:<subpotocol>://<host.domin><port>/<databasename>
+
+    驱动程序的说明应该指定子协议和子名称的正确形式。使用ODBC时，主机
+和端口信息没有必要提供，因为数据源总是配置在本地主机上。用于ODBC数据源的形式是 
+
+jdbc:odbc:<data source name>
+
+    为了打开数据库连接，用户必须使用具体的驱动程序另外，驱动程序应该指
+定如何这样做。如果正在使用JDBC-ODBC桥程序，那么可以通过使用名为Class类
+的forName()方法来使用具体的JDBC-ODBC桥驱动程序。
+
+class.forName("sun.jdbc.JdbcOdbcDriver");
+
+    然后，拥护可以告诉rManager打开数据源的连接，使用下列方法：
+
+theConnection=DriverManager.getConnection(theDataSource,theUser,thePassword);
+
+    getConnection()方法返回一个Connection对象，用户应该保存这个对象，
+因为它是访问数据源的方法。这里，该对象保存到名为theConnection的字段中。
+
+    如果在打开连接过程中出现错误，则SQLexception作废，通过在try-catch
+块内打开连接的语句，拥护可以处理这种异常。通过使用后面要讲的handleException()，
+在TextField内显示一个简短的相应信息。 
+
+4)执行SQL命令
+
+public void execSQLCommand(String command)
+{
+	try{
+		theStatement=theConnection.createStatement();
+		theResult=theStatement.executeQuery (command);
+		theMetaData=theResult.getMetaData ();
+		int columnCount=theMetaData.getColumnCount ();
+		theVisits.setText("");
+		while(theResult.next ())
+		{
+			for(int i =1;i<=columnCount;i++)
+			{
+				String colValue=theResult.getString(i);
+				if(colValue==null)colValue="";
+				theVisits.append (colValue+";");
+			}
+			theVisits.append ("\n");
+		}
+	}catch(Exception e)
+	{
+		handleException(e);
+	}
+}
+    为了执行该命令，程序使用Connection对象的createStatement()方法创建
+一个可以有查询的Statement。然后，它激活Statement对象的executiveQuery()
+方法，用来传递包含SQL查询语句的字符串。从init()中传送过来的参数——
+Slect * from MyTable是一个简单的数据库查询语言，如果你还不知道什么意思，
+那么请你还是查看一本有关数据库的书吧，这些内容很多，不是我这儿一下子能说
+清楚的了。它的意思简单的说，就是查找表——MyTable中的所有（*）信息。它会
+返回数据库中的所有内容，并把它作为ResultSet访问的结果。接着该程序激活ResultSet
+对象的getMetaData()方法。这时，返回一个ResultSetMetaData值，该值存储在
+一个称为theMetaData的变量中。使用ResultSetMetaData对象，可以获得很多有用的
+数据；这里该程序使用getColumnCount()方法获得结果表中列的数量。最后，该程序反
+复使用该结果表，激活theResult的next()方法获得结果表中的每一条记录，只到该方法
+使用完全部记录返回flase为止。
+
+5)关闭数据库连接
+
+public void closeConnection()
+	{
+	try{
+		theConnection.close ();
+		}
+		catch(Exception e)
+		{
+		handleException(e);
+		}
+	}
+    当用户访问完某个数据库时，应该关闭数据库连接，释放与连接有关的资源。用户创建
+的任何打开的ResultSet或者Statement对象将 自动关闭。另外，在关闭连接时可能发
+生一个SQLException，也放到后面处理。
+
+6)处理异常和错误
+
+public void handleException(Exception e)
+	{
+	theStatus.setText("Error:"+e.getMessage ());
+	e.printStackTrace ();
+	if(e instanceof SQLException)
+		{
+		while((e=((SQLException)e).getNextException ())!=null)
+		 {
+				System.out.println(e);
+			}
+		}
+	}
+    handleException()方法用来处理以上的错误和异常。该方法设置状态TextField包含与
+异常有关的错误消息，使用getMessage()方法获得该消息。它还可以在System.out打印
+堆栈轨迹。 
+
+三 安装ODBC数据源
+
+为了运行这个应用程序，用户必须 首先创建一个与MyTable数据库相对应的 ODBC数据源。
+为了通过ODBC使用Access,用户必须安装Access Odbc驱动程序。如果用户没有安装该驱动
+程序，那么还是先安装吧，什么，不会，不会也不行了，找一本书好好看看吧，这是肯定要
+看的。我这儿简单的给你说一下吧：
+
+1.从控制面板中选择ODBC-32，双击（要是没有这个图标，那我真的没有办法了，它在安装
+数据库的时候，应该会安装上的，否则就只能找一张数据库系统的安装盘，找到ODBC驱动程
+序进行安装）。
+
+2.单击添加，选择Microsoft Access Driver。（如果这个图标也没有，那么你的机器是严
+重缺乏营养，赶紧装数据库必须的软件，先装Access，这儿要用）
+
+3.输入你要使用的数据源的名称（如果没有，那就得先创建，我这儿就不说Access的使用方
+法了）。描述就随便你了。
+
+4.单击选择按钮选择你已经创建好了的Access数据库的文件。
+
+5.点确定就可以了。如果你想为你数据库保密的话，可以加上用户名和密码。（在高级选项里面）。
+
+        要说明一点的是，如果你用VJ++编辑的此程序，要是运行不了，那就是数据库的连接没有设
+置好，怎么将数据库设计好，以后再说吧。另外，VJ++有它自己的数据库驱动程序。很适合与
+VJ++一起使用，可惜介绍这方面的书好象不是很多。
+

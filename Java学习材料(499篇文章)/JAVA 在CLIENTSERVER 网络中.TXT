@@ -1,0 +1,417 @@
+作者：asp2001
+email: asp2001@163.net
+日期：2000-8-12 9:40:07
+Java 在Client/Server 网络中的应用 
+（作者：　2000年08月09日 10:19）
+
+　　随着Java语言的日益流行，特别是Java与Internet Web的密切结合，使它在全球取得了巨大的成功。Java语言以其独立于平台、面向对象、分布式、多线索及完善的安全机制等特色，成为现代信息系统建设中的良好的开发平台和运行环境。 
+
+
+
+一、Java网络应用模型 
+
+　　和Internet上的许多环境一样，完整的Java应用环境实际上也是一个客户机/服务器环境，更确切地说是浏览器/服务器模型（即Browser/Server模型，简称Web模型）。但与传统的客户机/服务器(C/S) 的二层结构不同，应用Java的Web模型是由三层结构组成的。传统的C/S结构通过消息传递机制，由客户端发出请求给服务器，服务器进行相应处理后经传递机制送回客户端。而在Web模型中，服务器一端被分解成两部分：一部分是应用服务器(Web 服务器)，另一部分是数据库服务器。 
+
+　　针对分布式计算环境，Java通过其网络类库提供了良好的支持。对数据分布，Java提供了一个URL(Uniform Resource Locator) 对象， 利用此对象可打开并访问网络上的对象，其访问方式与访问本地文件系统几乎完全相同。对操作分布，Java的客户机/ 服务器模式可以把运算从服务器分散到客户一端（服务器负责提供查询结果，客户机负责组织结果的显示），从而提高整个系统的执行效率，增加动态可扩充性。Java网络类库是Java 语言为适应Internet 环境而进行的扩展。另外，为适应Internet的不断发展，Java还提供了动态扩充协议，以不断扩充Java网络类库。 
+
+　　Java的网络类库支持多种Internet协议，包括Telnet, FTP 和HTTP (WWW)，与此相对应的Java网络类库的子类库为： 
+
+Java.net 
+
+Java.net.ftp 
+
+Java.net.www.content 
+
+Java.net.www.html 
+
+Java.net.www.http 
+
+　　这些子类库各自容纳了可用于处理Internet协议的类和方法。其中，java.net用于处理一些基本的网络功能，包括远程登录(Telnet)；java.net.ftp用于处理ftp协议；java.net.www.content用于处理WWW 页面内容；java.net.www.html 和java.net.www.http 则分别提供了对HTML 语言和HTTP 协议的支持。 
+
+
+
+二、客户机/服务器环境下的Java应用程序 
+
+客户机/服务器在分布处理过程中，使用基于连接的网络通信模式。该通信模式首先在客户机和服务器之间定义一套通信协议，并创建一Socket类，利用这个类建立一条可靠的链接；然后，客户机/服务器再在这条链接上可靠地传输数据。客户机发出请求，服务器监听来自客户机的请求，并为客户机提供响应服务。这就是典型的"请求-- 应答" 模式。下面是客户机/服务器的一个典型运作过程： 
+
+1、服务器监听相应端口的输入； 
+
+2、客户机发出一个请求； 
+
+3、服务器接收到此请求； 
+
+4、服务器处理这个请求，并把结果返回给客户机； 
+
+5、重复上述过程，直至完成一次会话过程。 
+
+　　按照以上过程，我们使用Java语言编写一个分别针对服务器和客户机的应用程序（Application）。该程序在服务器上时，程序负责监听客户机请求，为每个客户机请求建立Socket 连接，从而为客户机提供服务。本程序提供的服务为：读取来自客户机的一行文本，反转该文本，并把它发回给客户机。 
+
+　　通过该程序实例我们看到，使用Java语言设计C/S程序时需要注意以下几点： 
+
+（1）、 服务器应使用ServerSocket 类来处理客户机的连接请求。当客户机连接到服务器所监听的端口时，ServerSocket将分配一新的Socket 对象。这个新的Socket 对象将连接到一些新端口，负责处理与之相对应客户机的通信。然后，服务器继续监听ServerSocket，处理新的客户机连接。 
+
+　　Socket 和ServerSocket 是Java网络类库提供的两个类。 
+
+（2）、服务器使用了多线程机制。Server对象本身就是一个线程，它的run()方法是一个无限循环，用以监听来自客户机的连接。每当有一个新的客户机连接时，ServerSocket就会创建一个新的Socket类实例，同时服务器也将创建一新线程，即一个Connection 对象，以处理基于Socket 的通信。与客户机的所有通信均由这个Connection 对象处理。Connection的构造函数将初始化基于Socket 对象的通信流，并启动线程的运行。与客户机 的通信以及服务的提供，均由Connection对象处理。 
+
+（3）、客户机首先创建一Socket对象，用以与服务器通信。之后需创建两个对象：DataInputStream 和PrintStream，前者用以从Socket 的InputStream 输入流中读取数据，后者则用于往Socket的OutputStream 中写数据。最后，客户机程序从标准输入（如：控制台）中读取数据，并把这些数据写到服务器，在从服务器读取应答消息，然后把这些应答消息写到准输出。 
+
+　　以下分别为服务器和客户机端的源程序清单。本程序在NT 4.0 网络环境（TCP/IP）下使用JDK1.1 调试通过。 
+
+
+
+三、编写服务器类Java程序 
+
+// Server.java 
+
+import java.io.*; 
+
+import java.net.*; 
+
+public class Server extends Thread 
+
+{ 
+
+　　　　public final static int Default_Port=6543; 
+
+　　　　protectd int port; 
+
+　　　　protectd ServerSockt listen_socket; 
+
+// 定义出错例程：如果出现异常错误，退出程序。 
+
+Public static void fail(Exception e, String msg) 
+
+{ 
+
+　　　　System.err.println(msg + ": " + e); 
+
+　　　　System.exit(1); 
+
+} 
+
+// 定义并启动服务器的Socket 例程，监听客户机的连接请求。 
+
+public Server(int port) 
+
+{ 
+
+if(port == 0) port = Default_Port; 
+
+this.port = port; 
+
+try 
+
+{ 
+
+listen_socket = new ServerSocket(port); 
+
+} 
+
+catch(IOException e) fail(e, "Exception creating server socket"); 
+
+System.out.println("Server: listening on port" + port); 
+
+This.start(); 
+
+} 
+
+/* 下面为服务器监听线程的主程序。该线程一直循环执行，监听并接受客户机发出的连接 
+
+请求。对每一个连接，均产生一个连接对象与之对应，通过Socket 通道进行通信。*/ 
+
+public void run() 
+
+{ 
+
+try 
+
+　　　　{ 
+
+while(true) 
+
+{ 
+
+　　　　Socket client_socket = listen_socket.accept(); 
+
+　　　　Connection c = new Connection(client_socket); 
+
+　　　　　　　　　　　　} 
+
+} 
+
+catch(IOException e) fail(e,"Exception while listening for connections") 
+
+} 
+
+// 启动服务器主程序 
+
+public static void main(String args[]) 
+
+{ 
+
+　　　　int port = 0; 
+
+　　　　if (args.length == 1) 
+
+　　　　{ 
+
+　　　　try port = Integer.parseInt(args[0]); 
+
+　　　　catch(NumberFormatException e) port = 0; 
+
+} 
+
+new Server(port); 
+
+}　　　　　　　　　　　　　　　　　　　　　　 // End of the main 
+
+}　　　　　　　　　　　　　　　　　　 // End of Server class 
+
+//以下定义了Connection 类，它是用来处理与客户机的所有通信的线程。 
+
+class Connection extends Thread 
+
+{ 
+
+protected Socket client; 
+
+　　　　protected DataInputStream in; 
+
+　　　　　　　　protected PrintStream out; 
+
+// 初始化通信流并启动线程 
+
+public Connection(Socket client_socket) 
+
+{ 
+
+　　　　　　　　client = client_socket; 
+
+　　　　try 
+
+　　　　　　　　{ 
+
+　　　　　　　　　　　　in = new DataInputStream(client.getinputStream()); 
+
+　　　　　　　　out = new PrintStream(client.getOutputStream()); 
+
+} 
+
+catch(IOException e) 
+
+　　　　{ 
+
+　　　　try client.close(); 
+
+　　　　　　　　catch(IOException e2); 
+
+　　　　System.err.println("Exception while getting socket streram: " + e); 
+
+Return; 
+
+} 
+
+this.start; 
+
+}　　　　　　　　　　　　　　　　　　 // End of Connection method 
+
+// 服务例程：读出一行文本；反转文本；返回文本。 
+
+public void run() 
+
+{ 
+
+　　　　　　　　String line; 
+
+　　　　StringBuffer revline; 
+
+int len; 
+
+　　　　try 
+
+{ 
+
+　　　　　　　　for(;;) 
+
+{ 
+
+　　　　　　　　　　　　// Read a line 
+
+　　　　　　　　　　　　　　　　line = in.readline(); 
+
+　　　　　　　　　　　　　　　　　　　　if(line == null) break; 
+
+　　　　　　　　// Reverse the line 
+
+　　　　　　　　　　　　　　　　len = line.length(); 
+
+　　　　　　　　　　　　　　　　revline = new StringBuffer(len); 
+
+　　　　　　　　for(int i = len-1; i >=0; i--) 
+
+　　　　　　　　revline.insert(len-1-I;line.charAt(i)); 
+
+　　　　　　　　　　 // Write out the reverse line 
+
+　　　　　　　　out.println(revline); 
+
+　　　　　　　　　　　　} 
+
+catch(IOException e); 
+
+finally try client.close(); 
+
+catch(IOException e2); 
+
+} 
+
+// End of run method 
+
+} 
+
+// End of Connection class 
+
+3、编写客户机类Java 程序 
+
+// Client.java 
+
+import java.io.*; 
+
+import java.net.*; 
+
+public class Client extends 
+
+{ 
+
+　　　　public static final int Default_Port = 6543; 
+
+// 定义出错例程 
+
+　　　　public static final void usage() 
+
+　　　　{ 
+
+　　　　System.out.println("Usage: Java Client []"); 
+
+　　　　　　　　System.exit(0); 
+
+} 
+
+　　　　public static void main(String args[]) 
+
+{ 
+
+　　　　int port = Default_Port; 
+
+Socket s = null; 
+
+// 解析端口参数 
+
+if ((args.length != 1)&&(args.length != 2 )) usage(); 
+
+if (args.length == 1) 
+
+　　　　port = Default_Port; 
+
+else 
+
+{ 
+
+　　　　try port = Integer.parseInt(args[1]); 
+
+　　　　catch(NumberFormaatException e) usage(); 
+
+} 
+
+try{ 
+
+　　　　// 产生一个Socket ，通过指定的端口与主机通信。 
+
+　　　　s = new Socket(args[0], port); 
+
+// 产生用于发出和接收的文本字符流 
+
+DataInputStream sin = new DataInputStream(s.getInputStream()); 
+
+PrintStream sout = new DataInputStream(s.getInputStream()); 
+
+// 从控制台读入字符流 
+
+DataInputStream in = new DataInputStream(System.in); 
+
+　　　　// 返回连接的地址和端口 
+
+System.out.println("Connected to"+s.getInetAddress()+":"+ s.getPort()); 
+
+　　　　String line; 
+
+　　　　For(;;) 
+
+　　　　{ 
+
+　　　　　　　　// 显示提示符 
+
+　　　　　　　　System.out.print(" >"); 
+
+　　　　　　　　System.out.flush(); 
+
+　　　　　　　　// 读入控制台输入的一行字符 
+
+　　　　　　　　line = in.readline(); 
+
+　　　　　　　　if (line == null) break; 
+
+　　　　　　　　// 将接收的文本行送至服务器 
+
+　　　　　　　　sout.println(line); 
+
+　　　　　　　　// 从服务器接收一行字符 
+
+　　　　　　　　line = sin.readline(); 
+
+　　　　　　　　// Check if connection is closed(i.e. for EOF) 
+
+　　　　　　　　if(line == null) 
+
+　　　　　　　　{ 
+
+　　　　　　　　　　　　System.out.println("Connection closed by server."); 
+
+　　　　　　　　　　　　Break; 
+
+} 
+
+　　　　// 在控制台上显示接收的字符 
+
+　　　　System.out.println(line); 
+
+} 
+
+// End of for loop 
+
+} 
+
+/ End of try 
+
+catch(IOException e ) System.err.println(e); 
+
+// Always be sure to close the socket 
+
+finally 
+
+{ 
+
+　　　　try if(s != null) s.close(); 
+
+　　　　catch(IOException e2); 
+
+} 
+
+}　　　　　　　　　　　　　　　　　　　　　　 // End of main 
+
+}　　　　　　　　　　　　　　 // End of Client 
+
+运行该客户机程序时，必须以服务器主机名作为第一个参数，服务器端口号为第二个参数， 
+
+其中服务器端口号可缺省。 

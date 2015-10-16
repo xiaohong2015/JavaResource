@@ -1,0 +1,286 @@
+作者：sure160
+email: sure160@china.com
+日期：6/13/2001 12:46:36 PM
+简介：本文探讨了关系数据库中的实体对象在面向对象语言中如何抽象、实现，并提出一种实现方案。
+一、为什么要使用实体对象的概念 
+实体对象指的是可永久存储的数据对象，通常可以用关系数据库的一张数据表或一张主表和与之连接的几张子表来表示。为什么要引入实体对象的概念呢？我可以肯定您是看过关于面向对象优点的长篇大论的，不过我觉得有必要再唠叨两句，因为不是所有用C++或JAVA编程的人都是使用面向对象的方式想问题的。 
+
+在现实世界中，对象比它的属性要稳定，所以数据要抽象成对象。比如由于需求的修改，一个图书管理系统要显示更多的书目详细信息，图书的属性发生了变化，而图书这个对象并没有变，和其他对象（例如书架、借阅者）之间的关系也没有变。用一个数据对象来保存书目信息的程序修改起来要简单的多。 
+把实体对象如何永久储存的方法封装到对象中可以实现使用对象的外部程序的与数据库无关，便于程序的移植。 
+在程序设计中使用实体对象概念把面向对象分析、面向对象设计、面向对象编码着几个步骤连贯和一致。 
+可以减少外部程序中复杂性，使用这些实体对象的程序只需要简单的调用insert()或update()的方法，而不用去写讨厌的SQL语句。
+
+但是，由于历史原因，即使象Java这样的新兴语言，也没有在所有地方完全利用面向对象的思想。让我们看看JDBC吧，这是一个号称用对象封装的数据库接口。可是它封装的是什么呢？连接、语句、结果集和存储过程。这其实并不是我们设计系统所关心的东西，我们关心的是数据对象本身，而不是它从数据库中提取的方法。当然，JDBC本身也不该受到太多的指责，因为他本来的目标就是封装、屏蔽关系型数据库之间的差异，而不是企图实现一个面向对象的数据库。
+
+EJB第一次引起我的注意就是因为它提出的Entity Bean，也就是实体对象。它对实体对象提供了一套完整的实现思路，但是我认为它太复杂了，主要原因是EJB想要做的事太多了。大部分情况下我并不需要分布式处理，我也不需要把实体对象存储到文件中去。我需要的仅仅是在一个本地运行的基于数据库的程序。
+
+二、EJB如何实现的实体对象 
+刚才提到了EJB已经实现了实体对象，那么让我们看看它是如何实现的。EJB中Entity Bean的对象实际上是对数据对象的一种完美的抽象，在这里我们几乎看不到数据库管理系统的作用。一个实体对象有几种状态，在内存中、在磁盘缓存中、或者在数据库中，实体对象的这些状态通常我们是不关心的，EJB的容器在必要的情况下会自动转换对象的状态，也就是说自动把它存到数据库中，或从数据库中取出。我们要访问一个数据对象，要向一个对象容器提出申请，由它返回一个对象实例供我们使用。一个Entity Bean对应于数据表中的一行。如果我们访问的是同一行数据，对象容器返回的是不同的对象，但都指向同一个Entity Bean，并把我们所有的方法请求都发送给这个Entity Bean。实际上EntityBean的容器基本实现了一个面向对象的数据库。它这种实现方法带来几个显著的问题： 
+
+运行效率非常低。JAVA的速度慢是个老问题了，EJB的速度慢不光是因为大量代码用JAVA实现，而且由于它的结构，要根据数据表中的某一个属性查出一行数据，必须首先用SQL查询查找到这一行的主键（Primary Key），然后通过主键来找到这个Bean，如果这个Bean不在内存中--很不幸，这种情况经常发生，那么实际上是执行了两次SQL查询才找到一行数据。 
+容器本身要管理事务，以防数据的污读、污写、死锁等等一系列问题。本来DBMS管理这类问题已经有很多年经验了，已经相当完美的解决了这些问题，可是EJB不得不通过一个Transcation Server来管理这些问题。这使得容器的代码变得极其复杂，另外编程人员也不得不重新熟悉这些接口。 
+由于bean 中的数据是否存储在数据库里是由容器管理的，那么其他程序访问数据库会带来数据同步的问题。因此，在EJB架构中，外部程序不能直接访问数据库，只能通过EJB访问。
+
+三、我们实现的目标 
+我们只想把数据库对象更好的封装起来，为什么要购买别人昂贵的代码？为什么要为我们不会用到的分布式去牺牲大量的性能。我们想要尽量使用DBMS的功能，以实现最佳的性能和最简化的代码。
+
+事务处理最好还是用DBMS来管理，因为它一向管得很好，而且事务处理的代码很复杂，我不打算自己来完成。
+
+我不打算用同一个对象来指向数据库的一行。数据库的一行数据在程序中可能有多个对象，这些对象都应该是临时对象，而不是永久对象。他们的共享问题由DBMS本身加锁来解决。
+
+由于我们只是为访问DBMS提供了一个接口，外部程序完全可以不通过这个接口来访问数据库。
+
+实现后，使用实体对象的代码要简单。例如，数据库里有一个表account，它只有两个字段accountid和name，我们把它作为一个实体对象Account，假设我们要完成从数据库查询、修改、插入，使用它的代码片段如下： 
+Connection conn=ConnectionPool.getConn(); //也可以通过标准的DriverManager得到数据库连接，这是完全一样的
+
+  Conn.setAutoCommit(false); //如果不使用事务，这一行可以省去
+
+Account a1=new Account(conn);
+
+a1.getByAccountId(1); //查找到相应记录
+
+System.out.println(a1.name);
+
+a1.getByAccountIdForUpdate(1); //如果企图修改一个对象，必须通过forUpdate系列的方法得到这个对象
+
+  a1.name="new name";
+
+  a1.update();  //修改原有记录
+
+Account a2=new Account(conn);
+
+a2.accountId=3;
+
+  a2.name="姚大";
+
+  a2.insert();  //插入一条新记录
+
+  conn.commit();
+ 
+
+
+实体对象的属性通过方法修改是比较理想的方式，如用getName()，setName()两个方法访问Name属性。这还可以解决属性之间相互关联的问题。例如，表中有一个地区代码和地区名称两个域，必须保持一致，这就可以考虑在属性设置方法中实现。在这里我们为了简单，直接通过属性修改，在一般情况下，我觉得也是可以接受到。
+
+有一点必须注意的就是多线程程序所带来的数据完整性问题。对于我们常使用的从数据库读取数据到对象中->修改对象属性->更新到数据库这个流程，非常容易出现数据完整性破坏问题。比如一个进程中甲对象读取数据后，另一个进程中乙对象又修改了同一数据，这时甲对象再次更新数据库会带来污写。解决的办法是对象增加一个方法给数据库的这条记录加锁。例如Account.getByAccountId函数改为Account.getByAccountIdForUpdate，这个函数中相应的sql语句（ORACLE数据库）改为"select AccountId,name from account where accountId=? for update"，这样数据取出后就自动加锁，这个锁将会在事务提交或回滚时释放。for update在SQLServer相应的语法为holdlock。
+
+说到数据库加锁的问题就不能不考虑到数据库死锁的可能。想完全避免死锁是很困难的，只有尽量降低这种可能性。方法是：1、尽量少使用forUpdate这种函数，只有在更改数据库数据时才使用。查询的时候不要用，如果查询后根据某个条件有可能修改，那么在查询时不加锁，在修改前重新调用forUpdate函数加锁。2、尽量以某个特定的顺序加锁。例如有表A和表B，两个程序都要同时更新这两个表，最好都是先访问表A，再访问表B。
+
+Oracle有个很好的功能就是自动检测死锁。如果发生死锁，会回滚一个事务，并返回一个SQL错误，我们的程序要检测这个异常，处理程序中可能的错误。
+
+上面说到的对象中，只有getByXXX（）这样的方法，这种方法只会返回唯一的对象，如果想要返回一组对象，这时需要一个辅助类来实现。这个辅助类称为对象浏览器EntityBrowser。再实体对象中返回一个对象浏览器的方法一般命名为getAllByXXX()
+
+使用对象浏览器EntityBrowser要列出所有account表中的id和name的代码如下，其实这个对象浏览器和Java定义的Enumeration接口的最大区别就是它有一个close方法。请看下面的代码片断，它输出所有的Accout对象。
+
+
+       Connection conn=ConnectionPool.getConn();
+
+       Account a1=new Account(conn);
+
+       EntityBrowser browser=a1.getAll();
+
+       System.out.println("==Account List==");
+
+       While (browser.hasMoreElement()) {
+
+              Account a=(Account)browser.nextElement();
+
+              System.out.print(a.accountId);
+
+              System.out.print("--");
+
+              System.out.println(a.name);
+
+       }
+
+       browser.close();
+ 
+
+
+以上就是我们要实现的实体对象，下面介绍如何编写一个实体对象。
+
+四、实现的代码解释 
+首先，下面的代码定义一个所有实体对象的基础类EntityObject，这是一个抽象类，不能直接使用，但为其它实体对象定出了一个结构。 
+Import java.sql.*;
+/**所有实体对象基础类*/
+abstract public class EntityObject {
+       protected java.sql.Connection _conn;
+       private boolean _dbStored;
+       /**实体对象需要用一个数据库连接初始化，这样可以利用这个连接做事务提交或回滚*/
+       public EntityObject(Connection conn) {_conn=conn;_dbStored=false;}
+
+       /**这个方法用来插入新记录，子类必须重定义这个方法*/
+       public void insert() throws SQLException{ _dbStored=true;}
+
+       /**这个方法用来修改数据库原有记录，子类必须重定义这个方法*/
+       public void update() throws SQLException {_dbStored=true; }
+
+	   /**这个方法用来删除数据库原有记录，子类必须重定义这个方法*/
+       public void delete() throws SQLException {_dbStored=false; }
+
+       /**这个方法用来把数据库select语句得出的结果映射到对象的属性中去，子类必须重定义这个方法*/
+       public void _setAttribute(ResultSet rs) throws SQLException {_dbStored=true; }
+
+       /**这个方法可以判断这个对象是否已存在数据库中*/
+       public boolean isDbStored() {return _dbStored;}
+       /**这个方法将实体对象设为不存在数据库中，所有的getByxxx()方法首先要调用这个方法，使本对象无效，才能用select语句得到符合条件的对象*/
+       public void clearDbStored() {_dbStored=false;}
+}
+
+
+ 
+
+
+下面我们就可以定义一个实际的实体类。考虑一种简单情况，实体对象在关系数据库中只用一张表表示。这样的实体对象定义最简单。例如，数据库里有一个表account，它只有两个字段accountid和name，下面定义它的实体类。实体类必须重载insert,update,_setAttribute方法，然后根据需要增加getByXXX()方法，根据某个属性从数据库查找一个对象。
+
+
+Import java.sql.*;
+public class Account extends EntityObject {
+/*这里定义实体对象类所有的属性*/
+       public int accountId;
+       public String name;
+//最好将实体对象中的属性全部定义成私有，然后定义getXXX(), setXXX()两个方法来访问这个属性，这样的封装性最好，但略过于麻烦。如果数据结构预料会经常修改，最好用这个办法。否则，定义成公有属性也可。
+       Public Account(Connection conn){ super(conn); }
+       //重定义这个方法，执行实际的sql命令
+public void insert() throws SQLException {
+              PreparedStatement ps=_conn.prepareStatement ("insert into account(accountid,name) values(?,?)");
+              ps.setInt (1,accountId);
+              ps.setString (2,name);
+              ps.execute();
+              ps.close();
+              super.insert();  //注意，重载insert方法必须要有这一句
+       }
+//重定义这个方法，执行实际的sql命令
+       public void update() throws SQLException {
+              PreparedStatement ps=_conn.prepareStatement ("update account set accountid=?, name=? Where accountid=?");
+              ps.setInt(1,accountId);
+              ps.setString(2,name);
+              ps.setInt(3,accountId);
+              ps.execute();
+              ps.close();
+              super.update();  //注意，重载update方法必须要有这一句
+       }
+//重定义这个方法，执行实际的sql命令
+       public void delete() throws SQLException {
+              if (isDbStored()) {
+                     PreparedStatement ps=_conn.prepareStatement("delete account where accountid = ? ");
+                     ps.setInt(1,accountId);
+                     ps.execute();
+                     ps.close();
+              }
+              super.delete();
+       }
+    //下面这个方法把一个ResultSet转换成对象中的属性，下面所有的getByXXX方法都会用到这个方法。
+       public void _setAttribute(java.sql.ResultSet rs) throws SQLException {
+               accountId=rs.getInt(1);
+               name=rs.getString(2);
+               super._setAttribute(rs);  //注意，重载_setAttribute方法必须要有这一句
+       }
+//根据条件取得对象
+       public boolean getByAccountId(int id) throws SQLException {
+              clearDbStored();
+              PreparedStatement ps=_conn.prepareStatement ("select AccountId,Name from account where AccountId=?");
+			 //这里的select语句得到的结果集必须与上面的_setAttribute方法假定的结果集一致
+        ps.setInt(1,id);
+              ResultSet rs=ps.executeQuery();
+              if (rs.next())
+                     _setAttribute(rs);
+              rs.close();
+              ps.close();
+              return (isDbStored());
+       }
+//根据条件取得对象并企图修改
+       public boolean getByAccountIdForUpdate(int id) throws SQLException {
+              clearDbStored();
+              PreparedStatement ps=_conn.prepareStatement ("select AccountId,Name from account where AccountId=? for update");
+        ps.setInt(1,id);
+              ResultSet rs=ps.executeQuery();
+              if (rs.next())
+                     _setAttribute(rs);
+              rs.close();
+              ps.close();
+              return (isDbStored());
+       }
+}
+
+ 
+
+
+上面说到的对象中，只有getByXXX（）这样的方法，这种方法只会返回唯一的对象，这时，也不用保存数据库结果集，如果出现返回一组对象的情况，就不能不保存结果集了，这时需要一个辅助类来实现。这个辅助类称为对象浏览器，下面定义对象浏览器。
+
+
+import java.sql.*;
+/**所有实体对象的浏览器的父类*/
+abstract class EntityBrowser {
+       protected ResultSet _rs;
+       protected Connection _conn;
+       protected boolean _hasMoreElement;
+       /**浏览器是否还有下一个记录*/
+       public boolean hasMoreElement() throws SQLException{
+             return _hasMoreElement;
+       }
+       /**返回下一个记录，子类必须重载这个函数*/
+       abstract public Object nextElement() throws SQLException;
+       /**关闭这个浏览器*/
+       public void close () throws SQLException{
+              _rs.getStatement().close();
+       }
+       /**浏览器构造函数，指定一个数据库连接*/
+       public EntityBrowser(ResultSet rs) throws SQLException {
+              _rs=rs;
+              _conn=_rs.getStatement().getConnection();
+              _hasMoreElement=_rs.next();
+       }
+       //子类重载nextElement（）时调用这个方法
+       protected Object _nextEntityObj(EntityObject eo) throws SQLException {
+              if (_hasMoreElement) {
+                     eo._setAttribute(_rs);
+              } else eo=null;
+              _hasMoreElement=_rs.next();
+              return (eo);
+       }
+}
+
+ 
+
+
+有了EntityBrowser类后，我们来修改刚才定义的Account类。第一步是要在Account类里定义一个私有的EntityBrowser子类，这个子类只要定义一个构造函数并重载nextElement()方法即可。这里使用了在一个类里定义另一个类的技巧，这个技巧在java的容器类库中经常使用。第二步是在Account类中增加一个方法getAllByXX()，返回一组实体对象的方法名常用getAll打头。请看以下修改的代码片段。
+
+
+import java.sql.*;
+public class Account extends EntityObject {
+ 。。。   
+/*以下是新修改的代码*/
+    //定义一个子类
+    private class AccountBrowser extends EntityBrowser {
+              AccountBrowser (ResultSet rs) throws SQLException { super(rs); }
+              Public Object nextElement() throws SQLException{
+                     Account ac=new Account(_conn);
+                     return (_nextEntityObj(ac));
+              }
+}
+//下面是实体对象的方法
+       public EntityBrowser getAll() throws SQLException {
+              PreparedStatement ps=_conn.prepareStatement("select AccountId,Name from account ");
+        ResultSet rs=ps.executeQuery();
+              return (new AccountBrowser(rs));
+}
+public EntityBrowser getAllByName(String name) throws SQLException {
+    PreparedStatement ps=_conn.prepareStatement(“select AccountId,Name from account where name like ?”;
+    ps.setString(1,name);
+    ResultSet rs=ps.executeQuery();
+    return (new AccountBrowser(rs));
+}
+
+ 
+
+
+接下来，讨论一下数据表的连接关系，关系数据库主要有一对一，一对多，多对多，多对一的关系。比如教师和学生之间的教课关系，这是一种多对多的关系。有的关系是有自己的属性，比如教课时间，我们可以把所有的关系都看作一个实体对象。但是为了简化程序，对于那些没有自己属性的一对一，一对多关系我们可以把它简化成父、子表的关系。表示数据库中的主表和子表有两种方法。
+
+一种方法把子表和主表看作一个实体对象，子表用Vector或HashTable这样的Collection定义成主表的一个属性，在_setAttribute方法中，再执行一次sql查询，把查询出的子表数据放入collection中。同时还要修改insert,update方法，使得主表的实体对象每次数据插入或修改时都要删除并重新插入子表的数据。这里实际上把子表看作主表的一种附属数据结构，而不是独立的对象，子表的数据库操作全部由主表来完成。
+
+另一种方法是把子表看作一个单独的实体类，实际上这时不存在主表和子表的概念了。只有两个实体对象，他们之间是一种关联的关系。主表通过getXXByXX（）的方法来返回一个子表类的Browser。可以通过定义主表的一个方法insertXX（）, 调用子表的insert()来插入一个新的子表项目;定义deleteXXX()来删除子表项目。至于更新子表数据，可以直接调用子表实体类的update()方法，不需要使用主表类的任何方法。
+
+对于一个视图，也可以参照定义实体类的方法定义一个视图类，不过要尽量少用视图类，因为视图类和其他实体对象虽然语法上看不出关联，但语义上实际上是有关联的。一个实体类的修改常常要修改所有相关的视图类，这对于数据封装是很不利的。只有出于性能的考虑我们才使用它。
+
+最后，探讨一下数据库事务的概念。事务是建立在数据库连接的基础上的，可以一次提交或回滚一系列操作。要实现事务，必须把数据库连接的自动提交属性设为false。java缺省的连接都是自动提交的，实现事务必须强制执行一个conn.setAutoCommit(false)。如果连接不是自动提交的，那么要注意，每当一个事务完成时必须执行commit或rollback，就算是select语句也必须提交事务。而且事务最好能尽早提交，比如每次select后提交，这样可以减少数据库资源的占用。
+

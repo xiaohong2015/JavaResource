@@ -1,0 +1,32 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:27:13
+HTML 注释 
+
+在客户端显示一个注释. 
+
+JSP 语法
+
+<!-- comment [ <%= expression %> ] --> 
+
+例子 1
+
+<!-- This file displays the user login screen --> 
+
+在客户端的HTML源代码中产生和上面一样的数据： 
+
+<!-- This file displays the user login screen --> 
+
+例子 2
+
+<!-- This page was loaded on <%= (new java.util.Date()).toLocaleString() %> --> 
+
+在客户端的HTML源代码中显示为: 
+
+<!-- This page was loaded on January 1, 2000 --> 
+
+描述
+
+这种注释和HTML中很像，也就是它可以在"查看源代码"中看到。
+
+唯一有些不同的就是，你可以在这个注释中用表达式（例子2所示)。这个表达示是不定的，由页面不同而不同，你能够使用各种表达式，只要是合法的就行。

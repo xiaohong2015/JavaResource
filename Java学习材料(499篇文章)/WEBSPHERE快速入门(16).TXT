@@ -1,0 +1,47 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-23 9:33:56
+6.1 基本特性
+WebSphere应用服务器使您能够为Servlet 的开发实现 “一次写成，各处使用”的目的。该产品包括一个基于 Java 的 Servlet 引擎，独立于 Web 服务器和它所基于的操作系统。WebSphere应用服务器提供了服务器插件的选项，与大多数流行的应用程序设计接口（API）兼容。所支持的 Web 服务器有: 
+    l IBM HTTP 服务器
+	l Apache Server 
+	l Domino 
+	l Lotus Domino Go Webserver 
+	l Netscape Enterprise Server 
+	l Netscape FastTrack Server 
+	l Microsoft Internet Information Server 
+    除了 Servlet 引擎及插件外，WebSphere应用服务器还提供：
+    1. JavaSoft Java Servlet API 实现，以及这些 API 的扩展和附加。
+	2. 示例和文档，示例 Servlet 和 Web 站点应用程序演示了简单和高级技术。联机和可打印文档供您
+快速入门，并帮助掌握服务器高级功能的使用演示基本类及其扩展的示例应用程序。 
+	3. WebSphere应用服务器的管理器，使用图形界面，易于: 
+   (1) 为装入本地和远程的 Servlet 设置选项 
+   (2) 设置初始化参数 
+   (3) 管理 Servlet 
+   (4) 指定 Servlet 别名 
+   (5) 创建 Servlet 链和过滤 
+   (6) 启用轻量级目录访问协议（LDAP）目录支持 
+   (7) 记录 Servlet 消息 
+   (8) 启用 JVM 调试 
+   (9) 监控 WebSphere应用服务器 使用的资源 
+  (10) 监控已装入 Servlet、活动 Servlet 会话和 JDBC 连接 
+  (11) 控错误、事件、异常情况和日志输出 
+  (12) 创建转储和数据快照 
+  (13) 动态地启用和禁用跟踪 
+	4. 缓存和再使用与 JDBC-从属数据库连接的连接管理功能。当一个 Servlet 需要数据库连接时，它
+可从可用连接的缓冲池获得，从而消除了为每个请求打开一个新连接的所需花费的系统开销。 
+	5. 附加的 Java 类，遵循 JavaBeans 规范，允许程序员访问 JDBC-从属数据库。当隐藏使用关系数
+据库的复杂度时，这些数据访问 Bean 可提供增强功能。它们可用于可视集成开发环境中。 
+	6. JSP的动态页面内容支持。JSP 技术使您能够通过服务器端脚本生成动态 Web 页面。其结果是将
+呈示逻辑（例如，定义 Web 站点结构和外观的 HTML 代码）从业务逻辑（例如，访问数据库以获得要显示在 Web 站点上的信息的 Java 编码信息）中分隔出来。灵活性方面，JSP 文件可包括任何直接插入的 Java 的组合：<SERVLET> 标记、NCSA 标记和 JavaBean。 
+	7. 启用 LDAP（轻量级目录访问协议）支持的目录服务。 
+	8. 用于集成WebSphere应用服务器和Web服务器（如Apache Server） 到Tivoli 管理环境（Tivoli 
+Management Environment）以获得分布式监控和操作的模块和命令行界面。Tivoli 模块并不与WebSphere应用服务器一起发行，请访问Web 站点（http://www.software.ibm.com/webservers/appserv/）以获得更多信息。
+    WebSphere应用服务器对JSP的支持是通过JSP处理器来实现的。在 Web 服务器上安装 WebSphere应用服务器时，Web 服务器的配置被设置成将对 JSP 文件（即文件扩展名为 .jsp）的 HTTP 请求传递至 WebSphere应用服务器。WebSphere应用服务器配置则被设置成将 JSP 文件传递至其 JSP 处理器（pageCompile）。
+    JSP 处理器对每一个 JSP 文件创建并编译 Servlet。该处理器还为每个 JSP 文件产生两个文件：
+    (1)  java 文件：包含可用于 Servlet 的 Java 语言代码；
+	    (2)  class 文件：编译过的 Servlet。
+JSP 处理器把 .java 和 .class 文件放在目录 servlets\pagecompile\JSP_file_path 下，其中 JSP_file_path 是 JSP 源文件所在的目录路径。例如，若JSP 文件在WebSphere\AppServer\samples\Web
+Bank 目录下，则.java 和.class 文件就在WebSphere\AppServer\servlets\pagecompile\WebSphere\App Server\
+samples\WebBank 目录下。.java 和 .class 文件的文件名相同。处理器使用了命名约定，该命名约定包括将下划线字符和后缀添加到 JSP 文件名中。例如，如果 JSP 文件名是 login.jsp，则生成的文件为 _login_xjsp.java 和 _login_xjsp.class。
+如同所有的 Servlet，由 JSP 文件生成的 Servlet 是 javax.servlet.http.HttpServlet的子类或子孙类。如果 Servlet 类是软件包的一部分，则 Servlet Java 代码包含了用于一些必需类和软件包语句的导入语句。如果 JSP 文件包含 JSP 语法（例如指令和 scriptlets），则 JSP 处理器会将 JSP 语法转换成等价的 Java 代码。如果 JSP 文件包含 HTML 标记，则处理器添加 Java 代码，以使 Servlet 能一个接一个字符地输出 HTML。

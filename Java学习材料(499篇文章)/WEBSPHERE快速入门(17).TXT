@@ -1,0 +1,82 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-23 9:35:20
+6.2 安装与配置
+
+对于任何软件，都需要一些计划和具体步骤以确保成功安装。对于安装与配制 WebSphere应用服务器及其组件也是如此。下面介绍在Windows NT 上安装与配置WebSphere应用服务器
+    1．内存和软件要求
+(1) 内存：至少 128 MB RAM，建议 256 MB。WebSphere应用服务器安装光盘包括 Java 开发工具（JDK）。 
+(2) 操作系统：Microsoft NT 版本 4.0 与服务包3 。
+ 		(3) Web 服务器：WebSphere应用服务器需要下列服务器之一。 
+l IBM HTTP 服务器版本 1.3.3 Windows NT 版（WebSphere应用服务器安装光盘包括IBM HTTP 服
+务器） 
+l Apache Server 版本 1.3.2 Windows NT 版 
+l Domino 版本 5.0 Windows NT 版 
+l Lotus Domino Go Webserver 版本 4.6.2.5 Windows NT 版 
+l Microsoft Internet Information Server 版本 3.x 和 版本 4.0 Windows NT 版 
+l Netscape Enterprise Server 版本 3.01 和 版本 3.51 Windows NT 版（建议使用版本 3.5.1） 
+l Netscape FastTrack Server 版本 3.01 Windows NT 版 
+	(4) Java 开发组件（JDK）：建议使用与 WebSphere应用服务器一起提供的 JDK1.1.6。 
+	(5) Java servlet API：WebSphere应用服务器包括 JSDK 版本 2.0 或更高版本。 
+	(6) Web 浏览器：WebSphere应用服务器的管理器是用来管理 servlet 的用户界面。要运行管理器，
+需要 appletviewer 或支持 JDK1.1 的浏览器，例如：
+l Netscape Navigator 4.06 或 4.0.7，包括集成的 JDK 1.1 支持并由以下 Web 站点提供：
+http://developer.netscape.com/software/jdk/download.html。
+l 或带有修正包的 Microsoft Internet Explorer 4.01 或更高版本。
+l Sun HotJava 1.1 或更高版本 
+一些旧的浏览器不能够正确地处理启用本机语言支持的文本。如果在用户界面上看到外来字符，例如“sEnable”，而不是“Enable”，可以通过升级浏览器校正。
+    2．安装Web服务器
+如果计划安装 IBM HTTP 服务器，请在安装 WebSphere应用服务器之前安装它。可以从 WebSphere应用服务器安装光盘安装 IBM HTTP 服务器。安装WebSphere应用服务器会更改 Web 服务器 httpd.conf 文件。如果安装 Web 服务器是在安装 WebSphere应用服务器之后安装的，将不会进行更改，并且 WebSphere应用服务器将不能够正确运行。安装 IBM HTTP 服务器之后，需要一些配置以启用 SSL 支持。请参阅 IBM HTTP 服务器文档以获得指示信息。 
+对于计划安装其它的Web 服务器（如Apache Server），也请在安装 WebSphere应用服务器之前安装它。理由同上。
+    3．安装 WebSphere应用服务器之前
+    安装WebSphere应用服务器版本 2.0之前，请卸装所有以前的版本。卸装之前，备份 WebSphere应用服务器版本 1.x 文件。
+(1) 文件备份
+从Windows NT 卸装以前版本的 WebSphere应用服务器之前，确保要移植的文件已经或者将要保存。安装 WebSphere应用服务器版本 2.0 时显示出的图形用户界面备份 WebSphere应用服务器目录中的文件，包括类、领域、Servlet、属性文件，其中，属性文件包括servlet.properties、admin_port.properties、rules.properties、jvm.properties、aliases.properties、connmgr.properties、userprofile.properties。如果有文件驻留在这四个目录之外（例如，如果在 WebSphere应用服务器 安装中创建自己的目录），请在安装 WebSphere应用服务器 版本 2.0. 之前，在 WebSphere应用服务器 安装之外的位置备份文件。 
+此处包括移植进程的第一部分。第二部分必须在安装 WebSphere应用服务器版本 2.0 之后执行。请参阅有关文档以获得详细信息。 
+(2) 卸载前一版本
+对于 Windows NT，使用开始 --> 控制面板中的添加/删除选项，或从开始 --> 程序 --> IBM WebSphere --> WebSphere应用服务器版本1.x 卸装。 
+注意：当已安装了某版本的 WebSphere应用服务器，它将复制Web 站点配置文件作为备份文件，然后修改原始配置文件。当使用 Web 服务器时这个已被修改过的文件就成为活动的配置文件。当卸装 WebSphere应用服务器时，不会恢复以前的配置文件，它仍然是备份文件。为了使这些设置再次活动，必须将它们从备份文件转换为活动的 Web 服务器配置文件。
+另外，需要清除 CLASSPATH。如果在 CLASSPATH 中已经有来自以前版本的 WebSphere应用服务器的信息，安装版本2.0之前请删除这些信息。对于在 Windows NT 上使用Go Webserver 的Web服务器来说，当安装 WebSphere应用服务器时能自动卸装Go Webserver 上的 Java 支持。其它的请查阅有关文档。
+    4．安装WebSphere应用服务器
+在即将安装 WebSphere应用服务器之前，请确保已经： 
+(1) 备份所有未通过安装程序自动备份的文件（从以前的 WebSphere应用服务器进行安装）。
+(2) 安装您计划使用的 Web 服务器。Web 服务器必须在安装 WebSphere应用服务器之前安装。 
+(3) 如果 Web 服务器正在运行，请停止它。 
+注意：在WebSphere应用服务器的安装期间，如果指定使用 IBM HTTP 服务器或 Apache Server，将提示您确认 Web 服务器 httpd.conf 文件的位置。
+安装在 Windows NT 上，插入 WebSphere应用服务器安装光盘，转至以 Windows NT 操作系统命名的子目录，运行可执行安装程序（setup.exe）。一系列面板将指导您完成安装。 
+5．配置 WebSphere应用服务器
+下面介绍启用 WebSphere应用服务器和它的组件以使之协同工作的必要配置。完成这些任务之后，WebSphere应用服务器便能够主要通过使用缺省设置运行所有功能。
+(1) 配置 Apache Server
+如果使用Apache Server作为Web服务器，请确保httpd.conf 文件包含此行：AddModule mod_app_server.c。
+(2) 使用数据库。
+要确保 WebSphere应用服务器 维护和使用与关系数据库（如 Oracle 或 DB2）的连接，请添加数据库.zip 文件到位于文件 <as_root >/properties/bootstrap.properties 中的 java.classpath 属性，或使用 WebSphere应用服务器的管理器界面的 Java 引擎页面来指定文件。同样，确保 java.classpath 包含用于数据库连接的有效的驱动程序。请查看产品 Web 站点上的 WebSphere应用服务器 版本 2.0 自述文件可得到附加的技巧。 
+(3) 运行模式
+ose.mode 属性控制 WebSphere应用服务器是作为 Web 服务器的一部分（进程内），还是在独立模式下运行（进程外）。该属性位于 <as_root> /properties/bootstrap.properties 文件中。对于所有的服务器，ose.mode 缺省值是 out。如果使用 Apache Server 或 IBM HTTP 服务器，必须设置 ose.mode 属性为 out，这意味着 WebSphere应用服务器在独立模式下运行。对于其它 Web 服务器，可以（但不建议）更改 ose.mode 为 in 并且作为 Web 服务器的一部分运行 WebSphere应用服务器。 无论何时如有必要请复位 ose.mode。例如，如果从作为 Webserver 一部分运行的 Netscape Enterprise Server （ose.mode=in）转换为 IBM HTTP 服务器（要求 ose.mode=out），不要忘记在运行 IBM HTTP 服务器之前，将 ose.mode 属性更改为 out。
+与手工编辑包含 ose.mode 属性的 bootstrap.properties 文件相对比，管理器界面的 Java 引擎页面提供了一个简单的方法来锁住该属性值。 Java 引擎页面提供了一个可用来指示是以 Web 服务器的一部分（ose.mode=in）或以独立模式（ose.mode=out）运行 WebSphere应用服务器的单选按钮。请参阅有关文档学习如何访问管理器。
+ose.mode 的值影响。作为 Web 服务器一部分运行 WebSphere应用服务器为Servlet 和其它应用程序提供较高的性能，但安全性较差。作为 Web 服务器的一部分运行 WebSphere应用服务器，允许当关闭 Web 服务器时 WebSphere应用服务器自动停止。在独立模式下运行 WebSphere应用服务器需要其它步骤。 请参有关文档获得更多的详细信息。
+6．启动和停止 WebSphere应用服务器
+当启动 Web 服务器时WebSphere应用服务器自动启动。WebSphere应用服务器的管理器，是通过 Web 浏览器访问的，为查看和更改 WebSphere应用服务器的设置和性能提供了界面。请参阅定制配置设置。 
+如果将 WebSphere应用服务器 作为 Web 服务器的一部分运行，当关闭 Web 服务器时 WebSphere应用服务器 将自动停止。如果以独立模式运行，WebSphere应用服务器不会自动停止。如果使用 Apache Server 或 IBM HTTP 作为Web服务器， WebSphere应用服务器必须在独立模式下运行。
+当在 Windows NT 上进程外运行 WebSphere应用服务器 时，停止 Web 服务器之后，请停止 WebSphere Servlet 服务以停止 WebSphere应用服务器。从开始 --> 设置 --> 控制面板 --> 中选择 WebSphere Servlet 服务，并按“停止”按钮。 
+   7．安装的检查和故障寻找
+要验证 WebSphere应用服务器已安装好并正确配置，可调用 WebSphere应用服务器提供的 snoop servlet。使用 Web 浏览器打开 servlet URL: http://your.server.name/servlet/snoop。Snoop Servlet 应回送客户机发送的 HTTP 请求及 servlet 的初始化参数。SnoopServlet 和其它 servlet 的代码位于<as_root>/servlets 目录。如果Servlet失败，请尝试下列步骤: 
+    (1) 如果已通过手工编辑 .properties 文件或使用 WebSphere应用服务器的管理器界面更改了任何 WebSphere应用服务器的配置设置，请检查这些文件以确保未引入任何非法的或不正确的值。特别要检查<as_root> /properties/bootstrap.properties 文件。文档中心包含关于手工配置这些属性的资料和关于每一配置的可接受性及缺省值的讨论资料。
+    (2) 为Web 服务器打开本地日志和跟踪。找到 WebSphere应用服务器 bootstrap.properties 文件（在 <as_root> /properties 目录中）。设置 ose.trace.enabled 属性为true，设置 ose.trace.to.webserver 属性为true。停止 Web 服务器并重启动。记住如果 WebSphere应用服务器运行在独立模式，当停止 Web 服务器时它不会相应停止。检查 Web 服务器出错日志及 WebSphere应用服务器 <as_root>/logs 目录下的日志以查看错误。 
+    (3) 启用调试控制台并重新启动 Web 服务器。WebSphere应用服务器的调试控制台为收集和查看跟踪及监控数据提供了集中场所。例如，从调试控制台，可以作为一组启动和停止列在收集和监控服务器数据中的监控程序。调试控制台的服务器控制台标签允许查看 servlet 的 stdout 和 stderr 流。缺省情况下，调试控制台未启用。启用该控制台。在 WebSphere应用服务器 debug.properties 文件中设置 debug.server.console.enabled 属性为true并重新启动 Web 服务器使得改动生效。或者，运行 http://your.server.name/servlet/DebugConsoleServlet，启用调试控制台。在 Windows NT 上，要成功地查看调试控制台，必须配置 Windows NT 以允许一个或多个服务与 Windows 桌面交互。如果使用作为 Windows NT 服务运行的 Web 服务器：
+l 选择开始 --> 设置 --> 控制面板 --> 服务。 
+l 选择 Web 服务器相应的服务。 
+l 单击启动按钮。 
+l 在结果对话框中，选择允许服务与桌面交互的复选框。 
+l 重新启动 Web 服务器以使更改生效。
+对于 Microsoft Internet Information Server，对与 Web 服务器相关的每个服务（如 Web 发布和 FTP 
+服务），执行以上过程。这些服务必须允许与 Windows NT 桌面交互。如果 WebSphere应用服务器运行时未启动任何 Web 服务器相关的进程，则为 WebSphere Servlet 服务执行以上过程，允许服务与桌面交互。
+8．从 版本 1.x 移植到版本 2.0
+在安装 WebSphere应用服务器之后，通过下列步骤完成移植： 
+    (1) 请检查用户 Servlet、领域、类、JavaServer 页面（JSP）和其它在第一部分的移植过程中保存的与编程相关的文件已经被安放在它们所属的 WebSphere应用服务器 版本 2.0 目录中。安装程序应已为您完成了这些步骤。如果已备份了您创建在 WebSphere应用服务器 安装中用户文件或目录，请将它们安放在现在的新安装处。
+    (2) 传输 jvm.properties 文件设置到 WebSphere应用服务器版本 2.0 bootstrap.properties 文件。
+l 对于 WebSphere应用服务器 类路径，仅移植用户指定的 类路径部分到 bootstrap.properties 中 – 
+不要传输 JVM 库或 WebSphere应用服务器 版本 1.x .jar 文件路径，因为这些是 WebSphere应用服务器 版本 1.x 缺省配置的一部分，而您未曾自行设置过它们。换言之，只传输您添加的部分类路径。不要除去 WebSphere应用服务器 版本 2.0 缺省类路径；简单地加入 版本 1.x 项目即可。 
+l 对于 Java 库路径和路径，也只移动用户指定的部分。不要除去 WebSphere应用服务器 版本 2.0 
+缺省的库路径和路径设置；简单地加入 版本 1.x 项目即可。 
+l 对于其它属性，仅当它们有定义在 bootstrap.properties 中的对应者时才移植。 
+要使用 WebSphere应用服务器的管理器来管理在安装 WebSphere应用服务器之前已存在于 Web 服务器中的 Servlet，必须首先移植这些 Servlet。为了移植现有的 Servlet，将 Servlet 从它们目前的位置移动到 <as_root> \servlets 目录。WebSphere应用服务器 监控该目录并且当 Servlet 更改时自动重新装入 Servlet。如果有 Servlet 在其它目录中并且不想将它们移动到 <as_root> \servlets 目录，可使用管理器界面中 Java 引擎页面的“可重装 Servlet 类路径”字段来指定其余要监控的目录。使用 WebSphere应用服务器中的配置页面来重新配置以前的Servlet 参数。请参阅定制配置设置。

@@ -1,0 +1,54 @@
+作者：jspfuns
+日期：2000-8-10 17:35:12
+JavaBean开发者可以给一个Bean添加用户化器（Customizer）、属性编辑器（PropertyEditor）和BeanInfo接口来描述一个Bean的内容，Bean的使用者可在构造环境中通过与Bean附带在一起的这些信息来用户化Bean的外观和应做的动作。一个Bean不必都有BeanCustomizer、PrpertyEditor和BeanInfo，根据实际情况，这些是可选的，当有些Bean较复杂时，就要提供这些信息，以Wizard的方式使Bean的使用者能够用户化一个Bean。有些简单的Bean可能这些信息都没有，则构造工具可使用自带的透视装置，透视出Bean的内容，并把信息显示到标准的属性表或事件表中供使用者用户化Bean，前几节提到的Bean的属性、方法和事件名要以一定的格式命名，主要的作用就是供开发工具对Bean进行透视。当然也是给程序员在手写程序中使用Bean提供方便，使他能观其名、知其意。 
+3.3.1用户化器接口（Customizer Interface） 
+
+当一个Bean有了自己的用户化器时，在构造工具内就可展现出自己的属性表。在定义用户化器时必须要实现java.beans.Customizer接口。例如，下面是一个"按钮"Bean的用户化一器： 
+
+
+public class OurButtonCustomizer extends Panel implements Customizer {
+... ...
+/*当实现象OurButtonCustomizer这样的常规属性表时，一定要在其中实现addProperChangeListener
+和removePropertyChangeListener,这样，构造工具可用这些功能代码为属性事件添加监听者。*/
+... ...
+private PropertyChangeSupport changes=new PropertyChangeSupport(this);
+public void addPropertyChangeListener(PropertyChangeListener l) {
+changes.addPropertyChangeListener(l);
+public void removePropertyChangeListener(PropertyChangeListener l) {
+changes.removePropertyChangeListener(l);
+}
+... ...
+
+3.3.2 属性编辑器接口（PropertyEditor Interface） 
+
+一个JavaBean可提供PropertyEditor类，为指定的属性创建一个编辑器。这个类必须继承自java.beans.PropertyEditorSupport类。构造工具与手写代码的程序员不直接使用这个类，而是在下一小节的BeanInfo中实例化并调用这个类。例：
+
+
+public class MoleculeNameEditor extends java.beans.PropertyEditorSupport {
+public String[] getTags() {
+String resule[]={
+"HyaluronicAcid","Benzene","buckmisterfullerine",
+"cyclohexane","ethane","water"};
+return resule;}
+}
+
+上例中是为Tags属性创建了属性编辑器，在构造工具内，可从下拉表格中选择MoleculeName的属性应是"HyaluronicAid"或是"water"。 
+3.3.3BeanInfo接口 
+
+每个Bean类也可能有与之相关的BeanInfo类，在其中描述了这个Bean在构造工具内出现时的外观。BeanInfo中可定义属性、方法、事件，显示它们的名称，提供简单的帮助说明。 例如： 
+
+
+public class MoleculeBeanInfo extends SimpleBeanInfo {
+public PropertyDescriptor[] getPropertyDescriptors() {
+try {
+PropertyDescriptor pd=new PropertyDescriptor("moleculeName",Molecule.class);
+/*通过pd引用了上一节的MoleculeNameEditor类,取得并返回moleculeName属性*/
+pd.setPropertyEditorClass(MoleculeNameEditor.class);
+PropertyDescriptor result[]={pd};
+return result;
+} catch(Exception ex) {
+System.err.println("MoleculeBeanInfo: unexpected exeption: "+ex);
+return null;
+}
+}
+}

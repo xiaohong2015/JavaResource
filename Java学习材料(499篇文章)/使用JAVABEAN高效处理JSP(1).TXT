@@ -1,0 +1,45 @@
+作者：Eazily
+email: Eazily@yeah.net
+日期：6/12/2001 2:48:14 PM
+摘要：JavaServer Pages Model II的一个基本思想就是将表现（HTML）和处理逻辑分开。这篇文章介绍的是一个高效、可重用的设计方法，将动态的内容、处理和验证由JavaServer Page中分离出来，放到一个相应的JavaBean中。它使用Template Method的设计方法，可提高代码在整个Web应用中的重用性。此外，它还介绍了在一个HTTP Session中bean间如何通信的简单技巧。
+
+　　JavaServer Pages（JSP）技术提供了许多的特性，可让你简易和快速地开发Web应用。不过，如果你无计划和结构地使用这些技术，你的JSP代码将会是各种HTML标记、JSP标记和Java代码的混合，很难于看懂、调试和维护。
+
+　　这里的目标是将全部的JSP处理代码封装到JavaBean中。这种方法的好处是HTML编程者和美工可以做表现的开发（使用HTML编辑器），而Java编程者可以集中开发编程逻辑。此外，这种方法可便于你为同一个Web应用提供不同的外观。
+
+　　我将介绍的架构使用Template Method方法，可集中实现整个应用的共有设计部分和实现每个JSP的共有处理。就这个例子，共有的处理包括有页面状态管理、共有的页面处理、共有的错误处理，以及在页面间共享信息的技术。所有这些仅是定义一次，你可在页面设计时再处理特定的细节。
+
+　　我将以一个简单的"投票"应用为例，介绍如何使用这个架构。你应有基本的JSP和Java知识，并且最好懂得一些UML知识。
+
+　　总的静态结构
+
+　　这个部分将介绍该架构核心部分的概观，以及投票应用的例子。图一显示了该架构的一个UML框图：
+
+
+
+**************图一*******************
+（UML类框图）
+
+　　该架构的中心部分由两个共有的JSP包含文件和两个类组成，下面将会谈到。它们的作用是完成共有的处理。
+
+　　　includeheader.jsp：这个JSP文件必须被静态包含在每个JSP文件的开头。
+
+　　　includefooter.jsp：这个JSP文件必须被静态包含在每个JSP文件的末尾。
+
+　　AbstractJSPBean：这是一个抽象类，你应该将它作为所有JSP JavaBean类的一个超类使用。它是该架构的核心类。
+
+　　　SharedSessionBean：在一个HTTP session中，为所有的JSP JavaBean对象提供关联。
+
+　　JSP网页只是用作表现的。每个JSP页面都应该使用一个相应的JavaBean来处理特定页面的逻辑。每个JSP页面都应该静态包含includeheader.jsp和includefooter.jsp。每个JavaBean都必须扩展AbstractJSPBean，该抽象类包含有模板方法，可完成共有的处理。
+
+　　这个投票的应用包含有以下的JSP和相应的JavaBean：
+
+　　　login.jsp, LoginJSPBean:投票者认证和登录 
+
+　　　vote.jsp, VoteJSPBean: 执行投票 
+
+　　　confirmation.jsp, ConfirmationJSPBean: 显示确认和投票的结果
+
+　　我将不会详细讨论数据库和商业逻辑的部分（(Voter, Candidate和VoteDB)，不过它们对于这个例子是必需的。
+
+　　以上我们已经对整体有了一个概观，接着我们将讨论例子中的每个JSP页面。

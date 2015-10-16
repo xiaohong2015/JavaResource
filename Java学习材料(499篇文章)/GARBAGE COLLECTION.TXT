@@ -1,0 +1,60 @@
+作者：jeru
+email: jeru@163.net
+日期：7/3/2001 9:56:54 AM
+3)Garbage Collection 
+State the behavior that is guaranteed by the garbage collection system and write code that explicitly makes objects eligible for collection. 
+1.	Garbage collection is a mechanism for reclaiming memory from objects that are no longer in use, and making the memory available for new objects.
+2.	An object being no longer in use means that it can’t be referenced by any ‘active’ part of the program.
+3.	Garbage collection runs in a low priority thread. It may kick in when memory is too low. No guarantee.
+4.	It’s not possible to force garbage collection. Invoking System.gc may start garbage collection process.
+5.	There are no guarantees that the objects no longer in use will be garbage collected and their finalizers executed at all. gc might not even be run if the program execution does not warrant it. Thus any memory allocated during program execution might remain allocated after program termination, unless reclaimed by the OS or by other means.
+6.	There are also no guarantees on the order in which the objects will be garbage collected or on the order in which the finalizers are called. 
+7.	Circular references do not prevent objects from being garbage collected.
+8.	We can set the reference variables to null, hinting the gc to garbage collect the objects referred by the variables. Even if we do that, the object may not be gc-ed if it’s attached to a listener. (Typical in case of AWT components) Remember to remove the listener first.
+9.	All objects have a finalize method. It is inherited from the Object class.
+10.	finalize method is used to release system resources other than memory. (such as file handles and network connections) The order in which finalize methods are called may not reflect the order in which objects are created. Don’t rely on it. This is the signature of the finalize method.
+protected void finalize() throws Throwable { }
+In the descendents this method can be protected or public. Descendents can restrict the exception list that can be thrown by this method. 
+11.	finalize is called only once for an object. If any exception is thrown in finalize, the object is still eligible for garbage collection (at the discretion of gc)
+12.	gc keeps track of unreachable objects and garbage-collects them, but an unreachable object can become reachable again by letting know other objects of its existence from its finalize method (when called by gc). This ‘resurrection’ can be done only once, since finalize is called only one for an object.
+13.	finalize can be called explicitly, but it does not garbage collect the object.
+14.	finalize can be overloaded, but only the method with original finalize signature will be called by gc.
+15.	finalize is not implicitly chained. A finalize method in sub-class should call finalize in super class explicitly as its last action for proper functioning. But compiler doesn’t enforce this check.
+16.	System.runFinalization can be used to run the finalizers (which have not been executed before) for the objects eligible for garbage collection.
+17.	Local variables in methods go out of scope when the method exits. At this point the methods are eligible for garbage collection. Each time the method comes into scope the local variables are re-created.  
+18.	Java uses a "mark sweep garbage collection algorithm, which traverses all the object references, marking any objects that are referred to and then garbage collecting any objects that are unmarked.
+19.	Java allows you to add a finalize() method to any class. The finalize() method will be called before the garbage collector sweeps away the object. In practice, do not rely on the finalize method for recycling any resources that are in short supply - you simply cannot know when this method will be called.
+
+In the exam point of view :
+&#61623;&#61472;You must be able to identify when an object is available for gc - you have either set it to null or you
+have "redirected" the variable that was originally referring to it, so that it now refers to a different
+object.
+&#61623;&#61472;if you have a reference to an object say, A and then you pass A as an argument to some constructor -
+new obj(A); - then even if you null your reference - A=null; - you can't say that A is available for
+gc. So just follow the references and when they drop to zero you know its eligible/available for gc,
+not that it will happen.
+
+eg,
+1. obj = new Jo();
+2. obj.doSomething();
+3. obj = new Jo(); //Same as obj=null;
+4. obj.doSomething();
+
+Object a = new Object();
+Object a=null; //Now the object created in 1st line is available for gc
+Object a=new Object();
+a = new Object(); //same.
+// Now original object created in line 1 is available for gc and a new
+object is now out there referenced by "a".
+
+Aclass a = new Aclass(); // Object 1
+Aclass b= new Aclass(); // Object 2
+Aclass c = new Aclass(); // Object 3
+a=b; // now we have no valid object reference to object "a" and it will be
+// garbage collected sometime after this statement. But when?......
+a=c;
+c=null; // no garbage collection will be eligible since
+// "a" still refers to Object 3
+a=null; // now object "c" is eligible for gc since it always had a valid reference.
+// Should "b" go out of scope; then we would possibly have eligibility for gc.
+// there might still be other references to object "b" preventing the collection.

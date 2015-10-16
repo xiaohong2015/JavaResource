@@ -1,0 +1,46 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：2001-7-3 14:38:12
+　　八、 技术分析 
+
+　　Microsoft 公司的 ASP 技术也是动态网页开发技术。JSP和ASP从形式上非常相似，ASP程序员一眼就能认出＜% %＞以及＜%= %＞。但是深入探究下去会发现它们很多的差别，其中最主要的有以下三点： 
+
+　　1、 JSP的效率和安全性更高 
+
+　　ASP以源码形式存放，以解释方式运行，每次ASP网页调用都需要对源码进行解释，运行效率不高。另外，IIS的漏洞曾使得许多网站源程序大曝光，包括笔者以前用ASP开发的网站，ASP程序全部被人下载了去。 
+
+　　JSP在执行以前先被编译成字节码 (byte code)，字节码由Java虚拟机(Java Virtual Machine)解释执行，比源码解释的效率高；服务器上还有字节码的Cache机制，能提高字节码的访问效率。第一次调用JSP网页可能稍慢，因为它被编译成Cache，以后就快得多了。同时，JSP源程序不大可能被下载，特别是JavaBean程序完全可以放到不对外的目录中。 
+
+　　2、 JSP的组件 (Component) 方式更方便 
+
+　　ASP通过COM来扩充复杂的功能，如文件上载、发送email以及将业务处理或者复杂计算分离出来成为独立可重复利用的模块。JSP通过JavaBean实现了同样的功能扩充。 
+
+　　在开发方面，COM的开发远比JavaBean复杂和繁琐，学会ASP不难，但学会开发COM可不简单。而JavaBean就简单多了，从本文上述示例中可以看出开发JavaBean很方便。 
+
+　　在维护方面，COM必须在服务器上注册，如果修改了COM程序，就必须重新注册，甚至必须关机和重新启动。JavaBean则不需要注册，放在CLASSPATH包含的目录中就行了。如果JavaBean进行了修改，则JSWDK和Tomcat现在还需要关闭和重新运行（但不是关机），但开发者已经许诺将在以后的版本中做到不需要关闭服务器。 
+
+　　另外JavaBean是完全的OOP，可以针对不同的业务处理功能方便地建立一整套可重复利用的对象库，例如用户权限控制、email自动回复等等。 
+
+　　3、 JSP的适应平台更广 
+
+　　ASP目前仅适用于NT和IIS。虽然Unix下有ChiliSoft的插件来支持ASP，但是ASP本身的功能有限，必须通过ASP+COM的组合来扩充，Unix下的COM实现起来非常困难。 
+
+　　JSP则不同，几乎所有平台都支持Java，JSP+JavaBean可以在所有平台下通行无阻。NT下IIS通过一个插件，例如JRUN(http://www3.allaire.com/products/jrun/)或者ServletExec(http://www.newatlanta.com/)，就能支持JSP。著名的Web服务器Apache已经能够支持JSP。由于Apache广泛应用在NT、Unix和Linux上，因此JSP有更广泛的运行平台。虽然现在NT操作系统占了很大的市场份额，但是在服务器方面Unix的优势仍然很大，而新崛起的Linux更是来势不小。 
+
+　　从一个平台移植到另外一个平台，JSP和JavaBean甚至不用重新编译，因为Java字节码都是标准的与平台无关的。笔者将在NT下实验的JSP网页原封不动地拿到Linux下就运行起来了，感觉非常满意。 
+
+　　九、 结论 
+
+　　综上所述，JSP可谓是构建动态网站的一个利器，故推荐给读者，祝愿你们掌握JSP，开发出优秀的网站。ASP程序员也请试一下，JSP里也有session、request、response/out等对象，亲自试试看如何。 
+
+　　附文 
+
+　　这里是关于JSP的重要参考资料，有兴趣的读者可以进一步阅读。 
+
+http://java.sun.com/products/jsp/faq.html 
+http://www.esperanto.org.nz/jsp/jspfaq.html 
+http://www.zdnet.com/pcweek/stories/news/0,4153,410709,00.html 
+http://developer.netscape.com/viewsource/kuslich_jsp 
+/kuslich_jsp.html 
+http://web2.java.sun.com/products/jsp/jsp-asp.html 
+http://www.asptoday.com/articles/19991022.htm 

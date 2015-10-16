@@ -1,0 +1,280 @@
+作者：netkey
+日期：2001-6-2 17:06:13
+  作者:xiaoyou
+ 出处: www.csdn.com  
+
+  
+
+
+
+
+ 
+<%!
+stc_RSYB_Name stcRSYName1[];
+stc_SYB_INF stcSYBINF1[];
+%>
+
+<%/*
+   String p = (String) session.getValue("access");
+   if (p==null || !p.equals("1")) {
+     response.sendRedirect("error.htm");
+     return;
+   }*/
+%>
+<%!
+file://得到机器名字或IP
+String get_Myhostname(javax.servlet.http.HttpServletRequest request){
+  String myhostname = null;
+    try{
+      myhostname = request.getRemoteHost();
+      myhostname = myhostname.toUpperCase();
+    }catch(Exception e){}
+  return myhostname;
+}
+file://处理空字符串
+  String dealNull(String str) {
+    String returnstr = null;
+    if (str == null) returnstr = "";
+    else returnstr = str;
+    return returnstr;
+  }
+file://处理空对象  
+  Object dealNull(Object obj){
+    Object returnstr = null;
+    if (obj == null) returnstr = (Object)("");
+    else returnstr = obj;
+    return returnstr;
+  }
+
+  int dealEmpty(String s) {
+    s = dealNull(s);
+    if (s.equals("")) return 0;
+    return Integer.parseInt(s);
+  }
+
+String replace(String str,String substr,String restr){
+  String[] tmp = split(str,substr);
+  String returnstr = null;
+  if(tmp.length!=0) {
+    returnstr = tmp[0];
+    for(int i = 0 ; i < tmp.length - 1 ; i++)
+      returnstr =dealNull(returnstr) + restr +tmp[i+1];
+  } 
+  return dealNull(returnstr);
+}   
+   
+String htmlEncode(String txt){
+  txt = replace(txt,"&","&amp;");
+  txt = replace(txt,"&amp;amp;","&amp;");
+  txt = replace(txt,"&amp;quot;","&quot;");
+  txt = replace(txt,"\"","&quot;");
+  txt = replace(txt,"&amp;lt;","&lt;");
+  txt = replace(txt,"<","&lt;");
+  txt = replace(txt,"&amp;gt;","&gt;");
+  txt = replace(txt,">","&gt;");
+  txt = replace(txt,"&amp;nbsp;","&nbsp;");
+  txt = replace(txt," ","&nbsp;");
+  return txt;
+}
+
+String unHtmlEncode(String txt){
+  txt = replace(txt,"&amp;","&");
+  txt = replace(txt,"&quot;","\"");
+  txt = replace(txt,"&lt;","<");
+  txt = replace(txt,"&gt;",">");
+  txt = replace(txt,"&nbsp;"," ");
+  return txt;
+}
+
+file://ALERT Function
+  void sAlert(String title,String msg,String focus, JspWriter out){
+   try {
+      out.println("<script language='javascript'>");
+      out.println("alert(\"" + title + "\" + \"\\r\\n\" + \"" + replace(replace(msg,"''","'"),"\"","\\\"") +"\");");
+      out.println(focus);
+      out.println("</script>");
+   } catch(Exception e) { System.out.println(e);}
+  }
+file://CONFIRM Function
+  void sConfirm(String title,String msg ,String location,JspWriter out){
+    try{
+        out.println("<script language='javascript'>");
+  out.println("if(confirm(\"" + title + "\" + \"\\r\\n\" + \"" + replace(msg,"\"","\\\"") + "\")){" );
+        out.println("var d = (new Date()).toString();");
+  out.println(location + "+ d;");
+        out.println("}");
+        out.println("parent.document.form1.text1.select();");
+        out.println("</script>");
+   } catch (Exception e) { }
+  }
+  
+file://得到字符串长度  
+  int getStringLength(String s) {
+   int p = 0;
+    try {
+      int iLength = 0;
+      int irealLength = 0;
+      int j = 0;
+      p = s.getBytes("Shift_JIS").length;
+    } catch(java.io.UnsupportedEncodingException e) {}
+    return p;
+  }
+
+ void formatString(String s,int b,JspWriter out){
+    b--;
+    String t = "";
+    try {
+        int leng = getStringLength(s);
+        int j = 0;
+ if (leng > b) { 
+   for (int i = 1; i <= b ; i++) {
+            t = s.substring(0,i);
+     if (t.getBytes("Shift_JIS").length <= b ) {
+       j++;
+     } else break; 
+   }
+          file://j = j+1;
+          file://System.out.println("b=" + b + "----" + "j=" + j);
+          for(int i = 0;i < j; i++){ 
+            if(s.substring(i,i+1).equals(" "))
+              out.print("&nbsp;"); 
+            if(!s.substring(i,i+1).equals(" "))
+       out.print(htmlEncode(s.substring(i,i+1)));
+           }    
+          if (s.substring(0,j).getBytes("Shift_JIS").length  == b){
+            out.print("|");
+          }else{
+            out.print("&nbsp;|");
+          }
+        } else {
+   for (int  i = 0; i < b - leng ; i++)
+            t = t + "&nbsp;";
+          for (int i = 0; i < s.length(); i++){
+            if(s.substring(i,i+1).equals(" "))
+              out.print("&nbsp;");
+            if(!s.substring(i,i+1).equals(" "))
+              out.print(htmlEncode(s.substring(i,i+1)));
+          }
+   out.print(htmlEncode(t + "|"));
+       }
+    } catch(Exception e){System.out.println("----" + e);}
+  }
+
+file://判断是否为数字
+boolean isNumeric(String number)
+{
+ try
+ {
+  Integer.parseInt(number);
+  return true;
+ }
+ catch(NumberFormatException sqo)
+ {
+  return false;
+ }
+}
+file://判断是否为日期
+String mk_date(String c_date,int c_mode)
+{
+ String wk_buf= "";
+ String ToDay = "";
+ try
+ {
+  ToDay = Integer.toString(java.util.Calendar.getInstance().get(java.util.Calendar.YEAR));
+  switch(c_mode)
+  {
+   case 0:
+   {
+    wk_buf = c_date.substring(2, 4) + "/" + c_date.substring(4, 6);
+             if (c_date.length() == 8)
+    {
+                 wk_buf = wk_buf + "/" + c_date.substring(6, 8);
+             }
+    break;
+   }
+   case 1:
+   {
+    for (int i=0; i<c_date.length();i++)
+    {
+              if (c_date.substring(i, i+1) == " ")
+     { 
+                     wk_buf = wk_buf + "0";
+                 }
+     else
+     {
+                     wk_buf = wk_buf + c_date.substring(i, i+1);
+                 }
+    }
+             c_date = wk_buf;
+    wk_buf = "";
+             if (c_date.substring(0, 1) != "0" )
+    {
+                 wk_buf = "19";
+             }
+    else
+    {
+                 wk_buf = "20";
+             }
+    
+             wk_buf = wk_buf + c_date.substring(0, 2) + c_date.substring(3, 5);
+    
+             if (c_date.length() == 8)
+    {
+                  wk_buf = wk_buf + c_date.substring(6, 8);
+             }
+    break;
+   }
+   case 2:
+   {
+    wk_buf = c_date.substring(0, 4) + c_date.substring(5, 7) + c_date.substring(8, 10);
+    break;
+   }
+   case 3:
+   {
+    for(int i=0; i<c_date.length();i++ )
+    {
+                 if (c_date.substring(i, i+1) == " ")
+     {
+                     wk_buf = wk_buf + "0";
+                 }
+     else
+     {
+                     wk_buf = wk_buf + c_date.substring(i, i+1);
+                 }
+             }
+             c_date = wk_buf;
+             wk_buf = "";
+             if (Integer.parseInt(c_date.substring(0,2)) > Integer.parseInt(ToDay.substring(2, 4)))
+    {
+                 wk_buf = Integer.toString(Integer.parseInt(ToDay.substring(0,2)) - 1);
+             }
+    else
+    {
+                 wk_buf = ToDay.substring(0,2);
+             }
+             wk_buf = wk_buf + c_date.substring(0,2) + c_date.substring(3,5);
+             if (c_date.length() == 8)
+    {
+                 wk_buf = wk_buf + c_date.substring(6,8);
+              }
+    break;
+   }
+   case 4:
+   {
+    wk_buf = c_date.substring(0,4) + "/" + c_date.substring(4,6) + "/" + c_date.substring(6, 8);
+    break;
+   }
+   case 5:
+   {
+    wk_buf = c_date.substring(0,4) + c_date.substring(5, 7);
+    break;
+   }
+  }
+ }
+ catch(Exception e)
+ {
+  System.out.println("wrong : " + e);
+ }
+ return wk_buf;
+}
+

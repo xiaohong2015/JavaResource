@@ -1,0 +1,71 @@
+作者：blackwhites
+日期：2000-10-19 15:49:47
+ 看看我从老外那骗到的
+vishal_donth gave this response on 10/18/2000: 
+//these are the pakages to be imported from
+// Java Mail
+//The Java Mail PAckage either be dowloaded 
+//seperately
+//or else is Available in the J2sdkee1.2 
+// (Java Enterprise Edition)
+
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.util.*;
+
+
+//This function can be used to send the mail 
+// with the parameters given to it
+//U have to specify the smtp server through 
+//which u have to send the mail
+//since i was trying with a homenetmail 
+//account i directly sent the mail its server
+//For sending this mail u need a mail server 
+//which lets u to relay the messages
+//Try this thing for sending to a 
+//www.homenetmail.com account because it lets 
+//u send 
+//mails to the accounts like example try 
+//sending it to a "abc@homenetmail.com" 
+//account.Create the mail account in homenet 
+//mail first. If u get any other server which 
+//supports relaying u can try this on that 
+//also.
+
+//Use this function in ur Servlet to send 
+//mail by calling the function with the 
+//parameters
+
+public void sendMail(String toAddr, String subject, String body, String fromAddr)throws RemoteException{
+try{
+Properties props = new Properties();
+props.put("mail.smtp.host","mail.homenetmail.com");
+//Here we specify the SMTP server through 
+//which the mail should be delivered
+Session session = Session.getDefaultInstance(props, null);
+Message msg = new MimeMessage(session);
+msg.setFrom(new InternetAddress(fromAddr)); 
+//Specify the From Address
+InternetAddress[] tos =InternetAddress.parse(toAddr); 
+//Specify the To Address
+msg.setRecipients(Message.RecipientType.TO,tos);
+msg.setSubject(subject);
+//Specify the Subject
+msg.setText(body); 
+//Specify the Body 
+Transport.send(msg);
+System.out.println("Message is Sent");
+}
+catch(Exception e){
+System.out.println(e);
+}
+}
+
+// U have to run this function on a computer 
+//which is directly connected
+// to internet but not through a 
+//proxy......or else use a proxy which 
+//supports SMTP
+
+
+ 

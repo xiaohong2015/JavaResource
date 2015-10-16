@@ -1,0 +1,72 @@
+作者：easyinfonet
+email: zhujs@cec.gov.cn
+日期：2001-2-23 9:36:04
+6.3 定制配置
+本节介绍如何启动和使用 WebSphere应用服务器的管理器（一个图形界面）为 Servlet 活动和 WebSphere应用服务器的组件定制基本设置参数。
+   1．启动 WebSphere应用服务器的管理器
+要启动 WebSphere应用服务器的管理器，在 Web 浏览器中输入 URL：http://your.server.name:9527/。其中 your.server.name 是主机的全限定名。注意：如果在安装了 WebSphere应用服务器的同一机器的浏览器中启动 WebSphere应用服务器的管理器，使用 http://localhost:9527/ 以获得更高性能。 
+管理器启动并显示登录页面。若是首次登录至管理器，请使用 admin 作为登录用户标识符和口令。单击“确定”。为安全起见，应该更改登录口令。要运行管理器，需要支持 Java 开发组件（JDK）1.1.6 的 appletviewer 或浏览器。请参阅准备安装 WebSphere应用服务器中的软件要求，查看选项。
+    2．使用 WebSphere应用服务器的管理器
+管理器左边的浏览区域允许: 为不同 WebSphere应用服务器 组件定制设置、配置 Servlet 和设置别名及过滤、建立和维护安全性、收集和监控 WebSphere应用服务器、连接和 Servlet 数据。 
+    (1) 定制基本属性
+在使用 WebSphere应用服务器管理 Servlet 之前，请为 Servlet 活动和 WebSphere应用服务器的组件属性配置基本设置参数。在管理器浏览区域，单击“设置”显示可定制不同设置的项目页面。 
+    l 管理页面：更改登录至管理器的用户标识符和口令，并为管理器指定新的端口号。
+    l 连接管理页面：设置连接缓冲池，从而减少用于维护与数据服务器（如 IBM DB2 关系数据库）的连接所花费的资源。
+    l 目录管理页面：为目录服务器指定设置，允许从 Web 服务器、操作系统、WebSphere应用服务器 及其它软件产品的中央位置管理安全性数据。
+    l Java 引擎页面：指定 Java 编译器设置并指出 WebSphere应用服务器 是作为 Web 服务器一部分运行以获得较高性能，还是作为独立模式运行以获得更好安全性。
+    l 会话跟踪页面：指定维护用户会话（来自于相同浏览器的相关用户请求系列）的状态信息的设置。
+    l 用户简要表文件页面：指定维护关于 Web 站点访问者永久信息的设置。
+    l 虚拟主机页面：指定 Servlet 的替代路径，允许 Web 服务器根据 Servlet 请求期间客户机指定的不同域提供不同文档。
+    (2) 配置 Servlet、别名和过滤
+放置在<as_root>\servlets 目录下的 servlet 在请求时自动装入和重新装入（如果更新过）。也可以使用 WebSphere应用服务器 管理器，通过初始化参数和创建 Servlet 别名和过滤更为直接地管理 Servlet。要管理 Servlet，单击管理浏览区域中的 Servlet 并选择页面：
+    l 配置页面：为个别 Servlet 定义配置信息和初始化参数，如关联的类文件，是否在启动时装入 Servlet 以及 Web 服务器是否从远程装入 servlet。
+    l 别名页面：指定路径映射规则，允许用户输入快捷 URL 来调用特定 servlet。
+    l 过滤页面：联系 Servlet 和 MIME-类型，从而每当生成一个特定的 MIME-类型响应时，调用一个特殊的 Servlet。
+    (3) 维护安全性
+通过定义用户、组、资源和存取控制表建立和维护安全性。通过为每个用户、组和资源指定特定访问设置，可精确地控制如何使用服务的资源，及由谁使用。单击管理器浏览区域中的安全性显示这些页面:：
+    l 用户页面：指定允许谁访问由 WebSphere应用服务器 提供的 Web 页面及其它资源，如 servlet。
+    l 组页面：将用户与命名列表相关联，允许同时对整个组赋予访问权限。
+    l 存取控制表页面：为用户和组指定访问许可。
+    l 资源页面：为特定目录、文件和 WebSphere应用服务器 上的 servlet 指定安全性参数。
+    (4) 收集和监控服务器数据
+通过查看日志文件监控 Servlet 活动、已装入的 Servlet 的状态和资源的实时使用。单击监视器浏览区域中的“服务器执行分析”显示页面列表：
+    l JVM 调试页面：启用 JVM 调试和指定调试设置。
+    l 事件页面（在日志文件下）：监控事件日志中收集的信息 。
+    l 出错页面（在日志文件下）：监控出错日志中收集的信息。
+    l 活动会话页面（在监控下）：监控关于 Web 服务器上当前活动的用户会话的信息，包括关于个别会话的信息和所有活动会话的摘要信息。
+    l 数据库缓冲池连接页面（在监控下）：监控连接缓冲池信息，包括关于缓冲池和个别连接的统计数字。
+    l 转储面板页面（在监控下）：指定何时及在何处创建 Servlet 转储和活动快照。
+    l 异常情况状态（在监控下）：监控来自于 Java 引擎和 servlet 的异常数据 。
+    l 已装入 Servlet 页面（在监控下）：监控个别 servlet 的状态和统计数字。
+    l 日志输出页面（在监控下）：查看事件或出错日志输出的记录。
+    l 资源使用页面（在监控下）：监控服务资源如何被使用，包括内存、请求句柄对象缓冲池、服务请求和服务响应时间。
+    l 跟踪页面：监控跟踪数据，通常由 IBM 服务人员提出请求。
+    l 注销：要快速注销，单击管理器浏览区域中的“注销”，返回管理器登录屏幕。
+6.4 部署Servlet
+在WebSphere应用服务器上部署 Servlet需要四个步骤：编译 Servlet 或 Web 应用程序、将类文件放到 WebSphere应用服务器上、将相关的 HTML、JSP 和 SHTML 文件放到WebSphere应用服务器上、用WebSphere应用服务器的管理器来配置初始化参数，并设置其它选项。
+    1．编译 Servlet 和 Web 应用程序
+编译 Servlet，有下列注意事项： 
+   (1) 确保系统 CLASSPATH 环境变量中包括 JDK classes.zip 文件和相应的 WebSphere应用服务器 JAR 文件。 lib 目录中有几个 WebSphere应用服务器 JAR 文件。根据所需导入的类的不同，可能还需要将那些未列在该示例中的 JAR 文件包括在内： 
+如果使用的是 Windows NT，请分别输入下列命令（在同一行中）： 
+set CLASSPATH=.;JAVA_HOME\lib\classes.zip;
+applicationserver_root\lib\ibmwebas.jar;
+applicationserver_root\lib\jst.jar;applicationserver_root\lib\jsdk.jar;
+applicationserver_root\lib\xml4j.jar;
+applicationserver_root\lib\databeans.jar;%CLASSPATH%
+
+   (2) 用下列命令将 PATH 环境变量设置成包括 java/bin 目录的变量： 
+对于 Windows NT，该命令为：set PATH=JAVA_HOME\bin;%PATH%
+   (3) 通过发出下列命令来测试相应的 Java Development Kit (JDK) 是否在路径中：
+   java -version
+该命令应该返回 JDK 版本的状态消息。 
+   (4) 通过发出下列命令来编译 Servlet 
+   javac filename.java
+    2．将类文件放到 WebSphere应用服务器上
+缺省情况下，WebSphere应用服务器在 Servlet 根目录 applicationserver_root\servlets 下查找 Servlet 类文件。请将编译过的 Servlet 类文件复制到该目录下。要从替代 Servlet 目录中装入 Servlet，请配置可重装 Servlet 目录。要从远程系统中装入 Servlet，请在用 WebSphere应用服务器的管理器配置 Servlet 时，指定该远程系统。
+   (1) 如果 Servlet 在软件包中，则将软件包结构镜像成 servlet\ 或可重装 Servlet 目录下的子目录。例如，如果 Servlet SignonServlet.class 和 AccountBean.class 在名为 WebBank 中的软件包中，请将 Servlet 放在目录 servlet\WebBank下。 
+   (2) 如果 Servlet 导入您所开发的非 Servlet 类，建议将那些类复制到 applicationserver_root\servlets 下。 
+    根据jvm.properties 文件中的设置，将决定所有的 Servlet 标准输出是到 applicationserver_root\logs\ncf.log 文件还是 Java 控制台窗口。请参阅 启用 Java 控制台中的有关的说明。
+    3．将HTML、JSP和SHMTL文件放到WebSphere应用服务器上
+将与Servlet有关的HTML、JSP 和 SHMTL文件复制到 Web 服务器的 HTML 文档根目录 server_root\HTML_directory 下。该目录是由特定服务器配置（传递、别名和虚拟主机规则的设置）所决定的。
+    4．配置 Servlet
+    若要从远程系统上的 JAR 或 SER 文件装入 Servlet，或设置初始化参数，请使用 WebSphere应用服务器的管理器来配置 Servlet 或使用XML Servlet 配置。

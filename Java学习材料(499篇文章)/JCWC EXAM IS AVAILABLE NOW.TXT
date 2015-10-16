@@ -1,0 +1,15 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-7-24 14:22:54
+http://www.certit.com/default.htm?head2.htm&2
+Sun to release new Java exam
+
+Sun has announced that it will release Java Certified Web Component Developer exam on July 31. 
+
+According to Sun, this certification is for Sun Certified Programmers for Java[tm] 2 Platform who are using the Java technology servlet and JavaServer Pages[tm] (JSP[tm]) APIs to develop Web applications. Certification is available for the Java 2 Platform, Enterprise Edition (J2EE[tm]). The certification consists of just one exam. Its cost is $ 150. 
+
+The exam, numbered 310-080, will consist both multiple choice and short answer questions. The prerequisite for the exam is Sun Certified Programmer for Java Platform. Sun, however, says that number of questions, passing score and duration has not yet been finalized.
+
+For more info, click: http://suned.sun.com/US/certification/java/java_web.html
+
+For exam objectives, click: http://suned.sun.com/US/certification/java/exam_objectives.html#web

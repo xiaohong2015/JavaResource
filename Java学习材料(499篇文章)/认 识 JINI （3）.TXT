@@ -1,0 +1,27 @@
+作者：luflying
+email: zhang_yng@citiz.net
+日期：2000-11-24 11:52:08
+三、JavaSpace 
+
+Jini提供了在分散式环境中寻找（ look-up）、注册（ registration）、租借（leasing）等功能。而 JavaSpaces则负责管理分散式物件的处理程序（ processing）、分享（sharing）、以及流通（migration ）等。因此 Jini 与 JavaSpaces 彼此存在著相互合作的关系[3] 。以军队作比喻， Jini扮演的是军　官的角色，负责分派许多武器装备给军队。JavaSpaces则扮演军队的角色，负则使用那些被分派的武器以执行命令。简单的说， JavaSpaces就好像网路上的一个市场，它提供一个简单、快速、统一的介面，让网路上分散的资源可以被分享、协调与流通[4] 。
+
+JavaSpaces是用 Java所发展的技术，并且以RMI实作其网路通讯的功能，一般应用在n-tiers 架构的中间层（ middle tiers）[5] 。JavaSpaces虽然能提供　求者与供应者之间查询与沟通的机制，但它并不是资料库，而是以简单的messaging system为基础，进而提供更强大的功能。
+
+除了Jini之外， JavaSpaces技术也可被应用在其它系统与服务中，如： Workflow systems 、Customer management systems、Supply chain management 、Intelligent rich data distribution、 Trading services 、Auction systems 、Resource allocation and management systems、Agent Systems、以及 Publish and subscribe services等[4] 。
+
+四、应用 
+
+Jini技术有一个主要目的：让许多电子产品可以容易的被加入至网路上，也就是随插即用（plug-and-play） [6] 。任何物件，如： DVD、CD 、VCR、桌上型电脑、可携式电脑、印表机、扫描器、磁碟机、播放器、电话、电视机、警报系统、医疗器材、空调系统、厨具、汽车引擎、汽车的丁器板等，只要利用Jini技术，就可以结合各类的电子产品成为网路上的资源服务[6] ，而使用者只　透过电话或无限通讯器材就能使用这些服务。
+
+想像一个剧情：一个使用者坐在公园里，想要透过掌上型电脑来使用网路上的印表机，但是他并没有任何印表机的驱动程式。首先，Jini会启动 Lookup服务（类似 JavaSpaces），到联盟（federation ）中搜寻符合使用者条件的印表机。找到之後，Jini会跟那台印表机沟通，取得它的驱动程式，并且传至使用者的掌上型电脑。使用者於是可以轻易的使用网路上的印表机。
+
+我们也可以把家中的电器用品都结合到网路上，这样可以让我们在任何时间、任何地点来控制家里的电器，这将是多堋令人期待的一个理想。 
+
+目前已经有许多公司正在发展相关的技术，这些公司包括Axis、Canon、 Computer Associates、Datek 、Enocanto、Epson 、Ericsson、FedEx 、Mitsubishi、 Norwest Mortgage 、Novell、ODI、 Oki、Quantum、 Salomon Brother、 Seagate、以及 Toshiba等。
+
+五、结论 
+
+Jini让许多电器设备、网路服务结成联盟（ federation）。 Jini的最上层以 Lookup机制为基础的目录服务（ directory service ），让许多含有 Jini技术的资源，来注册以及被公布於网路上。下一层则利用JavaSpaces 技术来管理联盟的资源，以让使用者或其他应用程式使用资源。底层则是以RMI为基础的协定，用来规范物件之间在网路上的沟通。
+
+如同SUN公司所说：「网路就是电脑（The network is the computer）」。网路的出现提供了无限的计算资源，让我们可望达成一个超大型的计算系统。Java技术使得分散式计算变得容易可行，Jini 则实现网路就是一个超大型电脑的理想。
+

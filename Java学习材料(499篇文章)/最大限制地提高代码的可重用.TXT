@@ -1,0 +1,99 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：2001-6-15 13:28:57
+[b]最大限制地提高代码的可重用性
+克服传统面向对象编程方法在可重用性方面的不足[/b]
+
+[BLOCKQUOTE][b]摘要[/b]
+不要放弃编写可重用代码的努力！本技巧总结了三种修改您的现有代码以增强其可重用性的方法。[i][/i] [/BLOCKQUOTE][b]作者：Jeff Mather([email]jeff.mather@javaworld.com[/email])[/b]
+重用是一种神话，这似乎正在日渐成为编程人员的一种共识。然而，重用可能难以实现，因为传统面向对象编程方法在可重用性方面存在一些不足。本技巧说明了组成支持重用的一种不同方法的三个步骤。 
+[b]第一步：将功能移出类实例方法[/b]
+由于类继承机制缺乏精确性，因此对于代码重用来说它并不是一种最理想的机制。也就是说，如果您要重用某个类的单个方法，就必须继承该类的其他方法以及数据成员。这种累赘不必要地将要重用此方法的代码复杂化了。继承类对其父类的依赖性引入了额外的复杂性：对父类的更改会影响子类；当更改父类或子类中的任一方时，很难记住覆盖了哪些方法（或者没有覆盖哪些方法）；而且是否应该调用相应的父类方法也不明朗。 
+执行单一概念性任务的任何方法都应该是独立的，并应将其作为要重用的首选方法。要实现这一点，我们必须返回到过程式编程，将代码移出类实例方法并将其移入全局可见的过程中。为了提高这类过程的可重用性，您应该像编写静态实用方法那样编写这类方法：每个过程只使用其自身的输入参数和/或对其他全局可见过程的调用完成其工作，而且不应该使用任何非局部变量。这种外部依赖性的减弱降低了使用该过程的复杂性，从而可促进在别处对它的重用。当然，即便那些不计划重用的代码也会从这种结构中受益，因为它的结构总是相当清晰。 
+在 Java 中，方法不能脱离类而存在。但是，您可以采取相关步骤，使方法成为单个类的、公共可见的静态方法。作为示例，您可以采用类似下面这样的一个类： 
+class Polygon { 
+      . 
+      . 
+      public int getPerimeter() {...} 
+      public boolean isConvex() {...} 
+      public boolean containsPoint(Point p) {...} 
+      . 
+      . 
+} 
+
+并将其更改为类似以下的形式： 
+class Polygon { 
+      . 
+      . 
+      public int getPerimeter() {return pPolygon.computePerimeter(this);} 
+      public boolean isConvex() {return pPolygon.isConvex(this);} 
+      public boolean containsPoint(Point p) {return pPolygon.containsPoint(this, p);} 
+      . 
+      . 
+} 
+
+其中，pPolygon 如下所示： 
+class pPolygon { 
+    static public int computePerimeter(Polygon polygon) {...} 
+    static public boolean isConvex(Polygon polygon) {...} 
+    static public boolean containsPoint(Polygon polygon, Point p) {...} 
+} 
+
+类名 pPolygon 反映了该类所封装的过程主要与类型 Polygon 的对象有关。类名前的 p 表示该类的唯一用途就是将公共可见的静态过程组织起来。然而，在 Java 中类名以小写字母开头是不规范的，像 pPolygon 这样的类并不完成正常的类功能。这就是说，它不代表一类对象；它只是该语言所需的一个组织实体。 
+在以上事例中所作更改的全部效果就是，客户端代码不再非要通过继承 Polygon 来重用其功能。现在这一功能在 pPolygon 类中是以过程为单位提供的。客户端代码仅使用它所需的功能，而不必关心它不需要的功能。 
+这并不意味着类不会在新的过程式编程风格中发挥积极作用。恰恰相反，类要执行必要的分组任务，并封装它们所代表的对象的数据成员。此外，类通过实现多个接口而具备的多态性使其具备了卓越的可重用性，请参阅第二步中的说明。但是，您应该将通过类继承获得可重用性和多态性的方法归类到优先级较低的技术中，因为将功能包含在实例方法中并不是实现可重用性的最佳选择。 
+四人合著的畅销书 [url href=http://www.cn.ibm.com/developerWorks/java/jw-tips/tip107/index.shtml#resources][i]Design Patterns[/i][/url] 简要提及了一种与这一技术只有细微差别的技术。那本书中的 [i]Strategy[/i] 模式提倡用一个共公接口将相关算法的每个系列成员都封装起来，以便客户端代码可互换这些算法。因为一种算法通常被编写为一个或几个独立的过程，因而这种封装强调重用执行单一任务（即一个算法）的过程，而不强调重用包含代码和数据、执行多项任务的对象。本步骤也体现了同样的基本思想。 
+然而，用接口封装算法意味着将算法编写为实现该接口的一个对象。这意味着我们仍然被束缚在与数据耦合在一起的过程及其封装对象的其他方法上，因而使重用变得复杂。每次使用算法时必须实例化这些对象也是个问题，这将降低程序的性能。幸运的是，[i]Design Patterns[/i] 提供的一种解决方案可解决这两个问题。在编写 Strategy 对象时您可使用 [i]Flyweight[/i] 模式，以使每个对象仅有一个众所周知的共享实例（该实例处理执行问题），这样每个共享对象就不会在两次访问之间维护状态（因此该对象不包含任何成员变量，从而解决了许多耦合问题）。生成的 Flyweight-Strategy 模式将本步骤中封装功能的技术高度集成在全局可用的无状态过程中。 
+[b]第二步：将非基本数据类型的输入参数类型转换为接口类型[/b]
+通过接口参数类型而非通过类继承利用多态性，这是在面向对象编程方法中实现可重用性的真正基础，正如 Allen Holub 在 [url href=http://www.cn.ibm.com/developerWorks/java/jw-tips/tip107/index.shtml#resources]"Build User Interfaces for Object-Oriented Systems, Part 2"[/url] 中所讲的那样。 
+[BLOCKQUOTE]“... 可重用性是通过编写接口，而不是通过编写类来实现的。如果一个方法的所有参数均为一些已知接口的引用，而这些接口又是由您从未听过的一些类实现的，那么该方法可对编写代码时还不存在的类的对象进行操作。从技术上讲，可重用的是方法，而不是传递给该方法的对象。” [/BLOCKQUOTE]
+将 Holub 的论述应用到第一步的结果，一旦某个功能块可作为一个全局可见的独立过程，您就可以通过将它的每个类级输入参数类型转换为接口类型，从而进一步提高它的可重用性。这样，实现该接口类型的任何类的对象都符合该参数的要求，而不仅仅是符合原始类的要求。这样，该过程便潜在地可用于更多的对象类型。 
+例如，假定您有一个全局可见的静态方法： 
+static public boolean contains(Rectangle rect, int x, int y) {...} 
+
+该方法旨在判断给定的矩形是否包含给定的位置。此处您应该将 rect 参数的类型从类类型 Rectangle 更改为接口类型，如下所示： 
+static public boolean contains(Rectangular rect, int x, int y) {...} 
+
+Rectangular could be the following interface: 
+public interface Rectangular { 
+      Rectangle getBounds(); 
+} 
+
+现在，可描述为 Rectangular 的类（即可实现 Rectangular 接口）的对象都可作为 rect 的参数传递给 pRectangular.contains()。我们通过放宽对可传递给方法的参数的约束来提高方法的可重用性。 
+但是，就以上示例而言，当 Rectangle 接口的 getBounds 方法返回一个 Rectangle 时，您可能不知道使用 Rectangular 接口会有什么实际的好处；也就是说，如果我们知道我们要传入的对象在被请求时能返回 Rectangle；为什么不传入 Rectangle 类型而要传入接口类型呢？最重要的原因与集合有关。假定有这样一个方法： 
+static public boolean areAnyOverlapping(Collection rects) {...} 
+
+该方法旨在判断给定集合中的 rectangular 对象是否有重叠。接下来，在方法体中，当您依次处理集合中的每个对象时，如果无法将对象转换为诸如 Rectangular 这样的接口类型，如何才能访问那个对象的 rectangle 呢？唯一的选择是将对象转换为特定的类类型（我们已知该类中有一个方法能提供 rectangle），这意味着该方法必须事先知道它要对何种类类型进行操作，因此重用它时只能使用这些类型。这就是这一步首先要避免的问题！ 
+[b]第三步：选择耦合性较小的输入参数接口类型[/b]
+在执行第二步时，应该选择何种接口类型来替代给定的类类型呢？答案是：能充分描述过程对参数的要求且累赘最少的任何接口。参数对象要实现的接口越小，任一特定类能实现该接口的机会就越大 -- 因而其对象可用作该参数的类的数量也就越多。很容易看出，如果您有如下这样一个方法： 
+static public boolean areOverlapping(Window window1, Window window2) {...} 
+
+该方法旨在判断两个（假定为 rectangular）窗口是否重叠，如果该方法仅要求它的两个参数提供它们各自的 rectangular 坐标，则最好[i]简化[/i]这两个参数的类型以反映这一事实： 
+static public boolean areOverlapping(Rectangular rect1, Rectangular rect2) {...} 
+
+以上代码假定前面的 Window 类型对象也能实现 Rectangular。现在您就可以重用任何 rectangular 对象的第一个方法中所包含的功能。 
+您可能有过多次这样的经历，即充分指定了参数要求的可用接口包含过多不必要的方法。碰到这种情况时，您就应在全局名称空间中定义一个新的公共接口，以便其他可能面临同样窘境的方法重用这个接口。 
+您也可能有过多次这样的经历，即最好创建一个独特的接口来指定单个过程对一个参数的要求。您所创建的接口只会用于那个参数。当您希望将参数当作 C 中的函数指针处理时经常会出现这种情况，例如，假定有这样一个过程： 
+static public void sort(List list, SortComparison comp) {...} 
+
+该过程通过使用给定的比较对象 comp 对列表的所有对象进行比较，从而对给定的列表进行排序，sort 对 comp 的全部要求就是调用其单个方法执行比较。因此，SortComparison 应该是仅包含一个方法的接口： 
+public interface SortComparison { 
+      boolean comesBefore(Object a, Object b); 
+} 
+
+该接口的唯一用途就是为 sort 提供一种访问完成其工作所需功能的方法，因此 SortComparison 不应在别处重用。 
+[b]小结[/b]
+以上三步旨在改进用更传统的面向对象方法编写的现有代码。将这三个步骤与面向对象编程结合使用即可构建一种新的方法，您可用这种新方法编写以后的代码，这样编写代码将提高方法的可重用性和内聚性，同时也会减少方法的相互耦合及复杂性。 
+很明显，您不应该对本质上不适合重用的代码执行这些步骤。这种代码通常存在于程序的表示层。创建程序用户界面的代码及将输入事件绑定到完成实际操作的控制代码是不可重用的两个例子，因为它们的功能随程序的不同而相差甚远，根本无法实现可重用性。[img]http://a301.g.akamai.net/7/301/1403/v001/www.javaworld.com/javaworld/icons/dingbat.gif[/img] 
+[TABLE][TR][TD][b]作者简介 [/b]
+Jeff Mather([email]jeff.mather@javaworld.com[/email]) 为基于 Tucson，Ariz. 的 [url href=http://www.eblox.com/]eBlox.com[/url] 工作，在那里他为一些公司创建有关宣传材料和生物工艺行业的 applet。他还在业余时间编写[url href=http://geocities.com/silmar_game/]共享游戏[/url]。 [/TD][/TR][/TABLE]
+[b]参考资源[/b] [UL][LI]欲了解 Allen Holub 对重用的见解，请阅读他在 [i]JavaWorld[/i] 发表的文章，"Build User Interfaces for Object-Oriented system, Part 2"： 
+[url href=http://www.javaworld.com/javaworld/jw-09-1999/jw-09-toolbox.html]http://www.javaworld.com/javaworld/jw-09-1999/jw-09-toolbox.html [/url][LI]Allen Holub 的 [b]Toolbox[/b] 专栏的完整清单： 
+[url href=http://www.javaworld.com/javaworld/topicalindex/jw-ti-toolbox.html]http://www.javaworld.com/javaworld/topicalindex/jw-ti-toolbox.html [/url][LI][i]Design Patterns：Elements of Reusable Object-Oriented Software[/i]，Erich Gamma 等 (Addison-Wesley，1995)： 
+[url href=http://www.amazon.com/exec/obidos/ASIN/0201633612/javaworld]http://www.amazon.com/exec/obidos/ASIN/0201633612/javaworld [/url][LI]查看以前的所有 [b]Java 技巧[/b]并提交您自己的技巧： 
+[url href=http://www.javaworld.com/javatips/jw-javatips.index.html]http://www.javaworld.com/javatips/jw-javatips.index.html [/url][LI]Java 专家在 [i]JavaWorld[/i] 的 [b]JavaQ&A[/b] 专栏解答您最棘手的 Java 问题： 
+[url href=http://www.javaworld.com/javaworld/javaqa/javaqa-index.html]http://www.javaworld.com/javaworld/javaqa/javaqa-index.html [/url][LI]通过 [i]JavaWorld[/i] 的 [b]Java101[/b] 专栏从基础开始学习 Java： 
+[url href=http://www.javaworld.com/javaworld/topicalindex/jw-ti-java101.html]http://www.javaworld.com/javaworld/topicalindex/jw-ti-java101.html [/url][LI]访问 [i]JavaWorld[/i] 的主题索引： 
+[url href=http://www.javaworld.com/javaworld/topicalindex/jw-ti-index.html]http://www.javaworld.com/javaworld/topicalindex/jw-ti-index.html [/url][LI]要了解更多的 Java 窍门，请订阅 ITworld.com 的免费 [i]Java Tutor[/i] 时事通讯： 
+[url href=http://reg.itworld.com/cgi-bin/subcontent12.cgi]http://reg.itworld.com/cgi-bin/subcontent12.cgi [/url][LI]参与 [b]Java Beginner[/b] 的讨论，由 [i]JavaWorld[/i] 作者 Geoff Friesen 负责协调： 
+[url]http://www.itworld.com/jump/jw-javatip107/forums.itworld.com/webx?14@@.ee6b804/1195!skip=1125[/url] [/LI][/UL]

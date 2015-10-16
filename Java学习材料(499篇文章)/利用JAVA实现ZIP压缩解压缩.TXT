@@ -1,0 +1,315 @@
+作者：五一
+日期：00-7-7 14:06:26
+利用Java实现zip压缩/解压缩
+（作者：　2000年07月06日 13:30）
+
+　　由于网络带宽有限,所以数据文件的压缩有利于数据在Internet上的快速传输,同时也节 
+
+省服务器的外存空间。 
+
+　　Java 1.1实现了I/O数据流与网络数据流的单一接口,因此数据的压缩、网络传输和解 
+
+压缩的实现比较容易,下面介绍利用ZipEntry、ZipInputStream和ZipOutputStream三个Java 
+
+类实现zip数据压缩方式的编程方法。 
+
+　　zip压缩文件结构:一个zip文件由多个entry组成,每个entry有一个唯一的名称,entry的 
+
+数据项存储压缩数据。 
+
+　　与zip文件有关的几个Java类 
+
+　　·类ZipEntry 
+
+　　public ZipEntry(String name); 
+
+　　name为指定的数据项名。 
+
+　　·类ZipOutputStream 
+
+　　ZipOutputStream实现了zip压缩文件的写输出流,支持压缩和非压缩entry。下面是它的 
+
+几个函数: 
+
+　　public ZipOutputStream(OutputStream out); 
+
+　　∥利用输出流out构造一个ZIP输出流。 
+
+　　public void setMethod(int method); 
+
+　　∥设置entry压缩方法,缺省值为DEFLATED。 
+
+　　public void putNextEntry(ZipEntry newe); 
+
+　　∥如果当前的entry存在且处于激活状态时,关闭它,在zip文件中写入新的entry-newe 
+
+并将数据流定位于entry数据项的起始位置,压缩方法为setMethod指定的方法。 
+
+　　·类ZipInputStream 
+
+　　ZipInputStream实现了zip压缩文件的读输入流,支持压缩和非压缩entry。下面是它的 
+
+几个函数: 
+
+　　public ZipInputStream(InputStream in); 
+
+　　∥利用输入流in构造一个ZIP输出流。 
+
+　　public ZipEntry getNextEntry(); 
+
+　　∥返回ZIP文件中的下一个entry,并将输出流定位在此entry数据项的起始位置。 
+
+　　public void closeEntry(); 
+
+　　∥关闭当前的zip entry,并将数据流定位于下一个entry的起始位置。 
+
+　　程序代码及其注释 
+
+　　下列的程序实现了数据文件zip方式的压缩和解压缩方法。randomData()函数随机生成 
+
+50个double数据,并放在doc字符串变量中;openFile()函数读取ZIP压缩文件;saveFile()函数 
+
+将随机生成的数据存到ZIP格式的压缩文件中。 
+
+　　import java.util.zip.*; 
+
+　　import java.awt.event.*; 
+
+　　import java.awt.*; 
+
+　　import java.lang.Math; 
+
+　　import java.io.*; 
+
+　　public class TestZip extends Frame implements ActionListener { 
+
+　　TextArea textarea; ∥显示数据文件的多行文本显示域 
+
+　　TextField infotip; ∥显示数据文件未压缩大小及压缩大小单行文本显示域 
+
+　　String doc; ∥存储随机生成的数据 
+
+　　long doczipsize = 0;∥压缩数据文件的大小 
+
+　　public TestZip(){ 
+
+　　∥生成菜单 
+
+　　MenuBar menubar = new MenuBar(); 
+
+　　setMenuBar(menubar); 
+
+　　Menu file = new Menu("File",true); 
+
+　　menubar.add(file); 
+
+　　MenuItem neww= new MenuItem("New"); 
+
+　　neww.addActionListener(this); 
+
+　　file.add(neww); 
+
+　　MenuItem open=new MenuItem("Open"); 
+
+　　open.addActionListener(this); 
+
+　　file.add(open); 
+
+　　MenuItem save=new MenuItem("Save"); 
+
+　　save.addActionListener(this); 
+
+　　file.add(save); 
+
+　　MenuItem exit=new MenuItem("Exit"); 
+
+　　exit.addActionListener(this); 
+
+　　file.add(exit); 
+
+　　∥随机生成的数据文件的多行文本显示域 
+
+　　add("Center",textarea = new TextArea()); 
+
+　　∥提示文本原始大小、压缩大小的单行文本显示域 
+
+　　add("South",infotip = new TextField()); 
+
+　　} 
+
+　　public static void main(String args[]){ 
+
+　　TestZip ok=new TestZip(); 
+
+　　ok.setTitle("zip sample"); 
+
+　　ok.setSize(600,300); 
+
+　　ok.show(); 
+
+　　} 
+
+　　private void randomData(){ 
+
+　　∥随机生成50个double数据,并放在doc字符串变量中。 
+
+　　doc=""; 
+
+　　for(int i=1;i<51;i++){ 
+
+　　 double rdm=Math.random()*10; 
+
+　　 doc=doc+new Double(rdm).toString(); 
+
+　　 if(i%5 == 0) doc=doc+"\n"; 
+
+　　 else doc=doc+" "; 
+
+　　} 
+
+　　doczipsize = 0; 
+
+　　showTextandInfo(); 
+
+　　} 
+
+　　private void openFile(){ 
+
+　　∥打开zip文件,将文件内容读入doc字符串变量中。 
+
+　　FileDialog dlg=new FileDialog(this,"Open",FileDialog.LOA D); 
+
+　　dlg.show(); 
+
+　　String filename=dlg.getDirectory()+dlg.getFile(); 
+
+　　try{ 
+
+　　∥创建一个文件实例 
+
+　　File f=new File(filename); 
+
+　　if(!f.exists()) return; ∥文件不存在,则返回 
+
+　　∥用文件输入流构建ZIP压缩输入流 
+
+　　ZipInputStream zipis=new ZipInputStream(new FileInputStream(f)); 
+
+　　zipis.getNextEntry(); 
+
+　　∥将输入流定位在当前entry数据项位置 
+
+　　DataInputStream dis=new DataInputStream(zipis); 
+
+　　∥用ZIP输入流构建DataInputStream 
+
+　　doc=dis.readUTF();∥读取文件内容 
+
+　　dis.close();∥关闭文件 
+
+　　doczipsize = f.length();∥获取ZIP文件长度 
+
+　　showTextandInfo();∥显示数据 
+
+　　} 
+
+　　catch(IOException ioe){ 
+
+　　System.out.println(ioe); 
+
+　　} 
+
+　　} 
+
+　　private void saveFile(){ 
+
+　　∥打开zip文件,将doc字符串变量写入zip文件中。 
+
+　　FileDialog dlg=new FileDialog(this,"Save",FileDialog.SAVE); 
+
+　　dlg.show(); 
+
+　　String filename=dlg.getDirectory()+dlg.getFile(); 
+
+　　try{ 
+
+　　∥创建一个文件实例 
+
+　　File f=new File(filename); 
+
+　　if(!f.exists()) return; ∥文件不存在,则返回 
+
+　　∥用文件输出流构建ZIP压缩输出流 
+
+　　ZipOutputStream zipos=new ZipOutputStream(new FileOutputStream(f)); 
+
+　　zipos.setMethod(ZipOutputStream.DEFLATED); ∥设置压缩方法 
+
+　　zipos.putNextEntry(new ZipEntry("zip")); 
+
+　　∥生成一个ZIP entry,写入文件输出流中,并将输出流定位于entry起始处。 
+
+　　DataOutputStream os=new DataOutputStream(zipos); 
+
+　　∥用ZIP输出流构建DataOutputStream; 
+
+　　os.writeUTF(doc);∥将随机生成的数据写入文件中 
+
+　　os.close();∥关闭数据流 
+
+　　doczipsize = f.length(); 
+
+　　∥获取压缩文件的长度 
+
+　　showTextandInfo();∥显示数据 
+
+　　} 
+
+　　catch(IOException ioe){ 
+
+　　System.out.println(ioe); 
+
+　　} 
+
+　　} 
+
+　　private void showTextandInfo(){ 
+
+　　∥显示数据文件和压缩信息 
+
+　　textarea.replaceRange(doc,0,textarea.getText().length()); 
+
+　　infotip.setText("uncompressed size: "+doc.length()+"compressed size: "+dc zipsize); 
+
+　　} 
+
+　　public void actionPerformed(ActionEvent e){ 
+
+　　String arg = e.getActionCommand(); 
+
+　　if ("New".equals(arg)) randomData(); 
+
+　　else if ("Open".equals(arg)) openFile(); 
+
+　　else if ("Save".equals(arg)) saveFile(); 
+
+　　else if ("Exit".equals(arg)){ 
+
+　　 dispose();∥关闭窗口 
+
+　　 System.exit(0);∥关闭程序 
+
+　　} 
+
+　　else { 
+
+　　 System.out.println("no this command!"); 
+
+　　} 
+
+　　} 
+
+　　} 
+
+
+

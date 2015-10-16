@@ -1,0 +1,46 @@
+作者：chenm
+日期：2001-5-15 14:45:31
+/*
+Time Functions.
+cnmuse@chinaren.com
+*/
+
+import java.lang.*;
+import java.util.*;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
+
+public class formatDateTime{
+  static String TimeFormat1="yyyy.MM.dd HH:mm:ss";
+  public formatDateTime(){
+  }
+
+/*
+Function name:    lTimeCompare
+Description:      Compare two times
+Input:            String CompTime1,String CompTime2 (Format: yyyy.MM.dd HH:mm:ss)
+Output:           time diffrent by seconds
+*/
+  public long lTimeCompare(String CompTime1,String CompTime2){
+      long iReturn=-1;
+      SimpleDateFormat sdf = new SimpleDateFormat(TimeFormat1);
+      Date DateTime1=sdf.parse(CompTime1,new ParsePosition(0));
+      Date DateTime2=sdf.parse(CompTime2,new ParsePosition(0));
+      iReturn=DateTime2.getTime()/1000L-DateTime1.getTime()/1000L;
+      return iReturn;  
+  }
+
+/*
+Function name:    lTimeCompareNow
+Description:      Compare one time with now
+Input:            String CompTime1(Format: yyyy.MM.dd HH:mm:ss)
+Output:           time diffrent by seconds
+*/
+  public long lTimeCompareNow(String CompTime1){
+      long iReturn=-1;
+      SimpleDateFormat sdf = new SimpleDateFormat(TimeFormat1);
+      Date DateTime1=sdf.parse(CompTime1,new ParsePosition(0));
+      iReturn=java.lang.System.currentTimeMillis()/1000L-DateTime1.getTime()/1000L;
+      return iReturn;  
+  }
+}

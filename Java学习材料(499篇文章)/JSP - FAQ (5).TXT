@@ -1,0 +1,133 @@
+作者：jspfuns
+日期：2000-8-10 17:54:55
+33) Is there some sort of event that happens when a session object gets bound or unbound to the session? TOC 
+
+
+
+From: "Kirkdorffer, Daniel" <daniel.kirkdorffer@ATTWS.COM>
+
+HttpSessionBindingListener will hear the events When an object is added and/or remove from the session object, or when the session is invalidated, in which case the objects are first removed from the session, whether the session is invalidated manually or automatically (timeout).
+
+34) Is there a way to execute a JSP from the comandline or from my own application? TOC 
+
+
+
+There is a little tool called JSPExecutor that allows you to do just that. The developers (Hendrik Schreiber <hs@webapp.de> & Peter Rossbach <pr@webapp.de>) aim was not to write a full blown servlet engine, but to provide means to use JSP for generating source code or reports. Therefore most HTTP-specific features (headers, sessions, etc) are not implemented, i.e. no reponseline or header is generated. Nevertheless you can use it to precompile JSP for your website. JSPExecutor is GPLed and available at no charge at:
+
+http://www.webapp.de/jspexecutor.html
+
+35) What should I use, Model 1 or Model 2? TOC 
+
+
+
+Whichever one works for you. Model 2 can give you more control, especially if you are doing things such as filtering the actual web pages a client receives because of language. Model 1 is generally more simple. A more full description of Model 1 vs Model 2 is at http://www.aptura.com/technology/jspBook_Architectures.html.
+
+36) How do I delete a cookie with JSP? TOC 
+
+
+
+From: Chris Fesler <cfesler@InstantObjects.com>
+
+A little more experimentation, and I came up with a method to delete cookies. Say that I have a cookie called "foo," that I set a while ago & I
+want it to go away. I simply:
+
+<%
+Cookie killCookie = new Cookie("foo", null);
+killCookie.setPath("/");
+killCookie.setMaxAge(0);
+response.addCookie(killCookie);
+%>
+Note that this is -not- how the JSDK documentation indicates cookies are to be deleted, but what the heck -- it seems to work.
+
+
+
+37) Are there tips on things to watch out for in JSP? TOC 
+
+
+
+There are a number of things to beware of I'm sure, I have found one in particular so far:
+
+From John Langley (langley@NEOTEK.MV.COM), don't have directories in your path that are not valid Java identifiers (for example, they start with a number, or are a number). A number of JSP implementations use the directory your JSP is in as part of the package name and if that is in a directory with an invalid identifier then you are out of luck. 
+Beware of server side includes not recompiling when you have changed them. Some JSP engines won't check into your JSP or create dependency lists to ensure that the entire content of your JSP will be recompiled if a dependency has changed. 
+Many servlet engines don't notice that you change your beans, so that if you change your JSP and change a bean that it uses, although the JSP will reload, the bean will not. This will require you to restart your server. 
+The Virtual Machine has some intrinsic limitations as well (contributed by Costin Manolache), and these affect your JSP. From Virtual Machine Spec:
+
+64k entries in constant pool ( that means the count of strings you can use in out.println(), plus all other constants < 64k ) 
+64k as the size of a method ( that mean the service() method can't have unlimited number of instructions ) 
+constant string limit is 64k (bytes - not characters!) That may explain the 32K ( since Unicode chars are ~ 2 bytes - sometimes).
+( it's not the limit of a String - just constant String ). 
+Other tips appreciated! Email me at rvowles@esperanto.org.nz
+
+38) How do you get started with JSP on the Macintosh? TOC 
+
+
+
+From: Niels Peter Strandberg <nps@HEM1.PASSAGEN.SE>
+
+This mail is for all Mac users that want to get started with Java Server Pages on the Mac.
+
+This list is base on the mails I got from Mike Engelhart <mengelhart@earthtrip.com>. Who helped me to get my server started. Thanks Mike!
+
+Java Server Pages is the Java worlds answer to Active Server Pages on NT. Sun has made a free version witch includes a WebServer and an JSP
+engine. The package is made in 100% pure Java. So it runs on every Java platform, and it is free.
+
+Before you can cook you own Java Server Pages, You need to build the "JSP machine". And here is how to do it.
+
+You need the latest MRJ from Apple. MRJ2.1 can be found here: http://www.apple.com/java/. After download run the installer and install
+the MRJ. 
+You also need the latest MRJ SDK 2.1 (Im using 2.0 and that works great), that can be found here: http://developer.apple.com/java/text/download.html#sdk. After download run the installer and install the MRJ SDK. 
+You also need the "JavaServer WDK EA (JavaServer Web Development Kit 1.0 EA)" from Sun. This can be found here: http://developer.java.sun.com/developer/earlyAccess/jsp/. I downloaded the Win version, but there should be no problem if you download the
+Solaris version. After you have downloaded the Zip, unzip it using ZipIt or StuffIt. You have to be a registered member of developer connection
+to get access to the files, but that it's free. So go ahead an register yourself. 
+After you have unziped the zip file, place the unziped folder "jswdk-1.0-ea" on the desktop. Now locate the "MRJ SDK 2.1" folder and
+open it. Inside that folder is another folder named "JBindery" and inside that folder an app with the same name. 
+Now launche the app "jBindery". Click on the"Command" icon and add this to the Class name field: "com.sun.web.shell.Startup". Leave the
+optional parameters blank. 
+Click on the "Classpath" icon. Click on the "add .zip file..." button and add the following files: "webserver.jar" which is in the root of your "jswdk-1.0-ea" folder. Also add the following files which are in the "lib" folder: "jsp.jar" and "jspengine.jar" and "servlet.jar" 
+Click on the "add folder..." button and ad the following folder "beans" locate in examples/WEB-INF/jsp/ 
+Now you are ready to save these setting as an click able application. Click on the "Save Settings..." button, and give your "app" a name (ex.
+JSP Server) and make sure the check box "save as App" is checked. Make sure that you save the app in the root of the "jswdk-1.0-ea" folder. 
+Now you have embedded these setting in an application file. Now locate your "JSP Server" application and double click on it. Wait a few seconds, and your server should be up an running. The app will quit if it cant find a IP number. Go into your TCP/IP control panel and assign a permanent IP number (ex. 127.0.0.1). Then try to run the app again. 
+The JSP Server will run at port 8080 by default. You can change that by opening the "default.cfg" file in a text editor and change the "server.port" from 8080 to 80, witch is the default port for WebServers. 
+Now here is where the fun begins. Open your web browser and type in the IP number you assigned to you mac in the TCP/IP control panel. (http://127.0.0.1) or (http://127.0.0.1:8080) if you didn't change the port setting in the "default.cfg" file. 
+Now, explore the example and when your are ready, cook your own JSP. 
+39) What Application Servers support JSP? TOC 
+
+
+
+Originally contributed by Daniel Kirkdorffer, daniel.kirkdorffer@attws.com. See also http://www.interpasnet.com/JSS/textes/jsp2.htm or http://www.flashline.com/components/appservermatrix.jsp
+
+
+40) What happened to the LOOP and DISPLAY tags from JSP 0.92? TOC 
+
+
+
+They were left out in JSP 1.0 onwards. There was no explanation given. They may be able to be expressed as tag extensions but I have not investigated the 1.1 API yet to determine how that could be done.
+
+41) Does JSP have a bean providing File Upload features like ActiveX upload control? TOC 
+
+
+
+Get a look at the MultipartRequest object from the author of "Java Servlet Programming" (O'Reilly). Home page is http://www.servlets.com/index.html. The zip file for this class and other useful classes is at http://www.servlets.com/resources/com.oreilly.servlet/cos.zip.
+
+42) So how do I use EJB from JSP? TOC 
+
+
+
+43) Can I just abort processing a JSP? TOC 
+
+
+
+Yes. Because your JSP is just a servlet method, you can just put (whereever necessary) a
+
+<% return; %>
+44) "I'm trying to pass an object between a servlet and a JSP page, but my object is null on the JSP page. What could be wrong?" TOC 
+
+
+
+From: Timothy Owen Reilly 
+HttpSession objects are limited in scope to a particular servlet zone. In my case, I saw this behaviour because my servlet was in one servlet zone, and my jsp engine (GnuJSP) was in another. Try printing out the session id in both your servlet and your JSP page [use: HttpSession.getId() ], if it's different in both, then obviously each side of the equation is using a different session framework, and you could have the same problem as I did. 
+
+Running both my servlets and GnuJSP in the same servlet zone solved this problem. 
+
+Note: The observed behaviour and solution were under Apache JServ 1.1 and GnuJSP 1.0

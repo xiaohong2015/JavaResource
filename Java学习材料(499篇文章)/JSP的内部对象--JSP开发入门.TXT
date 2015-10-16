@@ -1,0 +1,45 @@
+作者：jeru
+日期：2000-12-20 11:31:04
+最后一个与JSP语法有关的组件叫做内部对象.在JSP小型指令文件内，你可以存取这些内部对象来与执行JSP网页的servlet环境相互作用。许多对内部对象的存取应该要简化。然而，这些是范例，它们的存取都是可接受的，要完整的利用内部对象设定则需要对最新的Java Servlet API有所了解。 
+
+　　下表列出你可以使用的内部对象。 
+
+
+　　内部对象说明 
+
+
+　　request 　　客户端请求，此请求会包含来自GET/POST请求的参数 
+
+　　response　　网页传回客户端的响应 
+
+　　pageContext 网页的属性是在这里管理 
+
+　　session 　　与请求有关的会话 
+
+　　application servlet正在执行的内容 
+
+　　out 　　　　用来传送响应的输出流 
+
+　　config　　　servlet的架构对象 
+
+　　page　　　　JSP网页本身 
+
+　　exception　　针对错误网页，未捕捉的例外 
+
+　　那么，这些是做什么的，而你应该如何使用它们呢?基本上，在你的小型指令文件里，你可以使用它们来存取执行JSP程序代码的servlet。为了避免谈论到太多Servlet API 的细节，让我们来检视一些你可以利用它们来做的事:　 
+
+　　不必使用表达式，你可以直接存取内部out对象来打印一些东西到response: 
+
+　　<% out.println("Hello"); %>.　 
+
+　　不必直接传送参数到JavaBean，你可以藉由请求对象来取得参数的值: 
+
+　　<% String name=request.getParameter("name"); out.println(name); %>。 
+
+　　当你以JSP写了许多的应用程序之后，如果你建立了JavaBeans或者发现你自己将太多的Java原始码放入你的JSP档案，你需要建立支持的Java类别，这样可以鼓励重复使用并且降低JSP网页转换时所需要的时间。当你需要建立Java类别时，你必须: 
+
+　　将JDSWK的安装目录\bin目录加到你的PATH。在你的autoexec.bat档案的PATH行的最后，加入C:\1.2.2\bin; 。 
+
+　　以下面的指令将JAR档案复制到\jre\lib\ext目录: 
+
+　　copy c:\jswdk-1.0.1\lib\servlet.jar c:\jdk1.2.2\jre\lib\ext. 

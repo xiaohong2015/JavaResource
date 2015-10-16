@@ -1,0 +1,72 @@
+作者：瞌睡虫
+email: kika2000@sina.com
+日期：7/27/2001 3:20:52 PM
+package pub.dates;
+import java.text.DateFormat;
+import java.util.*;
+
+public class Dates
+{
+ Date param=null;
+ Calendar ca=Calendar.getInstance();
+ public Dates()
+ {
+  param=new Date();
+  ca.setTime(param);
+ }
+ public Dates(Date vars)
+ {
+  param=vars;
+  ca.setTime(param);
+ }
+ public Dates(int y,int m,int d)
+ {
+  y=y-1900;m=m-1;
+  param=new Date(y,m,d);
+  ca.setTime(param);
+ }
+ //
+ public int getYear()
+ {
+  return ca.get(Calendar.YEAR);
+ }
+ public int getMonth()
+ {
+  return 1+ca.get(Calendar.MONTH);
+ }
+ public int getDay() 
+ {
+  return ca.get(Calendar.DAY_OF_MONTH);
+ }
+ public int getHour() 
+ {
+  return ca.get(Calendar.HOUR_OF_DAY);
+ }
+    
+ public int getMinute() 
+ {
+  return ca.get(Calendar.MINUTE);
+ }
+
+ public int getSecond()
+ {
+  return ca.get(Calendar.SECOND);
+ } 
+ public String getDate() 
+ {
+  return getYear()+"-"+getMonth()+"-"+getDay();
+ }
+
+ public String getTime()
+ {
+  return getHour() + ":" + getMinute() + ":" + getSecond();
+ }
+} 
+//package部分自己随意.
+构造方法:(3个)
+Dates();
+Dates(Date date);
+Dates(int y,int m, int d); y,m,d是年.月.日
+
+方法:
+getYear();  getMonth();  getDay(); getHour();  getMinute(); getSecond(); getDate(); getTime()

@@ -1,0 +1,29 @@
+作者：jspfuns
+日期：2000-8-9 11:34:09
+作者：Blueski编译
+
+
+使用PrintWriter对象即可写Text文件。
+
+请参考以下示例： 
+
+<%@ page import="java.io.*" %>
+<%
+String str = "print me";
+//always give the path from root. This way it almost always works.
+String nameOfTextFile = "/usr/anil/imp.txt";
+try { 
+PrintWriter pw = new PrintWriter(new FileOutputStream(nameOfTextFile));
+pw.println(str);
+//clean up
+pw.close();
+} catch(IOException e) {
+out.println(e.getMessage());
+}
+%>
+
+现在，打开imp.txt加以查看，字符串"print me"应该已经写入。 
+
+还有另一种方法，使用IN16标记库的file tag，可参考http：//sourceforge.net/project/?group_id=1282.
+其示例的语法为:
+<ext:file action="write|append|create|copy|move|delete|rename|read" from="<%= myfilename %>">

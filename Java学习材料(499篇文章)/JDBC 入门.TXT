@@ -1,0 +1,207 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 1:21:07 PM
+JDBC 入门 -- 建立联接 
+教程：JDBC 入门 作者：Maydene Fisher 翻译：comer 
+　　你需要做的第一事情是你与想要使用的 DBMS 建立一个连接。这包含 2 个步骤：装载驱动程序并建立连接。 
+
+装载驱动程序 
+　　装载驱动程序只需要非常简单的一行代码。例如，你想要使用 JDBC-ODBC 桥驱动程序, 可以用下列代码装载它： 
+
+　　　　Class.forName("sun.jdbc.odbc.JdbcOdbcDriver"); 
+
+　　你的驱动程序文档将告诉你应该使用的类名。例如， 如果类名是 jdbc.DriverXYZ ，你将用代码以下的代码装载驱动程序： 
+
+　　　　Class.forName("jdbc.DriverXYZ"); 
+
+　　你不需要创建一个驱动程序类的实例并且用 DriverManager 登记它，因为调用 Class.forName 将自动将加载驱动程序类。如果你曾自己创建实例，你将创建一个不必要的副本，但它不会带来什么坏处。 
+
+　　加载 Driver 类后，它们即可用来与数据库建立连接。 
+
+建立连接 
+　　第二步就是用适当的驱动程序类与 DBMS 建立一个连接。下列代码是一般的做法： 
+
+　　　　Connection con = DriverManager.getConnection(url, "myLogin", "myPassword"); 
+
+　　这个步骤也非常简单，最难的是怎么提供 url。如果你正在使用 JDBC-ODBC 桥， JDBC URL 将以 jdbc:odbc 开始：余下 URL 通常是你的数据源名字或数据库系统。因此，假设你正在使用 ODBC 存取一个叫 "Fred" 的 ODBC 数据源，你的 JDBC URL 是 jdbc:odbc:Fred 。把 "myLogin" 及 "myPassword" 替换为你登陆 DBMS 的用户名及口令。如果你登陆数据库系统的用户名为 "Fernanda" 口令为 "J8"，只需下面的 2 行代码就可以建立一个连接： 
+
+String url = "jdbc:odbc:Fred"; 
+Connection con = DriverManager.getConnection(url,"Fernanda", "J8"); 
+　　如果你使用的是第三方开发了的 JDBC驱动程序，文档将告诉你该使用什么 subprotocol， 就是在 JDBC URL 中放在 jdbc 后面的部分。例如, 如果驱动程序开发者注册了 acme 作为 subprotocol， JDBC URL 的第一和第二部分将是 jdbc:acme。驱动程序文档也会告诉你余下 JDBC URL 的格式。JDBC URL 最后一部分提供了定位数据库的信息。 
+
+　　如果你装载的驱动程序识别了提供给 DriverManager.getConnection 的 JDBC URL ，那个驱动程序将根据 JDBC URL 建立一个到指定 DBMS 的连接。正如名称所示，DriverManager 类在幕后为你管理建立连接的所有细节。除非你是正在写驱动程序，你可能无需使用此类的其它任何方法，一般程序员需要在此类中直接使用的唯一方法是 DriverManager.getConnection。 
+
+　　DriverManager.getConnection 方法返回一个打开的连接，你可以使用此连接创建 JDBC statements 并发送 SQL 语句到数据库。在前面的例子里，con 对象是一个打开的连接，并且我们要在以后的例子里使用它。 
+
+JDBC 入门 -- 设置表 
+创建表 
+　　首先，我们在我们的示例数据库创建其中一张表 COFFEES，包含在咖啡店所卖咖啡的必要的信息，包括咖啡名字，他们的价格，本星期卖了多少磅及迄今为止卖的数目。关于 COFFEES 表我们以后会详细描述，如下： 
+
+COF_NAME SUP_ID PRICE SALES TOTAL 
+Colombian 101 7.99 0 0 
+French_Roast 49 8.99 0 0 
+Espresso 150 9.99 0 0 
+Colombian_Decaf 101 8.99 0 0 
+French_Roast_Decaf 49 9.99 0 0 
+
+　　存储咖啡名的列是 COF_NAME，它的 SQL 数据类型是 VARCHAR，最大的长度为 32 个字符。因为我们所卖的每种类型咖啡都使用不同的名字，名字可用于作为唯一识别咖啡的标识，因此可用于作主键。第二个列叫 SUP_ID，用于保存咖啡供应商标识；其 SQL 数据类型为 INTEGER。第 3 列叫 PRICE，因为它需要保存带小数的十进制数，因此它的 SQL 类型为 FLOAT。（注意，通常钱的 SQL 类型为 DECIMAL 或 NUMERIC，但在不同 DBMSs 间存在差异，为了避免于老版本的 JDBC 的不兼容性在本教程我们采用更标准的 FLOAT 类型）SALES 列的 SQL 类型为 INTEGER，其值为本星期所卖咖啡的磅数。最后一列，TOTAL 的 SQL 类型为 INTEGER，保存了迄今为止所卖咖啡的总磅数。 
+
+　　数据库里的第二个表 SUPPLIERS，保存了每个供应商的信息： 
+
+SUP_ID SUP_NAME STREET CITY STATE ZIP 
+101 Acme, Inc. 99 Market Street Groundsville CA 95199 
+49 Superior Coffee 1 Party Place Mendocino CA 95460 
+150 The High Ground 100 Coffee Lane Meadows CA 93966 
+
+　　COFFEES 跟 SUPPLIERS 都包含列 SUP_ID，它意味着可以用 SELECT 语句从这两张表中取得有关信息。列 SUP_ID 是 SUPPLIERS 表的主键，用于唯一识别每个咖啡供应商。在 COFFEES 表中，SUP_ID 列被称外键。注意每个 SUP_ID 值在 SUPPLIERS 表里只出现一次；这对主键是必须的。在 COFFEES 表里，它作为外键，显然它可以有重复的 SUP_ID 值，因为同一供应商可以提供很多种的咖啡。在本节的最后，你将看见如何在 SELECT 语句中使用主键及外键的一个例子。 
+
+　　下面的 SQL 语句用于创建 COFFEES 表。列由列名跟空格跟 SQL 类型组成。列（包括列名及其 SQL 类型）跟下一个之间用逗号分隔。VARCHAR 类型创建定义了最大长度， 因此它需要有一个参数来表示最大长度。参数必须在类型后面的括号内。SQL 语句如下，列 COF_NAME 的长度 被限定为不得超过 32 个字符： 
+
+CREATE TABLE COFFEES 
+(COF_NAME VARCHAR(32), 
+SUP_ID INTEGER, 
+PRICE FLOAT, 
+SALES INTEGER, 
+TOTAL INTEGER) 
+
+　　这些代码不带 DBMS 语句结束符， 因为每个 DBMS 都可能不同。例如, Oracle 使用一个分号 (;) 作为语句的结束，而 Sybase 使用 go。你所使用的驱动程序会自动提供合适的语句结束符，因此你无须把它包括在你的 JDBC 代码中。 
+
+　　另外，我们应该指出的的是 SQL 语句的格式。在 CREATE TABLE 语句中，关键字采用大写字符，并且每个项目都另起一行。SQL 并没有此要求；仅仅是为了更容易阅读。SQL 标准是不区分关键词的大小写的, 因此，如下例中的 SELECT 语句可以有多种写法。因此下面两个不同写法的语句对 SQL 来说是一样的。 
+
+SELECT First_Name, Last_Name 
+FROM Employees 
+WHERE Last_Name LIKE "Washington" 
+
+select First_Name, Last_Name from Employees where 
+Last_Name like "Washington" 
+
+　　然而，引号里的内容是区分大小写的：在名字"Washington" 里 "W" 必须被大写，并且余下的字符必须是小写的。 
+
+　　对于标识，不同的 DBMS 有不同的要求，例如, 某些 DBMSs 要求那些列名及表名必须跟创建时的一样，有些则没有此要求。为安全起见，我们全部使用大写标识如 COFFEES、SUPPLIERS，因为我们是那样定义他们的。 
+
+　　到止我们写了创建 COFFEES 表的 SQL 语句。现在我们在它外面加上引号（使它成为字符串），并且字符串赋值给变量 createTableCoffees，在以后的 JDBC 代码中我们可以使用此变量。正如看到的，DBMS 并不在意分行，但对 Java 语言来，String 对象分行是通不过编译的。因而，我们可以用加号 (+) 把每一行的串连接。 
+
+String createTableCoffees = "CREATE TABLE COFFEES " + 
+"(COF_NAME VARCHAR(32), SUP_ID INTEGER, PRICE FLOAT, " + 
+"SALES INTEGER, TOTAL INTEGER)"; 
+
+　　我们在 CREATE TABLE 语句中使用的数据类型是通用的 SQL 类型（也称 JDBC 类型）它们在类 java.sql.Types 中定义。DBMSs 通常使用这些标准的类型，因此，当你要尝试一些 JDBC 应用程序时，你可以直接使用 CreateCoffees.java 应用程序，它使用了 CREATE TABLE 语句。如果你的 DBMS 使用了它的自己的本地的类型名字，我们为你供应其它的应用程序，我们将在后面详细解释。 
+
+　　在运用任何应用程序前，当然，我们将让你了解 JDBC 的基础。 
+
+创建 JDBC Statements 对象 
+　　Statement 对象用于把 SQL 语句发送到 DBMS 。你只须简单地创建一个 Statement 对象并且然后执行它，使用适当的方法执行你发送的 SQL 语句。对 SELECT 语句来说，可以使用 executeQuery。要创建或修改表的语句，使用的方法是 executeUpdate。 
+
+　　需要一个活跃的连接的来创建 Statement 对象的实例。在下面的例子中，我们使用我们的 Connection 对象 con 创建 Statement 对象 stmt： 
+
+Statement stmt = con.createStatement(); 
+
+　　到此 stmt 已经存在了，但它还没有把 SQL 语句传递到 DBMS。我们需要提供 SQL 语句作为参数提供给我们使用的 Statement 的方法。例如，在下面的代码段里，我们使用上面例子中的 SQL 语句作为 executeUpdate 的参数： 
+
+stmt.executeUpdate("CREATE TABLE COFFEES " + 
+"(COF_NAME VARCHAR(32), SUP_ID INTEGER, PRICE FLOAT, " + 
+"SALES INTEGER, TOTAL INTEGER)"); 
+
+　　因为我们已经把 SQL 语句赋给了 createTableCoffees 变量，我们可以如下方式书写代码： 
+
+stmt.executeUpdate(createTableCoffees); 
+
+执行语句 
+　　我们使用 executeUpdate 方法是因为在 createTableCoffees 中的 SQL 语句是 DDL （数据定义语言）语句。创建表，改变表，删除表都是 DDL 语句的例子，要用 executeUpdate 方法来执行。你也可以从它的名字里看出，方法 executeUpdate 也被用于执行更新表 SQL 语句。实际上，相对于创建表来说，executeUpdate 用于更新表的时间更多，因为表只需要创建一次，但经常被更新。 
+
+　　被使用最多的执行 SQL 语句的方法是 executeQuery。这个方法被用来执行 SELECT 语句，它几乎是使用最多的 SQL 语句。马上你将看到如何使用这个方法。 
+
+在表中输入数据 
+　　我们已经显示了如何通过指定列名、数据类型来创建表 COFFEES，但是这仅仅建立表的结构。表还没有任何数据。我们将次输入一行数据到表中，提供每列的信息，注意插入的数据显示顺序跟表创建时候是一样的，既缺省顺序。 
+
+　　下列代码插入一个行数据，COF_NAME 的值为 Colombian，SUP_ID 为 101，PRICE 为 7.99，SALES 0，TOTAL 0。就象创建 COFFEES 表一样，我们创建一 Statement 对象，并执行 executeUpdate 方法。 
+
+　　因为 SQL 语句一行显示不下，因此我们把它分为两行，并用加号 (+) 相连。特别要注意的是，在 COFFEES 和 VALUES 之间要有空格。这个空格必须在引号之内并且要在 COFFEES 跟 VALUES 之间；没有这个空格，SQL 语句将被错误地被读作为 "INSERT INTO COFFEESVALUES ..."，并且 DBMS 将寻找表 COFFEESVALUES。还要注意的是在 coffee name 上我们使用了单引号。 
+
+Statement stmt = con.createStatement(); 
+stmt.executeUpdate( 
+"INSERT INTO COFFEES " + 
+"VALUES ('Colombian', 101, 7.99, 0, 0)"); 
+
+　　下面的代码把第二行插入到表 COFFEES 中。我们可以在使用 Statement 对象而无须为每次执行创建一个新的。 
+
+stmt.executeUpdate("INSERT INTO COFFEES " + 
+"VALUES ('French_Roast', 49, 8.99, 0, 0)"); 
+
+　　剩下行的数据如下： 
+
+stmt.executeUpdate("INSERT INTO COFFEES " + 
+"VALUES ('Espresso', 150, 9.99, 0, 0)"); 
+stmt.executeUpdate("INSERT INTO COFFEES " + 
+"VALUES ('Colombian_Decaf', 101, 8.99, 0, 0)"); 
+stmt.executeUpdate("INSERT INTO COFFEES " + 
+"VALUES ('French_Roast_Decaf', 49, 9.99, 0, 0)"); 
+
+从表中取得数据 
+　　既然表 COFFEES 中已经有数据了，我们就可以写一个 SELECT 语句来取得这些值。下面的 SQL 语句中星号 (*) 表示选择所有的列。因为没有用 WHERE 子句来限制所选的行，因此下面的 SQL 语句选择的是整个表。 
+
+SELECT * FROM COFFEES 
+
+　　结果是整个表的数据，如下： 
+
+COF_NAME SUP_ID PRICE SALES TOTAL 
+--------------- ------ ----- ----- ----- 
+Colombian 101 7.99 0 0 
+French_Roast 49 8.99 0 0 
+Espresso 150 9.99 0 0 
+Colombian_Decaf 101 8.99 0 0 
+French_Roast_Decaf 49 9.99 0 0 
+
+　　如果你直接在数据库系统里输入 SQL 查询语句，你将在你的终端上看到如上的结果。当我们通过一个 Java 应用程序存取一个数据库时，正如我们马上要做的一样，我们需要检索结果以便我们能使用他们。你将在下一节看到如何实现。 
+
+这是 SELECT 语句的另一个例子，这将得到咖啡及其各自每磅单价的列表。 
+
+SELECT COF_NAME, PRICE FROM COFFEES 
+
+查询的结果集将具有如下形式： 
+
+COF_NAME PRICE 
+-------- ---------- ----- 
+Colombian 7.99 
+French_Roast 8.99 
+Espresso 9.99 
+Colombian_Decaf 8.99 
+French_Roast_Decaf 9.99 
+
+上面 SELECT 语句取得了所有咖啡的名字及价格。而下面的 SELECT 语句限制那些每磅价格低于 $9.00 的咖啡才被选择。 
+SELECT COF_NAME, PRICE 
+FROM COFFEES 
+WHERE PRICE < 9.00 
+
+结果集将具有如下形式： 
+
+COF_NAME PRICE 
+-------- ------- ----- 
+Colombian 7.99 
+French_Roast 8.99 
+Colombian Decaf 8.99 
+
+JDBC 入门 -- 开始 
+你需要做的第一事情是你要正确的安装。这包含下列几个步骤： 
+
+在你的计算机上安装 Java 和 JDBC 
+　　Java 数据库连接 (JDBC) 是一个标准 SQL（Structured Query Language，结构化查询语言）数据库访问接口, 可以为多种关系数据库提供统一访问。JDBC（Java DataBase Connection，Java 数据库连接） 也提供一种基准，据此可以构建更高级的工具和接口。 目前的 JDK（Java Development Kit，Java 开发工具包）软件捆绑包括 JDBC 和 JDBC-ODBC（Open DataBase Connection，开放式数据库连接）桥。这些包也可独立得到，以跟 JDK 1.0 一起使用。应该注意的是，本文的示例使用了 JDBC 2.0 接口，需要 JDK 2.0 来运行，不能在 JDK 1.1 下运行。 
+
+　　你可以从 http://java.sun.com/products/JDK/CurrentRelease 找到最新版。 
+
+安装驱动程序 
+　　你的驱动程序应该有安装方法。为特定的 DBMSs 写的 JDBC 驱动程序安装时只要拷贝到你的计算机上就可以了。并不需要特殊的配置。 
+
+　　如果你下载的是 Solaris 或 Windows JDK1.1 版本，桥作为包 sun.jdbc.odbc 与 JDK 一起自动安装。有关安装和配置 ODBC 的信息，请咨询 ODBC 驱动程序厂商。桥无须特殊配置。有关客户机安装和配置信息，请咨询数据库厂商。 
+
+如果需要，安装数据库系统 
+　　如果你不能确认是否安装了数据库系统，你需要按照供应商的要求安装数据库。大多数用户都已经安装了数据库，可继续使用他们安装好的数据库。 
+
+配置数据库 
+　　我们假设数据库 COFFEEBREAK 已经存在。（创建一个数据库并不困难，但需要一定的权限并通常是由数据库管理员来做）你还需要在此数据库里创建本教程作为例子使用的表。我们有意限制表的大小跟及数目，以便于管理。 
+
+　　假设我们的数据库是在一个咖啡馆里使用， 咖啡豆按磅卖，而咖啡则以杯为单位。为了简单起见，还假定经营者只需要 2 张表，分别存放不同种类的咖啡及咖啡供应商的有关信息。 
+
+　　首先我们演示怎么打开一个 DBMS 连接， 及 JDBC 是怎么发送 SQL 语句到你的 DBMS。通过这些代码，我们将表明使用 JDBC 传递 SQL 语句到你的 DBMS 并处理返回的结果是非常简单的。 
+
+　　所有的代码在主要的几个 DBMS 产品做了测试。然而, 如果你使用 JDBC-ODBC 桥来连接旧版本 ODBC 驱动程序时，可能会遇到一些兼容性问题。 

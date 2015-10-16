@@ -1,0 +1,126 @@
+作者：luoxh
+email: luoxh@371.net
+日期：8/23/2001 9:21:55 AM
+Jakarta-Tomcat 简明中文版用户指南第二部分 
+　
+
+元素及其描述 
+
+Server
+server.xml文件中最重要的元素.Server定义了一个Tomcat服务器.一般你不用对他担心太多.Server元素能包含Logger和ContextManager元素类型
+
+Logger
+此元素定义一个Logger对象,每个Logger都有一个名字去标识,也有一个纪录Logger的输出和冗余级别(描述此日志级别)和包含日志文件的路径.通常有servlet的Logger(ServletContext.log()处),JSP和Tomcat运行时的Logger.
+
+ContextManager
+ContextManager说明一套ContextInterceptor, RequestInterceptor , Context和他们的Connectors的配置及结构.ContextManager有几个随同提供的特性:
+1. 用来纪录调试信息的调试级别 
+2. webapps/,conf/,logs/和所有已定义的环境的基本位置.用来使Tomcat可以在TOMCAT_HOME外的其他目录启动. 
+3. 工作目录的名字
+
+ContextInterceptor&RequestInterceptor
+这些侦听器(interceptors)侦听具体发生在ContextManager中的事件.例如,ContextInterceptor侦听Tomcat的启动及终止事件,RequestInterceptor监视在它服务过程中用户请求需要通过的不同阶段.Tomcat的管理员不必知道太多关于侦听器的知识;另外,开发者应该知道这是如何在Tomcat中实现一个”全局”型的操作(例如安全性及每个请求日志)
+
+Connector
+Connector表示一个到用户的联接,不管是通过web服务器或直接到用户浏览器(在一个独立配置中).Connector负责管理Tomcat的工作线程和 读/写 连接到不同用户的端口的 请求/响应.Connector的配置包含如下信息:
+
+1.句柄类
+
+2.句柄监听的TCP/IP端口
+
+3.句柄服务器端口的TCP/IP的backlog.
+
+稍后我们将在此文档中描述如何配置Connector.
+
+Context
+每个Context提供一个指向你放置你Web项目的Tomcat的下属目录。每个Context包含如下配置：
+
+1. Context放置的路径,可以是与ContextManager主目录相关的路径.
+
+2.纪录调试信息的调试级别
+
+3.可重载的标志.开发Servlet时,重载更改后的Servlet,这是一个非常便利的特性,你可以调试或用Tomcat测试新代码而不用停止或重新启动Tomcat.要打开重载,把reloadable设为真即可.这虽花费时间但可检测所发生的变化;更重要的事,鉴于,在一个装载类对象装入一个新的servlet时,类装载触发器可能会掷出一些错误.为避免这些问题,你可以设置可重载为假,这将停止重载功能.
+
+
+　 
+
+从另一个目录中启动Tomcat
+
+作为缺省值将使用TOMCAT_HOME/conf/server.xml作为配置文件.缺省配置将使用TOMCT_HOME作为关系环境的基础.
+
+使用 “-f/你的/目录/server.xml”选项你可改变这种情况,使用另一个服务器配置文件和设置关系环境管理器的目录属性你需要在主目录内设置以下几个文件:
+
+&Oslash; 一个 webapps/目录(如果你已生成) – 所有war文件奖杯界压倒此目录而且所有子目录将作为关系环境添加.
+
+&Oslash; conf/目录 - 你可保存一个特殊的web.xml文件和其他配置文件
+
+&Oslash; logs/ - 所有日志文件将代替TOMCAT_HOME/logs/纪录到此目录中
+
+&Oslash; work/ - 关系环境的工作目录
+
+如server.xml中的ContextManager.home属性有关联,将关联到到当前工作目录.
+
+web。xml
+
+关于web。xml和web项目结构（包括目录服务及配置）的详细描述可在Servlet API Spec的第9，10，14章中找到。
+
+然而有一个与Tomcat有关的小“特性“与web.xml有关。Tomcat可以让用户通过将缺省的web.xml放入conf目录中来定义所有关系环境的web.xml的缺省值.建立一个新的关系环境时,Tomcat使用缺省的web.xml文件作为基本设置和应用项目特定的web.xml(放在应用项目的WEB-INF/web.xml文件)来覆盖这些缺省值.
+
+设置Tomcat与Apache Web 服务器
+
+服务器
+
+到现在为止,我们未讨论作为服务器扩展的Tomcat,只讨论了作为独立运行的服务器.但有一些问题需要说明:
+
+1. 当处理静态页面时,Tomcat不如Apache迅速.
+
+2. Tomcat不象Apache一样可配置.
+
+3. Tomcat不象Apache一样强壮.
+
+4. 有很多网站已在某一特定web server上投入了很长时间,例如,使用CGI脚本/Server API模组/perl/php…我们不能假设这些遗留下来的东西都会被丢弃.
+
+基于以上原因,一个现实的网站建议使用一个Web服务器,如Apache,为网站的静态页面请求提供服务,并使用Tomcat作为一个Servlet/JSP插件.
+
+我们不准备深入的讨论每个不同的配置,我们将:
+
+1. 涵盖Web服务器的基本行为
+
+2. 解释需要何种配置
+
+3. 在Apache上的实例
+
+
+Web 服务器操作
+
+
+简单说来，web服务器总是等待来自客户端的HTTP请求。当请求到达时，服务器会提供一切必要的内容来满足此请求。加入一个Servlet容器某种程度上会改变此行为。但服务器仍需处理如下因素：
+
+载入servlet容器接口库并初始化（处理请求之前）。
+
+当收到一个请求时，检查是否属于某Servlet，如是，则接口库接收此请求并处理。
+
+另一方面，接口库需要知道他将服务某种请求，通常是基于请求的URL的某种模式和将此请求导向何处。
+
+当用户想要设置使用虚拟主机的配置时，事情会变得更加复杂，或者想多个开发者在一个服务器上进行开发但使用不同的Servlet容器的JVMs。以下我们将讨论这两个问题。
+
+
+必需进行的配置
+
+
+应该考虑的是最明显的配置是servlet URL具有对servlet容器中的servlet具有表示的责任。很明显，你必须知道传递什么到Servlet容器。我们仍需提供附加的配置项目到web-server或servlet-container的结合体中.
+
+l 考虑到Tomcat进程是否可取得，我们仍需提供配置和Tomcat正在监听的TCP/IP 主机名/端口号。
+
+l 需要告知web服务器接口库的位置（因此我们可以在起始时装入）
+
+l 需要设置接口内部信息如将日志记录在何处和如何纪录，等等。
+
+所有此类信息必须出现在web服务器配置里或被接口使用的私有配置文件中。下面将讲述如何在Apache中如何实现这些配置。
+
+
+Apache上的实现
+
+这一部分演示如何配置Apache与Tomcat一起工作；并试图解释深入到可能会用到的配置规范。在jserv 安装页上可找到其他信息。
+
+

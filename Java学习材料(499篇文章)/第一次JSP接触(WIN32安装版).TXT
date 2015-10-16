@@ -1,0 +1,42 @@
+作者：jeru
+日期：2000-11-9 15:50:41
+一. 安装jdk
+1. 下载jdk1.2.2的win32版本,你可以由以下这个链接得到。
+http://java.sun.com/products/jdk/1.2.2/download-windows.html
+2. 测试。
+打开msdos窗口，set JAVA_HOME = C:\JDK1.2.2，然后编辑一个名为HelloWorld.java
+的文件(注意大小写)。
+
+class HelloWorld {
+    public static void main(String[] args) {
+        // Display "Hello World!"
+        System.out.println("Hello World!");
+    }
+}
+存盘后用jdk1.2.2/bin/javac.exe 来编译它----javac HelloWorld.java。
+得到一个新的文件HelloWorld，再用jdk1.2.2/bin/java.exe 来运行她----java HelloWorld,
+看到运行结果了吗？恭喜，我们可以做第二步了！
+
+二. 安装Tomcat
+Tomcat 无须安装，随便放到什么目录，比如说C:\Tomcat吧。
+在dos下敲如以下命令：
+set CLASSPATH = C:\JDK1.2.2\lib\tools.jar
+set TOMCAT_HOME = C:\Tomcat
+当然最好是把这些设置环境变量的语句放到autoexec.bat中去拉，^*_*^
+
+运行C:\tomcat\bin\startup.bat(关闭时运行shutdown.bat)
+进入C:\tomcat\webapps\examples\jsp\,这里是存放jsp文件的目录，当然你也可以自己
+修改配置的，编辑一个名为time.jsp的文件,由于众所周知的原因，请自行去掉html标记里的空格
+< html >
+< head >
+< title >First Page< /title >
+< /head >
+< body >
+< h3>Today is:
+<%= new java.util.Date() %>
+< /h3 >
+< /body >
+< /html >
+这是一个显示时间的jsp程序，也是你的第一个jsp程序。
+存盘关闭，打开浏览器，url栏输入http://localhost:8080/examples/time.jsp
+大功告成,看到显示的当前时间了吗?

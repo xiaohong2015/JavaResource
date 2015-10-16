@@ -1,0 +1,143 @@
+作者：爬虫
+email: xxx@xxx.xx
+日期：2001-5-8 17:42:40
+■CORBA技术简介 　　
+
+简单地说，CORBA允许应用之间相互通信，而不管它们存在于哪里以及是谁设计的。CORBA1.1于1991年由OMG发布，其中定义了接口定义语言（IDL）以及在对象请求代理（ORB）中实现客户对象与服务器对象之间交互的应用编程接口（API）。CORBA2.0于1994年发布，规定了各个供应商之间的ORB的通信规则。　　
+
+CORBA标准主要分为三个部分：接口定义语言（IDL）、对象请求代理（ORB）以及ORB之间的互操作协议IIOP。　　
+
+ORB是对象之间建立Client/Server关系的中间件。使用ORB，客户可以透明地调用一个服务对象上的方法，这个服务对象可以在本地，也可以在通过网络连接的其他机器上。ORB截获这一调用同时负责查找实现服务的对象并向其传递参数、调用方法返回最终结果。客户并不知道服务对象位于什么地方，它的编程语言和操作系统是什么，也不知道不属于对象接口的其他系统部分。这样，ORB在异构分布环境下为不同机器上的应用提供了互操作性，并无缝地集成了多种对象系统。　　
+
+在开发传统的Client/Server应用时，开发者使用他们自己设计的或一个公认的标准来定义用于设备之间通信的协议。协议的定义依赖于实现语言、网络传输和许多其他因素，而ORB的出现简化了这一过程。使用ORB时，协议是使用接口定义语言（IDL）定义的，而IDL是独立于语言的。并且ORB提供很强的灵活性，它使程序员选择最适合的操作系统、执行环境，甚至系统各个组件也可以采用不同的编程语言实现。更重要的是，它允许现有组件的集成。在一个基于ORB的解决方案中，开发者可以使用与创建新对象一样的IDL对遗留系统进行建模，他们创建“包装”代码以在标准化的软件总线与遗留系统接口之间传递信息。　　
+
+使用CORBA，用户可以透明地访问信息，并不需要知道信息存在于什么软件中、使用什么硬件平台，以及位于企业网络的什么地方。作为面向对象系统的通信核心，CORBA为今天的计算环境带来了真正的互操作性。 
+
+■CORBA与JAVA的相互关系 　　
+
+CORBA不只意味着对象请求代理（ORB），它还是非常全面的分布式对象平台。CORBA使JAVA应用可以跨越网络、语言以及操作系统，并为JAVA提供了一组分布服务，如分布式自我观察、动态发现、事务、关系、安全和命名等。　　
+
+JAVA不仅是一种语言，它还是一个动态代码系统，它对运行对象来说是一个可移植的虚拟机（JVM）。JAVA为开发、管理、发布Client/Server应用提供了更简单的方式。人们可以通过将应用放在一个Web服务器上将这一应用发布给成千上万个用户，而不必关心它的安装和升级。JAVA还非常适合服务器的开发，它可以动态地将服务代码移向最需要它们的地方。　　
+
+JAVA将会使CORBA对象能够运行在从主机、网络计算机到蜂窝电话等可编程的各种机器上，并简化了大型CORBA系统的代码发布。对客户和服务对象来说JAVA是很理想的编程语言，JAVA内置的多线程、垃圾收集和错误处理使编写健壮的网络对象变得很容易。　　
+
+这两种对象模型可以很好地相互补充，CORBA处理网络的透明性，JAVA处理实现的透明性，CORBA为JAVA可移植应用环境提供了一个分布式的结构。 
+
+■使用JAVA开发CORBA应用 　　
+
+下面让我简要介绍一下开发CORBA的步骤。　　
+
+使用JAVA开发CORBA应用需要如下五个步骤：　　
+
+使用IDL创建接口 (About.idl)
+　　下面的OMG IDL描述一个CORBA对象。
+　　module About
+　　{
+　　 interface Show
+　　 {
+　　 string ShowName();
+　　 };
+　　};
+　　将其存为Show.idl。　　
+编译接口并生成CORBA支持文件
+　　我们用以下命令编译这个 IDL 接口：
+　　 idltojava Show.idl
+　　idltojava是SUN公司的IDL编译器，可以免费从SUN公司站点上下载。
+　　因为idltojava在编译IDL文件之前，需要进行预编译，而如果你的机器上没有预编译器，可以使用以下命令：
+　　idltojava -fno-cpp Show.idl
+　　编译后将在当前目录下生成About子目录，其中会包括一些支持文件，如有兴趣可以看一下，但一定不要修改。　　
+实现服务器 (ShowServer.java)
+　　ShowServer的main() 方法，可完成以下任务：
+　　
+创建一个 ORB 实例 
+创建一个服务对象实例（CORBA About 对象的实现）并通知 ORB 
+获取一个命名上下文的CORBA对象引用，在该命名上下文中注册新的CORBA对象 
+在命名上下文中将新对象注册在“About”名下 
+等待对新对象的调用
+　　实现服务器源程序如下：
+　　import About.;
+　　import org.omg.CosNaming.;
+　　import org.omg.CosNaming.NamingContextPackage.;
+　　import org.omg.CORBA.;
+　　class ShowObject extends _ShowImplBase
+　　{
+　　 public String ShowName()
+　　 {
+　　 return "\nMy name is Seymour!!\n";
+　　 }
+　　}
+　　public class ShowServer {
+　　 public static void main(String args[])
+　　 {
+　　 try{
+　　 // 创建和初始化 ORB
+　　 ORB orb = ORB.init(args, null);
+　　 // 创建服务对象并将其向 ORB 注册
+　　 ShowObject ShowRef = new ShowObject();
+　　 orb.connect(ShowRef);
+　　 // 获取根命名上下文
+　　 org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
+　　 NamingContext ncRef = NamingContextHelper.narrow(objRef);
+　　 // 绑定命名中的对象引用
+　　 NameComponent nc = new NameComponent("About", "");
+　　 NameComponent path[] = {nc};
+　　 ncRef.rebind(path, ShowRef);
+　　 // 等待来自客户机的调用
+　　 java.lang.Object sync = new java.lang.Object();
+　　 synchronized (sync) {
+　　 sync.wait();
+　　 }
+　　 } catch (Exception e) {
+　　 System.err.println("ERROR: " + e);
+　　 e.printStackTrace(System.out);
+　　 }
+　　 }
+　　}
+　　
+实现客户机 (ShowClient.java)
+　　下面的应用程序客户机将完成以下任务：
+　　
+创建一个ORB； 
+获取一个指向命名上下文的引用； 
+在命名上下文中查找“Show”并获得指向该 CORBA 对象的引用； 
+调用对象的 ShowName() 操作并打印结果。
+　
+　　import About.;
+　　import org.omg.CosNaming.;
+　　import org.omg.CORBA.;
+　　public class ShowClient
+　　{
+　　 public static void main(String args[])
+　　 {
+　　 try{
+　　 // 创建和初始化 ORB
+　　 ORB orb = ORB.init(args, null);
+　　 // 获取根命名上下文
+　　org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
+　　NamingContext ncRef = NamingContextHelper.narrow(objRef);
+　　//解析命名中的对象引用
+　　NameComponent nc = new NameComponent("About", "");
+　　NameComponent path[] = {nc};
+　　About.Show ShowRef = ShowHelper.narrow(ncRef.resolve(path));
+　　// 调用 Show 服务对象并打印结果
+　　 String show = ShowRef.ShowName();
+　　 System.out.println(show);
+　　 } catch (Exception e) {
+　　 System.out.println("ERROR : " + e) ;
+　　 e.printStackTrace(System.out);
+　　 }
+　　 }
+　　}
+构建和运行ShowName程序　　
+编译 .java 文件，包括 stub 和 skeleton（在About目录中）：
+javac .java About/.java 　　 
+启动一个MS-DOS命令解释器，输入以下命令，确保名字服务器处于运行状态：
+tnameserv -ORBInitialPort 1050 　 
+启动另一个MS-Dos命令解释器，输入以下命令，启动Show服务器：
+java ShowServer -ORBInitialPort 1050 
+再启动一个MS-Dos命令解释器Show应用程序客户机：
+java ShowClient -ORBInitialPort 1050
+　　
+这时屏幕上会出现“My name is Seymour!”的字样，说明实验已经成功了。
+　　本示例程序在Windows 98、Java 1.2.2平台下实现。
+

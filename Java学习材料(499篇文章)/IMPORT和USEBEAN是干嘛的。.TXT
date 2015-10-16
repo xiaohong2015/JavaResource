@@ -1,0 +1,36 @@
+作者：sonymusic
+email: sonymusic@china.com
+日期：7/31/2001 5:44:11 PM
+
+[b][#ff0000]这是绝对的不同嘛。
+[/#]1、import[/b]
+import只是引用一个类或者一个包。这样在使用的时候就不必输入类的全名了。比如：java.util.Date d=new java.util.Date()，这样比较累，尤其是很多代码的时候。我们可以这样写：
+import java.util.*;
+// or 
+//import java.util.Date
+
+Date d =new Date();
+
+在JSP中使用IMPORT和在JAVA中使用没什么不同，
+<%@ page import="java.util.*"%>
+以下是JRUN生成的SERVLET代码；
+import java.util.*;
+
+[b]2、usebean
+[/b]usebean实际上是创建或者得到类的一个实例。
+看看JRUN为一个scope为page的usebean生成的SERVLET代码
+<jsp:useBean id="myd" scope="page" class="Date"/>
+servlet代码：
+Date myd = (Date)pageContext.getAttribute("myd", PageContext.PAGE_SCOPE );
+if(myd == null) { 
+    if(JRunJSPStaticHelpers.getAndSetBean(pageContext, "myd", Date.class  ,  PageContext.PAGE_SCOPE , 2)) { 
+        myd = (Date)pageContext.getAttribute("myd", PageContext.PAGE_SCOPE );
+    }
+    else {
+        myd = (Date)pageContext.getAttribute("myd", PageContext.PAGE_SCOPE );
+    }
+}
+pageContext.setAttribute("myd",myd);
+
+现在应该明白有什么不同了吧。
+sonymusic

@@ -1,0 +1,263 @@
+作者：jeru
+日期：2000-12-9 21:26:52
+5 - ResultSet
+本概述是从《JDBCTM Database Access from JavaTM: A Tutorial and Annotated Reference 》这本书中摘引来的。JavaSoft 目前正在准备这本书。这是一本教程，同时也是 JDBC 的重要参考手册，它将作为 Java 系列的组成部份在 1997 年春季由 Addison-Wesley 出版公司出版。 
+
+
+5.1 概述
+ResultSet 包含符合 SQL 语句中条件的所有行，并且它通过一套 get 方法（这些 get 方法可以访问当前行中的不同列）提供了对这些行中数据的访问。ResultSet.next 方法用于移动到 ResultSet 中的下一行，使下一行成为当前行。
+
+结果集一般是一个表，其中有查询所返回的列标题及相应的值。例如，如果查询为 SELECT a, b, c FROM Table1，则结果集将具有如下形式： 
+
+
+a b c
+-------- --------- --------
+12345 Cupertino CA
+83472 Redmond WA
+83492 Boston MA
+
+
+下面的代码段是执行 SQL 语句的示例。该 SQL 语句将返回行集合，其中列 1 为 int，列 2 为 String，而列 3 则为字节数组： 
+
+
+java.sql.Statement stmt = conn.createStatement();
+ResultSet r = stmt.executeQuery("SELECT a, b, c FROM Table1");
+while (r.next())
+{
+// 打印当前行的值。
+int i = r.getInt("a");
+String s = r.getString("b");
+float f = r.getFloat("c");
+System.out.println("ROW = " + i + " " + s + " " + f);
+}
+
+5.1.1 行和光标
+ResultSet 维护指向其当前数据行的光标。每调用一次 next 方法，光标向下移动一行。最初它位于第一行之前，因此第一次调用 next 将把光标置于第一行上，使它成为当前行。随着每次调用 next 导致光标向下移动一行，按照从上至下的次序获取 ResultSet 行。
+
+在 ResultSet 对象或其父辈 Statement 对象关闭之前，光标一直保持有效。
+
+在 SQL 中，结果表的光标是有名字的。如果数据库允许定位更新或定位删除，则需要将光标的名字作为参数提供给更新或删除命令。可通过调用方法 getCursorName 获得光标名。
+
+注意：不是所有的 DBMS 都支持定位更新和删除。可使用 DatabaseMetaData.supportsPositionedDelete 和 supportsPositionedUpdate 方法来检查特定连接是否支持这些操作。当支持这些操作时，DBMS/驱动程序必须确保适当锁定选定行，以使定位更新不会导致更新异常或其它并发问题。
+
+
+5.1.2 列
+方法 getXXX 提供了获取当前行中某列值的途径。在每一行内，可按任何次序获取列值。但为了保证可移植性，应该从左至右获取列值，并且一次性地读取列值。
+
+列名或列号可用于标识要从中获取数据的列。例如，如果 ResultSet 对象 rs 的第二列名为“title”，并将值存储为字符串，则下列任一代码将获取存储在该列中的值： 
+
+String s = rs.getString("title");
+String s = rs.getString(2);
+
+注意列是从左至右编号的，并且从列 1 开始。同时，用作 getXXX 方法的输入的列名不区分大小写。
+
+提供使用列名这个选项的目的是为了让在查询中指定列名的用户可使用相同的名字作为 getXXX 方法的参数。另一方面，如果 select 语句未指定列名（例如在“select * from table1”中或列是导出的时），则应该使用列号。这些情况下，用户将无法确切知道列名。
+
+有些情况下，SQL 查询返回的结果集中可能有多个列具有相同的名字。如果列名用作 getXXX 方法的参数，则 getXXX 将返回第一个匹配列名的值。因而，如果多个列具有相同的名字，则需要使用列索引来确保检索了正确的列值。这时，使用列号效率要稍微高一些。
+
+关于 ResultSet 中列的信息，可通过调用方法 ResultSet.getMetaData 得到。返回的 ResultSetMetaData 对象将给出其 ResultSet 对象各列的编号、类型和属性。
+
+如果列名已知，但不知其索引，则可用方法 findColumn 得到其列号。
+
+
+5.1.3 数据类型和转换
+对于 getXXX 方法，JDBC 驱动程序试图将基本数据转换成指定 Java 类型，然后返回适合的 Java 值。例如，如果 getXXX 方法为 getString，而基本数据库中数据类型为 VARCHAR，则 JDBC 驱动程序将把 VARCHAR 转换成 Java String。getString 的返回值将为 Java String 对象。
+
+下表显示了允许用 getXXX 获取的 JDBC 类型及推荐用它获取的 JDBC 类型（通用 SQL 类型）。小写的 x 表示允许 getXXX 方法获取该数据类型；大写的 X 表示对该数据类型推荐使用 getXXX 方法。例如，除了 getBytes 和 getBinaryStream 之外的任何 getXXX 方法都可用来获取 LONGVARCHAR 值，但是推荐根据返回的数据类型使用 getAsciiStream 或 getUnicodeStream 方法。方法 getObject 将任何数据类型返回为 Java Object。当基本数据类型是特定于数据库的抽象类型或当通用应用程序需要接受任何数据类型时，它是非常有用的。
+
+可使用 ResultSet.getXXX 方法获取常见的 JDBC 数据类型。
+
+“x”表示该 getXXX 方法可合法地用于获取给定 JDBC 类型。
+
+“X”表示推荐使用该 getXXX 方法来获取给定 JDBC 类型。
+
+　 T
+I
+N
+Y
+I
+N
+T S
+M
+A
+L
+L
+I
+N
+T I
+N
+T
+E
+G
+E
+R B
+I
+G
+
+N
+T R
+E
+A
+L F
+L
+O
+A
+T D
+O
+U
+B
+L
+E D
+E
+C
+I
+M
+A
+L N
+U
+M
+E
+R
+I
+C B
+I
+T C
+H
+A
+R V
+A
+R
+C
+H
+A
+R
+L
+O
+N
+G
+V
+A
+R
+C
+H
+A
+R B
+I
+N
+A
+R
+Y V
+A
+R
+B
+I
+N
+A
+R
+Y L
+O
+N
+G
+V
+A
+R
+B
+I
+N
+A
+R
+Y D
+A
+T
+E T
+I
+M
+E T
+I
+M
+E
+S
+T
+A
+M
+P 
+getByte X x x x x x x x x x x x x 　 　 　 　 　 　 
+getShort x X x x x x x x x x x x x 　 　 　 　 　 　 
+getInt x x X x x x x x x x x x x 　 　 　 　 　 　 
+getLong x x x X x x x x x x x x x 　 　 　 　 　 　 
+getFloat x x x x X x x x x x x x x 　 　 　 　 　 　 
+getDouble x x x x x X X x x x x x x 　 　 　 　 　 　 
+getBigDecimal x x x x x x x X X x x x x 　 　 　 　 　 　 
+getBoolean x x x x x x x x x X x x x 　 　 　 　 　 　 
+getString x x x x x x x x x x X X x x x x x x x 
+getBytes 　 　 　 　 　 　 　 　 　 　 　 　 　 X X x 　 　 　 
+getDate 　 　 　 　 　 　 　 　 　 　 x x x 　 　 　 X 　 x 
+getTime 　 　 　 　 　 　 　 　 　 　 x x x 　 　 　 　 X x 
+getTimestamp 　 　 　 　 　 　 　 　 　 　 x x x 　 　 　 x 　 X 
+getAsciiStream 　 　 　 　 　 　 　 　 　 　 x x X x x x 　 　 　 
+getUnicodeStream 　 　 　 　 　 　 　 　 　 　 x x X x x x 　 　 　 
+getBinaryStream 　 　 　 　 　 　 　 　 　 　 　 　 　 x x X 　 　 　 
+getObject x x x x x x x x x x x x x x x x x x x 
+
+
+
+5.1.4 对非常大的行值使用流
+ResultSet 可以获取任意大的 LONGVARBINARY 或 LONGVARCHAR 数据。方法 getBytes 和 getString 将数据返回为大的块（最大为 Statement.getMaxFieldSize 的返回值）。但是，以较小的固定块获取非常大的数据可能会更方便，而这可通过让 ResultSet 类返回 java.io.Input 流来完成。从该流中可分块读取数据。注意：必须立即访问这些流，因为在下一次对 ResultSet 调用 getXXX 时它们将自动关闭（这是由于基本实现对大块数据访问有限制）。 
+
+JDBC API 具有三个获取流的方法，分别具有不同的返回值： 
+
+
+getBinaryStream 返回只提供数据库原字节而不进行任何转换的流。
+
+
+getAsciiStream 返回提供单字节 ASCII 字符的流。
+
+
+getUnicodeStream 返回提供双字节 Unicode 字符的流。
+
+
+注意：它不同于 Java 流，后者返回无类型字节并可（例如）通用于 ASCII 和 Unicode 字符。
+
+下列代码演示了 getAsciiStream 的用法： 
+
+java.sql.Statement stmt = con.createStatement();
+ResultSet r = stmt.executeQuery("SELECT x FROM Table2");
+// 现在以 4K 块大小获取列 1 结果：
+byte buff = new byte[4096];
+while (r.next()) {
+Java.io.InputStream fin = r.getAsciiStream(1);
+for (;;) {
+int size = fin.read(buff);
+if (size == -1) { // 到达流末尾
+break;
+}
+// 将新填充的缓冲区发送到 ASCII 输出流：
+output.write(buff, 0, size);
+}
+}
+
+5.1.5 NULL 结果值
+要确定给定结果值是否是 JDBC NULL，必须先读取该列，然后使用 ResultSet.wasNull 方法检查该次读取是否返回 JDBC NULL。
+
+当使用 ResultSet.getXXX 方法读取 JDBC NULL 时，方法 wasNull 将返回下列值之一： 
+
+
+Java null 值：对于返回 Java 对象的 getXXX 方法（例如 getString、getBigDecimal、getBytes、getDate、getTime、getTimestamp、getAsciiStream、getUnicodeStream、getBinaryStream、getObject 等）。
+
+
+零值：对于 getByte、getShort、getInt、getLong、getFloat 和 getDouble。
+
+
+false 值：对于 getBoolean。
+
+
+5.1.6 可选结果集或多结果集
+通常使用 executeQuery（它返回单个 ResultSet）或 executeUpdate（它可用于任何数据库修改语句，并返回更新行数）可执行 SQL 语句。但有些情况下，应用程序在执行语句之前不知道该语句是否返回结果集。此外，有些已存储过程可能返回几个不同的结果集和/或更新计数。
+
+为了适应这些情况，JDBC 提供了一种机制，允许应用程序执行语句，然后处理由结果集和更新计数组成的任意集合。这种机制的原理是首先调用一个完全通用的 execute 方法，然后调用另外三个方法，getResultSet、getUpdateCount 和 getMoreResults。这些方法允许应用程序一次一个地研究语句结果，并确定给定结果是 ResultSet 还是更新计数。
+
+用户不必关闭 ResultSet；当产生它的 Statement 关闭、重新执行或用于从多结果序列中获取下一个结果时，该 ResultSet 将被 Statement 自动关闭。
+
+
+
+ 

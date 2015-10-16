@@ -1,0 +1,72 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:52:11
+简单的WEB服务器
+
+一个简单的WEB服务器将由列表9.2这样构建.当然,还必须要对方法和回应事件进行改进.简单的服务器不会分析和存储请求头.新的WEB服务器将分析和存储请求,为以后的处理作准备.为了达到这个目的,你必须有一个包含HTTP请求的类.
+
+HTTPrequest类
+
+列表9.5列出了一个完整的HTTPrequest类.这个类必须包括一个请求头所需的所有信息. 
+
+列表9.5.HTTPrequest类. 
+
+import java.io.*; 
+import java.util.*; 
+import java.net.*; 
+import NameValue; 
+/** 
+* 这个类有一个HTTP请求的所有信息 
+*/ 
+public class HTTPrequest 
+{ 
+public String version; 
+public String method; 
+public String file; 
+public Socket clientSocket; 
+public DataInputStream inbound; 
+public NameValue headerpairs[]; 
+/** 
+* 建立一个这个类的实例 
+*/ 
+public HTTPrequest() 
+{ 
+version = null; 
+method = null; 
+file = null; 
+clientSocket = null; 
+inbound = null; 
+inbound = null; 
+headerpairs = new NameValue[0]; 
+} 
+/** 
+* 加入一个名称/值对到核心数组
+*/ 
+public void addNameValue(String name, String value) 
+{ 
+try 
+{ 
+NameValue temp[] = new NameValue[ headerpairs.length + 1 ]; 
+System.arraycopy(headerpairs, 0, temp, 0, headerpairs.length); 
+temp[ headerpairs.length ] = new NameValue(name, value); 
+headerpairs = temp; 
+} 
+catch (NullPointerException npe) 
+{ 
+System.out.println("NullPointerException while adding name-value: 
+" + npe); 
+} 
+} 
+/** 
+* 以字符串的形式归还这个类
+*/ 
+public String toString() 
+{ 
+String s = method + " " + file + " " + version + "\n"; 
+for (int x = 0; x < headerpairs.length; x++ ) 
+s += headerpairs[x] + "\n"; 
+return s; 
+} 
+} 
+
+NameValue类简单地存储了两个字符串:name 和 value.当一个新的对要被加入时,一个新的数组将被分配.新的数组接受了旧的数组和新的成员.旧的数组然后被一个新建的对象覆盖了.

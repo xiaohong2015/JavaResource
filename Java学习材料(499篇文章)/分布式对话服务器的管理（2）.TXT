@@ -1,0 +1,50 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：7/4/2001 1:41:17 PM
+　　Mnemosyne使用三种界面表达其状态。
+
+　　1、CommonContext界面存贮Mnemosyne的全部信息。每个Mnemosyne都有一个CommonContext对象的实例，以便read、write、take Memory对象时在各个方法之间进行同步。在write或者take说Memory对象时，CommonContext对象既定义“silent”方法也定义“loud”方法，当在不进行事件通知的情况下添加对象时，就会用到“silent”方法。例如，当Mnemosyne对象接收到WriteRemoteEvent（向一个远程Mnemosyne对象写对象的告示。）事件后，如果它也希望向CommonContext对象写另一个对象，它就无需通知其他的远程CommonContext对象，最初的Mnemosyne已经通知了它们，因此这种写是通过调用CommonContext对象的silentWrite()方法“静悄悄”地完成的。而“loud”方法则在有对象第一次被添加时将这一事件的详细信息通知所有被调用的监听对象。
+
+　　2、Transaction对象用于在read、write、take Memory对象时进行分布式事务处理，这意味在Mnemosyne对象上可能会有多步骤的操作。
+
+　　3、TransactionContext界面管理分布式事务，使得系统可以中止或提交一个事务。
+
+　　保持Mnemosynes的同步是通过synchronize()和notify()这二个由 Mnemosyne定义的方法完成的。synchronize()可以使一个本地的Mnemosyne与其他Mnemosyne的Vector保持同步（这些Mnemosyne可以是本地的或远程的，为简明起见，我们假定它们是远程的。）下面是synchronize()的一个例子：
+
+
+public void synchronize(Vector Mnemosynes) 
+throws RemoteException, TransactionException 
+{ 
+
+file:// MatchAllMemory对象是一个有效类
+file://对任何二个Memory对象进行比较
+MatchAllMemory matchAllMemory = new MatchAllMemory(); 
+
+file:// 从Primary中获得所有Memory 
+Mnemosyne Mnemosyne = (Mnemosyne) Mnemosynes.firstElement(); 
+Vector allMemories = Mnemosyne.readAll(matchAllMemory,null); 
+
+
+commonContext.silentWriteAll(allMemories); 
+
+// 注册进行发送、接收事件 
+Enumeration enumeration = Mnemosynes.elements(); 
+while(enumeration.hasMoreElements()) 
+{ 
+Mnemosyne nextMnemosyne = (Mnemosyne) enumeration.nextElement(); 
+
+file://注册接收通知
+nextMnemosyne.addTakeRemoteEventListener(this, matchAllMemory); 
+nextMnemosyne.addWriteRemoteEventListener(this, matchAllMemory); 
+
+file:// 注册发送通知
+addTakeRemoteEventListener(nextMnemosyne, matchAllMemory); 
+addWriteRemoteEventListener(nextMnemosyne, matchAllMemory); 
+} 
+
+// ... 
+} 
+ 
+
+
+　　本地的Mnemosyne对象读取Vector中第一个Mnemosyne对象的所有Memory对象，并采用“silent”方法将它们写到其CommonContext对象中。然后，本地Mnemosyne将自己作为TakeRemoteEventListener和WriteRemoteListener添加到所有的远程Mnemosyne中，这就意味着任何对远程Mnemosynes的take或read操作都将调用本地Mnemosyne的notify()方法。最后，本地Mnemosyne将远程Mnemosyne添加到其TakeRemoteEventListeners和WriteRemoteListeners队列中，确保对本地Mnemosyne的write或take操作都会通知远程Mnemosyne。

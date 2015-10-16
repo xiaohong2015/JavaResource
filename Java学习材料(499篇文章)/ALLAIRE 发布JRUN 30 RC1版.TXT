@@ -1,0 +1,38 @@
+作者：jjx
+日期：00-4-29 10:17:13
+allaire 发布jrun 3.0 rc1版
+jjx整理自allaire邮件列表，主页:[url]http://202.106.124.52/jjx[/url]
+
+allaire发布了jrun 3.0,该版本新增以下特点
+1、在jrun management console中分发ejbs
+2、在jrun management console中允许你为jdbc 数据源设置数据库连接池(此功能类似于odbc连接池)。
+3、为j2ee应用分发提供支持enterprise archive(.ear)文件
+4、当前有22定制tags可用在jsp页面中
+该版本当前可用在HP-UX, Linux, Windows,Solaris,SGI IRIX, IBM AIX, Digital Unix个平台之上
+
+下载地址
+http://beta.allaire.com
+
+allaire还发布了jrun studio beta 1
+该工具提供一可视化开发工具供开发jsp/servlet之用
+以下是特点简介
+- 通过jrun rds访问远程和本地服务器文件
+- Server Development mapping (就是在开发环境中将本地文件和url对照，如c:\hellp.jsp和http://localhost/hello.jsp对照，以便在开发环境中浏览server端页面，像asp/jsp/php，interdev好像缺少这个功能，不过想想还是挺简单啊)
+- 支持数据源浏览和建立sql 语句
+-JSP QuickBar 支持全部  JSP 1.1 标记
+-jsp 标记编辑和增强帮助
+- jsp彩色代码支持
+- jsp标记检查
+呵呵，我还没有下载过，但好像这些功能是homesite都具备或是增强吧
+
+下载地址：
+http://beta.allaire.com
+
+最后是Cluster Cats for JRun rc 1,为jrun server提供集群支持
+
+
+嘿嘿，coldfusion的开发者，现在了解allaire对coldfusion的态度了吧，还不放弃它，学习jsp/asp开发。不过java语言好像没有asp/coldfusion来的简单了吧
+
+
+
+

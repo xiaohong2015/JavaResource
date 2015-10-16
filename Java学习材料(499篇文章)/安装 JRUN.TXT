@@ -1,0 +1,56 @@
+作者：jeru
+email: jeru@163.net
+日期：2000-12-31 12:19:29
+安装 JRun 
+在安装Generator的联机版本时, 安装程序总是在Macromedia文件夹下的一个子文件夹中安装Live Software JRun.在Windows中, 此子文件夹为Macromedia\Generator 2;在UNIX系统中,此子目录为Macromedia\Generator2（数字2之前无空格）.Generator安装JRun.dll文件到你的Web服务器的Scripts目录（若此目录中已有此文件的话,它将被覆盖）. 
+
+在UNIX系统中,JRun也被编译进Apache, 或是作为Netscape Enterprise的一个模块被列入清单. 
+
+更多相关文章请访问  爪哇人--》http://www.cyberlabs.com/~jeru/
+
+
+
+
+
+管理 JRun 
+
+为了监控和记录它的活动JRun拥有一个管理工具.例如,你能够纪录JRun发出的任何错误和警告.在JRun Admin对话框有两个属于 Generator的标签（Generator和Mappings ）.请查阅 JRun文档来了解更多的其他JRun Admin工具标签的信息.（你可以通过 www.livesoftware.com访问Live Software Web站点来获得这些文档.） 
+
+如何运用JRun Admin工具: 
+
+1 选择 开始 > 程序 > Macromedia Generator 2 > JRun Administration. 
+2 选择 jsm-default,然后单击配置. 
+3 选择 jse,然后单击服务配置. 
+4 单击 Mappings标签来察看Generator servlet列出的特殊文件类型. 
+5 单击 Generator标签并选择logging选项. 
+注意:当Generator运行在一个成品环境下时,你应该选择logging level为None or Errors. 
+选择 None,关闭logging选项. 
+选择 Warnings来纪录在Generator运行时JRun可能发出的任何警告.这些警告提供了任何一个非致命性errors的有关信息. 
+选择 Errors来纪录任何一个Generator可能发出的错误.这个设置提供了相对Warnings较少的信息. 
+选择 Verbose来纪录当它运行于 Generator servlets时Generator可能发出的所有warnings和errors. 
+6 单击 Aliases选项来显示JRun和Generator servlets的配置信息. 
+7 单击 Save All. 
+
+
+
+你可以通过Macromedia\Generator\logs\generator.logl文件来察看你在JRun Admin对话框中为Generator页面所作的任何改动. 
+
+
+
+调试JRun的活动 
+
+如果你要配置Generator来存入管理信息,你可以通过文本编辑器来察看在Macromedia\Generator\logs\位置下的文件中已纪录的信息.在这些文件中,你可以察看关于应用过程的信息, 例如:电影是否已经完全生成,或者是服务器能否连接数据源. 
+
+例如,你可以通过察看JrunServletEvent.log文件来检查JRun是否已初始化Generator servlets.下面例子中给出了log文件的部分,列出了已经完全初始化的servlets: 
+
+Fri Apr 02 15:18:32 PST 1999: com.livesoftware.jrun.plugins.ssi.JRunSSI: init 
+Fri Apr 02 15:18:33 PST 1999: FlashGenerator: init 
+Fri Apr 02 15:18:33 PST 1999: GifGenerator: init 
+Fri Apr 02 15:18:33 PST 1999: PngGenerator: init 
+Fri Apr 02 15:18:33 PST 1999: JpegGenerator: init 
+下面的log文件的部分列出了JRun还未预加载的servlets: 
+
+Wed Apr 21 17:36:01 PDT 1999: Could not pre-load servlet 'FlashGenerator'. 
+Wed Apr 21 17:36:02 PDT 1999: Could not pre-load servlet 'GifGenerator'. 
+Wed Apr 21 17:36:02 PDT 1999: Could not pre-load servlet 'PngGenerator'. 
+Wed Apr 21 17:36:02 PDT 1999: Could not pre-load servlet 'JpegGenerator'. 

@@ -1,0 +1,278 @@
+作者：bdsc
+email: bdscca@yahoo.ca
+日期：2001-7-13 17:02:54
+SOAP:简单对象访问协议
+(2001-1-1)
+摘要 
+SOAP是用在分散或分布的环境中交换信息的简单的协议，它是一个基于XML的协议，包括三个部分：封装定义了一个描述消息中包含什么内容以及如何处理它们的框架，编码规则用于表示应用程序定义的数据类型的实例，另外还有一个表示远程过程调用和应答的协定。SOAP被设计为可以与各种其它协议结合使用；但这篇文章仅描述如何将SOAP和HTTP及HTTP扩展框架相结合。 
+
+目录
+1. 简介 
+1.1 设计目标 
+1.2 符号协定 
+1.3 SOAP消息举例 
+2. SOAP消息交换模型 
+3. 与XML的关系 
+4. SOAP封装 
+4.1.1 SOAP encodingStyle属性 
+4.1.2 封装版本模型 
+4.2 SOAP头 
+4.2.1 使用SOAP头属性 
+4.2.2 SOAP actor属性 
+4.2.3 SOAP mustUnderstand属性 
+4.3 SOAP体 
+4.3.1 SOAP头和体的关系 
+4.4 SOAP 错误 
+4.4.1 SOAP错误代码 
+5. SOAP编码 
+5.1 XML编码类型规则 
+5.2 简单类型 
+5.2.1 字符串 
+5.2.2 枚举 
+5.2.3 字符数组 
+5.3 多态 Accessor 
+5.4 复合类型 
+5.4.1 复合值和对值的引用 
+5.4.2 数组 
+5.4.2.1 PartiallyTransmitted Arrays 
+5.4.2.2 稀疏数组 
+5.4.3 一般复合类型 
+5.5 缺省值 
+5.6 SOAP root属性 
+6. 在HTTP中使用SOAP 
+6.1 SOAP HTTP请求 
+6.1.1 HTTP头中的SOAPAction域 
+6.2 SOAP HTTP应答 
+6.3 HTTP扩展框架 
+6.4 SOAP HTTP举例 
+7. 用SOAP表示RPC 
+7.1 RPC和SOAP体 
+7.2 RPC和SOAP头 
+8. 安全考虑 
+9. 参考文献 
+A. SOAP封装举例 
+A.1 请求编码举例 
+A.2 应答编码举例 
+1. 简介
+SOAP以XML形式提供了一个简单、轻量的用于在分散或分布环境中交换结构化和类型化信息的机制。SOAP本身并没有定义任何应用程序语义，如编程模型或特定语义的实现；实际上它通过提供一个有标准组件的包模型和在模块中编码数据的机制，定义了一个简单的表示应用程序语义的机制。这使SOAP能够被用于从消息传递到RPC的各种系统。 
+
+SOAP包括三个部分 
+
+SOAP封装（见第4节）结构定义了一个整体框架用来表示消息中包含什么内容，谁来处理这些内容以及这些内容是可选的或是必需的。 
+SOAP编码规则（见第5节）定义了用以交换应用程序定义的数据类型的实例的一系列机制。 
+SOAP RPC表示（见第7节）定义了一个用来表示远程过程调用和应答的协定。 
+虽然这三个部分都作为SOAP的一部分一起描述，但它们在功能上是相交的。特别的，封装和编码规则是在不同的名域中定义的，这种模块性的定义方法增加了简单性。 
+
+在SOAP封装，SOAP编码规则和SOAP RPC协定之外，这个规范还定义了两个协议的绑定，描述了在有或没有HTTP扩展框架[6]的情况下，SOAP消息如何包含在HTTP消息[5]中被传送。 
+
+1.1 设计目标 
+SOAP的主要设计目标是简单性和可扩展性，这意味着传统的消息系统和分布对象系统的某些性质不是SOAP规范的一部分。这些性质包括： 
+
+分布式碎片收集 
+成批传送消息 
+对象引用（要求分布式碎片收集） 
+激活机制（要求对象引用） 
+1.2 符号约定 
+这篇文章中的关键字 "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", 和"OPTIONAL"的解释在RFC-2119 [2]中。 
+
+这篇文章中用到的名域前缀 "SOAP-ENV" 和 "SOAP-ENC"分别与"http://schemas.xmlsoap.org/soap/envelope/" 和"http://schemas.xmlsoap.org/soap/encoding/"关联。 
+
+整篇文档中，名域前缀“xsi”被假定为与URI "http://www.w3.org/1999/XMLSchema-instance“（在XML Schema规范[11]定义）相连。类似的，名域前缀”xsd“被假定为与URI "http://www.w3.org/1999/XMLSchema"（在 [10]中定义）相连。名域前缀”tns“用来表示任意名域。所有其它的名域前缀都只是例子。 
+
+名域URI的基本形式”some－URI“表示某些依赖于应用程序或上下文的URI[4]。
+
+这个规范用扩展BNF（在RFC－2616[5] 描述）描述某些结构。 
+
+1.3 SOAP消息举例 
+在这个例子中，GetLastTradePrice SOAP 请求被发往 StockQuote服务。这个请求携带一个字符串参数和ticker符号，在SOAP应答中返回一个浮点数。XML名域用来区分SOAP标志符和应用程序特定的标志符。这个例子说明了在第6节中定义的HTTP绑定。如果SOAP中管理XML负载的规则完全独立于HTTP是没有意义的，因为事实上该负载是由HTTP携带的。
+
+在Appendix A中有更多的例子。 
+
+例1 在HTTP请求中嵌入SOAP消息 
+
+POST /StockQuote HTTP/1.1
+Host: 
+www.stockquoteserver.com
+Content-Type: text/xml; 
+charset="utf-8"
+Content-Length: nnnn
+SOAPAction: 
+"Some-URI"
+
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+   <SOAP-ENV:Body>
+       <m:GetLastTradePrice xmlns:m="Some-URI">
+           <symbol>DIS</symbol>
+       </m:GetLastTradePrice>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+下面是一条应答消息，包括HTTP消息，SOAP消息是其具体内容： 
+
+例2 在HTTP应答中嵌入SOAP消息 
+
+HTTP/1.1 200 OK
+Content-Type: text/xml; 
+charset="utf-8"
+Content-Length: 
+nnnn
+
+<SOAP-ENV:Envelope
+  xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+  SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+   <SOAP-ENV:Body>
+       <m:GetLastTradePriceResponse xmlns:m="Some-URI">
+           <Price>34.5</Price>
+       </m:GetLastTradePriceResponse>
+   </SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+2. SOAP消息交换模型 
+SOAP消息从发送方到接收方是单向传送，但正如上面显示的，SOAP消息经常以请求/应答的方式实现。 
+
+SOAP实现可以通过开发特定网络系统的特性来优化。例如，HTTP绑定（见第6节）使SOAP应答消息以HTTP应答的方式传输，并使用同一个连接返回请求。
+
+不管SOAP被绑定到哪个协议，SOAP消息采用所谓的”消息路径“发送，这使在终节点之外的中间节点可以处理消息。 
+
+一个接收SOAP消息的SOAP应用程序必须按顺序执行以下的动作来处理消息： 
+
+识别应用程序想要的SOAP消息的所有部分 （见4.2.2节） 
+检验应用程序是否支持第一步中识别的消息中所有必需部分并处理它。如果不支持，则丢弃消息（见4.4节）。在不影响处理结果的情况下，处理器可能忽略第一步中识别出的可选部分。 
+如果这个SOAP应用程序不是这个消息的最终目的地，则在转发消息之前删除第一步中识别出来的所有部分。 
+为了正确处理一条消息或者消息的一部分，SOAP处理器需要理解：所用的交换方式（单向，请求/应答，多路发送等等），这种方式下接收者的任务，RPC机制（如果有的话）的使用（如第7节中所述），数据的表现方法或编码，还有其它必需的语义。 
+
+尽管属性比如SOAP encodingstyle（见4.1.1节）可以用于描述一个消息的某些方面，但这个规范并不强制所有的接收方也必须有同样的属性并取同样的属性值。举个例子，某一特定的应用可能知道一个元素表示一条遵循第7节约定的RPC请求，但是另外一些应用可能认为指向该元素的所有消息都用单向传输，而不是类似第7节的请求应答模式。
+（译者注：交互双方的SOAP消息并不一定要遵循同样的格式设定，而只需要以一种双方可理解的格式交换信息就可以了） 
+
+3. 与XML的关系
+所有的SOAP消息都使用XML形式编码（更多有关XML的信息请见[7]）
+
+一个SOAP应用程序产生的消息中，所有由SOAP定义的元素和属性中必须包括正确的名域。SOAP应用程序必须能够处理它接收到的消息中的SOAP名域（见4.4节），并且它可以处理没有SOAP名域的SOAP消息，就象它们有正确的名域一样。
+
+SOAP定义了两个名域（更多有关XML名域的信息请见[8]）
+
+SOAP封装的名域标志符是"http://schemas.xmlsoap.org/soap/envelope/" 
+SOAP的编码规则的名域标志符是"http://schemas.xmlsoap.org/soap/encoding/" 
+SOAP消息中不能包含文档类型声明，也不能包括消息处理指令。[7]
+
+SOAP使用"ID"类型"id"属性来指定一个元素的唯一的标志符，同时该属性是局部的和无需校验的。SOAP使用"uri-reference"类型的"href"属性指定对这个值的引用，同时该属性是局部的和无需校验的。这样就遵从了XML规范[7]，XML Schema规范[11]和XML连接语言规范[9]的风格。
+
+除了SOAP mustUnderstand 属性(见4.2.3节）和SOAP actor属性(见4.2.2节）之外，一般允许属性和它们的值出现在XML文档实例或Schema中（两者效果相同）。也就是说，在DTD或Schema中声明一个缺省值或固定值和在XML文档实例中设置它的值在语义上相同。
+
+4. SOAP封装
+SOAP消息是一个XML文档，包括一个必需的SOAP封装，一个可选的SOAP头和一个必需的SOAP体。在这篇规范剩余部分中，提到SOAP消息时就是指这个XML文档。这一节中定义的元素和属性的名域标志符为："http://schemas.xmlsoap.org/soap/envelope/" 。一个SOAP消息包括以下部分：
+
+在表示这个消息的XML文档中，封装是顶层元素。 
+应用SOAP交换信息的各方是分散的且没有预先协定，SOAP头提供了向SOAP消息中添加关于这条SOAP消息的某些要素(feature)的机制。SOAP定义了少量的属性用来表明这项要素（feature）是否可选以及由谁来处理。（见4.2节） 
+SOAP体是包含消息的最终接收者想要的信息的容器（见4.3节）。SOAP为SOAP体定义了一个Fault元素用来报告错误信息。 
+语法规则如下所示： 
+
+封装 
+元素名是 "Envelope" 
+在SOAP消息中必须出现。 
+可以包含名域声明和附加属性。如果包含附加属性，这些属性必须限定名域。类似的，"Envelope"可以包含附加子元素，这些也必须限定名域且跟在SOAP体元素之后。 
+SOAP头 （见4.2节） 
+元素名是"Header" 
+在SOAP消息中可能出现。如果出现的话，必须是SOAP 封装元素的第一个直接子元素。 
+SOAP头可以包含多个条目，每个都是SOAP头元素的直接子元素。所有SOAP头的直接子元素都必须限定名域。 
+SOAP体 （见4.3节） 
+元素名是"Body" 
+在SOAP消息中必须出现且必须是SOAP封装元素的直接子元素。它必须直接跟在SOAP头元素（如果有的话）之后。否则它必须是SOAP封装元素的第一个直接子元素。 
+SOAP体可以包括多个条目，每个条目必须是SOAP体元素的直接子元素。SOAP体元素的直接子元素可以限定名域。SOAP定义了SOAP Fault元素来表示错误信息。(见4.4节). 
+4.1.1 SOAP encodingStyle 属性
+EncodingStyle全局属性用来表示SOAP消息的序列化规则。这个属性可以在任何元素中出现，作用范围与名域声明的作用范围很相似，为这个元素的内容和它的所有没有重载此属性的子元素。SOAP消息没有定义缺省编码。
+
+属性值是一个或多个URI的顺序列表，每个URI确定了一种或多种序列化规则，用来不同程度反序列化SOAP消息，举例如下：
+
+"http://schemas.xmlsoap.org/soap/encoding/"
+"http://my.host/encoding/restricted http://my.host/encoding/"
+""
+
+第5节中定义的序列化规则由URI"http://schemas.xmlsoap.org/soap/encoding/" 确定。使用这个特定序列化规则的消息应该用encodingStyle属性说明这一点。另外，所有以"http://schemas.xmlsoap.org/soap/encoding/"开头的URI中的序列化规则与第5节中定义的SOAP编码规则相一致。
+
+一个零长度的URI（""）明确显示所含元素没有任何编码形式。这可以用来取消上一级元素的所有编码声明。
+
+4.1.2 封装版本模型
+SOAP没有定义常规的基于主版本号和辅版本号的版本形式。SOAP消息必须有一个封装元素与名域"http://schemas.xmlsoap.org/soap/envelope/"关联。如果SOAP应用程序接收到的SOAP消息中的SOAP封装元素与其他的名域关联，则视为版本错误，应用程序必须丢弃这个消息。如果消息是通过HTTP之类的请求/应答协议收到的，应用程序必须回答一个SOAP VersionMismatch 错误信息（见4.4节）。
+
+4.2 SOAP头
+SOAP为相互通信的团体之间提供了一种很灵活的机制：在无须预先协定的情况下，以分散但标准的方式扩展消息。可以在SOAP头中添加条目实现这种扩展，典型的例子有认证，事务管理，支付等等。
+
+头元素编码为SOAP封装元素的第一个直接子元素。头元素的所有直接子元素称作条目。
+
+条目的编码规则如下：
+
+一个条目有它的完整的元素名（包括名域URI和局部名）确定。SOAP头的直接子元素必须有名域限制。 
+SOAP encodingStyle属性可以用来指示条目所用的编码形式（见4.1.1节） 
+SOAP mustUnderstand属性（见4.2.3节）和SOAP actor属性（见4.2.2节）可以用来指示如何处理这个条目以及由谁来处理。（见4.2.1节） 
+4.2.1 使用头属性
+这一节中定义的SOAP头属性确定了SOAP消息的接收者应该怎样按第2节中所述的方式处理消息。产生SOAP消息的SOAP应用程序，应该仅仅在SOAP头元素的直接子元素中使用这些SOAP头属性。SOAP消息的接收者必须忽略所有不在SOAP头元素的直接子元素中SOAP头属性。
+
+下面的例子是一个SOAP头，包括一个元素标志符"Transaction"，"mustUnderstand"取值为"1"和数值5。这应该以如下方式编码：
+
+<SOAP-ENV:Header>
+   <t:Transaction
+      xmlns:t="some-URI" SOAP-ENV:mustUnderstand="1">
+          5
+   </t:Transaction>
+</SOAP-ENV:Header>
+
+4.2.2 SOAP actor属性
+一个SOAP消息从始节点到终节点的过程中，可能沿着消息路径经过一系列SOAP中间节点。一个SOAP中间节点是一个可以接收转发SOAP消息的应用程序。中间节点和终节点由URI区分。
+
+可能SOAP消息的终节点并不需要所有部分，而在消息路径上的一个和几个中间节点可能需要这些内容。头元素的接收者扮演的角色类似于一个过滤器，防止这些只发给本接受者的消息部分扩散到其它节点。即一个头元素的接收者必须不转发这些头元素到SOAP消息路径上的下一个应用程序。同样的，接收者可能插入一个相似的头元素。
+
+SOAP actor全局属性可以用于指示头元素的接收者。SOAP actor属性的值是一个URI。URI "http://schemas.xmlsoap.org/soap/actor/next"指出了第一个处理这个消息的SOAP应用程序需要这个头元素。这类似于HTTP头中用Connection域表示hop-by-hop范围模型。
+
+省略SOAP actor属性表示接收者是SOAP消息的终节点。
+
+如果这个属性要生效，它必须出现在SOAP消息实例中。（见第3节和4.2.1节）
+
+4.2.3 SOAP mustUnderstand属性
+SOAP mustUnderstand全局属性用来指示接受者在处理消息时这个条目是否必须处理。条目的接收者由SOAP actor属性定义（见4.2.2节）。MustUnderstand属性的值是"1" 或 "0"。缺少SOAP mustUnderstand属性在语义上等同于它的值为"0"。
+
+如果一个头元素的SOAP mustUnderstand属性的值是"1",那么条目的接受者必须或者遵守语义（如以元素的全名传送）并按照语义正确的处理，或者放弃处理消息（见4.4节）。
+
+SOAP mustUnderstand 属性考虑了消息演变的准确性（robust evolution）。必须假定包含SOAP mustUnderstand属性且值为"1"的元素以某种方式修改了它们的父元素或同层元素的语义。以这种方式连接元素确保了语义上的变化不会被那些不能完全理解它的接收者忽略。
+
+如果这个属性要生效，它必须出现在SOAP消息实例中。（见第3节和4.2.1节）
+
+4.3 SOAP体
+SOAP体元素提供了一个简单的机制，使消息的最终接收者能交换必要的信息。使用体元素的典型情况包括配置RPC请求和错误报告。
+
+体元素编码为SOAP封装元素的直接子元素。如果已经有一个头元素，那么体元素必须紧跟在头元素之后，否则它必须是SOAP封装元素的第一个直接子元素。
+
+体元素的所有直接子元素称作体条目，每个体条目在SOAP体元素中编码为一个独立的元素。
+
+条目的编码规则如下：
+
+一个条目由它的元素全名（包括名域URI和局部名）确定。SOAP体元素的直接子元素可能是名域限制的。 
+SOAP encodingStyle属性可能用来指示条目（见4.1.1节）的编码方式。 
+SOAP定义了一个Fault条目用来报告错误信息。（见4.4节）
+
+4.3.1 SOAP头和体的关系
+虽然头和体定义为独立的元素，它们实际上是有关系的。体条目和头条目的关系如下：体条目在语义上等同于actor属性为缺省值且mustUnderstand属性值为"1"的头条目。不使用actor属性则表示缺省的actor。（见4.2.2节）
+
+4.4 SOAP错误
+SOAP错误元素用于在SOAP消息中携带错误和（或）状态信息。如果有SOAP错误元素，它必须以以体条目的方式出现，并且在一个体元素中最多出现一次。
+
+SOAP错误元素定义了以下四个子元素： 
+
+faultcode 
+faultcode元素给软件提供了一个识别此错误的算法机制。SOAP错误元素必须有faultcode子元素，并且它的值必须是一个合法的名（在[8]节定义）。SOAP定义一些SOAP faultcode描述基本的SOAP错误（见4.4.1节）。 
+faultstring 
+faultstring元素提供了一个错误解释，而不是为了软件处理。faultstring元素类似于HTTP中定义(见[5]，第6.1节）的'Reason-Phrase'。SOAP错误元素必须有faultstring子元素，并且它应该提供一些错误本质的解释信息。 
+faultactor 
+faultactor元素提供了在消息路径上是谁导致了错误发生的信息（见第2节）。它类似于SOAP actor属性（见4.2.2节），只是SOAP actor指的是头条目的目的地，faultactor指的是错误的来源。faultactor属性的值是用来区分错误来源的URI。不是SOAP消息的最终目的地的应用程序必须在SOAP Fault元素中包含faultactor元素。消息的最终目的地可以使用faultactor元素明确的指示是它产生了这个错误（参见下面的detail元素） 
+detail 
+detail元素用来携带与Body元素有关的应用程序所要的错误信息。如果Body元素的内容不能被成功的处理，则必须包含detail子元素。它不能用来携带属于头条目的错误信息。头条目的详细出错信息必须由头条目携带。
+Fault元素中没有detail元素表示这个错误与Body元素的处理无关。在有错误的时候，这可以用来区分Body元素有没有被正确的处理。
+
+detail元素的所有直接子元素称作detail条目，并且每个detail条目在detail元素中编码为独立的元素。
+
+detail条目的编码规则如下（参见例10）： 
+一个detail条目由它的元素全名（包括名域URI和局部名）确定。SOAP体元素的直接子元素可能是名域限制的。 
+SOAP encodingStyle属性可能用来指示detail条目（见4.1.1节）的编码方式。 
+也可以有其它的Fault子元素，只要它们是名域限制的。

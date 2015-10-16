@@ -1,0 +1,64 @@
+作者：jeru
+email: jeru@163.net
+日期：7/3/2001 1:06:10 PM
+XML和J2EE的组合技术
+2001-05-09· 布老虎·小龙亭
+
+　　当前，Java 2平台企业版（J2EE）架构在厂商市场和开发者社区中倍受推崇。作为一种工具，可扩展标记语言（XML）简化了数据交换、进程间消息交换这一类的事情，因而对开发者逐渐变得有吸引力，并开始流行起来。自然，在J2EE架构中访问或集成XML解决方案的想法也很诱人。因为这将是强大系统架构同高度灵活的数据管理方案的结合。
+
+　　XML的应用似乎是无穷无尽的，但它们大致上可以分为三大类：
+
+　　* 简单数据的表示和交换（针对XML的简单API（SAX）和文档对象模型（DOM）语法解析，不同的文档类型定义（DTDs）和概要（schemas））
+
+　　* 面向消息的计算（XML-RPC（远程过程调用），SOAP协议，电子化业务XML（ebXML））
+
+　　* 用户界面相关、表示相关的上下文（可扩展样式表语言（XSL），可扩展样式表语言转换（XSLT））
+
+　　这几类应用在J2EE架构中恰好有天然的对应：数据表示和交换功能是EJB组件模型中持久化服务（persistence services）的一部分，基于消息的通讯由Java消息服务（JMS）API来处理，而界面表示正是Java服务器页面（JSP）和Java Servlets的拿手好戏。
+
+　　在本文中，我们将看到当今基于J2EE的应用里，XML是如何在上述几个方面进行应用的，以及在相关标准的未来版本中这些应用将会如何发展。
+
+　　基础：数据的表示和交换
+
+　　原型化的XML应用（假设有的话）的内容通常是：数据以XML格式存放，为了进行显示、修改甚至写入某个XML文档而经常被读入到某个对象模型中。作为例子，假定我们正处理多种类型的媒体（图品、视频、文本文档等等），并且用下面这个简单的XML DTD来描述这些媒体的元数据：
+
+　　＜!-- DTD for a hypothetical media management system --＞
+　　＜!-- Media assets are the root of the object hierarchy. Assets are also
+　　　　hierarchical - they can contain other assets. --＞
+　　＜!ELEMENT media-asset (name, desc?, type*, media-asset*, urn)＞
+　　＜!-- Metadata about the asset --＞
+　　＜!ELEMENT name (#PCDATA)＞
+　　＜!ELEMENT desc (#PCDATA)＞
+　　＜!ELEMENT type (desc, mime-type?)＞
+　　＜!ELEMENT mime-type (#PCDATA)＞
+　　＜!ELEMENT urn (#PCDATA)＞
+
+　　以下是一个基于上述媒体DTD的XML文档，描述了与某个课程讲座相关的内容：
+
+　　＜?xml version="1.0" ?＞＜!DOCTYPE media-asset PUBLIC "-//Jim Farley//DTD Media Assets//EN" "http://localhost/Articles/Sun/dtds/media.dtd"＞
+　　＜media-asset＞
+　　＜name＞第14讲＜/name＞
+　　＜desc＞与第14讲相关的所有内容＜/desc＞
+　　＜!-- 内容对象"lecture 14"的一套子组件 --＞ 
+　　＜media-asset＞
+　　＜name＞讲座的幻灯片＜/name＞
+　　＜type＞
+　　＜desc＞MS PowerPoint＜/desc＞
+　　＜mime-type＞application/vnd.ms-powerpoint＜/mime-type＞
+　　＜/type＞
+　　＜urn＞http://javatraining.org/jaf/E123/lecture-14/slides.ppt＜/urn＞
+　　＜/media-asset＞
+　　＜media-asset＞
+　　＜name＞讲座的视频片断＜/name＞
+　　＜type＞
+　　＜desc＞RealPlayer streaming video＜/desc＞
+　　＜mime-type＞video/vnd.rn-realvideo＜/mime-type＞
+　　＜/type＞
+　　＜urn＞http://javatraining.org/jaf/E123/lecture-14/lecture.rv＜/urn＞
+　　＜/media-asset＞
+　　＜!-- 讲座开始 --＞
+　　＜urn＞http://javatraining.org/jaf/E123/lecture-14/index.jsp＜/urn＞
+　　＜/media-asset＞ 
+
+　　从Web或者企业级应用的角度看，能以这种方式访问数据真是一种福音，因为它体现了高度的可移动性，使我们与元数据的实际资源本身隔离。这些资源可能来自一个关系数据库系统、某种活动媒体服务器或者Web服务器上的一个静态XML文档，等等。如果想把这些数据加载到Java应用中，我们可以从当前众多的Java语言XML解析器中选用一个，通过它将XML数据装入一个DOM文档，最后遍历文档，将所有这些数据转换到我们应用系统的对象模型中。
+

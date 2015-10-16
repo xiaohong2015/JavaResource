@@ -1,0 +1,94 @@
+作者：caoli
+email: caoli@dicp.ac.cn
+日期：2001-2-21 9:42:25
+1） JSP（JavaServer Pages）简介：在当今世界，流行的Internet应用程序开发主要有：ASP，PHP，CGI，JSP……等多种方案，技术上各有优缺点，但是JSP以其简单易学，跨平台的特性，在众多程序中独树一帜，在短短几年中已经形成了一套完整的规范，并广泛的应用于电子商务等各个领域中。在国内JSP现在也得到了比较广泛的重视
+　　2） 如何才能快速掌握JSP：JSP实际上是JSP定义的一些标记和JAVA程序段，以及HTML文件的混合体。所以，如果要掌握JSP首先必须对HTML有一定的了解（不然怎么设计网页），然后，也必须有JAVA程序的基础（要知道JSP是基于JAVA语言的），最后就是对JSP标识的一些必要的了解（它使你知道如何用JAVA语言及HTML组合成完整的JSP），而此篇文章我们在这里主要是对JSP标识及语法规则进行介绍。所以最好对HTML及JAVA语言有一点了解，如果没有学过也没有关系，下面的介绍会让你对JSP有一个比较直观的了解。 
+　　3） 体会简单易学的JSP：JSP简单而易学，如果你有了HTML的基础，要学会就很容易的了，不信？先拿一段JSP程序给你看看吧（简单而经典的HelloWord.jsp）：
+　　< %page language="java"% > 
+　　< HTML> 
+　　< head > 
+　　< title>Hello World!< /title>
+　　< /head>
+　　< body bgcolor="#FFFFFF">
+　　< %String msg="JSP Example";//定义字符串对象
+　　out.println("Hello World!"); %> 
+　　< %=msg%> < !-显示变量值- >
+　　< /body>
+　　< /HTML> 
+　　运行之后，在窗口上的输出字符串Hello World! JSP Example，怎么样，一看就懂了吧，的确很简单的，除去"< %% >"标识，其他的都是普通的超文本，如果你有了超文本的基础，一看便知道了；不过他和超文本还是有了一点区别，那就是加入了"< %% >"标识，标识之中使用的是JAVA程序，由它来控制动态数据的显示的，并直接输出到标识符所嵌入的位置，整个结构显得相当的直观，以后如果页面发生了变化，修改也变得十分的容易。至于程序第一行的标识，我们暂时可以不必管他，在后面，我们会对这类语法做相应的介绍。
+　　看了上面的JSP程序，你对JSP应该也有了一点了解了吧，是的，学习JSP是并不是一件难事，而且以后，你会越发感受到JSP的优势，他的跨平台特性在Internet开发程序中可谓是独树一帜，因为JSP技术是构建于JAVA语言之上的，他的很多特性和应用都来自JAVA语言，所以如果你要学好JSP，需要有JAVA编程的基础（关于JAVA语言，我这里就不多介绍了，可以参看相应的书籍，向大家推荐：《JAVA2程序设计》（清华大学出版社）） 
+　　4） JSP从头做起： 
+　　a) 从www.java.sun.com下载JDK(JAVA开发工具包)，并安装，现假设为c:\jdk1.3 b) 组建JSP运行　　环境：要使JSP运行起来首先要建造JSP运行环境。
+　　现在我们常用到的应用程序服务器软件主要有WebLogic Application Server，Apache Tomcat，Allarie Jrun。WebLogic是现在市场上占有率最高的一种服务器软件，功能强大，配置也很简单，作为商业应用的服务器是很好的选择，不过作为初学应用，建议还是不要的好，因为这是商业软件，需要money的。Jrun是由Allarie公司开发的服务器软件，也有比较高的声誉，和WebLogic一样也是很好的选择，也是商业软件。初学，还是找个便宜点（最好是不要钱的：）），Tomcat便是你最好的选择，他是一个免费的服务器软件，而且他的源代码可以免费获得，当你对它有深入的了解之后，可以自由的对他进行扩充，以适应你自己的需要，虽然配置麻烦了一点，但以上的这么多优点，它是我们当之无愧的最佳选择。下面我们就以Tomcat为实例，向大家介绍win2000下JSP环境的配置： 
+　　1） 首先，从apache网站（http://java.apache.org）上下载Tomcat，下载的是一个.zip文件（jakarta-tomcat.zip），把它解压到你的目录下面，假设为c:\tomcat。
+　　2） 进入tomcat的目录里，找到startup.bat文件，打开编辑。在行call tomcat start的前面加上两行： SET TOMCAT_HOME=c:\tomcat 和 SET JAVA_HOME=c:\jdk1.3 注：c:\jdk1.3是jdk1.3安装的位置。
+　　3） 然后鼠标右键点击"我的电脑"，选择属性。在系统属性中打开高级选项，点击"环境变量"，在"用户变量"和"系统变量"中都加入两个变量classpath和path，它们的值是：classpath的值　　c:\jdk1.3\bin\tools.jar;C:\jdk1.3\lib\dt.jar path的值为 c:\jdk1.3\bin;c:\jdk1.3 
+　　4） 执行jakarta-tomcat\bin\startup.bat，会看到一个打开的Tocmat启动窗口， 
+　　5） 打开浏览器，输入：http://localhost:8080，回车就可以看到TOMCAT的主页面了
+　　c) JSP的基本语法简介：
+　　　　i. 注释语句："< %-- comment --% >"在编译的时候将跳过此标识； 
+　　　　ii. 插入一个有效的程序段 ：< % code % > 
+　　　　iii. 定义JSP文件中的全局属性： 
+　　< %@ page
+　　[ language="java" ] //声明脚本语言的种类 
+　　[ extends="package.class" ] //标明JSP编译时需要加入的Java Class的全名，但是得慎重的使用它，它会限制JSP的编译能力. 
+　　[ import="{package.class / package.*}, ..." ] //需要导入的Java包的列表 
+　　[ session="true / false" ] //设定客户是否需要HTTP Session 
+　　[ buffer="none / 8kb / sizekb" ] //buffer的大小被out对象用于处理执行后的JSP对客户浏览器的输出 
+　　[ autoFlush="true / false" ] //设置如果buffer溢出，是否需要强制输出，如果其值被定义为true(缺省值)，输出正常，如果它被设置为false,如果这个buffer溢出，就会导致一个意外错误的发生.如果你把buffer设置为none,那么你就不能把autoFlush设置为false. 
+　　[ isThreadSafe="true / false" ] //设置Jsp文件是否能多线程使用。缺省值是true,也就是说，JSP能够同时处理多个用户的请求，如果设置为false，一个jsp只能一次处理一个请求 
+　　[ info="text" ] //一个文本在执行JSP将会被逐字加入JSP中，你能够使用Servlet.getServletInfo方法取回。 
+　　[ errorPage="relativeURL" ] //设置此页是否为出错页，如果被设置为true,你就能使用exception对象
+　　[ contentType="mimeType [ ;charset=characterSet ]" / "text/html ; charset=ISO-8859-1" ] //设置MIME类型 。缺省MIME 类型是: text/html, 缺省字符集为 ISO-8859-1 
+　　[ isErrorPage="true / false" ] %> 
+　　iv. 包含一个文件："< %@ include file="relativeURL" %> "，在编译的时候可以（静态的）插入文件；
+　　v. 包含一个表达式："< %= expression %>"在运行的时候显示的是表达式的值； 
+　　vi. 申明变量：" < %! declaration; [ declaration; ]+ .. % >"；如"< %!int I;% >" 
+　　vii. 创建一个Bean实例并设置其属性：""；class属性：从一个class中示例一个对象；id属性：指示此class对象的引用名；scope属性： Bean存在的范围以及id变量名的有效范围，如果为page则只在此页面类有效(下次调用该页面时时将重新创建class对象)；如为session则在session有效期类，此class对象只创建一次；如为Application则class在整个程序运行工程中始终有效，并且只创建一次（相当于静态量）
+　　d) Tomcat的JSP例程介绍：
+　　< !-- Copyright (c) 1999 The Apache Software Foundation. All rights 
+　　reserved. 
+　　Number Guess Game 
+　　Written by Jason Hunter < jasonh@kasoftware.com>, CTO, K&A Software 　　　　　　　　　　http://www.servlets.com -->
+　　< %@ page import = "num.NumberGuessBean" %>
+　　< ! -导入的Java包- >
+　　< jsp:useBean id="numguess" class="num.NumberGuessBean" scope="session"/ > 
+　　< ! -创建对象并设置其应用名为numguess并申明此对象在session有效期内始终有效-->
+　　< html> 
+　　< head>
+　　< title>Number Guess< /title>
+　　< /head> 
+　　< body bgcolor="white">
+　　< font size=4> 
+　　< % if (numguess.getSuccess()) { %> //调用NumberGuessBean对象的getSuccess方法 
+　　Congratulations! You got it.
+　　And after just
+　　< %= numguess.getNumGuesses()%> 
+　　tries.< p> 
+　　< % numguess.reset(); %>
+　　Care to < a href="numguess.jsp">try again?
+　　< % } else if (numguess.getNumGuesses() == 0) { %> Welcome to the Number Guess game.
+　　 I'm thinking of a number between 1 and 100.
+　　 < form method=get>
+　　What's your guess?
+　　< input type=text name=guess>
+　　< input type=submit value="Submit"> 
+　　< /form>
+　　< % } else { %>// 
+　　Good guess, but nope. Try < b>
+　　< %= numguess.getHint() %>< /b>. 
+　　You have made < %= numguess.getNumGuesses() %> guesses.< p>
+　　I'm thinking of a number between 1 and 100.
+　　< form method=get> What's your guess?
+　　< input type=text name=guess>
+　　< input type=submit value="Submit"> 
+　　< /form> < % } %> 
+　　< /font>
+　　< /body>
+　　< /html> 
+　　从例子我们可以看到，JSP是通过程序的逻辑来控制页面的显示的，通过程序来得到显示的动态属性。
+　　5） 相关网站介绍
+　　a) www.java.sun.com 
+　　b) www.servlets.com
+　　c) www.21icsearch.com/aspfans/jspfans/default.jsp 
+　　d) http://java.apache.org

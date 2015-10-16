@@ -1,0 +1,22 @@
+作者：大自然
+日期：2001-3-28 12:37:47
+一、在调试运行JSP或SERVLET的时候，用WEB RUN为什么会每次都打开一个新端口？
+解决方法：选择Run-Configurations，在Runtime Configurations框中选择<Default>，选择Edit，在JSP/SERVLET栏中选择Server options，你会看到有一个Port number，这个表示你调试的时候TOMCAT打开的端口，把右边的Search for unused port的勾去掉，这样每次调试JSP/SERVLET的时候就不会打开N个端口了。：)
+
+二、为什么装好JB4以后，新建文件的时候选择Enterprise，里面的关于EJB、CORBA的项目都是虚的？
+解决方法：那是因为你没有指定AppSERVER的路径，建议你先安装一个IAS(当然也可以是服务器上已经装好的)，然后在JB4里选择Tools-Enterprise Setup，在Application Server的Tab框里，设置你的IAS installation directory，如果安装在本地，则只需要直接设置好路径，如果是安装在服务器上，则需要先把服务器上的IAS安装路径共享出来，然后在本地设置该安装路径为网络驱动器就行了(因为发现JB4里用JAVA写的资源管理器里居然没有网上邻居的)，当然WebLogic也可以这样设置。
+
+三、怎样在JB4里安装MYSQL或其它的数据库JDBC驱动。(以http://mmmysql.sourceforge.net/下载的mysql-comp.jar为例)
+解决方法：
+1、打开JDBC Explorer，在View菜单里选择Options，然后选择Drivers，这里列出了所有的JDBC驱动，然后按 Add新增一个驱动，在弹出的Driver Class里输入org.gjt.mm.mysql.Driver。
+
+2、然后在JDBC Explorer的File菜单里选择New，新建一个数据库连接，在弹出的New Url里选择Driver，发现刚才的org.gjt.mm.mysql.Driver驱动是红的，表明驱动没装上。于是装第三步
+
+3、在JB4的Tools菜单里选择Enterprise Setup，然后选择Database Drivers，按Add，在弹出的Select libraries里按New，然后在弹出的New Library的Name框中输入:mysql driver，在location里选择Jbuilder，在library path里加入mysql_comp.jar这个文件的路径，如c:\mysql-jdbc\mysql_comp.jar，然后按OK完成。
+
+4、这时候要重启JB4后才能使设置生效，然后再重复2步骤。发现原来是红的org.gjt.mm.mysql.Driver现在已经变成和系统预带的sun.jdbc.odbc.JdbcOdbcDriver一样的颜色了，这表明MYSQL驱动已经安装成功。
+
+5、在New Url的框里选择Driver:org.gjt.mm.mysql.Driver，在URL里输入jdbc:mysql://localhost/myphpbbs?user=root?password=test，按OK，这样就配置好一个和MYSQL数据库的连接，然后按OK。
+
+四、为什么在JB4里编译的JSP或SERVLET都不能显示中文？
+解决方法：点击JB4的左上角的项目，如xxx.jpx，右键选Properties，在General框的Encoding里选择ISO8859_1，这样用JB4对SERVLET进行编译的时候就可以显示中文了。也就省了你在DOS窗口下用javac -encoding ISO8859_1 xxx.java来编译了。：)

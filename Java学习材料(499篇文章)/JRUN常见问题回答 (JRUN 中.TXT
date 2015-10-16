@@ -1,0 +1,67 @@
+作者：jeru
+email: jeru@163.net
+日期：2000-12-31 12:15:46
+JRun常见问题回答 
+
+什么是并发（Concurrency）？ 
+
+并发指JRun在同一时间运行多个servlet的能力。JRun通过运用Java内建的多线程能力支持并发。多任务或多处理（Multi-tasking or Multi-processing）是并发的其他说法。该功能赋予JRun可以同时负载多个用户的并发请求。 
+我需要什么程度的并发处理功能？ 
+
+这取决于你准备支持多少个Web用户，JRun支持多大的流量以及Web服务器的速度。JRun带有一个监控功能帮助你估算出负载的量。 
+JRun的免费版可以支持什么程度的并发？ 
+
+最多同时5个请求。 
+JRun Pro支持什么程度的并发？ 
+
+无限。 
+JRun Pro Unlimited支持什么程度的并发？ 
+
+无限。 
+当并发请求超过我所使用的JRun负载量的时候会发生什么问题？ 
+
+JRun将对这些请求进行排序并按顺序分别处理。当用户的请求处于排队状态时，他们会感觉轻微的延迟。 
+过去JRun版本支持多少个并发连接？ 
+
+免费版和Pro版都支持无限多个连接。 
+如果我的并发处理数是有限的，为什么我应该升级？ 
+
+JRun2.3.3不但比以前版本更快，而且也更强壮，它还包括了原来只在JRun Pro中提供的，对JavaServer Pages(JSP)的全面支持以及其他功能。 
+标准的JRun 2.3.3卖多少钱？ 
+
+JRun 标准版是免费的。 
+JRun Pro2.3和JRun Pro Unlimited 2.3卖多少钱？ 
+
+价格信息请浏览我们的在线报价页面。 
+JRun Pro2.3和JRun Pro Unlimited 2.3之间有哪些区别？ 
+
+这两个版本的产品都可以运行无限多个并发的连接。但是，JRun Pro2.3和 JRun Pro Unlimited之间还有2个主要的区别。 
+版权结构：JRun Pro的版权以每中央处理器计算（例如，如果你在一台装有3个中央处理器的机器上安装JRun Pro，你需要买3个JRun Pro）。而JRun Pro Unlimited是以每台机器计算的，如果你有一台带4个中央处理器的机器，显然买JRun Pro Unlimited就更划算。 
+并发Java 虚拟机的数量：JRun Pro可以运行最多5个Java虚拟机而JRun Pro Unlimited并不限制Java虚拟机的数量。 
+若想了解更多JRun个版本的区别，请访问版本比较列表页面。 
+对于已经购买了JRun Pro 2.2.1/JST 1.0.1捆绑产品的用户，升级到JRun Pro2.3要花多少钱？ 
+
+免费。 
+对于已经购买了JRun Pro 2.2.1或更早版本的用户，升级到JRun Pro2.3要花多少钱？ 
+
+有关所有价格信息，请访问我们的在线价格页面查询。 
+现在是否还卖JRun Scripting Toolkit(JST)? 
+
+JST已经不再是一个单独的产品了，我们已经将它包含到JRun 和 JRun Pro中去了。 
+已经有了JRun Scripting Toolkit1.0.1(或更早版本)的用户来说，升级到JRun Pro2.3的价格是多少？ 
+
+免费。 
+我已被授权可获得一个免费升级到JRun Pro2.3的名额，我怎么拿到属于我的产品呢？ 
+
+正式用户如需要升级，请访问我们的下载产品页面，如果你过去未注册过，请先注册。你会发现在允许下载的产品中有JRun Pro 2.3.3供您直接下载。 
+我是否可以测试JRun Pro? 
+
+是的。可接受无限量并发连接的的JRun Pro 30日试用版可以直接从我们的站点下载。这样你就可以估计出你一般可能需要多少数量的并发连接。现在就下载吧。 
+我是一家电子杂志并且需要使用JRun 2.3.3，我是否必须购买JRun Pro? 
+
+是的。在授权使用声明中已经指出，电子杂志在实施应用或站点、包括内联网的时候，必须购买JRun Pro。免费的JRun只能供你在开发和测试阶段进行使用。 
+JRun2.3.3中是否包括了JavaServer Pages? 
+
+是的。在JRun2.3.3和JRun Pro2.3中包括了一些服务器端 Java scripting 技术，其中包括JavaServer Pages，赠送的模板以及taglets(普通JRun Scripting Toolkit) 
+
+更多相关文章请访问  爪哇人--》http://www.cyberlabs.com/~jeru/

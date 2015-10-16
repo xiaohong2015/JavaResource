@@ -1,0 +1,52 @@
+作者：blackwhites
+日期：2000-10-25 18:04:29
+cocoon 1.7.4在RedHat下基于apache jserv的安装 
+cocoon是xml在apache上的实现，作为一种web发布系统。本文介绍cocoon在RedHat下的安装。 
+首先确认你已经安装了apache jserv，如果你还没有安装apache jserv,请参考本站 
+《RedHat下安装apache jserv 1.1.2》一文。 
+默认jserv安装在/usr/local/jserv下，jserv.conf在/usr/local/jserv/conf下 
+1、需要的软件 
+http://xml.apache.org取得Cocoon-1.7.4.tar.gz 
+2、 
+#cp Cocoon-1.7.4.tar.gz /usr/local 
+#tar xvzf Cocoon-1.7.4.tar.gz 
+#ln -s cocoon-1.7.4 cocoon 
+3、更改配置文件 
+#cd /usr/local/jserv/etc 
+#vi jserv.properties加入 
+wrapper.classpath=/usr/local/jdk/lib/tools.jar 
+wrapper.classpath=/usr/local/cocoon/bin/cocoon.jar
+wrapper.classpath=/usr/local/cocoon/lib/xerces_1_0_3.jar 
+
+wrapper.classpath=/usr/local/cocoon/lib/xalan_1_0_1.jar 
+wrapper.classpath=/usr/local/cocoon/;lib/fop_0_12_1.jar 
+wrapper.classpath=/usr/local/JSDK/lib/jsdk.jar 
+#注意这里不能用/usr/local/cocoon/lib/servlet_2_2.jar因为jserv不支持servlet2.2 
+
+存盘 
+#vi zone.properties加入 
+servlet.org.apache.cocoon.Cocoon.initArgs=/usr/local/cocoon/conf/cocoon.properties 
+存盘 
+#vi jserv.conf加进 
+Action cocoon /servlets/org.apache.cocoon.Cocoon 
+AddHandler cocoon xml 
+存盘 
+4、测试 
+重新启动你的apache 
+通过浏览器调用http://yourserver/Cocoon.xml没看到出信息吧，你快成功了。 
+把/usr/local/cocoon/samples下的文件拷贝到web发布目录下， 
+#cp -R /usr/locao/cocoon/samples /usr/local/apache/htdocs/xml 
+用浏览器调用 
+http://yourserve/xml/index.xml怎么样所有的例子都看见正确结果了吗？ 
+5、中文问题 
+更改index.xml 
+然后把一些信息改成中文，调用，应该是出现乱码，怎么解决呢？如下方法解决： 
+更改/usr/local/cocoon/src/apache/cocoon/formatter/下的文件， 
+把"text/html"更改成"text/html;charset=GB2312" 
+然后运行/usr/local/cocoon/build.sh，这个命令将编译src, 
+结果文件cocoon.jar在/usr/local/build/下 
+然后你再更改/usr/local/jserv/etc/jserv.properties中的 
+wrapper.classpath=/usr/local/cocoon/bin/cocoon.jar
+为wrapper.classpath=/usr/local/cocoon/build/cocoon.jar 
+重新启动apache，看见了你的中文了吗？呵呵就这么简单 
+对xml/java/sevlet等相关信息请参考相关网站 

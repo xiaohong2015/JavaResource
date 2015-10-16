@@ -1,0 +1,126 @@
+作者：jspfuns
+日期：2000-8-10 17:32:36
+JavaBean的属性与一般Java程序中所指的属性，或者说与所有面向对象的程序设计语言中对象的属性是一个概念，在程序中的具体体现就是类中的变量。在JavaBean设计中，按照属性的不同作用又细分为四类：Simple, Index, Bound与Constrained属性。 
+
+3.1.1 Simple属性 
+
+一个简单属性表示一个伴随有一对get/set方法（C语言的过程或函数在Java程序中称为"方法"）的变量。属性名与和该属性相关的get/set方法名对应。例如：如果有setX和getX方法，则暗指有一个名为"X"的属性。如果有一个方法名为isX，则通常暗指"X"是一个布尔属性（即X的值为true或false）。例如在下面这个程序中： 
+
+
+public class alden1 extends Canvas {
+string ourString= "Hello"; //属性名为ourString，类型为字符串
+public alden1(){ 　　　　//alden1()是alden1的构造函数，与C++中构造函数的意义相同
+setBackground(Color.red);
+setForeground(Color.blue);
+}
+/* "set"属性*/
+public void setString(String newString) {
+ourString=newString;
+}
+/* "get"属性 */
+public String getString() {
+return ourString;
+}
+}
+
+3.1.2 Indexed属性 
+
+一个Indexed属性表示一个数组值。使用与该属性对应的set/get方法可取得数组中的数值。该属性也可一次设置或取得整个数组的值。例： 
+
+
+public class alden2 extends Canvas {
+int[] dataSet={1,2,3,4,5,6}; // dataSet是一个indexed属性
+public alden2() {
+setBackground(Color.red);
+setForeground(Color.blue);
+}
+/* 设置整个数组　*/
+public void setDataSet(int[] x){
+dataSet=x;
+}
+/* 设置数组中的单个元素值 */
+public void setDataSet(int index, int x){
+dataSet[index]=x;
+}
+/* 取得整个数组值 */
+public int[] getDataSet(){
+return dataSet;
+}
+/* 取得数组中的指定元素值 */
+public int getDataSet(int x){
+return dataSet[x];
+}
+}
+
+3.1.3 Bound属性 
+
+一个Bound属性是指当该种属性的值发生变化时，要通知其它的对象。每次属性值改变时，这种属性就点火一个PropertyChange事件(在Java程序中，事件也是一个对象)。事件中封装了属性名、属性的原值、属性变化后的新值。这种事件是传递到其它的Bean，至于接收事件的Bean应做什么动作由其自己定义。 
+
+
+图3.1是一个简单Bound属性示意图，当PushButton的background属性 与Dialog的background属性bind时，若PushButton的background属性发生变化时，Dialog的background属性也发生同样的变化。 例： 
+
+
+public class alden3 extends Canvas{
+String ourString= "Hello"; //ourString是一个bound属性
+private PropertyChangeSupport changes = new PropertyChangeSupport(this);
+/** 注：Java是纯面向对象的语言，如果要使用某种方法则必须指明是要使用哪个对象的方法，在下面的程序中要进行点火事件的操作，这种操作所使用的方法是在PropertyChangeSupport类中的。所以上面声明并实例化了一个changes对象，在下面将使用changes的firePropertyChange方法来点火ourString的属性改变事件。*/ 
+
+public void setString(string newString){
+String oldString = ourString;
+ourString = newString;
+/* ourString的属性值已发生变化，于是接着点火属性改变事件 */
+changes.firePropertyChange("ourString",oldString,newString);
+}
+public String getString(){
+return ourString;
+}
+/** 以下代码是为开发工具所使用的。我们不能预知alden3将与哪些其它的Bean组合成为一个应用，无法预知若alden3的ourString属性发生变化时有哪些其它的组件与此变化有关，因而alden3这个Bean要预留出一些接口给开发工具，开发工具使用这些接口，把其它的JavaBean对象与alden3挂接。*/ 
+
+public void addPropertyChangeListener(PropertyChangeLisener l){
+changes.addPropertyChangeListener(l);
+}
+public void removePropertyChangeListener(PropertyChangeListener l){
+changes.removePropertyChangeListener(l);
+}
+
+通过上面的代码，开发工具调用changes的addPropertyChangeListener方法把其它JavaBean注册入ourString属性的监听者队列l中，l是一个Vector数组，可存储任何Java对象。开发工具也可使用changes的removePropertyChangeListener方法，从l中注销指定的对象，使alden3的ourString属性的改变不再与这个对象有关。当然，当程序员手写代码编制程序时，也可直接调用这两个方法，把其它Java对象与alden3挂接。 
+3.1.4 Constrained属性 
+
+一个JavaBean的constrained属性，是指当这个属性的值要发生变化时，与这个属性已建立了某种连接的其它Java对象可否决属性值的改变。constrained属性的监听者通过抛出PropertyVetoException来阻止该属性值 的改变。过程如图3.2 
+
+
+例：下面程序中的constrained属性是PriceInCents。 
+
+
+public class JellyBean extends Canvas{
+private PropertyChangeSupport changes=new PropertyChangeSupport(this);
+private VetoableChangeSupport Vetos=new VetoableChangeSupport(this);
+/*与前述changes相同，可使用VetoableChangeSupport对象的实例Vetos中的方法，在特定条件下来阻止PriceInCents值的改变。*/ 
+
+
+......
+public void setPriceInCents(int newPriceInCents) throws PropertyVetoException {
+/*　方法名中throws PropertyVetoException的作用是当有其它Java对象否决PriceInCents的改变时，要抛出例外。*/ /* 先保存原来的属性值*/ 
+
+int oldPriceInCents=ourPriceInCents;
+/**点火属性改变否决事件*/ 
+vetos.fireVetoableChange("priceInCents",new Integer(OldPriceInCents), new Integer(newPriceInCents));
+
+/**若有其它对象否决priceInCents的改变，则程序抛出例外，不再继续执行下面的两条语句，方法结束。若无其它对象否决priceInCents的改变，则在下面的代码中把ourPriceIncents赋予新值，并点火属性改变事件*/ 
+
+ourPriceInCents=newPriceInCents;
+changes.firePropertyChange("priceInCents", new Integer(oldPriceInCents),new Integer(newPriceInCents));
+}
+
+/**与前述changes相同，也要为PriceInCents属性预留接口，使其它对象可注册入PriceInCents否决改变监听者队列中，或把该对象从中注销 
+
+public void addVetoableChangeListener(VetoableChangeListener l)
+{ vetos.addVetoableChangeListener(l);
+}
+public void removeVetoableChangeListener(VetoableChangeListener l){
+vetos.removeVetoableChangeListener(l);
+}
+......
+} 
+从上面的例子中可看到，一个constrained属性有两种监听者：属性变化监听者和否决属性改变的监听者。否决属性改变的监听者在自己的对象代码中有相应的控制语句，在监听到有constrained属性要发生变化时，在控制语句中判断是否应否决这个属性值的改变。
+总之，某个Bean的constrained属性值可否改变取决于其它的Bean或者是Java对象是否允许这种改变。允许与否的条件由其它的Bean或Java对象在自己的类中进行定义。

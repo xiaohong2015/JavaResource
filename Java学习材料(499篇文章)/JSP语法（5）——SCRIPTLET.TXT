@@ -1,0 +1,38 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:29:13
+Scriptlet
+
+包含一个有效的程序段. 
+
+JSP 语法
+
+<% code fragment %> 
+
+例子
+
+<% 
+String name = null; 
+if (request.getParameter("name") == null) { 
+%> 
+<%@ include file="error.html" %> 
+<% 
+} else { 
+foo.setName(request.getParameter("name")); 
+if (foo.getName().equalsIgnoreCase("integra")) 
+name = "acura"; 
+if (name.equalsIgnoreCase( "acura" )) { 
+%> 
+
+描述
+
+一个scriptlet能够包含多个jsp语句，方法，变量，表达式 
+
+因为scriptlet,我们便能做以下的事: 
+
+声明将要用到的变量或方法（参考 声明). 
+编写JSP表达式（参考 表达式). 
+使用任何隐含的对象和任何用<jsp:useBean>声明过的对象 
+编写JSP语句 (如果你在使用Java语言，这些语句必须遵从Java Language Specification,). 
+任何文本，HTML标记，JSP元素必须在scriptlet之外 
+当JSP收到客户的请求时，scriptlet就会被执行，如果scriptlet有显示的内容，这些显示的内容就被存在out对象中。

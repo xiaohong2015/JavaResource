@@ -1,0 +1,72 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:50:30
+服务器Sockets
+
+列表9.2是一个服务器应用程序的一部分.
+
+列表9.2 一个简单的服务器程序 
+
+/** 
+* 一个监听端口并提供HTML文档的程序.
+*/ 
+class SimpleWebServer { 
+public static void main(String args[]) 
+{ 
+ServerSocket serverSocket = null; 
+Socket clientSocket = null; 
+int connects = 0; 
+try 
+{ 
+{ 
+// 建立一个服务器socket 
+serverSocket = new ServerSocket(80, 5); 
+while (connects < 5) 
+{ 
+// 等待连接 
+clientSocket = serverSocket.accept(); 
+//服务连接
+ServiceClient(clientSocket); 
+connects++; 
+} 
+serverSocket.close(); 
+} 
+catch (IOException ioe) 
+{ 
+System.out.println("Error in SimpleWebServer: " + ioe); 
+} 
+} 
+public static void ServiceClient(Socket client) 
+throws IOException 
+{ 
+DataInputStream inbound = null; 
+DataOutputStream outbound = null; 
+try 
+{ 
+// 得到IO流 
+inbound = new DataInputStream( client.getInputStream()); 
+outbound = new DataOutputStream( client.getOutputStream()); 
+//格式化输出(回应头和很少的HTML文档)
+StringBuffer buffer = PrepareOutput(); 
+String inputLine; 
+while ((inputLine = inbound.readLine()) != null) 
+{ 
+//如果到了HTTP请求的尾部,就发送回应 
+if ( inputLine.equals("") ) 
+{ 
+outbound.writeBytes(buffer.toString()); 
+break; 
+} 
+} 
+} 
+finally 
+{ 
+// 清除 
+System.out.println("Cleaning up connection: " + client); 
+tln("Cleaning up connection: " + client); 
+outbound.close(); 
+inbound.close(); 
+client.close(); 
+client.close(); 
+} 
+} 

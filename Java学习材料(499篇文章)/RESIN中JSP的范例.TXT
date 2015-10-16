@@ -1,0 +1,308 @@
+作者：jspfuns
+日期：2000-8-12 2:31:15
+By Scott Ferguson
+Blueski编译
+
+目录如下：
+1 引论 
+2 范例的框架: Hello, World 
+3 Servlet 评论 
+4 展示留言本 
+5 留言本的模式 
+6 作为应用属性的留言本
+7 留言本的逻辑 
+8 结论 
+
+
+1 引论 
+
+JSP的强大优势在于把一种应用的商务逻辑和它的介绍分离开来。用 Smalltalk的面向对象的术语来说， JSP鼓励MVC(model-view-controller)的web应用。JSP的classes 或 beans 是模型, JSP 是这个视图, 而Servlet是控制器。 
+
+这个例子是一个简单的留言本，包括用户登录和留言。它被作为Resin平台的示范：
+--执行角色
+--模型 A 留言本 
+--用于新用户的login.jsp
+--用于已注册用户的add.jsp 
+--控制器 GuestJsp, 一个用来管理状态的servlet 
+
+
+2 样板的框架: Hello, World 
+
+GuestJsp servlet的框架把 "Hello, World" 这个字符串传给login.jsp页面。这个框架为留言本设立结构。具体细节将在下面补充。 
+
+这个例子被编译后可以浏览到：
+
+http://localhost:8080/servlet/jsp.GuestJsp 
+
+你可以看到页面上有这样的显示: Hello, world 
+
+JSP模板是以Servlet的处理开始然后把处理结果传给JSP页进行格式化。 
+
+以下使用了一个Servlet2.1 ServletContext的特性 getRequestDispatcher()。
+请求的调度器在服务器上让servlets直接向前传送并包括了任何可能的子请求。对SSI包含来说这是一个更灵活的取代做法。
+在servlet文件中请求的调度器可以包含任何页面,servlet,或JSP的结果。 GuestJsp将使用dispatcher.forward()来将控制传给JSP页进行格式化。 
+
+GuestJsp.java: Skeleton package jsp.GuestJsp;
+
+import java.io.*;
+import java.util.*;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+/**
+* GuestJsp is a servlet controlling user
+* interaction with the guest book.
+*/
+public class GuestJsp extends HttpServlet {
+/**
+* doGet handles GET requests
+*/
+public void doGet(HttpServletRequest req,
+HttpServletResponse res)
+throws ServletException, IOException
+{
+// Save the message in the request for login.jsp
+req.setAttribute("message", "Hello, world");
+
+// get the application object
+ServletContext app = getServletContext();
+
+// select login.jsp as the template
+RequestDispatcher disp;
+disp = app.getRequestDispatcher("login.jsp");
+
+// forward the request to the template
+disp.forward(req, res);
+}
+}
+
+
+servlet和jsp页使用HttpRequest对象中的属性进行通信。skeleton在"message"属性中保存了"Hello, World"。
+当login.jsp启动时，它将捕捉到该字符串并将其打印出来。 
+
+由于Resin的JavaScript能够读取扩充的Bean模型，它可以将request.getAttribute("message")转换成为
+JavaScript的对应物 request.attribute.message。 
+
+login.jsp: Skeleton <%@ page language=javascript %>
+
+<head>
+<title><%= request.attribute.message %></title>
+</head>
+
+<body bgcolor='white'>
+<h1><%= request.attribute.message %></h1>
+</body>
+
+3 Servlet的复习
+
+对于来自于ASP或CGI背景并转向jsp的人来说，
+Servlets代替CGI脚本体现了Java在动态类加载方面的优势。servlet就是一个Java类，
+它对Servlet或HttpServlet进行了扩展并放置到适当的路径中。Resin将自动加载servlet并执行它。 
+
+url /servlet/classname将request提交给Servlet请求器。请求器会从doc/WEB-INF/classes自动加载Java类的类名
+并试图执行Servlet的service方法。 
+
+Resin将定期检查类文件以判断是否被修改过。如果被修改过，则将用新的servlet取代旧的。 
+
+4 显示留言本 
+
+在基本框架已经运行后, 下一步是创建model。 
+
+5 留言本模型
+
+留言本是很直接的，这里知识包含了一下API。它遵从Bean模型以简化JavaScript。
+同样的API可以工作于HashMap, 基于文件,以及数据库应用。 
+
+JSP文件只能存取public方法。所以JSP文件无法创建一个新的留言本或者增加一个新用户。
+这是GuestJsp servlet的责任。 
+
+jsp.Guest.java API package jsp;
+
+public class Guest {
+Guest();
+public String getName();
+public String getComment();
+}
+
+
+Resin的JavaScript能读取Bean模型。所以使用JavaScript的JSP页面可以存取getName()和getComment()
+作为属性。例如，你可以简化使用guest.name和guest.comment。 
+
+jsp.GuestBook.java API package jsp;
+
+public class GuestBook {
+GuestBook();
+void addGuest(String name, String comment);
+public Iterator iterator();
+}
+
+
+Resin的JavaScript同样可以读取iterator()调用，所以你可以使用JavaScript用于 ... 任何一个来取得用户： 
+
+for (var guest in guestBook) {
+...
+}
+
+
+
+GuestBook作为application属性
+为了使得例子保持简单，GuestJsp在application (ServletContext)中存取GuestBook。作为例子，
+在application中保存数据是可以接受的，但对于完全成熟的应用，最好仅使用application将数据放到其它地方。
+
+jsp.GuestJsp.java // get the application object
+ServletContext app = getServletContext();
+
+GuestBook guestBook;
+
+// The guestBook is stored in the application
+synchronized (app) {
+guestBook = (GuestBook) app.getAttribute("guest_book");
+
+// If it doesn't exist, create it.
+if (guestBook == null) {
+guestBook = new GuestBook();
+guestBook.addGuest("Harry Potter", "Griffindor rules");
+guestBook.addGuest("Draco Malfoy", "Slytherin rules");
+app.setAttribute("guest_book", guestBook);
+}
+}
+
+RequestDispatcher disp;
+disp = app.getRequestDispatcher("login.jsp");
+
+// synchronize the Application so the JSP file 
+// doesn't need to worry about threading
+synchronized (app) {
+disp.forward(req, res);
+}
+
+
+JSP文件本身是简单的。它从application获取留言本并在表中显示内容。通常，
+application对象需要同步，因为一些客户端可能同时浏同一页面。
+GuestJsp在jsp文件被调用之前小心处理了同步情况。 
+
+login.jsp: Display Guest Book <%@ page language=javascript %>
+
+<head>
+<title>Hogwarts Guest Book</title>
+</head>
+
+<body bgcolor='white'>
+
+<h1>Hogwarts Guest Book</h1>
+<table>
+<tr><td width='25%'><em>Name</em><td><em>Comment</em>
+<%
+var guestBook = application.attribute.guest_book
+
+for (var guest in guestBook) {
+out.writeln("<tr><td>" + guest.name + "<td>" + guest.comment);
+}
+%>
+</table>
+
+</body>
+
+
+Hogwarts Guest Book
+Name Comment 
+Harry Potter Griffindor Rules 
+Draco Malfoy Slytherin Rules 
+
+
+6 留言本的规则（logic）--作为应用属性的留言本 
+
+留言本的规则是很简单的。如果用户没有登录，他会看到一个提示和登录表。
+登录后他会看到提示并在一个表中加入留言。 login.jsp给出了登录的页面，add.jsp给出了
+增加流言的页面。 
+
+GuestJsp在session变量中保存了规则信息。 
+
+执行'login'来登录或 'add'来增加留言。 其中
+name： 用户名 
+password： 口令 
+comment：留言
+
+7 留言本规则 ...
+
+// name from the session
+String sessionName = session.getValue("name");
+
+// action from the forms
+String action = request.getParameter("action");
+
+// name from the login.jsp form
+String userName = request.getParameter("name");
+
+// password from the login.jsp form
+String password = request.getParameter("password");
+
+// comment from the add.jsp form
+String comment = request.getParameter("comment");
+
+// login stores the user in the session
+if (action != null && action.equals("login") &&
+userName != null &&
+password != null && password.equals("quidditch")) {
+session.putValue("name", userName);
+}
+
+// adds a new guest
+if (action != null && action.equals("add") &&
+sessionName != null &&
+comment != null) {
+guestBook.addGuest(sessionName, comment);
+}
+
+String template;
+// if not logged in, use login.jsp
+if (session.getValue("name") == null)
+template = "login.jsp";
+// if logged in, use add.jsp
+else
+template = "add.jsp";
+
+RequestDispatcher disp;
+disp = app.getRequestDispatcher(template);
+
+...
+
+
+login.jsp和add.jsp仅加上了不同forms在前一个section中显示代码。 
+
+login.jsp <%@ page language=javascript %>
+<head>
+<title>Hogwarts Guest Book: Login</title>
+</head>
+<body bgcolor='white'>
+
+<h1>Hogwarts Guest Book</h1>
+<table>
+<tr><td width='25%'><em>Name</em><td><em>Comment</em>
+<%
+var guestBook = application.attribute.guest_book
+
+for (var guest in guestBook) {
+out.writeln("<tr><td>" + guest.name + "<td>" + guest.comment);
+}
+%>
+</table>
+<hr>
+
+<form action='GuestJsp' method='post'>
+<input type=hidden name='action' value='login'>
+<table>
+<tr><td>Name:<td><input name='Name'>
+<tr><td>Password:<td><input name='Password' type='password'>
+<tr><td><input type=submit value='Login'>
+</table>
+</form>
+</body>
+
+
+8 结论 
+
+Resin示例演示了扩充留言本的一些方法，包括加入一些智能的东西用于form处理。然而，由于forms取得更多的只能，即使是JSP模板也变得复杂化了。
+有一个结论：XTP模板。 
+

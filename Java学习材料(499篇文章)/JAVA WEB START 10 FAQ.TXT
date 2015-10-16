@@ -1,0 +1,134 @@
+作者：diego lynn
+日期：2001-3-25 10:59:29
+General information 
+What is JavaTM Web Start? 
+Where do I get more information? 
+Why should I use JavaTM Web Start? 
+How can I launch applications with JavaTM Web Start? 
+Does it matter how I launch an application? 
+What are the system requirements for JavaTM Web Start? 
+What platforms does JavaTM Web Start run on? 
+What are the server-side system requirements for JavaTM Web Start? 
+Is JavaTM Web Start based on a standard? 
+Can I implement my own JavaTM Web Start? 
+What are the supported browsers? 
+When and where can we get the European and Asian language versions of JavaTM Web Start? 
+Is there a comprehensive list of Online Resources for JavaTM Web Start? 
+Can I deploy any application with JavaTM Web Start? 
+Are there any third party tools available to deploy my application with Java Web Start? 
+What applications are available for JavaTM Web Start? 
+Is JavaTM Web Start a software distribution mechanism like Marimba and MS SMS? 
+Is JavaTM Web Start an application installer? 
+What version of the JavaTM platform does JavaTM Web Start work with? 
+How does JavaTM Web Start relate to Plug-in? 
+Licensing and Support Questions: 
+Is there a Licensing fee for JavaTM Web Start? 
+Can we deploy/redistribute JavaTM Web Start with our application? 
+Are there any restrictions to redistributing JavaTM Web Start? 
+Where can I find the Licensing Terms for the JRE? 
+What kind of support is available for JavaTM Web Start with the License? 
+Technical information 
+How do I detect if JavaTM Web Start is installed? 
+Why does Java Web Start download the application the next time? 
+Do I need to change my application to work with JavaTM Web Start? 
+Is there a migration path from applets to applications? 
+Does JavaTM Web Start support applets? 
+Is there a way to pass VM properties to JavaTM Runtime? 
+I don't want to rely on server time stamp. How can I specify versioned JAR and how can I get incremental updates of JARs? 
+Are JAR files shared between applications? 
+Is JRE 1.1 supported? 
+How can I provide my own splash screen? 
+How can I save the Application state on the local system? 
+If my application needs a specific JRE to run, how do I specify this in my JNLP file? 
+How can I specify my resource using relative URLs? 
+How do I specify a version of a Standard Extension? 
+Can I rely on Class-Path in the Manifest file? 
+Can I use JavaTM Web Start even if my Application depends or uses native code (.dlls, .so)? 
+How can I load resources within my application using Class.forName and ClassLoader.getSystemClassLoader in JavaTM Web Start? 
+How can I launch JavaTM Web Start from the command line? 
+How do I use JAR files that are signed by different certificates? 
+Security Questions: 
+How secure is JavaTM Web Start? 
+What is a secure sandbox? 
+How is the JavaTM Web Start secure sandbox more flexible? 
+How can I enable my application to gain unrestricted access to the system? 
+Is there support for encrypted download of JAR files? 
+What is this Security Dialog all about? 
+Is there an online resource to learn more about Security tools? 
+Troubleshooting Questions: 
+What should I do when JavaTM Web Start reports that the installation is bad? 
+When I start JavaTM Web Start nothing happens except for a Splash Screen. 
+I installed JavaTM Web Start but I cannot load resources over the network?  
+Application ran before (1.0 Beta and prior) now I am getting AccessControlExceptions. 
+Browser shows JNLP file as plain text?  
+I get a Bad MIME type error when accessing the JNLP file? 
+What does the "Warning: Failed to verify the authenticity of this certificate. No assertions can be made of the origin or validity of the code." mean? 
+I cannot seem to access my local system as "localhost" to download resources? 
+Why does JavaTM Web Start always reload JAR files from IIS server? 
+I am having trouble with my application, how do I trace System.out and System.err? 
+I see "Launching Application" screen and it loops forever? 
+General information 
+What is JavaTM Web Start? 
+
+JavaTM Web Start provides a platform-independent, secure, and robust deployment technology. It enables developers to deploy full-featured applications to end-users by making the applications available on a standard Web server. By using any Web browser, end-users can launch the applications and be confident they always have the most-recent version. back to top 
+
+Where do I get more information? 
+
+Click here to download JavaTM Web Start. 
+
+Go to the README for comprehensive instructions on downloading, installing, and using JavaTM Web Start if you are an end-user. 
+
+If you are a developer, go to the Developer's Guide for concise, detailed technical information on how to deploy applications using JavaTM Web Start. 
+
+If you are a site architect, go to the Architecture Page for examples of the types of Web-based solutions that are enabled by Java Web Start and the Java 2 platform, or to the Java Web Start Architecture diagram for more information on how Java Web Start functions. back to top 
+
+Why should I use JavaTM Web Start? 
+
+It's an easy, robust, and secure way to deploy applications directly from the Web. Developers can make applications readily available via the Web. In addition, JavaTM Web Start provides JavaTM runtime environment (JRE) management capabilities, it's easy to set up, it's browser-independent, and it's an efficient way to deploy Web application solutions. 
+
+Users can easily access applications much as they would a Web page -- without a separate installation step. From the desktop, users can access and use applications based on JavaTM 2 technology, using a richer and more responsive user interface than is available on a Web page. And, once a JavaTM Web Start based application is installed, users simply click to run the application whenever needed. 
+
+Users do not need to manually update applications because each time they launch an application, it is transparently updated from the Web -- so they always use the most recent version available. back to top 
+
+How can I launch applications with JavaTM Web Start? 
+
+You initially launch a new application by clicking on a link from a Web page. 
+
+If you use an application frequently, create a shortcut from your desktop or from the Start Menu by allowing JavaTM Web Start to place an icon on your desktop. JavaTM Web Start will ask the second time you launch an application if you would like to create shortcuts or an entry in the Start Menu. If you say "yes," all future launches of the application can start without a browser. 
+
+JavaTM Web Start also provides an Application Manager, which is launched by clicking on the icon on your desktop if you are running the Microsoft Windows operating system, or by using the <install-dir>/javaws command on SolarisTM Operating Environment and Linux platforms. The Application Manager keeps track of all applications that have been downloaded and launched using JavaTM Web Start, and allows you to directly launch them.back to top 
+
+Does it matter how I launch an application? 
+
+No, applications launch in the same manner no matter which method you use: from a Web page, from the shortcut on the desktop, from the Start menu, or through the JavaTM Web Start Application Manager. 
+
+JavaTM Web Start always checks to see if a newer version of the application is available for use and automatically downloads that from the Web for you. 
+
+If the application you are using has not been digitally signed, JavaTM Web Start will launch it in a restricted and secure execution environment. An application that is not signed, or one that you do not trust, will never be run with unrestricted access to your local system or network.back to top 
+
+What are the system requirements for JavaTM Web Start? 
+
+Any client system that supports the JavaTM 2 platform can use JavaTM Web Start. JavaTM Web Start works with virtually all browsers. back to top 
+
+What platforms does JavaTM Web Start run on? 
+
+Sun Microsystems provides versions for Windows 95, Windows 98, Windows NT, and Windows 2000; SolarisTM Operating Environment (SPARC and Intel editions); and Linux/i486.  
+back to top 
+
+What are the server-side system requirements for JavaTM Web Start? 
+
+JavaTM Web Start uses the HTTP protocol for communication between the client and the server. A standard unmodified Web server can be used to host an application. 
+
+If you require additional services, such as version-based and incremental updates for your applications, the Web Server will need to support Servlets or cgi-scripting. back to top 
+
+Is JavaTM Web Start based on a standard? 
+
+Yes, the Java Community ProcessSM is a series of public meetings in which the definition of the JavaTM technology was created. 
+
+Java Network Launching Protocol is a technology which is a part of the JCPSM standard. Its specification number is JSR 000056, the Java Network Launching Protocol  and Application Programming Interface (JNLP).  
+
+JavaTM Web Start 1.0 is the product-quality reference inplementation for the JNLP technology described above, therefore other platform vendors are encouraged to port Java(TM) Web Start to their platform or implement the specification. 
+
+For the specification please see: http://java.sun.com/aboutJava/communityprocess/jsr/jsr_056_jnlp. html 
+back to top 
+

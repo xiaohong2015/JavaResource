@@ -1,0 +1,45 @@
+作者：jeru
+日期：2000-12-20 11:28:18
+你将会需要Java 2软件开发工具(JSDK)，它原来的名称是Java发展工具(JDK)以及JavaServer网站发展工具(JSWDK)，Tomcat，或是其它支持JSP的网络服务器。Sun免费提供JSDK与JSWDK来供Windows，Solaris，以及Linux平台使用。　 
+
+如果你想要在你目前的网络服务器上使用JSP，但服务器本身并不支持JSP与Java servlets，你可以试试看Allaire的Jrun，它的作用就像是针对Netscape企业版与FastTrack服务器、微软的网际网络信息服务器(IIS)与个人网络服务器(PWS)、Apache、以及其它服务器的网络服务器附加设备。你也可以使用Apache网络服务器的Java版本，最新的JSWDK里有提供。 
+
+　　下载与安装你需要的组件 
+
+
+　　目前发布的1.2.2-001，JSDK可下载的版本是以可安装的压缩形式。下载的文件大约是20MB，可提供完整的Java发展环境，让你能建立利用标准API为核心的Java解决之道。然而，你的网络服务器需要应用到JSP的唯一一件事是Java编译器。要让网络服务器知道编译器的位置，将环境变量JAVA.HOME设到JSDK的安装目录。如果你是在Windows上安装并且接受预设目录，将这行程序代码set JAVA.HOME=C:\1.2.2加到你的autoexec.bat档案并且重新开机。 
+
+在安装好JSDK之后，下载并且安装JSWDK或beta版的Tomcat，以Java为主的Apache网络服务器。安装在哪里并不重要，重要的是你可以找到它。一般而言，它会放在上层目录，这种方式可以让你取代JSWDK或 JSDK的网络服务器，不需要移动其它的网络服务器。在你安装好这个档案之后，你就可以准备发展JSP了。 
+　　在你正确的安装JSWDK之后，执行startserver指令文件来激活网络服务器，预设通讯端口 为 8080。要看你在激活服务器之后是均C有正确的安装工具，你可以加载范例JSP档案中的任何一个(http://localhost:8080/examples/jsp/)。如果你能够成功的执行一个范例档案，你可以知道你已经正确的设定好软件了。如果你在激活服务器的控制台窗口看到错误讯息，那么你需要解决这个问题。最常发生的问题是没有设定(或者不正确设定)环境变量JAVA.HOME。要检视目前的环境设定，在DOS模式下键入set。 
+
+
+　　开始 
+
+
+　　解释JSP语法之前，先建立一个显示目前日期与时间的快速网页并且将它储存成sample.jsp: 
+
+　　<html> 
+
+　　<head> 
+
+　　<title>First Page</title> 
+
+　　</head> 
+
+　　<body> 
+
+　　<H3>Today is: 
+
+　　<%= new java.util.Date() %> 
+
+　　</H3> 
+
+　　</body> 
+
+　　</html>. 
+
+将这个档案与你所有的HTML与JSP网页放在你JSWDK安装目录下的网页目录里. 你可以在http://localhost:8080/sample.jsp下载此页.当你第一次参观这个网页时，网站服务器会将JSP翻译成Java servlet程序代码，那你就会看到目前的日期与时间. 
+　　现在你已经下载，安装，并且架构好发展环境，你已经准备好要了解JSP语法与建立你自己的JSP为主的解决之道. 
+
+
+

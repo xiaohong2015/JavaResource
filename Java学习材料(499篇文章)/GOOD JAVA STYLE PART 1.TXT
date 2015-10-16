@@ -1,0 +1,210 @@
+作者：jeru
+email: jeru@163.net
+日期：8/9/2001 6:11:15 PM
+Good Java Style: Part 1
+By Thornton Rose 
+
+Introduction
+Having worked as a software developer and consultant for many years, I have seen a large amount of code in a variety of programming languages. It has run the gamut from elegant to ugly, and unfortunately much of it has been ugly. I hope to persuade you, and my fellow developers, that we should give as much attention to the style of our code as we give to the user interface and other visible parts of an application. In this the first part of a two part series, I explain why we should care about how our code looks and illustrate some general elements of good Java style. 
+
+Why Style Matters
+Even though Java is used to write programs rather than prose, it is still used to express thoughts and ideas. And, in addition to conveying information, those thoughts and ideas must actually do something. Worrying about good style may seem like a waste of time, but it behooves us to write our code such that the thoughts and ideas it expresses are exceptionally clear. 
+
+Here are several reasons for using good style [from "Java Code Conventions," Sun Microsystems]: 
+
+
+80% of the lifetime cost of a software product goes to maintenance. 
+Hardly any software is maintained for its whole life by the original author(s). 
+Using good style improves the maintainability of software code. 
+If the source code is shipped with the software, it should be as well-packaged, clean, and professional as the rest of the product. 
+
+Writing code with good style also provides the following benefits: 
+
+
+It improves the readability, consistency, and homogeneity of the code, which makes it easier to understand and maintain. 
+It makes the code easier to trace and debug, because it's clear and consistent. 
+It allows you to continue more easily where you or another programmer stopped, particularly after a long period of time. 
+It increases the benefit of code walkthroughs, because the participants can focus more on what the code is doing. 
+
+General Guidelines
+Writing Java with good style is not hard, but it does require attention to detail. Here are some general guidelines to follow: 
+
+
+Make the code clear and easy to read. 
+Make the code consistent. 
+Use obvious identifier names. 
+Logically organize your files and classes. 
+Have only one class per file (not including inner classes). 
+Use a maximum line width of 80-90 characters. 
+Use whitespace and/or other separators judiciously. 
+Use spaces instead of tabs for indentation. 
+
+Tabs vs. Spaces
+Tabs vs. spaces is one of several religious issues related to writing code, and I am not suggesting that there is only one right way. I espouse using spaces because it ensures that my code will look the same in my editor as it does in your editor and vice versa. If you feel that using spaces instead of tabs "just ain't right", then by all means use tabs. 
+
+Braces and Indentation
+Indent style (cf., Raymond, "Indent Style"), or the placement of braces ("{" and "}") and the associated indentation of code, is another of the religious issues related to writing code. There are several indent styles common to C-style languages like Java, and I am not going to suggest that one of them is superior. In most of the example code in this article, I use what is usually referred to as K&R style. If you don't like K&R, by all means use another style.
+
+Comments
+There are two type of comments that you can put in your Java code: Javadoc comments (also called documentation comments) and implementation comments. Javadoc comments can be extracted by the javadoc tool to produce API documentation. Implementation comments are those comments that explain the how and why of the code. Use the following guidelines for commenting your Java code: 
+
+
+Use Javadoc comments wherever they are allowed (on classes and methods at minimum). 
+Use block comments rather than end-of-line/trailing comments, except in special cases, such as variable declarations. 
+
+Also, keep in mind that good comments are helpful; bad comments are a nuisance. 
+
+Example 1. Bad Comment Style
+
+
+   // applyRotAscii() -- Apply ASCII ROT
+   private void applyRotAscii(){
+      try{
+         int rotLength = Integer.parseInt(rotationLengthField.getText().trim()); // get rot len
+         RotAscii cipher = new RotAscii(rotLength); // new cipher
+         textArea.setText(cipher.transform(textArea.getText())); // transform
+      }catch(Exception ex){ 
+         /* Show exception */
+         ExceptionDialog.show(this, "Invalid rotation length: ", ex); }
+   }
+
+
+Example 2. Good Comment Style.
+
+
+   /**
+    * Apply the ASCII rotation cipher to the user's text. The length is retrieved
+    * from the rotation length field, and the user's text is retrieved from the
+    * text area.
+    *
+    * @author Thornton Rose
+    */
+   private void applyRotAscii() {
+      int      rotLength = 0;  // rotation length
+      RotAscii cipher = null;  // ASCII rotation cipher
+   
+      try {
+         // Get rotation length field and convert to integer.
+          
+         rotLength = Integer.parseInt(rotationLengthField.getText().trim());
+         
+         // Create ASCII rotation cipher and transform the user's text with it.
+          
+         cipher = new RotAscii(rotLength);
+         textArea.setText(cipher.transform(textArea.getText()));
+   
+       } catch(Exception ex) {
+         // Report the exception to the user.
+         
+         ExceptionDialog.show(this, "Invalid rotation length: ", ex);
+      }
+   }
+
+
+Blocks and Statements
+Use the following guidelines for writing blocks and statements: 
+
+
+Put only one statement per line. 
+Always use braces with control statements (e.g., 'if'). 
+Consider marking the end of a block with a comment (e.g., } // end if), particularly with long or nested blocks. 
+Put variable declarations at the beginning of a block. 
+Always initialize variables. 
+If you want to be a perfectionist, left-align variable names. 
+Indent the case clauses in a switch block. 
+Put whitespace before and after operators. 
+In if, for, or while, put whitespace before the "(". 
+Use whitespace and parentheses in expressions to increase readability. 
+
+Variables used in 'for' loops are the exception to putting variables at the beginning of a block. The loop variable(s) may be declared in the initialization part of the for statement, e.g., for (int i = 0; ...)
+ 
+. 
+
+Putting a comment at the end of a block can help you track down accidentally deleted closing braces. Finding those in a large source file can sometimes drive you nearly crazy. 
+
+Example 3. Bad Block Style.
+
+
+   try{
+      for(int i=0;i<5;i++){
+         ...
+         }
+      int threshold=calculateThreshold(); 
+      float variance=(threshold*2.8)-1;
+      int c=0;
+      if (threshold<=15) c=calculateCoefficient();
+      switch(c){
+      case 1: setCeiling(c*2); break;
+      case 2: setCeiling(c*3); break;
+      else: freakOut();
+      }
+   }catch(Exception ex){ ... }
+
+
+Example 4. Good Block Style.
+
+
+   try {
+      int   threshold  = 0;
+      float variance    = 0.0;
+      int   coefficient = 0;
+      
+      // Prepare 5 cycles.
+      
+      for (int i = 0; i < 5; i ++){
+         prepareCycle(i);
+      }
+      
+      // Calculate the threshold and variance.
+      
+      threshold = calculateThreshold();
+      variance = (threshold * 2.8) - 1;
+      
+      // If the threshold is less than the maximum, calculate the coefficient.
+      // Otherwise, throw an exception.
+      
+      if (threshold <= MAX_THRESHOLD) {
+         coefficient = calculateCoefficient();
+      } else {
+         throw new RuntimeException("Threshold exceeded!");
+      }
+      
+      // Set the ceiling based on the coefficient.
+      
+      switch (coefficient) {
+         case 1: 
+            setCeiling(coefficient * 2); 
+            break;
+          
+         case 2: 
+            setCeiling(coefficient * 3); 
+            break;
+          
+         else: 
+            freakOut();
+      } // end switch
+   } catch(Exception ex) { 
+      ... 
+   } // end try
+
+
+Related Links
+
+Tabs vs. Spaces, Jamie Zawinski. 
+Writing Robust Java Code — The Ambysoft Inc. Coding Standards for Java, Scott Ambler. 
+Draft Java Coding Standard, Doug Lea. 
+Java Code Conventions, Sun Microsystems, Inc. 
+How to Write Doc Comments for Javadoc, Sun Microsystems, Inc. 
+The Jargon File (known in print as The New Hacker's Dictionary), Eric S. Raymond. 
+Indent Style, The Jargon File, Eric S. Raymond. 
+
+References
+
+Java Code Conventions. Copyright ) 1995-2000 Sun Microsystems, Inc. 
+
+About the Author
+Thornton Rose is a contract software developer in Atlanta, Ga. He can be reached via e-mail at thornton.rose@mindspring.com. 
+
+
+
+  

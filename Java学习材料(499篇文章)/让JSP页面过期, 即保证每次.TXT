@@ -1,0 +1,5 @@
+作者：sonymusic
+email: sonymusic@163.net
+日期：8/7/2001 2:13:53 PM
+response.addHeader("Cache-Control", "no-cache");
+response.addHeader("Expires", "Thu,  01 Jan   1970 00:00:01 GMT");

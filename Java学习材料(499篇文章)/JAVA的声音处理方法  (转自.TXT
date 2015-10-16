@@ -1,0 +1,226 @@
+作者：jeru
+email: jeru@163.net
+日期：6/27/2001 5:27:48 PM
+JAVA的声音处理方法  
+ 
+
+作者：蝙蝠vs堕落 　　编辑：violet
+
+   
+ JAVA的声音处理 
+   
+ 　　数字音频格式有很多种，其质量与采样频率和采样精度两个参数有关。频率的表示单位为赫兹〔Hz〕，它表示每秒采样次数。采样频率越高，音质就越好。采样精度为每次采样所存储的数据数量，它决定每个数字信号所能够表示的离散振幅的数量。存储每个样本的数据越多，音质就越好。但是高品质的声音需要占用大量的内存和磁盘空间。考虑到网络带宽，在Internet连接上传输就需要花费很长的时间。对于Applet来说，保证声音文件的最小化是极为重要的。 
+
+   
+ Java能够支持以下四种声音格式： 
+   
+ ◆AU 
+◆AIFF 
+◆WAVE 
+◆MIDI 
+
+　　第一种声音格式AU为以前的Java 1.1版本支持的唯一的声音格式。采样频率为8000赫兹，采样精度为8位。AIFF和WAVE与AU格式一样，都用来表示数字化的声音。其中，WAVE格式提供了更宽范围的音质。MIDI格式专用于音乐，并且以音符与乐器而不是数字化的声音来描述声音的。 
+
+　　关于声音的创建：声音关键工具为Windows9X中的标准应用程序—录音机。录制的格式为WAVE。另外还有很多专业水准的应用程序，采样和编辑数字化的声音，及格式的转换。 
+
+   
+ 资源需求： 
+   
+ ■ 硬件资源需求： 
+⑴声卡 
+⑵音箱 
+＃如需要录制声音，这还需麦克风。 
+
+■ 软件资源需求： 
+⑴windows9X操作系统 
+⑵网络浏览器 
+⑶Java插件/运行时间环境 
+
+   
+ 处理方案一 
+   
+ 　　JAVA2开始，爪哇语言能够支持上述四种声音格式。简单的方法为在java中通过Applet类的AudioClip()接口来装载声音。该接口风钻了有关声音片断的常用方法，具有对播放声音片断的最小支持。 
+
+该接口定义了如下方法： 
+■ play() 
+语法：void play() 
+功能：开始播放声音片断。 
+不论声音片断是否已经在播放，都从头播放。播放一遍但不重复。 
+
+■ loop() 
+语法：void loop() 
+功能：循环播放声音片断。 
+调用该方法是不论声音片断是否已在播放，都从头开始播放。
+
+■ stop() 
+语法：void stop() 
+功能：停止播放声音片断。 
+AudioClip接口可以通过getAudioClip()及getCodeBase()方法来获取声音片断及 
+URL地址。可以利用此方法在WEB页中播放指定的声音片断。 
+＃需求：基于JDK1.2以上版本的开发环境。如果只播放AU格式的声音文件，JDK1 
+.1就可。 
+
+附：soundtest.html源代码 
+《HTML》 
+《HEAD》 
+《TITLE》 
+HTML Test Page 
+《/TITLE》 
+《/HEAD》 
+《BODY》 
+《APPLET 
+CODEBASE = "" CODE = "test.class" NAME = "TestApplet" WID 
+TH = 400 HEIGHT = 200 HSPACE = 0 VSPACE = 0 ALIGN = mi 
+ddle》 
+《PARAM NAME = "clip" VALUE = "sound.AU"》 
+《/APPLET》 
+《/BODY》 
+《/HTML》 
+附：test,java源代码 
+package SoundTest; 
+import java.awt.*; 
+import java.awt.event.*; 
+import java.applet.*; 
+import javax.swing.*; 
+import java.net.*; 
+public class test extends JApplet { 
+boolean isStandalone = false; 
+String sound; 
+JButton jButtonPlay = new JButton(); 
+JButton jButtonLoop = new JButton(); 
+JButton jButtonStop = new JButton(); 
+JLabel jLabel1 = new JLabel(); 
+AudioClip clip; 
+//Get a parameter value 
+public String getParameter(String key, String def) { 
+return isStandalone ? System.getProperty(key, def) : 
+(getParameter(key) != null ? getParameter(key) : def); 
+} 
+//Construct the applet 
+public test() { 
+} 
+//Initialize the applet 
+public void init() { 
+try { 
+jbInit(); 
+} 
+catch(Exception e) { 
+e.printStackTrace(); 
+} 
+} 
+//Component initialization 
+private void jbInit() throws Exception { 
+jButtonPlay.setText("Play"); 
+jButtonPlay.setBounds(new Rectangle(50, 85, 80, 40)); 
+jButtonPlay.addMouseListener(new java.awt.event.MouseAdapter() { 
+public void mouseClicked(MouseEvent e) { 
+jButtonPlay_mouseClicked(e); 
+} 
+}); 
+this.setSize(new Dimension(400,200)); 
+this.getContentPane().setLayout(null); 
+jButtonLoop.setText("Loop"); 
+jButtonLoop.setBounds(new Rectangle(150, 85, 80, 40)); 
+jButtonLoop.addMouseListener(new java.awt.event.MouseAdapter() { 
+public void mouseClicked(MouseEvent e) { 
+jButtonLoop_mouseClicked(e); 
+} 
+}); 
+jButtonStop.setText("Stop"); 
+jButtonStop.setBounds(new Rectangle(250, 85, 80, 40)); 
+jButtonStop.addMouseListener(new java.awt.event.MouseAdapter() { 
+
+public void mouseClicked(MouseEvent e) { 
+jButtonStop_mouseClicked(e); 
+} 
+}); 
+jLabel1.setText("Sound Test Demo"); 
+jLabel1.setBounds(new Rectangle(109, 28, 186, 28)); 
+this.getContentPane().add(jButtonPlay, null); 
+this.getContentPane().add(jButtonStop, null); 
+this.getContentPane().add(jButtonLoop, null); 
+this.getContentPane().add(jLabel1, null); 
+try { sound = this.getParameter("clip", "sound.AU"); } catch (Exce 
+ption e) { e.printStackTrace(); } 
+if(sound!=null){ 
+try{ 
+clip=JApplet.newAudioClip (new URL(getCodeBase(),sound)); 
+
+} 
+catch(MalformedURLException e){ 
+System.out.println ("Bad URL"); 
+} 
+} 
+} 
+//Get Applet information 
+public String getAppletInfo() { 
+return "Applet Information"; 
+} 
+//Get parameter info 
+public String[][] getParameterInfo() { 
+String[][] pinfo = 
+{ 
+{"clip", "String", "sound.AU"}, 
+}; 
+return pinfo; 
+} 
+void jButtonPlay_mouseClicked(MouseEvent e) { 
+clip.play(); 
+} 
+void jButtonLoop_mouseClicked(MouseEvent e) { 
+clip.loop(); 
+} 
+void jButtonStop_mouseClicked(MouseEvent e) { 
+clip.stop(); 
+} 
+} 
+
+   
+ 处理方案二 
+   
+ 　　利用JAVA媒体框架中的Sound API来处理声音片断。Sound API 被包含在SUN公司的JAVA媒体框架中，也包含在JDK1.3版本中。编译源代码需要支持JDK1.3的开发环境和运行时间环境。 
+
+　　可以利用Sound API在网页中加入Applet的方式达到要求。但浏览器需要通过Java插件或运行时间环境的支持。 
+
+Sound API主要包括以下四部分： 
+
+Packages 
+javax.sound.midi 提供MIDI (Musical Instrument Digital Interface)的I/O、 
+序列、合成的接口和类。 
+javax.sound.midi.spi Supplies interfaces for service providers to impl 
+ement when offering new MIDI devices, MIDI file readers and writers, o 
+r sound bank readers. 
+javax.sound.sampled 为采样数字音频的捕获、处理、重放提供接口和类。 
+javax.sound.sampled.spi Supplies abstract classes for service provider 
+s to subclass when offering new audio devices, sound file readers and 
+writers, or audio format converters. 
+
+
+   
+ 处理方案三 
+   
+ 　　利用JAVA 3D中的sound类。该类似声音资源的抽象定义。每一个具体的声音对象都可以应用sound的方法。
+
+Sound类的类关系如下： 
+java.lang.Object 
++-javax.media.j3d.SceneGraphObject 
++-javax.media.j3d.Node 
++-javax.media.j3d.Leaf 
++-javax.media.j3d.Sound
+
+sound类的子类有： 
+⒈BackgroundSound 
+⒉PointSound 
+⒊ConeSound 
+
+使用上述三种声音的步骤如下：
+
+⒈定义并生成一个MediaContainer对象，同时提供对象所需要的声音文件，通常 
+要单独设置一个存放AU/WAV声音文件的目录。 
+
+⒉定义一个BackgroundSound/ PointSound/ ConeSound对象，根据需要，设置声 
+音的是否循环、强度大小等参数，设置它的作用范围并setEnable用使其开始作用。 
+
+⒊根据具体的对象设置坐标系。 
+＃JAVA 3D应用程序只能播放au/wav格式的声音文件。不能播放midi文件。 
+ 

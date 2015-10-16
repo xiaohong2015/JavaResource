@@ -1,0 +1,55 @@
+作者：梦
+email: mfgqd@263.net
+日期：2001-5-23 18:02:50
+And the finalists are: 
+
+
+Best Java Virtual Machine 
+Blackdown 1.3 Linux, Blackdown.org 
+Java HotSpot Server VM 2.0, Solaris, Sun Microsystems 
+Java HotSpot Server VM 2.0, Windows, Sun Microsystems 
+
+Best Java IDE 
+JBuilder 4 Enterprise, Borland Software 
+Forte for Java 2.0, Sun Microsystems 
+VisualAge for Java 3.5, Enterprise Edition, IBM 
+
+Best Java Performance Monitoring/Testing Tool 
+Optimizeit 4.0, VMGear 
+JUnit 3.5, JUnit.org 
+Jtest 3.3, ParaSoft 
+
+Best Java Class Library 
+JGL 3.1, ObjectSpace 
+The Collections Framework, Sun Microsystems 
+JClass Enterprise Suite 4.5.1, Sitraka Software 
+
+Best Java Application Server 
+WebSphere Application Server 3.5, Advanced Edition, IBM 
+BEA WebLogic Server 6.0, BEA Systems 
+iPlanet Application Server 6.0, Enterprise Edition, iPlanet E-Commerce Solutions 
+
+Best Java Device Application 
+WebSphere Transcoding Publisher 3.5, IBM 
+Whiteboard SDK 1.0, Bluetooth Edition, Zucotto Wireless 
+Java 2 Platform Micro Edition, Wireless Toolkit 1.0.1, Sun Microsystems 
+
+Best Java-XML Technology 
+Java API for XML Processing (JAXP) 1.1, Sun Microsystems 
+Xalan-Java 1.2.2, The Apache XML Project 
+XML Parser for Java 3.1.1, IBM alphaWorks 
+
+Best Java Book 
+Java Servlet Programming, Second Edition, Jason Hunter, William Crawford (O'Reilly & Associates, 2001) 
+Java Performance Tuning, Jack Shirazi (O'Reilly & Associates, 2000) 
+Thinking in Java, Second Edition, Bruce Eckel (Prentice Hall, 2000) 
+
+Most Useful New or Revised Java API/Technology 
+Java Message Service API 1.0.2, Sun Microsystems 
+Log4j 1.0.4, The Jakarta Project 
+Mobile Information Device Profile (MIDP), Sun Microsystems/JCP 
+
+Most Innovative Java Product 
+Tomcat 3.2, The Jakarta Project 
+Java Web Start 1.0, Sun Microsystems 
+VisualAge for Java 3.5, Enterprise Edition, IBM 

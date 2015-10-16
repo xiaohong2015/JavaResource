@@ -1,0 +1,189 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-8-16 15:21:51
+form.htm
+========
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>邮件例程 - JavaMail - 发送HTML邮件</title>
+</head>
+
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0">
+<form method="post" action="send.jsp">
+<tr>
+  <td>SMTP主机：</td>
+  <td><input type="text" name="smtp" size="80"></td>
+</tr>
+<tr>
+  <td>发信人：</td>
+  <td><input type="text" name="from" size="80"></td>
+</tr>
+<tr>
+  <td>收信人：</td>
+  <td><input type="text" name="to" size="80"></td>
+</tr>
+<tr>
+  <td>抄送人：</td>
+  <td><input type="text" name="cc" size="80"></td>
+</tr>
+<tr>
+  <td>暗送人：</td>
+  <td><input type="text" name="bcc" size="80"></td>
+</tr>
+<tr>
+  <td>主题：</td>
+  <td><input type="text" name="subject" size="80"></td>
+</tr>
+<tr>
+  <td valign="top">内容：</td>
+  <td><textarea name="body" rows="5" cols="80"></textarea></td>
+</tr>
+<tr>
+  <td colspan="2" align="center"><input type="submit" value="发送"></td>
+</tr>
+</form>
+</table>
+
+</body>
+</html>
+
+send.jsp
+========
+<%--
+作者：何志强[hhzqq@21cn.com]
+日期：2000-08-16
+版本：1.0
+功能：邮件例程 - JavaMail - 发送HTML邮件
+--%>
+
+<%
+//变量声明
+java.lang.String smtp,from,to,cc,bcc,subject,body;
+
+//获得用户输入数据
+smtp = request.getParameter("smtp");
+from = request.getParameter("from");
+to = request.getParameter("to");
+cc = request.getParameter("cc");
+bcc = request.getParameter("bcc");
+subject = request.getParameter("subject");
+if(subject!=null){
+   subject = new java.lang.String(subject.getBytes("iso-8859-1"));
+}
+body = request.getParameter("body");
+
+//发送邮件
+pipi.mail.HTML.send(smtp,from,to,cc,bcc,subject,body);
+%>
+
+pipi.jaf.StringDataSource.java
+==============================
+/*
+作者：何志强[hhzqq@21cn.com]
+日期：2000-08-16
+功能：字符串型数据源
+*/
+
+package pipi.jaf;
+
+public class StringDataSource implements javax.activation.DataSource{
+   private java.lang.String data;
+   private java.lang.String type;
+
+   public StringDataSource(java.lang.String data,java.lang.String type){
+      this.data = data;
+      this.type = type;
+   }
+
+   public java.io.InputStream getInputStream() throws java.io.IOException{
+      return new java.io.StringBufferInputStream(data);
+   }
+
+   public java.io.OutputStream getOutputStream() throws java.io.IOException{
+      throw new java.io.IOException("it does not support this method now!");
+   }
+
+   public java.lang.String getContentType(){
+      return type;
+   }
+
+   public java.lang.String getName(){
+      return "pipi";
+   }
+}
+
+pipi.mail.HTML.java
+===================
+/*
+作者：何志强[hhzqq@21cn.com]
+日期：2000-08-16
+功能：发送HTML邮件
+*/
+
+package pipi.mail;
+
+public final class HTML{
+   public static void send(
+      java.lang.String smtp,    /*SMTP主机地址*/
+      java.lang.String from,    /*发信人*/
+      java.lang.String to,      /*收信人*/
+      java.lang.String cc,      /*抄送人*/
+      java.lang.String bcc,     /*暗送人*/
+      java.lang.String subject, /*主题*/
+      java.lang.String body     /*内容*/
+   ) throws java.lang.Exception{
+      //变量声明
+      java.util.Properties props;              //系统属性
+      javax.mail.Session mailSession;          //邮件会话对象
+      javax.mail.internet.MimeMessage mimeMsg; //MIME邮件对象
+
+      //设置系统属性
+      props = java.lang.System.getProperties(); //获得系统属性对象
+      props.put("mail.smtp.host",smtp); //设置SMTP主机
+
+      //获得邮件会话对象
+      mailSession = javax.mail.Session.getDefaultInstance(props,null);
+
+      //创建MIME邮件对象
+      mimeMsg = new javax.mail.internet.MimeMessage(mailSession);
+
+      //设置发信人
+      mimeMsg.setFrom(new javax.mail.internet.InternetAddress(from));
+
+      //设置收信人
+      if(to!=null){
+         mimeMsg.setRecipients(javax.mail.Message.RecipientType.TO,javax.mail.internet.InternetAddress.parse(to));
+      }
+
+      //设置抄送人
+      if(cc!=null){
+         mimeMsg.setRecipients(javax.mail.Message.RecipientType.CC,javax.mail.internet.InternetAddress.parse(cc));
+      }
+
+      //设置暗送人
+      if(bcc!=null){
+         mimeMsg.setRecipients(javax.mail.Message.RecipientType.BCC,javax.mail.internet.InternetAddress.parse(bcc));
+      }
+
+      //设置邮件主题
+      //mimeMsg.setSubject(subject);
+      mimeMsg.setSubject(subject,"gb2312");
+
+      //设置邮件内容
+      mimeMsg.setDataHandler(new javax.activation.DataHandler(new pipi.jaf.StringDataSource(body,"text/html")));
+
+      //发送邮件
+      javax.mail.Transport.send(mimeMsg);
+   }
+}
+
+本套程序使用到JavaMail和JAVABEANS(TM) ACTIVATION FRAMEWORK(JAF)：
+　　JavaMail
+　　　　[url]http://java.sun.com/products/javamail/[/url]
+　　JAVABEANS(TM) ACTIVATION FRAMEWORK(JAF)
+　　　　[url]http://java.sun.com/products/javabeans/glasgow/jaf.html[/url]
+
+ 

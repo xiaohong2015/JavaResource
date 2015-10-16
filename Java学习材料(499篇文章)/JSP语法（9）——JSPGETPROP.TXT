@@ -1,0 +1,85 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:31:45
+<jsp:getProperty> 
+
+
+获取Bean的属性值，用于显示在页面中 
+
+
+
+
+
+JSP 语法
+
+
+
+<jsp:getProperty name="beanInstanceName" property="propertyName" /> 
+
+
+例子
+
+
+
+
+<jsp:useBean id="calendar" scope="page" class="employee.Calendar" /> 
+
+<h2> 
+
+Calendar of <jsp:getProperty name="calendar" property="username" /> 
+
+</h2> 
+
+
+
+
+
+
+描述
+
+
+这个<jsp:getProperty>元素将获得Bean的属性值，并可以将其使用或显示在JSP页面中.在你使用<jsp:getProperty>之前，你必须用<jsp:useBean>创建它. 
+
+
+<jsp:getProperty>元素有一些限制: 
+
+
+
+
+你不能使用<jsp:getProperty>来检索一个已经被索引了的属性 
+
+
+你能够和JavaBeans组件一起使用<jsp:getProperty>,但是不能与Enterprise 
+
+Bean一起使用。 
+
+
+
+
+
+属性
+
+
+
+
+
+name="beanInstanceName" 
+ bean的名字,由<jsp:useBean>指定 
+
+
+
+
+
+property="propertyName" 
+所指定的Bean的属性名。 
+
+
+
+
+
+技巧:
+
+
+
+
+在sun的JSP参考中提到，如果你使用<jsp:getProperty>来检索的值是空值，那么NullPointerException将会出现，同时如果使用程序段或表达式来检索其值，那么在浏览器上出现的是null（空). 

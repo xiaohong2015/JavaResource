@@ -1,0 +1,100 @@
+作者：jeru
+email: jeru@163.net
+日期：2000-12-26 10:46:54
+山西省网络管理中心任军 
+
+----摘要：本文主要讨论了Java语言中字符的特殊表达形式，尤其是中文信息的表达处理，阐述了字符处理的关键是要将十六位Unicode字符，转换为本地下层平台，也就是运行Java虚拟处理机的平台能够理解的字符形式。
+
+----关键词：Java、字符、8位、16位、Unicode字符集
+
+----Java是一种编程语言、一个运行系统、一套开发工具和一个应用程序编程界面（API）。Java建立在C++的熟悉、有用的特征之上，而取消了C++的复杂的、危险的和多余的元素。它是一个更安全、更简单、更容易使用的语言。
+
+1、Java的字符表达
+
+----Java语言和C语言对字符进行了互不相同的描述，Java使用16位的Unicode字符集(该标准描述了许多语言的各种不同字符),因此Java字符是一个16位的无符号整数，字符变量用来存放单个字符，而不是完整的字符串。
+
+----一个字符(character)，就是单个字母(letter)，许多字母构成一个单词，一组单词组成句子，以此类推。但是对于含有诸如中文信息的字符，就不是那么简单了。
+
+----Java的基本的char类型被定义成无符号的16位，它是Java中唯一的一个无符号类型。使用16位表达字符的主要原因是要让Java能够支持任何Unicode字符，因此而使得Java适用于描述或显示任何被Unicode支持的语言，可移植性也就会更好。但是，能够支持某种语言的字符串显示，和能够正确打印某种语言的字符串，常常是两个不同的问题。由于Oak（Java最初的代号）开发组的主要环境是Unix系统和某些源于Unix的系统，所以对开发人员来说，最为方便实用的字符集是ISOLatin-1。相应地，这一开发组就带有Unix遗传性，也就导致了Java的I/O系统在很大程度上以Unix的流概念为模型，而在Unix系统中，每一种I/O设备都是用一串8比特的流来表示。这种在I/O系统方面取模于Unix的做法，使得Java语言拥有16位的Java字符，而却只有8位的输入设备，这样就给Java带来了些不足。因此在任何一处Java字符串按8位来读入或写出的地方，都得有一小段程序代码，被称为"劈(hack)"，来将8位的字符映射成为16位Unicode，或将16位的Unicode劈成8位字符。
+
+2、问题及解决
+
+----我们要实现从一个文件读取信息，尤其是读取含有中文信息的文件，并将读取到的信息显示在屏幕上，一般我们使用FileInputStream函数打开文件、readChar函数读入字符。如下： 
+
+
+ import java.io.*;
+ public class rf{
+      public static void main(String args[]) {
+           FileInputStream fis;
+           DataInputStream dis;
+           char c;
+
+           try {
+               fis = new FileInputStream("xinxi.txt");
+               dis = new DataInputStream(fis);
+               while (true) {
+                   c = dis.readChar();
+                   System.out.print(c);
+                   System.out.flush();
+                   if (c == '\n') break;
+               }
+               fis.close();
+           } catch (Exception e) { }
+           System.exit(0);
+     }
+ }
+
+----但是事实上，运行这一程序，所能得到的输出结果是一堆无用的乱码。不能正确输出xinxi.txt文件内容，其原因是readChar函数读入的是16位的Unicode字符，而System.out.print却将其当作八位的ISO latin-1字符输出。 
+
+----Java 1.1版本引入了一套全新的Readers和Writers接口来处理字符。我们可以利用InputStreamReader类而不是DataInputStream来处理文件。修改上面的程序如下： 
+import java.io.*;
+
+
+ public class rf {
+      public static void main(String args[]) {
+           FileInputStream fis;
+           InputStreamReader irs;
+           char ch;
+
+           try {
+               fis = new FileInputStream("xinxi.txt");
+               irs = new InputStreamReader(fis);
+               while (true) {
+                   ch = (char) irs.read();
+                   System.out.print(c);
+                   System.out.flush();
+                   if (ch == '\n') break;
+               }
+               fis.close();
+           } catch (Exception e) { }
+           System.exit(0);
+     }
+ }
+
+----这样才能正确输出xinxi.txt中的文本(尤其是中文信息)。另外，当xinxi.txt文件来自不同的机器，即来自不同操作平台（或汉字内码不同）的机器，比如： 文件来自客户端（客户端上传文件给服务器），而读取文中信息的操作由服务器端执行。如果用上面的程序来实现这一功能，就有可能仍然不能得到正确的结果。其原因就是输入编码转换失败，我们还需要进行如下的改动： 
+
+
+     ......  
+        int c1;
+    int j=0;
+        StringBuffer str=new StringBuffer();
+        char lll[][]= new char[20][500];
+        String ll="";
+     try {
+          fis = new FileInputStream("fname.txt");
+          irs = new InputStreamReader(fis);
+              c1=irs.read(lll[1],0,50);
+          while (lll[1][j]!=' ') {
+               str.append(lll[1][j]);
+               j=j+1;                  
+              }
+                   ll=str.toString();
+           System.out.println(ll);
+       } catch (IOException e) { 
+              System.out.println(e.toString());}
+        ......
+
+----这样，输出的结果就正确了。当然，上面的程序是不完整的，只是说明了一下解决的方法。 
+
+----总之，Java语言中字符处理，尤其是中文信息的处理，比较特殊。在Java中，字符处理的关键是要将十六位Unicode字符，转换为本地下层平台也就是运行Java虚拟处理机的平台能够理解的字符形式。 
+

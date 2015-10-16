@@ -1,0 +1,16 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-16 11:35:57
+5.4 JSP API
+    有两种接口支持 JSP 技术。这些 API 提供了一种将内容生成（业务逻辑）从内容演示（HTML 格式）中分离出来的方法。这种分离使 Servlet 能生成内容并将它（如在 Bean 中）存储在请求的上下文中。生成上下文的 Servlet 通过将请求的上下文传递至 JSP 文件来生成一个响应，该 JSP 文件包含 HTML 格式。<BEAN> 标记便提供了对业务逻辑的访问。支持 JSP 的接口有：
+    = com.sun.server.http.HttpServiceRequest：该类实现了 javax.servlet.http.HttpServletRequest 接口和用于设置根据名称定义的属性的方法 setAttribute() 。 
+    = com.sun.server.http.HttpServiceResponse：该类实现了 javax.servlet.http.HttpServletResponse 接口，并添加了一个使 Servlet 能调用 JSP 文件和可选地传递上下文的 callPage() 方法。 
+    1．callPage() 方法
+    用 callPage() 方法在 Servlet 中对 JSP 进行服务。所服务的页面（一个 JSP 文件）作为响应返回到浏览器中。调用 Servlet 还可以通过请求对象传递某些上下文。应该对所服务的页面标题进行编码，以将用于告诉浏览器不要对文件执行高速缓存的指令包含在内。callPage() 方法的语法如下： 
+public void callPage(String fileName, HttpServletRequest req) throws ServletException, IOException
+其中：
+   = fileName：用于标识文件（该文件用于生成输出并表示内容）的 URL 名。如果文件名以斜杠（/）开头，则可以假设文件位置与文档根目录有关。如果文件名不是以斜杠开头，则可假设文件位置与当前调用的请求有关。callPage() 方法不支持调用文件扩展名为 .html 的页面。如果需要使用 callPage() 方法来调用 HTML 页面，则必须首先将 HTML 文件重命名成扩展名为 .jsp 的文件。 
+   = Req：调用该方法的是 Servlet 的 HttpServletRequest 对象。最通常的是，将上下文作为 Bean，在请求对象的上下文中进行传递。 
+要使用 callPage() 方法，必须将响应对象造型成com.sun.server.http.HttpServiceResponse类型。
+    2．使用 setAttribute() 方法
+    用 setAttribute() 方法来将一个特性存储在请求的上下文中。语法是：public void setAttribute(String key, Object o),其中，key代表存储的特性名，而o表示用 key 来存储的上下文对象。要使用 setAttribute() 方法，必须将请求对象造型成com.sun.server.http.HttpServiceRequest类型。

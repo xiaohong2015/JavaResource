@@ -1,0 +1,72 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-1-9 18:35:34
+Question  How do you delete a message from the mail server?  
+Derived from  An unanswered question originally posed by Benjamin Alejandro Rodriguez Rengifo  
+Topics  Java:API:JavaMail:IMAP4, Java:API:JavaMail:POP3  
+Author  John Zukowski  
+Created  23-Feb-00  Modified  25-Jul-00  
+ 
+
+Answer 
+
+The basic process of deleting a message is to call setFlag() on the message and set the Flags.Flag.DELETED flag to true.
+
+message.setFlag(Flags.Flag.DELETED, true);
+
+Then, when you close the folder, deleted messages will be removed.
+
+Be sure to open the folder for read/write access:
+
+folder.open(Folder.READ_WRITE);
+
+The following program demonstrates listing each message in the folder and prompting for deletion:
+
+import java.io.*;
+import javax.mail.*;
+import javax.mail.internet.*;
+
+public class DeleteMessageExample {
+  public static void main (String args[]) throws Exception {
+    String host = args[0];
+    String username = args[1];
+    String password = args[2];
+
+    // Get session
+    Session session = Session.getInstance(
+      System.getProperties(), null);
+
+    // Get the store
+    Store store = session.getStore("pop3");
+    store.connect(host, username, password);
+
+    // Get folder
+    Folder folder = store.getFolder("INBOX");
+    folder.open(Folder.READ_WRITE);
+
+    BufferedReader reader = new BufferedReader (
+      new InputStreamReader(System.in));
+
+    // Get directory
+    Message message[] = folder.getMessages();
+    for (int i=0, n=message.length; i<n; i++) {
+       System.out.println(i + ": " + message[i].getFrom()[0] 
+         + "\t" + message[i].getSubject());
+
+       System.out.println("Do you want to delete message? [YES to delete]");
+       String line = reader.readLine();
+       // Mark as deleted if appropriate
+       if ("YES".equals(line)) {
+         message[i].setFlag(Flags.Flag.DELETED, true);
+       }
+    }
+
+    // Close connection 
+    folder.close(true);
+    store.close();
+  }
+}
+
+You can also expunge() the Folder. However, the POP3 server from Sun does not support this operation.
+
+

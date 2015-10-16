@@ -1,0 +1,50 @@
+作者：罗亭
+email: tingluo@263.net
+日期：2001-7-24 11:43:07
+/** 很基础的东东，但一定是很好的东东 */
+
+C:\JBuilder4\jdk1.3\bin>javadoc
+
+用法：javadoc [options] [packagenames] [sourcefiles] [@files]
+-overview <file>          读取 HTML 格式的概述文档
+-public                   仅显示 public 类和成员
+-protected                显示 protected/public 类和成员（缺省）
+-package                  显示 package/protected/public 类和成员
+-private                  显示所有类和成员
+-help                     显示命令行选项
+-doclet <class>           通过候选 doclet 生成输出
+-docletpath <path>        指定 doclet 类文件的查找位置
+-1.1                      利用 JDK 1.1 模仿 doclet 生成输出
+-sourcepath <pathlist>    指定源文件的查找位置
+-classpath <pathlist>     指定用户类文件的查找位置
+-bootclasspath <pathlist> 覆盖自举类加载器所加载的
+                          类文件的位置
+-extdirs <dirlist>        覆盖已安装的扩展的位置
+-verbose                 有关 Javadoc 所做工作的输出信息
+-locale <name>            所用的 Locale，例如 en_US 或 en_US_WIN
+-encoding <name>          源文件编码名称
+-J<flag>                  将 <flag> 直接传给运行时系统
+
+由标准 doclet 提供：
+-d <directory>            输出文件的目标目录
+-use                      创建类和包的用法页
+-version                  包含 @version 段
+-author                   包含 @author 段
+-splitindex               将索引分为每个字母对应一个文件
+-windowtitle <text>       文档的浏览器窗口标题
+-doctitle <html-code>     包含包索引页（首页）的标题
+-header <html-code>       包含每一页的页眉文本
+-footer <html-code>       包含每一页的页脚文本
+-bottom <html-code>       包含每一页的页底文本
+-link <url>               创建到 javadoc 输出的链接（位于 <url>）
+-linkoffline <url> <url2> 利用位于 <url2> 的包列表链接到位于 <url> 的文档
+-group <name> <p1>:<p2>.. 将概览页中指定的包分组
+-nodeprecated             不包含 @deprecated 信息
+-nodeprecatedlist         不生成不鼓励使用的列表
+-notree                   不生成类层次
+-noindex                  不生成索引
+-nohelp                   不生成帮助链接
+-nonavbar                 不生成导航栏
+-helpfile <file>          包含帮助链接功能链接到目标的文件
+-stylesheetfile <path>    改变所生成文档的样式的文件
+-docencoding <name>       输出编码名称

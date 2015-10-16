@@ -1,0 +1,44 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：7/4/2001 1:41:45 PM
+　　当添加或删除一个Memory对象时，经过同步的本地Mnemosyne对象需要对所有的Mnemosyne进行更新，可以通过notify()方法来完成这一任务。无论是发生write或take事件，Mnemosyne都会针对发生的事件调用适当的监听者的notify()方法。在synchronize()方法中，我们把本地Mnemosyne注册为所有远程Mnemosyne的take和write事件的监听者，一旦远程Mnemosyne上有take和write事件发生，就会调用本地 Mnemosyne的notify()方法。然后，本地Mnemosyne必须对事件作出反应。下面是Mnemosyne如何与远程Mnemosyne进行同步的例子：
+
+
+public void notify(RemoteEvent remoteEvent) throws RemoteException 
+{ 
+// 回写被写的内存，但无需通知所有的Mnemosyne
+if(remoteEvent instanceof WriteRemoteEvent) 
+{ 
+WriteRemoteEvent wre = (WriteRemoteEvent) remoteEvent; 
+commonContext.silentWrite(wre.getMemory()); 
+} 
+
+file:// 取被写的Memory，但无需通知所有的Mnemosyne
+if(remoteEvent instanceof TakeRemoteEvent) 
+{ 
+TakeRemoteEvent tre = (TakeRemoteEvent) remoteEvent; 
+commonContext.silentTake(tre.getMemory()); 
+} 
+} 
+ 
+
+
+　　现在已经创建了一个控制所有memory对象的Mnemosyne，它自动与远程Mnemosyne保持同步，如果任何一个远程Mnemosynes得到或失去一个Memory对象时，都可以使它保持最新的状态。
+
+　　要通过Mnemosyne管理HTTP对话，servlet需要创建HttpSession的实例（从HttpServletRequest中使用getSession()），在实现Memory对象的类中封装对话，并调用Mnemosyne对象的write()方法把封装类写到一个Mnemosyne中。
+
+　　通过调用write()方法，封装着对话的Memory对象沿着网络传送给Mnemosyne，并通知远程机器。当对象被写到Mnemosyne时，WriteRemoteEvent被发送给在Mnemosyne上注册的所有WriteRemoteEventListeners，这样，所有其他的Mnemosynes就能将新的对象作为Mnemosynes添加到它们的对话信息存贮库中。
+
+　　要对存贮的对话进行查询，servlet调用read()方法查找包含对话的Memory对象，如果Mnemosyne找到了要查找的对象，则该对象通过RMI返回到servlet服务器。
+
+　　最后，要删除对话，servlet就会调用Mnemosyne的take()方法，Mnemosyne将象有read事件发生那样退还Memory对象，同时从其存贮对象库中删除该Memory对象。同时，向其所有TakeRemoteEventListeners发送TakeRemoteEvent事件，通知所有的远程Mnemosynes该Memory对象已经被删除了。
+
+　　建立对话服务器
+
+　　上面我们已经讨论了如何在多服务器上维护对话存贮库，下面我们将讨论如何建立对话服务器。在初始化过程中，对话服务器完成下列任务：
+
+　　━━创建本地Mnemosyne对象。
+
+　　━━把本地Mnemosyne绑定到RMI。
+
+　　━━把本地Mnemosyne与其他的远程Mnemosyne进行同步。

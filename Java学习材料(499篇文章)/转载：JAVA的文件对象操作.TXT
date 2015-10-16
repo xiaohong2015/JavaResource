@@ -1,0 +1,65 @@
+作者：lovefan
+email: lovefan@cmmail.com
+日期：2001-7-6 11:02:54
+                      java文 件对象操作 
+
+在 我 们 进 行 文 件 操 作 时， 需 要 知 道 一些关 于 文 件 的信 息。File类 提供了 一些 成 员 函 数 来 操 纵 文 件 和 获得 一些文 件 的 信 息。 
+
+1、创 建 一 个 新 的 文 件 对 象 
+
+你 可 用 下 面 三 个 方 法 来 创 建 一 个 新 文 件 对 象： 
+
+File myFile; myFile = new File("etc/motd"); 
+
+或 
+
+myFile = new File("/etc","motd"); //more useful if the directory or filename are variables 
+
+或 
+
+File myDir = new file("/etc"); myFile = new File(myDir,"motd"); 
+
+这 三 种 方 法 取 决 于 你 访 问 文 件 的 方 式。 例 如， 如 果 你 在应 用 程 序 里 只 用 一 个 文 件， 第 一 种 创 建 文 件 的 结 构 是 最容 易 的。 但 如 果 你 在 同 一 目 录 里 打 开 数 个 文 件， 则 第 二 种或 第 三 种 结 构 更 好 一些。 
+
+2、 文 件 测 试 和 使 用 
+
+一 旦 你 创 建 了 一 个 文 件 对 象， 你 便 可 以 使 用 以 下 成员 函 数 来 获 得 文 件 相 关 信 息： 
+
+文件名 ： String getName() 
+路径：    String getPath() 
+         String getAbslutePath()
+         String getParent() 
+         boolean renameTo(File newName) 
+
+文 件 测 试 ： boolean exists() 、 boolean canWrite() 、 boolean canRead() 、 boolean isFile() 、 boolean isDirectory() 、 boolean isAbsolute() 
+
+一 般 文 件 信 息 l long lastModified() l long length() 
+
+目 录 用 法 l boolean mkdir() l String[] list() 
+
+3、 文 件 信 息 获 取 例 子 程 序
+
+这 里 是 一 个 独 立 的 显 示 文 件 的 基 本 信 息 的 程 序， 文 件通 过 命 令 行 参 数 传 输： 
+
+import java.io.*; class fileInfo{ 
+     File fileToCheck; 
+     public static void main(String args[]) throws IOException{ 
+     if (args.length>0){ 
+          for (int i=0;i<args.length;i++){ 
+               fileToCheck = new File(args[i]); 
+               info(fileToCheck); 
+          } 
+     } 
+     else
+         { 
+         System.out.println("No file given."); 
+     } 
+  } 
+  
+  public void info (File f) throws IOException {       
+      System.out.println("Name: "+f.getName());   
+      System.out.println("Path: "=f.getPath()); 
+      if (f.exists()) {
+         System.out.println("File exists."); 
+         System.out.print((f.canRead() ?" and is Readable":"")); System.out.print((f.cnaWrite()?" and is Writeable":"")); System.out.println("."); System.out.println("File is " + f.lenght() = " bytes."); } else { System.out.println("File does not exist."); } } } 
+

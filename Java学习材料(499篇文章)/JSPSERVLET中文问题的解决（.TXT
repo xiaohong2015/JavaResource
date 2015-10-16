@@ -1,0 +1,107 @@
+作者：bigeagle
+email: bigeagle@163.net
+日期：2001-7-12 10:44:53
+JSP/Servlet 中的汉字编码问题
+（作者：张建芳，转自IBM DeveloperWorks 中国网站　2001年04月18日 15:08）
+
+　　网上就 JSP/Servlet 中 DBCS 字符编码问题有许多优秀的文章和讨论，本文对它们作一些整理，并结合 IBM WebSphere Application Server 3.5（WAS）的解决方法作一些说明，希望它不是多余的。 
+
+1.问题的起源 
+　　每个国家（或区域）都规定了计算机信息交换用的字符编码集，如美国的 ASCII，中国的 GB2312-80，日本的 JIS 等，作为该国家/区域内信息处理的基础，有着统一编码的重要作用。字符编码集按长度分为 SBCS（单字节字符集），DBCS（双字节字符集）两大类。早期的软件（尤其是操作系统），为了解决本地字符信息的计算机处理，出现了各种本地化版本（L10N），为了区分，引进了 LANG，Codepage 等概念。但是由于各个本地字符集代码范围重叠，相互间信息交换困难；软件各个本地化版本独立维护成本较高。因此有必要将本地化工作中的共性抽取出来，作一致处理，将特别的本地化处理内容降低到最少。这也就是所谓的国际化（I18N）。各种语言信息被进一步规范为 Locale 信息。处理的底层字符集变成了几乎包含了所有字形的 Unicode。 
+
+　　现在大部分具有国际化特征的软件核心字符处理都是以 Unicode 为基础的，在软件运行时根据当时的 Locale/Lang/Codepage 设置确定相应的本地字符编码设置，并依此处理本地字符。在处理过程中需要实现 Unicode 和本地字符集的相互转换，甚或以 Unicode 为中间的两个不同本地字符集的相互转换。这种方式在网络环境下被进一步延伸，任何网络两端的字符信息也需要根据字符集的设置转换成可接受的内容。 
+
+　　Java 语言内部是用 Unicode 表示字符的，遵守 Unicode V2.0。Java 程序无论是从/往文件系统以字符流读/写文件，还是往 URL 连接写 HTML 信息，或从 URL 连接读取参数值，都会有字符编码的转换。这样做虽然增加了编程的复杂度，容易引起混淆，但却是符合国际化的思想的。 
+
+　　从理论上来说，这些根据字符集设置而进行的字符转换不应该产生太多问题。而事实是由于应用程序的实际运行环境不同，Unicode 和各个本地字符集的补充、完善，以及系统或应用程序实现的不规范，转码时出现的问题时时困扰着程序员和用户。 
+
+2.GB2312-80，GBK，GB18030-2000 汉字字符集 
+　　其实解决 JAVA 程序中的汉字编码问题的方法往往很简单，但理解其背后的原因，定位问题，还需要了解现有的汉字编码和编码转换。 
+
+　　GB2312-80 是在国内计算机汉字信息技术发展初始阶段制定的，其中包含了大部分常用的一、二级汉字，和 9 区的符号。该字符集是几乎所有的中文系统和国际化的软件都支持的中文字符集，这也是最基本的中文字符集。其编码范围是高位0xa1－0xfe，低位也是 0xa1-0xfe；汉字从 0xb0a1 开始，结束于 0xf7fe； 
+
+　　GBK 是 GB2312-80 的扩展，是向上兼容的。它包含了 20902 个汉字，其编码范围是 0x8140-0xfefe，剔除高位 0x80 的字位。其所有字符都可以一对一映射到 Unicode 2.0，也就是说 JAVA 实际上提供了 GBK 字符集的支持。这是现阶段 Windows 和其它一些中文操作系统的缺省字符集，但并不是所有的国际化软件都支持该字符集，感觉是他们并不完全知道 GBK 是怎么回事。值得注意的是它不是国家标准，而只是规范。随着 GB18030-2000国标的发布，它将在不久的将来完成它的历史使命。 
+
+　　GB18030-2000(GBK2K) 在 GBK 的基础上进一步扩展了汉字，增加了藏、蒙等少数民族的字形。GBK2K 从根本上解决了字位不够，字形不足的问题。它有几个特点： 
+
+　　●它并没有确定所有的字形，只是规定了编码范围，留待以后扩充。 
+
+　　●编码是变长的，其二字节部分与 GBK 兼容；四字节部分是扩充的字形、字位，其编码范围是首字节 0x81-0xfe、二字节0x30-0x39、三字节 0x81-0xfe、四字节0x30-0x39。 
+
+　　●它的推广是分阶段的，首先要求实现的是能够完全映射到 Unicode 3.0 标准的所有字形。 
+
+　　●它是国家标准，是强制性的。 
+
+　　现在还没有任何一个操作系统或软件实现了 GBK2K 的支持，这是现阶段和将来汉化的工作内容。 
+
+3.JSP/Servlet 汉字编码问题及在 WAS 中的解决办法 
+　　3.1 常见的 encoding 问题的现象 
+
+　　网上常出现的 JSP/Servlet encoding 问题一般都表现在 browser 或应用程序端，如: 
+
+　　●浏览器中看到的 Jsp/Servlet 页面中的汉字怎么都成了 ’?’ ? 
+
+　　●浏览器中看到的 Servlet 页面中的汉字怎么都成了乱码？ 
+
+　　●JAVA 应用程序界面中的汉字怎么都成了方块？ 
+
+　　●Jsp/Servlet 页面无法显示 GBK 汉字。 
+
+　　●Jsp/Servlet 不能接收 form 提交的汉字。 
+
+　　●JSP/Servlet 数据库读写无法获得正确的内容。 
+
+　　隐藏在这些问题后面的是各种错误的字符转换和处理（除第3个外，是因为 Java font 设置错误引起的）。解决类似的字符 encoding 问题，需要了解 Jsp/Servlet 的运行过程，检查可能出现问题的各个点。 
+
+　　3.2 JSP/Servlet web 编程时的 encoding 问题 
+
+　　运行于Java 应用服务器的 JSP/Servlet 为 Browser 提供 HTML 内容，其过程如下图所示： 
+
+ 
+　　其中有字符编码转换的地方有： 
+
+　　a.JSP 编译。Java 应用服务器将根据 JVM 的 file.encoding 值读取 JSP 源文件，并转换为内部字符编码进行 JSP 编译，生成 JAVA 源文件，根据 file.encoding 值写回文件系统。如果当前系统语言支持 GBK，那么这时候不会出现 encoding 问题。如果是英文的系统，如 LANG 是 en_US 的 Linux, AIX 或 Solaris，则要将 JVM 的 file.encoding 值置成 GBK 。系统语言如果是 GB2312，则根据需要，确定要不要设置 file.encoding，将 file.encoding 设为 GBK 可以解决潜在的 GBK 字符乱码问题。 
+
+　　b.Java 需要被编译为 .class 才能在 JVM 中执行，这个过程存在与a.同样的 file.encoding 问题。从这里开始 servlet 和 jsp 的运行就类似了，只不过 Servlet 的编译不是自动进行的。 
+
+　　c.Servlet 需要将 HTML 页面内容转换为 browser 可接受的 encoding 内容发送出去。依赖于各 JAVA App Server 的实现方式，有的将查询 Browser 的 accept-charset 和 accept-language 参数或以其它猜的方式确定 encoding 值，有的则不管。因此 constant-encoding 也许是最好的解决方法。对于中文网页，可在 JSP 或 Servlet 中设置 contentType="text/html; charset=GB2312"；如果页面中有GBK字符，则设置为contentType="text/html; charset=GBK"，由于IE 和 Netscape对GBK的支持程度不一样，作这种设置时需要测试一下。 
+
+　　因为16位 JAVA char在网络传送时高8位会被丢弃，也为了确保Servlet页面中的汉字（包括内嵌的和servlet运行过程中得到的）是期望的内码，可以用 PrintWriter out=res.getWriter() 取代 ServletOutputStream out=res.getOutputStream(), PrinterWriter 将根据contentType中指定的charset作转换(ContentType需在此之前指定！);也可以用OutputStreamWriter封装 ServletOutputStream 类并用write(String)输出汉字字符串。 
+
+对于 JSP，JAVA Application Server 应当能够确保在这个阶段将嵌入的汉字正确传送出去。 
+
+　　d.这是 URL 字符 encoding 问题。如果通过 get/post 方式从 browser 返回的值中包含汉字信息， servlet 将无法得到正确的值。SUN的 J2SDK 中，HttpUtils.parseName 在解析参数时根本没有考虑 browser 的语言设置，而是将得到的值按 byte 方式解析。这是网上讨论得最多的 encoding 问题。因为这是设计缺陷，只能以 bin 方式重新解析得到的字符串；或者以 hack HttpUtils 类的方式解决。参考文章 2、3 均有介绍，不过最好将其中的中文 encoding GB2312、 CP1381 都改为 GBK，否则遇到 GBK 汉字时，还是会有问题。 
+
+　　Servlet API 2.3 提供一个新的函数 HttpServeletRequest.setCharacterEncoding 用于在调用 request.getParameter(“param_name”) 前指定应用程序希望的 encoding，这将有助于彻底解决这个问题。 
+
+　　WebSphere Application Server 对标准的 Servlet API 2.x 作了扩展，提供较好的多语言支持。上述c,d情况，WAS 都要查询 Browser 的语言设置，在缺省状况下zh、zh-cn 等均被映射为 JAVA encoding CP1381（注意：CP1381 只是等同于 GB2312 的一个 codepage，没有 GBK 支持）。这样做我想是因为无法确认 Browser 运行的操作系统是支持GB2312, 还是 GBK，所以取其小。但是实际的应用系统还是要求页面中出现 GBK 汉字，最著名的是朱总理名字中的“?”(rong2 ，0xe946，\u9555)，所以有时还是需要将 Encoding/Charset 指定为 GBK。当然 WAS 中变更缺省的 encoding 没有上面说的那么麻烦，针对 a,b，参考文章 5 ），在 Application Server 的命令行参数中指定 -Dfile.encoding=GBK 即可； 针对 d，在 Application Server 的命令行参数中指定-Ddefault.client.encoding=GBK。如果指定了-Ddefault.client.encoding=GBK，那么c情况下可以不再指定charset。 
+
+　　3.3 数据库读写时的 encoding 问题 
+
+　　JSP/Servlet 编程中经常出现 encoding 问题的另一个地方是读写数据库中的数据。 
+
+　　流行的关系数据库系统都支持数据库 encoding，也就是说在创建数据库时可以指定它自己的字符集设置，数据库的数据以指定的编码形式存储。当应用程序访问数据时，在入口和出口处都会有 encoding 转换。对于中文数据，应当保证数据的完整性。GB2312，GBK，UTF-8 等都是可选的数据库 encoding；如果选择 ISO8859-1(8-bit SBCS)，那么应用程序在写数据之前须将 16Bit 的一个汉字或 Unicode 拆分成两个 8-bit 的字符，读数据之后则需将两个字节合并起来，同时还有判别其中的 SBCS 字符。没有充分利用数据库 encoding 的作用，反而增加了编程的复杂度，ISO8859-1不是推荐的数据库 encoding。JSP/Servlet编程时，可以先用数据库管理系统提供的功能检查其中的中文数据是否正确。 
+
+　　然后应当注意的是读出来的数据的 encoding，JAVA 程序中一般得到的是 Unicode。写数据时则相反。 
+
+　　3.4 定位问题时常用的技巧 
+
+　　定位中文encoding问题通常采用最笨的也是最有效的办法——在你认为有嫌疑的程序处理后打印字符串的内码。通过打印字符串的内码，你可以发现什么时候中文字符被转换成Unicode，什么时候Unicode被转回中文内码，什么时候一个中文字成了两个 Unicode 字符，什么时候中文字符串被转成了一串问号，什么时候中文字符串的高位被截掉了…… 
+
+　　取用合适的样本字符串也有助于区分问题的类型。如：”aa啊aa?aa” 等中英相间、GB、GBK特征字符均有的字符串。一般来说，英文字符无论怎么转换或处理，都不会失真（如果遇到了，可以尝试着增加连续的英文字母长度）。 
+
+4.结束语 
+　　其实 JSP/Servlet 的中文encoding 并没有想像的那么复杂，虽然定位和解决问题没有定规，各种运行环境也各不尽然，但后面的原理是一样的。了解字符集的知识是解决字符问题的基础。不过，随着中文字符集的变化，不仅仅是 java 编程，中文信息处理中的问题还是会存在一段时间的。 
+
+5.参考文章 
+1) Character Problem Review 
+2) Java 编程技术中汉字问题的分析及解决 
+3) NLS Characters in WebSphere: SBCS/DBCS display on same page 
+4) GB18030 
+5) Setting language encoding in web applications: Websphere applications Server 
+作者简介 
+　　张建芳，软件工程师，毕业于北京理工大学计算机应用学院，有多年中文本地化经验。您可通过 jfzhang@usa.net 与他联系。 
+
+　　 
+
+转自IBM 

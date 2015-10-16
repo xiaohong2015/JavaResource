@@ -1,0 +1,146 @@
+作者：罗亭
+email: tinluo@263.net
+日期：2001-3-8 13:56:04
+/**
+*有朋友有如此苦心之作，实在感谢，相信它不会怪我转贴吧，他的email是vividq@china.com
+*/
+
+关于Servlet、Jsp中的多国语言显示
+
+　　因为一直不信Java竟会有不能混排显示多国语言的BUG，这个周末研究了一下Servlet、Jsp的多国语言显示的问题，也就是Servlet的多字符集问题，由于我对字符集的概念还不是很清晰所以写出的东西未必是准确的，我是这样理解Java中的字符集的：在运行时，每个字符串对象中存储的都是编码为UNICODE内码的（我觉得所有的语言中都是有相应编码的，因为在计算机内部字符串总是用内码来表示的，只不过一般计算机语言中的字符串编码时平台相关的，而Java则采用了平台无关的UNICODE）。
+　　Java从一个byte流中读取一个字符串时，将把平台相关的byte转变为平台无关的Unicode字符串。在输出时Java将把Unicode字符串转变为平台相关的byte流，如果某个Unicode字符在某个平台上不存在，将会输出一个'?'。举个例子：在中文Windows中，Java读出一个"GB2312"编码的文件（可以是任何流）到内存中构造字符串对象，将会把GB2312编码的文字转变为Unicode编码的字符串，如果把这个字符串输出又将会把Unicode字符串转化为GB2312的byte流或数组："中文测试"----->"\u4e2d\u6587\u6d4b\u8bd5"----->"中文测试"。
+如下例程：
+byte[] bytes = new byte[]{(byte)0xd6, (byte)0xd0, (byte)0xce, (byte)0xc4, (byte)0xb2, (byte)0xe2, (byte)0xca, (byte)0xd4};//GBK编码的"中文测试"
+java.io.ByteArrayInputStream bin = new java.io.ByteArrayInputStream(bytes);
+java.io.BufferedReader reader = new java.io.BufferedReader(new java.io. InputStreamReader (bin,"GBK"));
+String msg = reader.readLine();
+System.out.println(msg)
+　　这段程序放到包含"中文测试"这四个字的系统（如中文系统）中，可以正确地打印出这些字。msg字符串中包含了正确的"中文测试"的Unicode编码："\u4e2d\u6587\u6d4b\u8bd5"，打印时转换为操作系统的默认字符集，是否可以正确显示依赖于操作系统的字符集，只有在支持相应字符集的系统中，我们的信息才能正确的输出，否则得到的将会是垃圾。
+　　话入正题，我们来看看Servlet/Jsp中的多语言问题。我们的目标是，任一国家的客户端通过Form向Server发送信息，Server把信息存入数据库中，客户端在检索时仍然能够看到自己发送的正确信息。事实上，我们要保证，最终Server中的SQL语句中保存的时包含客户端发送文字的正确Unicode编码；DBC与数据库通讯时采用的编码方式能包含客户端发送的文字信息，事实上，最好让JDBC直接使用UNICODE/UTF8与数据库通讯！这样就可以确保不会丢失信息；Server向客户端发送的信息时也要采用不丢失信息的编码方式，也可以是Unicode/Utf8。
+　　如果不指定Form的Enctype属性，Form将把输入的内容依照当前页面的编码字符集urlencode之后再提交，服务器端得到是urlencoding的字符串。编码后得到的urlencoding字符串是与页面的编码相关的，如gb2312编码的页面提交"中文测试"，得到的是"%D6%D0%CE%C4%B2%E2%CA%D4"，每个"％"后跟的是16进制的字符串；而在UTF8编码时得到的却是"%E4%B8%AD%E6%96%87%E6%B5%8B%E8%AF%95"，因为GB2312编码中一个汉字是16位的，而UTF8中一个汉字却是24位的。中日韩三国的ie4以上浏览器均支持UTF8编码，这种方案肯定包涵了这三国语言，所以我们如果让Html页面使用UTF8编码那么将至少可以支持这三国语言。
+　　但是，如果我们html/Jsp页面使用UTF8编码，因为应用程序服务器可能不知道这种情况，因为如果浏览器发送的信息不包含charset信息，至多Server知道读到Accept-Language请求投标，我们知道仅靠这个投标是不能获知浏览器所采用编码的，所以应用程序服务器不能正确解析提交的内容，为什么？因为Java中的所有字符串都是Unicode16位编码的，HttpServletRequest.request(String)的功能就是把客户端提交的Urlencode编码的信息转为Unicode字符串，有些Server只能认为客户端的编码和Server平台相同，简单地使用URLDecoder.decode(String)方法直接解码，如果客户端编码恰好和Server相同，那么就可以得到正确地字符串，否则，如果提交地字符串中包含了当地字符，那么将会导致垃圾信息。
+　　在我提出的这个解决方案里，已经指定了采用Utf8编码，所以，可以避免这个问题，我们可以自己定制出decode方法：
+public static String decode(String s,String encoding) throws Exception {
+StringBuffer sb = new StringBuffer();
+for(int i=0; i<s.length(); i++) {
+char c = s.charAt(i);
+switch (c) {
+case '+':
+sb.append(' ');
+break;
+case '%':
+try {
+sb.append((char)Integer.parseInt(
+s.substring(i+1,i+3),16));
+}
+catch (NumberFormatException e) {
+throw new IllegalArgumentException();
+}
+i += 2;
+break;
+default:
+sb.append(c);
+break;
+}
+}
+// Undo conversion to external encoding
+String result = sb.toString();
+byte[] inputBytes = result.getBytes("8859_1");
+return new String(inputBytes,encoding);
+}
+　　这个方法可以指定encoding，如果把它指定为UTF8就满足了我们的需要。比如用它解析："%E4%B8%AD%E6%96%87%E6%B5%8B%E8%AF%95"就可以得到正确的汉字"中文测试"的Unicode字符串。
+现在的问题就是我们必须得到客户端提交的Urlencode的字符串。对于method为get的form提交的信息，可以用HttpServletRequest.getQueryString()方法读到，而对于post方法的form提交的信息，只能从ServletInputStream中读到，事实上标准的getParameter方法被第一次调用后，form提交的信息就被读取出来了，而ServletInputStream是不能重复读出的。所以我们应在第一次使用getParameter方法前读取并解析form提交的信息。
+　　我是这么做的，建立一个Servlet基类，覆盖service方法，在调用父类的service方法前读取并解析form提交的内容，请看下面的源代码：
+package com.hto.servlet;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+/**
+* Insert the type's description here.
+* Creation date: (2001-2-4 15:43:46)
+* @author: 钱卫春
+*/
+public class UTF8ParameterReader {
+Hashtable pairs = new Hashtable();
+/**
+* UTF8ParameterReader constructor comment.
+*/
+public UTF8ParameterReader(HttpServletRequest request) throws java.io.IOException{
+super();
+parse(request.getQueryString());
+parse(request.getReader().readLine());
+}
+/**
+* UTF8ParameterReader constructor comment.
+*/
+public UTF8ParameterReader(HttpServletRequest request,String encoding) throws java.io.IOException{
+super();
+parse(request.getQueryString(),encoding);
+parse(request.getReader().readLine(),encoding);
+}
+public static String decode(String s) throws Exception {
+StringBuffer sb = new StringBuffer();
+for(int i=0; i<s.length(); i++) {
+char c = s.charAt(i);
+switch (c) {
+case '+':
+sb.append(' ');
+break;
+case '%':
+try {
+sb.append((char)Integer.parseInt(
+s.substring(i+1,i+3),16));
+}
+catch (NumberFormatException e) {
+throw new IllegalArgumentException();
+}
+i += 2;
+break;
+default:
+sb.append(c);
+break;
+}
+}
+// Undo conversion to external encoding
+String result = sb.toString();
+byte[] inputBytes = result.getBytes("8859_1");
+return new String(inputBytes,"UTF8");
+}
+public static String decode(String s,String encoding) throws Exception {
+StringBuffer sb = new StringBuffer();
+for(int i=0; i<s.length(); i++) {
+char c = s.charAt(i);
+switch (c) {
+case '+':
+sb.append(' ');
+break;
+case '%':
+try {
+sb.append((char)Integer.parseInt(
+s.substring(i+1,i+3),16));
+}
+catch (NumberFormatException e) {
+throw new IllegalArgumentException();
+}
+i += 2;
+break;
+default:
+sb.append(c);
+break;
+}
+}
+// Undo conversion to external encoding
+String result = sb.toString();
+byte[] inputBytes = result.getBytes("8859_1");
+return new String(inputBytes,encoding);
+}
+/**
+* Insert the method's description here.
+* Creation date: (2001-2-4 17:30:59)
+* @return java.lang.String
+* @param name java.lang.String
+*/
+public String getParameter(String name) {
+if (pairs == null || !pairs.containsKey(name)) return null;
+return (String)(((ArrayList) pairs.get(name)).get(0));
+}

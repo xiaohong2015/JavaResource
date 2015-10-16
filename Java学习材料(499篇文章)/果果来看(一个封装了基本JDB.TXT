@@ -1,0 +1,355 @@
+作者：zergling
+email: onlydream@eastday.com
+日期：7/27/2001 1:15:48 PM
+odbc.java
+---------------------------------------------
+
+package bbs;
+
+/*
+database operation class, test by odbc
+
+This javabean is written by zergling
+It is my first javabean :o
+version 1.01
+*/
+
+import java.sql.*;
+import java.lang.*;
+import java.io.*;
+import java.util.*;
+import sun.io.*;
+
+public class odbc
+    {
+    Connection sqlCon;
+    ResultSet rstSql;
+    Statement stmS;
+    String strCon;
+    String strSql;
+    boolean status;
+    long rowcount;
+    int page;
+    int pagesize;
+    long pagecount;
+    long firstrecord;
+
+    //connect to the default database
+    public boolean connect()
+        {
+        //Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+        this.strCon = "jdbc:odbc:jspbbs";                                                  //replace with your default database
+        try
+            {
+            Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+            this.sqlCon = java.sql.DriverManager.getConnection(this.strCon,"sa","");    //replace with your default database connection configure option
+            this.status = true;
+            return true;
+            }
+        catch(Exception e)
+            {
+            this.status = false;
+            return false;
+            }
+        }
+
+    //connect to the custom database
+    public boolean connect(String conName,String username,String password)
+        {
+        //Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+        this.strCon = conName;                                                  
+        try
+            {
+            Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+            this.sqlCon = java.sql.DriverManager.getConnection(this.strCon,username,password);    
+            this.status = true;
+            return true;
+            }
+        catch(Exception e)
+            {
+            this.status = false;
+            return false;
+            }
+        }
+
+    //execute sql(insert,update,delete,...)
+    public boolean execute(String s)
+        {
+        try
+            {
+            this.stmS = this.sqlCon.createStatement();
+            this.stmS.executeUpdate(s);
+            this.status = true;
+            return true;
+            }
+        catch(Exception e)
+            {
+            this.status = false;
+            return false;
+            }
+        }
+
+    //query the data from database
+    public boolean query(String s)
+        {
+        try
+            {
+            this.rowcount = 0;
+            this.stmS = this.sqlCon.createStatement();
+            this.rstSql = this.stmS.executeQuery(s);
+            while (this.nextrecord())
+                {
+                this.rowcount++;
+                }
+            this.rstSql = this.stmS.executeQuery(s);
+            this.status = true;
+            return true;
+            }
+        catch(Exception e)
+            {
+            this.status = false;
+            return false;
+            }
+        }
+    
+    //return the row count
+    public long getrowcount()
+        {
+        return this.rowcount;
+        }
+
+    //return the pagecount
+    public long getpagecount()
+        {
+        return this.pagecount;
+        }
+    
+    //return the resultset of data
+    public String getstring(String s)
+        {
+        try
+            {
+            return this.rstSql.getString(s);
+            }
+        catch(Exception e)
+            {
+            return "not exists";
+            }
+        }
+
+    public int getint(String s)
+        {
+        try
+            {
+            return Integer.parseInt(this.rstSql.getString(s));
+            }
+        catch(Exception e)
+            {
+            return 0;
+            }
+        }
+
+    //resultset move forward
+    public boolean nextrecord()
+        {
+        try
+            {
+            return this.rstSql.next();
+            }
+        catch(Exception e)
+            {
+            return false;
+            }
+        }
+    
+    //set current page (recall first)
+    public boolean setpage(int size,int no)
+        {
+        this.pagesize = size;
+        this.page = no;
+        this.pagecount = Math.round((this.rowcount - 1) / this.pagesize)+1; 
+        this.firstrecord = this.pagesize * ( this.page - 1 );
+        try
+            {
+            for(int i=0;i<this.firstrecord;i++)
+                if (!this.nextrecord()) break;
+            return true;
+            }
+        catch(Exception e)
+            {
+            return false;
+            }
+        }
+    
+    //get string from database and change it into chinese
+    public String readChinese(String s)
+        {
+        try
+            {
+            String temp = new String(s.getBytes("GB2312"),"8859_1");
+            return temp;
+            }
+        catch(Exception e)
+            {
+            return s;
+            }
+        }
+
+    //write string to the database's chinese transform
+    public static String writeChinese(String s)
+        {
+        char[] orig =s.toCharArray();
+        byte[] dest =new byte[orig.length];
+        for(int i=0;i<orig.length;i++)
+        dest[i] =(byte)(orig[i]&0xFF);
+        try
+            {
+
+            ByteToCharConverter toChar =ByteToCharConverter.getConverter("gb2312");
+
+            return new String(toChar.convertAll(dest));
+            }
+        catch(Exception e)
+            {
+            return s;
+            }
+        }
+
+
+    //string's search and replace
+    public String replace(String con ,String tag,String rep){
+
+        int j=0;
+
+        int i=0;
+
+        int k=0;
+
+        String RETU="";
+
+        String temp =con;
+
+        int tagc =tag.length();
+
+        while(i<con.length()){
+
+            if(con.substring(i).startsWith(tag)){
+
+                temp =con.substring(j,i)+rep;
+
+                RETU+= temp;
+
+                i+=tagc;
+
+                j=i;
+
+            }
+
+            else{
+
+                i+=1;
+
+            }
+
+            
+
+        }
+
+        RETU +=con.substring(j);
+
+        return RETU;
+
+    }    
+    
+        public Vector listValue(String con ,String tag){
+
+        int j=0;
+
+        int i=0;
+
+        int k=0;
+
+        Vector vv=new Vector();
+
+        String temp =con;
+
+        int tagc =tag.length();
+
+        while(i<con.length()){
+
+            if(con.substring(i).startsWith(tag)){
+
+                temp =con.substring(j,i);
+
+                vv.addElement(temp);
+
+                i+=tagc;
+
+                j=i;
+
+            }
+
+            else{
+
+                i+=1;
+
+            }
+
+            
+
+        }
+
+        vv.addElement(con.substring(j));
+
+        return vv;
+
+    }    
+
+
+    //filt the html code & sql symbol
+    public String htmlencode(String s)
+        {
+        try
+            {
+            String temp = this.replace(s,"<","&lt;");
+            temp = this.replace(temp,">","&gt;");
+            temp = this.replace(temp,"'","&quot;");
+            temp = this.replace(temp,"\"","&quot;");
+            temp = this.replace(temp," ","&nbsp;");
+            temp = this.replace(temp,"\n","<br>");
+            return temp;
+            }
+        catch(Exception e)
+            {
+            return s;
+            }
+        }
+    
+    //return the status of last operation
+    public boolean getstatus()
+        {
+
+        return this.status;
+        }
+    
+    //close all object
+    public boolean close()
+        {
+        try
+            {
+            if (this.sqlCon != null) this.sqlCon.close();
+            if (this.rstSql != null) this.rstSql.close();
+            if (this.stmS != null) this.stmS.close();
+            this.status = true;
+            return false;
+            }
+        catch(Exception e)
+            {
+            this.status = false;
+            return true;
+            }
+        }
+
+    }
+
+     

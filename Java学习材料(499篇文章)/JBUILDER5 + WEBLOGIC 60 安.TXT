@@ -1,0 +1,39 @@
+作者：hp.q
+email: hp.q@263.net
+日期：6/18/2001 1:38:01 PM
+一、安装JBuilder5 （秦海鹏提供）
+        1、安装Jbuilder5
+        2、启动Jbuilder5，你会发现启动不起来，这时你到 \jbuilder5\bin\jbuilder.config 文件中把 “mainclass com.borland.jbuilder.JBuilder” 这一行加上“#”号注释掉，再启动Jbuilder5，Jbuilder5就会报一个错，下面再一次修改 \jbuilder5\bin\jbuilder.config 文件，把 “#mainclass.borland.jbuilder.JBuilder” 这一行的“#”号删掉，再启动Jbuilder5，OK
+（hp.q注：这一个并不正确，其实是我瞎改凑巧改对的，后来我分析是因为我们装了vss的缘故，只要去掉vss的两行就可以了。
+）
+        3、Jbuilder密码： xa52-?npkv-gcqzw 
+                     m69-tet 
+二、安装配置Weblogic（Bob's Home Page提供）
+    BEA WebLogic Server 6.0 Final <http://commerce.beasys.com/downloads/weblogic_server.jsp#wls> Crack: bea_wls60final_crack.zip <http://go.163.com/~bob0215/bea_wls60final_crack.zip> (size: 16KB)
+
+    用法：比如我将 WebLogic Server 6.0 Final 安装在 C:\bea 目录下，将上面的 bea_wls60final_crack.zip <http://go.163.com/~bob0215/bea_wls60final_crack.zip> 解开后，将其中的 cr_wls60f.jar 拷到 C:\bea\wlserver6.0\lib 目录下，将 license.bea 拷到 C:\bea 目录下(主要是改expiration="never", units="unlimited"就可以了)，将 C:\bea\wlserver6.0\config\mydomain 目录中的 startWebLogic.cmd 文件中的
+   set CLASSPATH=.;.\lib\weblogic_sp.jar;.\lib\weblogic.jar
+
+   一行改为：
+
+   set CLASSPATH=.\lib\cr_wls60f.jar;.;.\lib\weblogic_sp.jar;.\lib\weblogic.jar
+
+    然后运行 .\startWebLogic.cmd. To confirm the server is running, visit http://127.0.0.1:7001/console/index.jsp. Enjoy !
+
+    注意：这里的 mydomain / myserver 是在安装时选择的缺省名字，请用相应的实际名字代替。 
+
+    上面的 bea_wls60final_crack.zip <http://go.163.com/~bob0215/bea_wls60final_crack.zip> 中还提供了 examples & petstore 的相应启动文件供大家参考。 
+三、配置Jbuilder5（魏文麒提供）
+    1、tools->enterprise setup
+              一定要配IAS4.1，（如有BAS4.5配BAS4.5更好）不然EJB出不来！
+       配Weblogic6.0只要把Weblogic6.0的路径设好即可。
+    2、project->default project properties
+              配置run面板：VM parameters的值在“-ms64m -mx64m ”后加入
+       “ -classpath .\lib\cr_wls60f.jar;.;.\lib\weblogic_sp.jar;.\lib\weblogic.jar ”
+       这样在Jbuilder5中调用Weblogic6.0时权限就不会有问题了！
+       配置servers面板：选择weblogic6.0为应用服务器，建议选上“application server is web server”项，这样jsp就也用weblogic6.0来调试了（而不是tomcat）
+    3、其他配置与jbuilder4+weblogic5.1的配法相同。
+    
+    以上配置均在机器上正常运行！
+
+

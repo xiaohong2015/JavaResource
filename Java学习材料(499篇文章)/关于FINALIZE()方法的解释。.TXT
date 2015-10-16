@@ -1,0 +1,113 @@
+作者：sonymusic
+email: sonymusic@163.net
+日期：8/9/2001 11:36:21 PM
+[b]原题：[/b]
+我在thinking in java中看见以下一段代码。
+
+//:Garbage.java
+//Demonstration of the garbage
+//collector and finalization
+
+class Chair {
+    static boolean gcrun=false;
+    static boolean f=false;
+    static int created=0;
+    static int finalized=0;
+    int i;
+    Chair(){
+        i=++created;
+        if(created==47)
+            System.out.println("Created 47");
+    }
+    protected void finalize(){
+        if(!gcrun){
+            gcrun=true;
+            System.out.println(
+                "Beginning to finalize after"+created+
+                "Chairs have been created");
+        }
+    if(i==47){
+        System.out.println(
+            "Finalizing Chair #47,"+
+            "Setting flag to stop Chair creation");
+        f=true;
+    }
+    finalized++;
+    if(finalized>=created)
+        System.out.println(
+            "All"+finalized+"finalized");
+    }
+}
+
+public class Garbage{
+    public static void main(String[] args){
+      if(args.length==0){
+          System.out.println("Usage:\n"+
+              "java Garbage before\n or:\n"+
+              "java Garbage after");
+          return;
+      }
+      while(!Chair.f){
+          new Chair();
+          new String("To take up space");
+      }
+      System.out.println(
+          "After all chairs have been created:\n"+
+          "total created ="+Chair.created+
+          ",total finalized ="+Chair.finalized);
+      if(args[0].equals("before")){
+          System.out.println("gc():");
+          System.gc();
+          System.out.println("runFinalization():");
+          System.runFinalization();
+      }
+      System.out.println("bye");
+      if(args[0].equals("after"))
+          System.runFinalizersOnExit(true);
+    }
+}///:-
+
+为什么执行java Gerbage before
+以后，当所有对象创建完（比如8000个），这时只清除了2000个（不定）
+应该只能创建47个对象啊
+
+
+[b]分析：[/b]
+首先，在一个循环当中创建对象，并且只是创建，而不引用，也就是说这个对象会自动的被系统当作垃圾处理掉。但请注意，finalize()方法并不是立刻就会执行的，执行的时间完全由系统来决定。所以很有可能的情况是已经创建了20000个对象，才开始其中的某一个对象的清除工作（这可能和时间或者系统内容的占用有关）。看finalize()方法中的一段代码：
+	if (!gcrun) {
+		gcrun = true;
+		System.out.println(
+			"\nBeginning to finalize after" + created + "Chairs have been created\nat ");
+	}
+就会出现这样的结果：
+Beginning to finalize after 25038 Chairs have been created
+
+这时对象的创建过程仍在继续（因为已经Finalize的对象还不满47个，Chair.f还是false）。所以Chair.created会继续增加。
+直到有47个对象被清除了，Chair.f被置成true了，创建对象的循环才结束。看main方法中的一段代码：
+	System.out.println(
+		"\nAfter all chairs have been created:\n"
+			+ "total created ="
+			+ Chair.created
+			+ ",total finalized ="
+			+ Chair.finalized+"\n");
+如上所说，Chair.created是不断增加的，而在这段代码执行之前，又会有N个对象被释放掉了，所以finalized也增加了。
+结果可能是这样的：
+total created =29096,total finalized =73
+
+其实这一过程和你使用的JVM有很大关系，执行结果可能会很不相同。但有一点是可以肯定的，那就是我们无法确定JVM什么时候做对象的清除工作（这也是Thinking in java中这段代码的想要说明的），可能会在这个对象刚刚“无用”的时候就清除掉了，也可能滞后几秒，甚至永远不清除。
+
+如果你的开发环境支持跟踪的话，你可以以STEP的方式运行，你会看到运行结果大不相同。给你看看我的运行结果：
+Created 47
+Beginning to finalize after25038Chairs have been created
+Finalizing Chair #47,Setting flag to stop Chair creation
+After all chairs have been created:
+total created =45993,total finalized =1800
+gc():
+runFinalization():
+bye
+All45993finalized
+
+注意最后一行，因为人为的停顿，JVM有足够的时间将所有的对象都清除了。
+
+[b]结论：[/b]
+不能指望finalize()方法能稳定的工作，尤其不能依靠它来做文件的关闭等操作，由于finalize()的不确定性，往往得不到你想要的结果。事实上我们只需要知道所有无用的对象，JVM会自己清除就够了。

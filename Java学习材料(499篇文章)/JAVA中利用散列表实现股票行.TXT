@@ -1,0 +1,188 @@
+作者：asp2001
+email: asp2001@163.net
+日期：2000-8-9 12:50:30
+Java中利用散列表实现股票行情的查询 
+建设银行云南省保山地区分行 
+杨绍方 
+---- 在java中，提供了一个散列表类Hashtable，利用该类，我们可以按照特定的方式来存储数据，从而达到快速检索的目的。本文以查询股票的收盘数据为例，详细地说明java中散列表的使用方法。 
+
+一、散列表的原理 
+---- 散列表，又称为哈希表，是线性表中一种重要的存储方式和检索方法。在散列表中，可以对节点进行快速检索。散列表算法的基本思想是：由结点的关键码值决定结点的存储地址，即以关键码值k为自变量，通过一定的函数关系h（称为散列函数），计算出对应的函数值h(k)来，将这个值解释为结点的存储地址，将结点存入该地址中，检索时，根据要检索的关键码值，用同样的散列函数计算出地址，然后，到相应的地址中去获取要找的结点数据。因此，散列表有一个重要特征：平均检索的长度不直接依赖于表中元素的个数。 
+---- 散列表最重要的一个指标是负载因子，即散列表中结点数目与表中能容纳的总结点数的比值，它描述了散列表的饱和程度，负载因子越接近1.0，内存的使用效率越高，元素的寻找时间越长，同样，负载因子越接近0.0，元素的寻找时间越短，但内存的浪费越大。Hashtable类缺省的负载因子为0.75. 
+
+二、Hashtable类 
+---- Hashtable类为我们提供了散列表完整的功能，可以让我们很方便地构造和使用散列表，查询信息。 
+---- 1.创建散列表对象 
+
+---- Hashtable类的构造器主要有下面几种形式： 
+
+public Hashtable(int initialCapacity, float loadFactor)；
+public Hashtable(int initialCapacity)；
+public Hashtable()；
+在本文的实例中，我们使用了最简单的一种：
+Hashtable stockInfo = new Hashtable();
+
+---- 2.充填数据 
+---- 当构造了Hashtable对象后，我们就可以将数据填入该对象中，以便以后查询。Hashtable类提供了put方法来完成数据的装填，其原型如下： 
+
+---- public synchronized Object put(Object key, Object value)； 
+
+---- 3.查询数据 
+
+---- 查询数据可以使用get方法，其原型如下： 
+
+---- public synchronized Object get(Object key) 
+
+---- 4.其它常用的方法 
+
+public int size();
+//返回散列表中的结点数目
+public boolean isEmpty();
+//判断散列表是否为空
+public boolean containsValue(Object value);
+//判断散列表中是否含有某值
+public synchronized boolean containsKey(Object key);
+//判断散列表中是否含有某个结点
+public synchronized void clear();
+//清空整个散列表
+
+三、StringTokenizer类 
+---- StringTokenizer类的主要用途是将字符串以定界符为界，分析为一个个的token（可理解为单词），定界符可以自己指定。 
+---- 构造器有下面几种形式： 
+
+public StringTokenizer(String str, 
+String delim, boolean returnTokens);
+public StringTokenizer(String str, String delim);
+public StringTokenizer(String str);
+其中，str为需分析的字符串，delim为定界符，
+Tokens描述是否将定界符作为一个token。
+
+---- 其它常用的方法有： 
+public boolean hasMoreTokens() ;
+//判断字符串中是否还有token
+public String nextToken();// 
+StringTokenizer对象的下一个token
+
+四、实例 
+---- 本文使用的股票行情为上海和深圳证券交易所的收盘行情，文件名为hqsj.txt，下面是文件中的一行数据： 
+---- 600122宏图高科 18.90 18.80 18.90 18.20 18.27 3155 582.96 
+
+---- 下面是完整的源程序，在JDK1.2下使用javac编译通过。 
+
+import java.io.*; 
+import java.util.*;
+import java.awt.*;
+import java.applet.*;
+import java.awt.event.*;
+
+public class StockQuote extends Applet 
+implements ActionListener
+{
+private static final File INFO_FILE = 
+new File("hqsj.txt");
+private Hashtable stockInfo;
+TextField stockID;
+Button button1;
+private String quoteid,quotename;
+
+public void init()
+{
+add(new Label("股票代码"));
+stockID = new TextField(6);
+add(stockID);
+button1 = new Button("查询");
+button1.addActionListener(this);
+add(button1);
+resize(500, 300);
+}
+
+public void start()
+{
+loadinfo();
+}
+
+protected boolean loadinfo()
+{
+String fileLine;
+StringTokenizer tokenize;
+String id;
+StringBuffer name;
+
+try {
+// 创建一个访问数据文件的stream
+BufferedReader stockInput = new 
+BufferedReader(new FileReader(INFO_FILE));
+// 创建Hashtable对象
+stockInfo = new Hashtable();
+// 每次从文件中读一行数据
+while ((fileLine = stockInput.readLine()) != null) {
+// 将每一行数据分解为tokens.
+tokenize = new StringTokenizer(fileLine);
+try {
+id = tokenize.nextToken();
+// 创建一个放置股票信息的buffer
+name = new StringBuffer();
+while(tokenize.hasMoreTokens()) {
+name.append(tokenize.nextToken());
+if (tokenize.hasMoreTokens()) {
+name.append("");
+}
+}
+// 向Hashtable中充填记录
+stockInfo.put(id,name.toString());
+} catch(NullPointerException excpt) {
+System.err.println("充填数据时出错: " + excpt);
+} catch(NoSuchElementException excpt) {
+System.err.println("无效的数据记录 " +
+"in file: " + excpt);
+}
+} 
+stockInput.close();
+
+} catch(FileNotFoundException excpt) {
+System.err.println("不能发现文件: " + excpt);
+return false;
+} catch(IOException excpt) {
+System.err.println("I/O故障: " + excpt);
+return false;
+}
+ return true;
+}
+
+protected String getQuote(String StockID)
+{
+String info;
+
+// 从Hashtable得到数据
+info = (String)stockInfo.get(StockID);
+if (info != null)
+return info;
+else
+return "股票代码错误！";
+}
+
+public void paint(Graphics g)
+{
+g.drawString("股票代码"+quoteid+":" ,10,60);
+g.drawString("股票名称"+"前收"+"今开"+"最高"
++"最低"+"收盘"+"交易量"+"交易金额", 10, 90);
+g.drawString(quotename, 10, 120);
+}
+
+public void actionPerformed(ActionEvent ev)
+{
+String label = ev.getActionCommand();
+if (label.equals("查询"))
+{
+quoteid = stockID.getText();
+if(quoteid != null)
+quotename = getQuote(quoteid);
+else quotename = "请输入股票代码！";
+repaint();
+}
+}
+}
+
+---- 由于java固有的、安全方面的限制，如果不使用SecurityPermission或数字签名等措施，java程序就不具有读取本地文件的权限，为了节省篇幅，本文对此不再多做讨论，将编译得到的StockQuote.class放到一个.html文件中，直接使用jdk1.2提供的appletviewer，其命令行的使用方法如下： 
+d:\jdk1.2\bin\appletviewer  StockQuote.html
+

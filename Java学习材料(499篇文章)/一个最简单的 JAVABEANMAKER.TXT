@@ -1,0 +1,79 @@
+作者：jeru
+email: jeru@163.net
+日期：7/3/2001 10:38:00 AM
+只实现最简单功能,自动生成setter,getter当bean中属性较多时可以节省时间:
+
+Usage: java JavaBeanMaker aaa.txt bbb
+ 
+1. aaa.txt is the text file in following style,you can get a example--jeru.txt in attachment
+   ======================
+   int id
+   String name
+   int age
+   ======================
+ 
+2  bbb is the file name of your javabean without .java,so if you want a Test.java
+   just type "Java JavaBeanMaker aaa.txt Test"
+ 
+================= jeru.txt ==========================
+int id
+String name
+int age
+================= JavaBeanMaker.java ================
+import java.io.*;
+import java.util.*;
+
+public class JavaBeanMaker {
+  
+  public static void main(String[] args) {
+    System.out.println("Reading datas......");
+      try {
+        // read properties of source text file
+	int i = 0;
+	String record = new String();
+	Vector property = new Vector();
+        RandomAccessFile source = new RandomAccessFile(args[0],"r");
+        while ((record = source.readLine()) != null) {
+          i ++;
+          property.addElement(record);		
+        }
+        source.close();
+      
+	RandomAccessFile destine = new RandomAccessFile(args[1],"rw");
+        String content = "// This JavaBean is make by Jeru's JavaBeanMaker" + "\r\n\r\n";
+        content += "public class " + args[1] + " {" + "\r\n\r\n";
+	  
+	String[] tmp = new String[3];
+	for (i=0; i<property.size(); i++) {
+	  String str = (String)property.elementAt(i);
+	  //System.out.println("Value " + i + ":" + str);
+	  StringTokenizer tokens = new StringTokenizer(str);
+          for (int j=0; j<=1; j++) {
+	    tmp[j] = tokens.nextToken();
+	    System.out.println("token: " + tmp[j]);		  
+	  }
+
+   	  // capital tmp[1]
+	  tmp[2] = tmp[1].substring(0,1).toUpperCase() + tmp[1].substring(1);
+	  System.out.println(tmp[2]);
+	
+	  content += "  " + tmp[0] + " " + tmp[1] + ";" + "\r\n";
+		
+	  content += "  " + "public void set" + tmp[2] + "(" + tmp[1] + ") {" + "\r\n";
+	  content += "    " + "this." + tmp[1] + " = " + tmp[1] + ";" + "\r\n";
+	  content += "  " + "}" + "\r\n";
+		
+	  content += "  " + "public "  + tmp[0] + " get" + tmp[2] + "() {" + "\r\n";
+	  content += "    " + "return " + tmp[1] + ";" + "\r\n";
+    	  content += "  " + "}" + "\r\n\r\n";
+
+       }
+
+       System.out.println("the last content is " + content);
+       content += "}";
+       destine.writeBytes(content);
+       destine.close();	
+	
+     } catch(Exception e){ e.getMessage(); }
+  }
+}

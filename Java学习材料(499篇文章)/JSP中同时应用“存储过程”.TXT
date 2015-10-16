@@ -1,0 +1,40 @@
+作者：asp2001
+email: asp2001@163.net
+日期：2000-8-12 11:14:26
+存储过程和javabean的应用
+
+存储过程sp_shop_base：
+Create Procedure sp_shop_base (@shop_id int,@msg char(50) output)
+As
+  SELECT shop_name, shop_phone, shop_email, shop_cash, shop_address
+  FROM shop_shop
+  WHERE shop_id = @shop_id
+  SELECT @msg = 'Retrieval Finished'
+  return 1
+
+程序：
+<%@ page contentType="text/html;charset=gb2312"%>
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>JSP 存储过程 - javabean - JDBC-ODBC - SQL Server </title>
+</head>
+<body>
+<%@ page language="java" import="java.sql.*" %>
+<jsp:useBean id="bka" scope="page" class="shop.bka" />
+<%
+ResultSet RS = bka.executeQuery("{call sp_shop_base('2','')}");
+while (RS.next()) {
+out.println(RS.getString(1));
+out.println(RS.getString(2));
+out.println(RS.getString(3));
+out.println(RS.getString(4));
+out.println(RS.getString(5));
+}
+RS.close();
+%>
+
+
+
+__________________________________________________

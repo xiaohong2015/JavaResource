@@ -1,0 +1,34 @@
+作者：blackwhites
+日期：2000-10-23 17:22:43
+尽管你可以在scriptlet中放置大块的代码，但大多数Java代码是放在可重用的、被称为JavaBean的组件中的。JavaBean就象ActiveX控件：它们提供已知的功能并被设计成非定制可重用。 
+
+JavaBean的价值体现在它的一系列属性里，使用这些属性可以访问JavaBean的设置。用一个人来做类比，如果这个人是一个JavaBean，那么他的姓名、身份证号码和地址就是这些属性。在JSP Web站点中，你只要“连接粒媒”就可以使站点成为动态的。 
+
+假设JavaBean是在建立网站之前就做好了，你要做的第一件事就是告诉JSP页面它将要使用粒媒，这可以通过<jsp:useBean>标记来实现： 
+
+<jsp:useBean id="localName" class="com.jguru.Person" scope="application" />。 
+
+标记需要你用id属性来确定粒媒。在这里，你用名字来确定处于JSP页面其它部分的粒媒。除了id属性，你还要告诉页面到哪里去找粒媒，或粒媒的Java类名。 
+
+JavaBean的class属性具有这一功能，除此之外，还有其他几种确定粒媒的方法。最后所需要的是scope属性。使用scope属性，你可以告诉粒媒为这个单独的页面保存信息（缺省设置）[scope="page"]；为这一次请求保存信息[scope="request"]；为这次会话过程保存信息[scope="session"]；或是为整个应用程序保存信息[scope="application"]。把scope设为“session”，你可以在JSP页面中轻松地保存诸如购物车之类的内容。 
+
+在你声明了一个JavaBean之后，你就可以访问它的属性来进行定制。你可以使用<jsp:getProperty>标记来得到一个属性的值。在使用<jsp:getProperty>标记时，你需要指定要使用的粒媒名称（使用useBean的id域）以及要取值的属性。然后，所需要的实际值就会被放到输出中： 
+
+<jsp:getProperty id="localName" property="name" />. 
+
+改变JavaBean的属性需要使用<jsp:setProperty>标记。使用这个标记时，你还需要要确定粒媒和属性，以便修改，另外，你还需要提供新的值。如果你给出的名字是正确的，这些信息就可以从一个提交的表单直接获得： 
+
+<jsp:setProperty id="localName" property="*" /> 
+
+或者是从参数获取，在参数里你需要直接给出属性和参数的名字： 
+
+<jsp:setProperty id="localName" property="address" param="parameterName" /> 
+
+或者，你也可以直接用名字和值进行设置： 
+
+<jsp:setProperty id="localName" property="serialNumber" value="string" /> 
+
+或<jsp:setProperty id="localName" property="serialNumber" value= <%= expression %> />. 
+
+最后，为了让Web服务器找到JavaBean，你需要把它们的类文件放在一个特殊的地方。如果使用JSWDK，则最简便的地方就是安装目录下的“classes”目录，如\jswdk-1.0.1\classes。 
+

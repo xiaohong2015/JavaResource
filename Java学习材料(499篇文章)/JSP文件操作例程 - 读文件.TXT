@@ -1,0 +1,44 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-08-07 14:26:10
+<%--
+作者：何志强[hhzqq@21cn.com]
+日期：2000-08-07
+版本：1.0
+功能：JSP文件操作例程 - 读文件
+--%>
+
+<%@ page contentType="text/html;charset=gb2312"%>
+
+<%
+//变量声明
+java.lang.String strFileName;     //文件名
+java.io.File objFile;             //文件对象
+java.io.FileReader objFileReader; //读文件对象
+char[] chrBuffer = new char[10];  //缓冲
+int intLength;                    //实际读出的字符数(一个中文为一个字符)
+
+//设置待读文件名
+strFileName = "d:\\test.txt";
+
+//创建文件对象
+objFile = new java.io.File(strFileName);
+
+//判断文件是否存在
+if(objFile.exists()){//文件存在
+   //创建读文件对象
+   objFileReader = new java.io.FileReader(objFile);
+
+   //读文件内容
+   while((intLength=objFileReader.read(chrBuffer))!=-1){
+      //输出
+      out.write(chrBuffer,0,intLength);
+   }
+
+   //关闭读文件对象
+   objFileReader.close();
+}
+else{//文件不存在
+   out.println("下列文件不存在："+strFileName);
+}
+%>

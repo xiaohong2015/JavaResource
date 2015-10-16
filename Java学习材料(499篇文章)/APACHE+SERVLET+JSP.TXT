@@ -1,0 +1,106 @@
+作者：大傻瓜
+email: dalinqin@yeah.net
+日期：2000-07-11 15:16:08
+本文只讨论如何在Windows NT 4.0上安装Apache+Servlet+jsp。
+本文中的配置情况如下：
+　　Windows NT 4.0
+　　jdk1_2_2-001-win.exe
+　　apache_1_3_12_win32.exe
+　　ApacheModuleJServ.dll
+　　tomcat.zip(3.0)
+一、软件下载
+　　JDK
+　　　　http://java.sun.com/products/jdk/1.2/
+　　Apache Server
+　　　　http://www.apache.org/dist/binaries/win32/apache_1_3_12_win32.exe
+　　Apache JServ
+　　　　http://jakarta.apache.org/builds/tomcat/release/v3.0/win32/ApacheModuleJServ.dll
+　　Tomcat
+　　　　http://jakarta.apache.org/builds/tomcat/release/v3.0/tomcat.zip
+二、软件安装
+　　（一）JDK
+　　　　1、双击jdk1_2_2-001-win.exe文件进行安装，使用缺省配置进行安装，JDK的缺省安装目录为
+　　　　　 C:\jdk1.2.2，JRE的缺省安装目录为C:\Program Files\JavaSoft\JRE\1.2；
+　　　　2、重启计算机；
+　　　　3、更新下列环境变量：把C:\jdk1.2.2\bin目录追加到PATH中；把
+　　　　　 .;C:\jdk1.2.2\lib\tools.jar;C:\jdk1.2.2\lib\dt.jar加入到CLASSPATH中。更新
+　　　　　 方法：控制面板－＞系统－＞环境－＞系统变量；
+　　　　4、测试applet：
+　　　　 　　1)打开command窗口；
+　　　　 　　2)切换到C:\jdk1.2.2\demo\applets\TicTacToe目录；
+　　　　 　　3)运行appletviewer example1.htm；
+　　　　 　　4)一切正常;
+　　　　5、测试application：
+　　　　　　　 1)在我的D:\HZQ\Java目录下创建一个test.java文件，内容如下：
+　　　　　　　 　　public class test
+　　　　　　　 　　{
+　　　　　　　 　　 public static void main(String arc[]){
+　　　　　　　 　　 System.out.println("JDK安装成功了，朋友！");
+　　　　　　　 　　 }
+　　　　　　　 　　};
+　　　　 　　2)打开command窗口；
+　　　　 　　3)切换到D:\HZQ\Java目录；
+　　　　 　　4)运行javac test.java进行编译；
+　　　　 　　5)运行java test运行这个程序；
+　　　　 　　6)一切正常。
+　　（二）Apache Server
+　　　　1、双击apache_1_3_12_win32.exe文件进行安装，使用缺省配置进行安装，缺省安装目录为
+　　　　　 C:\Program Files\Apache Group\Apache，我用$APACHE_ROOT来代替安装目的地；
+　　　　2、修改$APACHE_ROOT\conf\httpd.conf：
+　　　　 　　1)PORT
+　　　　　　　　　设置Apache Web Server运行时使用的端口号，由于我这里的IIS也在运行，IIS使
+　　　　　　　　　用了80端口号，于是我把它改成Port 8080，以后在浏览器上输入
+　　　　　　　　　http://localhost:8080/才能访问到Apache Web Server服务器，输入
+　　　　　　　　　http://localhost/时能访问到IIS，这样两个Web Server都可以用了哦，我用
+$APACHE_PORT标识；
+　　　　　　　　2)DocumentRoot
+　　　　　　　　　设置文档根目录，当您在浏览器上输入http://localhost:$APACHE_PORT/时，服
+　　　　　　　　　务器会从文档根目录读取数据，由于我的程序都放在D:\HZQ下，所以我把
+　　　　　　　　　DocumentRoot设置为D:/HZQ；
+　　　　3、Apache安装完后在"开始－＞程序"菜单组中多了Apache Web Server菜单组，运行其中的
+　　　　　 Install Apache as a service，这样的话在"开始－＞设置－＞控制面板－＞服务"中就
+　　　　　 多了一个名为Apache的服务，您可以用它来启动或停止Apache服务；
+　　　　4、打开"开始－＞设置－＞控制面板－＞服务"，选中Apache这个服务，按"开始"启动Apache
+　　　　　 服务；
+　　　　5、我在浏览器上输入http://localhost:$APACHE_PORT/，就看到了D:\HZQ下的所有文件，
+　　　　　 这时表明Apache服务已经安装成功。
+　　（三）Apache JServ
+　　　　1、把ApacheModuleJServ.dll文件拷贝到$APACHE_ROOT\modules目录下；
+　　　　2、修改$APACHE_ROOT\conf\httpd.conf：
+　　　　　 　　在该文件中加上LoadModule jserv_module modules/ApacheModuleJServ.dll以
+　　　　　 　　启动Apache JServ；
+　　　　3、重新启动Apache服务。
+　　（四）Tomcat
+　　　　1、用WinZIP等解压缩软件把tomcat.zip解压缩到一个目录下，我把它解压缩到C:\，它会自动
+　　　　　 创建tomcat子目录，这样在C盘就多了一个目录C:/tomcat，我用$TOMCAT标识；
+　　　　2、打开$APACHE_ROOT\conf\httpd.conf文件，在该文件最后加上类似这样一句话：
+　　　　　 　　Include $TOMCAT/etc/tomcat.conf
+　　　　　 在我这里为Include C:/tomcat/etc/tomcat.conf；
+　　　　3、修改Tomcat运行的端口号，注意Tomcat自己有一个独立的HTTP服务器，它必须使用一个还未
+　　　　 　被使用的端口号，我这里的8081还未被占用，我用$TOMCAT_PORT标识，分配给Tomcat：
+　　　　　 　　1)打开$TOMCAT/server.xml；
+　　　　　 　　2)修改ContextManager：
+　　　　4、双击$TOMCAT目录下的startup.bat来启动Tomcat；
+　　　　5、在浏览器上输入http://localhost:$TOMCAT_PORT/，能看到Tomcat Version 3.0这一页
+　　　　　 就表示Tomcat安装成功了；
+　　　　6、在浏览器上输入http://localhost:$APACHE_PORT/examples/servlets/，能看到
+　　　　　 Servlet Examples with Code这一页就表示Apache+Servlet也成功了；
+　　　　7、在浏览器上输入http://localhost:$APACHE_PORT/examples/jsp/，能看到jsp Samples
+　　　　　 这一页就表示Apache+jsp也成功了。
+
+附：
+　　JDK Download
+　　　　http://java.sun.com/products/jdk/1.2/
+　　Apache Server Download
+　　　　http://www.apache.org/dist/binaries/win32/apache_1_3_12_win32.exe
+　　Apache JServ Download
+　　　　http://jakarta.apache.org/builds/tomcat/release/v3.0/win32/ApacheModuleJServ.dll
+　　Tomcat Download
+　　　　http://jakarta.apache.org/builds/tomcat/release/v3.0/tomcat.zip
+　　Java(TM) 2 SDK 1.2.2-001 Installation Instructions
+　　　　http://java.sun.com/products/jdk/1.2/install-windows.html
+　　Tomcat FAQ
+　　　　http://jakarta.apache.org/cvsweb/index.cgi/jakarta-tomcat/src/doc/faq
+　　Tomcat+Apache-HOWTO
+　　　　http://jakarta.apache.org/cvsweb/index.cgi/jakarta-tomcat/src/doc/Tomcat%2bApache-HOWT
+

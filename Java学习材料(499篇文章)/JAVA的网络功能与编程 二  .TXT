@@ -1,0 +1,495 @@
+作者：jtwww
+日期：2000-11-6 16:10:59
+    五、显示网络上其他HTML文档
+
+
+
+    利用Java提供的getAppletContext().showDocument(URL)可以
+
+显示其他结点的HTML文档，同前面的显示网络上其他结点的图象，
+
+有两种格式，下面各举一例：
+
+                      ●程序8   格式一
+
+import java.applet.*;
+
+import java.awt.*;
+
+import java.net.*;
+
+public class showdoc extends Applet
+
+{    
+
+    URL docur= null;
+
+    public void paint(Graphics g) {
+
+      try {
+
+            docur=new URL("http://www.shu.edu.cn/~xyx/doc/manhua.html");        
+
+      } 
+
+      catch (MalformedURLException e) {
+
+                System.out.println("Can't open the URL ");
+
+      }
+
+      if (docur != null) {
+
+                    getAppletContext().showDocument(docur,"_blank");
+
+      }   
+
+    }
+
+}
+
+
+
+                          ●程序9 格式二
+
+import java.applet.*;
+
+import java.awt.*;
+
+import java.net.*;
+
+public class showdoc2 extends Applet
+
+{    
+
+   URL docur= null;
+
+   public void paint(Graphics g) { 
+
+      try {
+
+getAppletContext().showDocument(new URL("http://www.shu.edu.cn/
+
+~xyx/doc/manhua.html"));       
+
+      } 
+
+      catch (MalformedURLException e) {
+
+                System.out.println("Can't open the URL ");
+
+      }   
+
+   }
+
+}
+
+
+
+     六、读取网络上文件内容
+
+
+
+     前述的网络功能只是显示或播放网络上结点的图象、 声音及
+
+HTML文档，并没有对其内容进行处理。事实上，Java还可读取网络
+
+上文件的内容，并对其内容进行处理。
+
+    读取网络上文件内容的步骤可如下：
+
+    1. 创建一个URL类型的对象
+
+    如：
+
+    String url = "ftp://202.120.127.218/incoming/test/readtxt.html";
+
+URL fileur;
+
+        try { 
+
+fileur = new URL(url); } 
+
+        catch ( MalformedURLException e) { 
+
+               System.out.println("Can't get URL: " );
+
+        }
+
+    2. 利用URL类的openStream()，获得对应的InputStream类的对象
+
+    如：
+
+InputStream filecon = fileur.openStream();
+
+    3. 将InputStream对象转化为DataInputStream类的对象
+
+    如：
+
+    DataInputStream filedata = new DataInputStream(filecon);
+
+    4. 读取内容
+
+    如对前面的filedata，可用filedata.readLine() 一行一行读
+
+取内容，或用filedata.readchar一个字符一个字符读取内容。 对
+
+读取到的内容，可由Java Applet进行各种处理， 并将处理结果用
+
+各种方式显示出来。
+
+    下面的例子是读取 http://www.shu.edu.cn/~xyx/doc/manhua.html
+
+文件内容的例子，为简洁起见，该例中只将文件的内容逐行读出，
+
+并在文本区显示出来。
+
+●程序10
+
+import java.io.*;
+
+import java.net.*;
+
+import java.awt.*;
+
+import java.applet.*;
+
+public class showfile extends Applet{
+
+     URL fileur;
+
+     TextArea showarea = new TextArea("Please wait a while for get
+
+text",10,70);
+
+     public void init() {
+
+        String url = "http://www.shu.edu.cn/~xyx/doc/manhua.html";
+
+        try { fileur = new URL(url); } 
+
+        catch ( MalformedURLException e) { 
+
+               System.out.println("Can't get URL: " );
+
+        }
+
+        add(showarea);
+
+}
+
+
+
+    public void paint(Graphics g) {
+
+        InputStream filecon = null;
+
+        DataInputStream filedata = null;
+
+        String fileline;
+
+try {
+
+                filecon = fileur.openStream();
+
+                filedata = new DataInputStream(filecon);
+
+                while ((fileline = filedata.readLine()) != null) {
+
+                        showarea.appendText(fileline+"\n");
+
+}
+
+}
+
+catch (IOException e) {
+
+                System.out.println("Error in I/O:" + e.getMessage());
+
+}
+
+   }
+
+}
+
+
+
+    七、动态使用网络上资源
+
+    在前面介绍的例子的基础上，可以动态地利用网络上的资源。
+
+其方法是编制一个线程，每隔一定时间自动到相应结点读取最新的
+
+内容。本文对线程的编制不再展开，读者可参考有关文章或直接套
+
+用下面的例子。
+
+    例如对上例中读取http://www.shu.edu.cn/~xyx/doc/manhua
+
+.html文件内容的例子，加入线程后如下所示。该例子每隔5秒更新
+
+一次数据。如果http://www.shu.edu.cn/~xyx/doc/manhua.html中
+
+存放的是一些变化较快的信息如股市行情等，并有程序随时动态地
+
+更新其内容，则在Web中加入这种Java Applet，可以让流览者得到
+
+动态的信息。进一步，也可以在程序中对数据进行处理，并用图形
+
+方式显示处理结果。例如将各时刻的数据绘制成曲线，流览者可以
+
+看到动态变化的曲线。
+
+//程序11
+
+import java.io.*;
+
+import java.net.*;
+
+import java.awt.*;
+
+import java.applet.*;
+
+public class dynashow extends java.applet.Applet
+
+    implements Runnable {
+
+    Thread dthread;
+
+    URL fileur;
+
+TextArea showarea = new TextArea("Wait for a while...",10,70);
+
+     public void init() {
+
+        String url = " http://www.shu.edu.cn/~xyx/doc/manhua.html ";
+
+        try { fileur = new URL(url); } 
+
+        catch ( MalformedURLException e) { 
+
+               System.out.println("Can't get URL: " );
+
+        }
+
+        add(showarea);
+
+     }
+
+
+
+     public void start() {
+
+        if (dthread == null) 
+
+        {
+
+                dthread = new Thread(this);
+
+                dthread.start();
+
+        }
+
+    }
+
+    public void stop() {
+
+        if (dthread != null) {
+
+                dthread.stop();
+
+                dthread = null;
+
+        }
+
+    }
+
+
+
+    public void run() {
+
+        InputStream filecon = null;
+
+        DataInputStream filedata = null;
+
+        String fileline;
+
+        while(true){
+
+            try {
+
+                filecon = fileur.openStream();
+
+                filedata = new DataInputStream(filecon);
+
+                while ((fileline = filedata.readLine()) != null) {
+
+                        showarea.appendText(fileline+"\n");
+
+        }
+
+            }
+
+           catch (IOException e) {
+
+                System.out.println("Error in I/O:" + e.getMessage());
+
+           }
+
+           try{
+
+                dthread.sleep(5000);
+
+           }
+
+           catch (InterruptedException e){}
+
+           repaint();
+
+       }
+
+     }
+
+}
+
+
+
+    八、Java网络能力的限制
+
+
+
+    出于安全性考虑，在用netscape浏览时，Java Applet 只能和
+
+其所在的主机建立连接，因此，前面的程序编译后大部分只能存放
+
+在http://www.shu.edu.cn/~xyx对应的主机上。存放到其他主机时
+
+需更改程序中的结点地址。否则浏览器将显示安全出错。
+
+    但对显示网络上其他HTML文档没有此限制（如程序8、9），读
+
+者可以将程序编译后放到任意WWW服务器或FTP服务器，均可正常运
+
+行。
+
+    此外，当浏览器从本地盘打开调用Java Applet的HTML文档时，
+
+也不受此限制。因此，本文所有的程序都可存放在本地盘编译，只
+
+要用netscape的File/Open File菜单打开，便可正确运行。
+
+    对于另一种Java程序－－Java Application，也无此限制，例
+
+如对于读取网络上文件内容的程序10，对应的Java Application可
+
+作如下编程：
+
+
+
+●程序11
+
+import java.io.*;
+
+import java.net.*;
+
+import java.awt.*;
+
+class showfile2 {
+
+     public static void main(String args[]){
+
+        InputStream filecon = null;
+
+        DataInputStream filedata = null;
+
+        String fileline;
+
+        String url = "http://www.shu.edu.cn/~xyx/doc/manhua.html";
+
+        URL fileur;
+
+        try {
+
+   fileur = new URL(url);
+
+                filecon = fileur.openStream();
+
+                filedata = new DataInputStream(filecon);
+
+                while ((fileline = filedata.readLine()) != null) {
+
+System.out.println(fileline+"\n");
+
+}
+
+}
+
+catch (IOException e) {
+
+                System.out.println("Error in I/O:" + e.getMessage());
+
+}
+
+  }
+
+}
+
+    将其以showfile2.java存盘，用javac showfile2.java编译后，
+
+只需执行“java showfile2”便可以在屏幕上打印出
+
+http://www.shu.edu.cn/~xyx/doc/manhua.html 文件的内容。
+
+
+
+    九、创建URL对象的方法
+
+
+
+    在前面的例子中我们统一使用new URL(url字符串)的形式创建
+
+URL对象。其实，Java提供了四种创建URL对象的形式：
+
+    1.new URL(url字符串)    本文中的程序均采用此种格式，如：
+
+new  URL("http://www.shu.edu.cn/~xyx/doc/manhua.html")
+
+    2.new URL(协议，主机名，文件名或路径)    如程序2中的
+
+String  url = "http://www.shu.edu.cn/~xyx/img/shnet.jpg";
+
+image = getImage(new URL(url));部分可改为：
+
+image = getImage(new URL("http","www.shu.edu.cn","/~xyx /img/shnet.jpg"));
+
+    3.new URL(协议，主机名，端口号，文件名或路径)1
+
+如：new URL("http","www.shu.edu.cn",80, "/~xyx/doc/manhua.html")
+
+    4.new URL(基准url，文件名或路径)
+
+
+
+    十、实现网络功能的其他方法
+
+
+
+    以上着重介绍了利用Java的URL类实现从网络上获取声音、 图
+
+象、HTML文档及文件数据的编程方法。Java的网络功能很强大，除
+
+上面介绍的外，还可以利用URLconnection 类实现更广泛的网络功
+
+能，如向WWW 服务器上的 CGI 程序发送信息等； 通过 Socket 及
+
+ServerSocket类，可以自己编写客户软件及服务软件，并可以自己
+
+设计通讯协议。
+
+
+
+〖参考文献〗
+
+Laura Lemay,Charles L. Perkins  "Teach Yourself JAVA in 21 Days" 
+
+摘自《Internet世界》

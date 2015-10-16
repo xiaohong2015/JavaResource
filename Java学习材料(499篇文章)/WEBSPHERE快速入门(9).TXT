@@ -1,0 +1,80 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-16 11:28:36
+3.4 NetObjects BeanBuilder
+    NetObjects BeanBuilder是创建多媒体Java applet的可视化写作工具。它的前身是Lotus BeanMachine。NetObjects BeanBuilder使得开发者能用多媒体、特效、灵巧的表单和动态数据来丰富网站，而不要写一行Java代码，或者只需写一些简单的Java代码。BeanBuilder是通过把JavaBean结合进applet的可视化编辑工具来实现这一强大的功能。开发者只要从BeanBuilder的样式库（Palette）里选择丰富的可重用的JavaBean，设置几个属性，就完成了多媒体Java applet的开发。如果在样式库里没有需要的那个JavaBean，可以用BeanBuilder的部件引入向导（Import Part Wizzard）引入JavaBean或Java 类。甚至也可以引入已有的applet。
+    1．Applet 概述
+    Applet是Panel的一个子类，可以包含GUI组件。与一般的应用程序不同的是，applet只能在浏览器里运行。Applet使用称之为沙箱（“sandbox”）的安全模型。在这个模型中，网上下载的applet缺省地是不可信代码（不可信Applet），不可信Applet有下列约束：
+    (1) 不能读或写本地文件系统；
+	 (2) 不能进行网络操作，除非是对于applet的源主机；
+	 (3) 不能装载某些类，如SecurityManage子类和URLContentFactory等；
+	 (4) 不能访问它所运行的线程组以外的线程或线程组；
+	 (5) 不能使用广播字节套（multicast sockets）；
+	 (6) 不能访问java.security包
+    这个安全模型使得用户放心地使用applet。然而，这些安全限制使编程的任务变得更困难。在JDK1.1里，Applets可以被签署（sign）。如果运行时环境的安全政策认为“签署者”是可信任的话，这些被签署的applets可以被认为是“可信任的”代码。在JDK1.2里，所有的Java代码都是能被限制的或签署的。
+	Applets通常被嵌入HTML文档中，applet标记是在一个Web页面里使用applet的标准机制。举例如下：
+<Applet
+		CODE= Register.class
+		WIDTH=500
+		HEIGHT=500
+  		CODEBASE= classes
+  		ARCHIVE= Register.jar>
+    	<PARAM NAME= fullName VALUE= "Henry Burns">
+ 		<PARAM NAME= age VALUE= "12">
+</Applet>
+CODE，WIDTH，HEIGHT属性是必需的选项，其它的属性和包含的标记是可选的，如ARCHIVE属性和CODEBASE属性和PARM标记。有关属性和标记，及其它们的含义如下：
+    (1) CODEBASE= Java代码所在的URL（不是document base）。CODEBASE允许规定.class文件所在的路径，使用页面服务器上的路径或URL。
+    (2) CODE= Applet类文件的名字。CODE属性可以指定为在页面服务器上的路径或URL，值对大小写敏感，而且必需包括.class扩展名。
+    (3) WIDTH= applet显示区域的宽度。
+	(4) HEIGHT= applet显示区域的高度。WIDTH和HEIGHT用像素点规定浏览器定位的空间。
+	(5) ALT=如果浏览器不能理解标记的话，要使用的文字
+	(6) ARCHIVE=允许使用JAR文件，作为发现applet文件的地方
+	(7) NAME= applet的名字。多个applets之间的通信要用到这个。
+	(8) ALIGN= 告诉浏览器怎样在显示区域里排列applet
+	(9) VSPACE= applet和别的组件在垂直方向上的间隔
+	(10) HSPACE= applet和别的组件在水平方向上的间隔
+	(11) PARM标记，要求一个NAME和一个VALUE成对出现。使用PARAM标记来指定一个applet
+的参数。PARM标记必须在<APPLET>和</APPLET>之间出现。NAME部分是大小写不敏感的，而VALUE部分是大小写敏感的。所有传给applet的参数都被当作字符串。
+     在上述嵌入HTML文档的applet例子中，Applet类由Register.class定义，该文件存放在Web服务器中HTML文档目录的classes子目录中，而且Register.class 文件很可能被包含在Register.jar 文件中。Jar文件是包括一个附加的”manifest”文件的压缩ZIP文件，通常用来把一个applet需要的二进制文件、源文件和资源文件等有关文件结合进一个文件。浏览器取得jar文件之后，需要解压缩得到所需的.class文件及可能的相关资源文件。Jar文件也可以用于Java应用程序或Servlet，但一般用于Applet。如果一个Jar文件用于一个应用程序或Servlet，在运行它们以前会有一个额外的解压缩的过程。对applets而言，这个额外的解压缩处理是值得的，因为节约了网络传输时间。最后，jar文件也可以被用作一个分发Java软件包的机制。
+在applet代码中，程序员可以使用getDocumentBase()方法来获得包含applet标记的HTML页面的URL。使用getCodeBase（）来找出CODEBASE属性选项的设置。如果CODEBASE属性选项是空白的，getCodeBase()方法返回与getDocumentBase()一样的值。使用getParameter(String)方法取得参数的值，通常需要对传进Applet的VALU还要进行差错处理。
+    2．标准样式库
+    样式库中包含了许多用于组成applet的 bean。BeanBuilder 提供了缺省的样式库，为了把样式库中的某个 bean 放置在applet中，可以在样式库中单击这个 bean 的图标。此操作可将 bean 装载到光标上，并将光标变成十字指针形状，然后在设计器上再次单击鼠标放置 bean。样式库上的beans包括附件Beans、控件Beans、多媒体Beans、和网络Beans四种类型。
+    A.附件分类
+	 (1) 布尔求值：用于对布尔值进行 AND 和 OR 运算； 
+	 (2) 数学公式：用于执行基本的数学运算；
+	 (3) 数字求值：用于比较两个数字的大小；
+	 (4) 文本源：用于访问文本文件的内容，对于一个远程文件可以使用一个URL表示，或对于一个在
+可信任的applet里的本地文件使用一个文件名表示。
+    B.控件分类
+	(1) 按钮：按钮 bean。
+	(2) 复选框：复选框 bean。
+	(3) 选择框：下拉列表bean。
+	(4) 标签：显示单行文本的bean。
+	(5) 列表框：列表框 bean。
+	(6) 面板：可以包容其他 bean 并且具有布局样式的 bean。
+	(7) 文本区：可以输入多行文本的bean。
+	(8) 文本域：只能输入单行文本的bean。 
+   这些是标准的AWT控件，但是，这些控件提供的有关事件更丰富。
+   C.多媒体分类
+   (1) 动画：用于显示一组连续的图片。
+	(2) 声音：用于播放声音剪辑。
+	(3) 时钟：用于显示日期和时间。
+	(4) 图像：用于显示图片文件。
+	(5) 动作：用于沿着路径移动其它bean。
+	(6) 跳跃文本：用于显示在屏幕上跳动的文本。
+	(7) 感应按钮：当鼠标经过时可以改变图像。
+	(8) 阴影文本：显示带有阴影的文本。
+	(9) 打字机：用于显示文本字符并伴随播放声音。
+	(10) 文本：用于显示文本。
+	(11) 行走文本：用于在屏幕上显示移动的文本。
+	(12) 计时器：用于计算时间。
+   D.网络分类
+   (1) 数据库：用于显示数据库中的数据。
+	(2) 电子邮件：用于组织和发送电子邮件而不用浏览器邮件对话框。
+	(3) 新闻摘要：用于显示包含 URL 链接的滚动文本列表。
+	(4) HTML参数：用于读取 HTML 参数。
+	(5) 邮件链接：用于显示浏览器的邮件对话框。
+	(6) URL 链接：用于连接到其他 Web 页面。生成的URL以./开头的，即使用相对于HTML页面的
+相对路径，正斜杠和反斜杠都是一样的。
+	(7) 大字标题；用于显示带URL链接的滚动文字列表
+    BeanBuilder提供的控件同VisualAge for Java提供的不一样。例如，BeanBuilder有出色的多媒体和动画控件。

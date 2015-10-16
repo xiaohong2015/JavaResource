@@ -1,0 +1,50 @@
+作者：飞鸟
+日期：2000-07-13 00:39:59
+为什么要把tomcat配置成为Apache的in-process部件？
+1. Tomcat 处理静态页面没有apache快
+2. Tomcat不如apache容易配置
+3. Tomcat没有apache稳定健壮
+4. apache支持CGI 脚本和API，perl,php等等 
+
+下面让我来尝试配置一下
+1。review一下我apache和tomcat的安装情况先
+我的机器是windows 2000 server 中文版本，已经安装了jdk1.3(在d:\jdk1.3)
+apache我安装在D:\Program Files\Apache Group\Apache
+我设置apache服务器的ServerName是spf,我的机器名是spf
+设置为端口81,80已经给iis5了
+tomcat我安装在D:\tomcat
+
+2。在着手配置之前，让我来看一下tomcat的文档。
+D:\tomcat\doc\uguide\tomcat_ug.html
+
+3。然后follow该文档开始配置，先下载ApacheModuleJServ.dll   
+http://jakarta.apache.org/builds/tomcat/release/v3.1/bin/win32/i386/ApacheModuleJServ.dll
+放到D:\Program Files\Apache Group\Apache\modules目录下
+
+4。然后编辑D:\Program Files\Apache Group\Apache\conf\httpd.conf
+在末尾添加这句
+include d:/tomcat/conf/tomcat-apache.conf 
+
+5。重新启动apache
+命令行输入：
+net stop "apache_svr" 
+net start "apache_svr"
+（我把apache配置成win2k的服务了。）
+
+6。然后在浏览器中输入http://localhost:81/examples/
+得到一个404错误。。。
+十分不解，就再次察看文档
+D:\tomcat\doc\uguide\tomcat_ug.html
+发现一句，说apache自动启动tomcat 还没有实现 :(((
+ Automatically starting Tomcat is not implemented yet
+气死我了。。。
+运行 d:\tomcat\bin\startup.bat 启动tomcat
+然后浏览器就可以看到http://localhost:81/examples/的目录列表了。
+
+总结： 
+  apache不能自动启动tomcat 真是不爽，也许下一版本就可以了。不过如果是出于研究和学习JSP的目的，目前这一点不是十分重要。
+  如果要建立新的虚拟目录，可以修改d:\tomcat\conf\server.xml,加上相关内容,然后重新启动tomcat,重新启动apache就可以了，而且我发现虚拟目录的物理路径必须放在d:\tomcat\webapps\目录下，真是很奇怪的事情。
+
+附：
+   上次我找linux资料的时候，当了一份apache的中文文档，已经上传到chinaasp.com/dowload栏目上了，详细地址是：[url]http://www.chinaasp.com/download/readItem.asp?id=342[/url] 供大家参考
+

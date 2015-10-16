@@ -1,0 +1,209 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2000-11-14 23:15:19
+5.3  CORBA技术及实例 
+CORBA是一种规范，它定义了分布式对象如何实现互操作。在WorldWideWeb盛行之前，特别是Java编程语言风靡之前，C＋＋开发者基本将CORBA作为其高端分布式对象的解决方案。 
+实际的CORBA规范归对象管理组（ObjeotManagementGroup）管辖，这是一家由700多家公司组成的开放的研讨会，其工作是制订对象计算的开放标准。CORBA对象可以用任何一种CORBA软件开发商所支持的语言，如C、C++、Java、Ada和Smalltalk，来编写。同样地，CORBA对象可以运行在任何一种CORBA软件开发商所支持的平台上，如Solaris，Windows95/NT,OpenVMS、DigitalUnix、HP-UX或AIX等。这意味着，我们可以在Windows95下运行Java应用程序，同时动态调入并使用C＋＋对象，而实际上，该对象可能存储于一个在Internet上的UnixWeb服务器上。 
+使用    接口描述语言（InterfaceDescriptionLanguage）编写的对象接口，使得与语言无关的独立性成为可能。IDL使得所有CORBA对象以一种方式被描述，仅仅需要一个由本地语言（C/C++、CORBA、Java）到IDL的“桥梁”。CORBA对象的互通信要以对象请求解析器（Object Request Broker）为中介，这种互通可以在多种流行通信协议之上（如TCP/IP或是IPX/SPX）实现。在TCP/IP上，来自于不同开发商的ORB用InternetInter-Orb协议（IIOP）进行通讯，这是CORBA2.0标准（最新的版本）的一部分。 
+目前，对于较为流行的编程语言（包括C＋＋，Smalltalk，Java和Ada95），已经有了许多第三方的ORB。随着其他语言的逐渐流行，CORBA开发商毫无疑问地要做出相应的ORB来支持它们。 
+5.3.1  CORBA简介 
+最初，OMG在1990年制订了对象管理体系（ObjectManagementArchitecture），即OMA，来描述应用程序如何实现互操作。作为其中的一部分，需要有一个标准规范应用程序片段即对象的互操作──这导致了CORBA的诞生。OMA定义了组成CORBA的四个主要部分。（图1.1） 
+
+图1.1  OMG的CORBA参考模型 
+l    Object Request Broker，ORB作为对象互通讯的软总线。 
+l    Object Services，定义加入ORB的系统级服务，如安全性、命名和事务处理。 
+l    Common Facilities定义应用程序级服务，如复合文档等。 
+l    Application Interface 定义现实世界的对象和应用，如飞机或银行帐户。 
+1．ObjectRequestBroker详述 
+OMA最重要的部分就是ORB。为了创建一个遵从CORBA规范的应用程序，ORB是CORBA四大部分中唯一必须提供的。许多ORB版本根本不带CORBAServices或是CORBAFacilities，你可以自制（或购买）商用对象。但是，没有ORB，CORBA应用程序绝对无法工作。（图5.2） 
+
+图5-.2 单个ORB的体系结构 
+CORB ORB最显见的功能，是对你的应用程序或是其它ORB的请求予以响应。在CORBA应用程序运行期间，你的ORB可能被请求做许多不同的事情，包括： 
+l    查找并调用远程计算机上的对象 
+l    负责不同编程语言之间的参数转换（如C＋＋到Java） 
+l    可超越本机界限的安全管理 
+l    为其它的ORB收集并发布本地对象的metadata 
+l    用下载的代码（stub）中描述的静态方法调用去击活远程对象中的方法 
+l    用动态方法调用击活远程对象 
+l    自动击活一个当前没有装入内存运行的对象。 
+l    将回调方法导引向其管理之下的本地对象 
+实现细节对软件开发者的透明性，是ORB的一个杰出的特性。用户只须在代码中提供相应的hooks，用于初始化ORB并向ORB登记该应用程序，就可以将该应用程序和大量分布式对象建立联系。 
+2．用IDL描述对象 
+为了保持CORBA的商业中立性和语言中立性，必须有一个中介，存在于象C＋＋CORBA服务器代码和JavaCORBA客户机这样的实体之间。这就是IDL。一个底层对象的若干相关方法和属性被IDL集入一个单一接口。一旦IDL接口定义完成，它可以以stub码或框架代码（skeletoncode）的形式编译成你选用的语言。在所有的ORB中都有IDL编译器。例如，VisigenicVisiBrokerforJavaORB中就含有Java/IDL编译器，而VisigenicVisiBrokerforC++ORB则提供了C＋＋/IDL编译器。 
+有一点值得注意的是IDL不同于其它的面向对象程序设计语言，我们不能用它指定它所定义的类或是方法的具体实现。因此，将它仅仅作为一种定义底层对象接口的语言要好得多。 
+就象在Java中将属性和方法封装到相关的类中一样，上述各项均包含在IDL的模块之中。在一个模块之中可以定义一个或多个接口。表一中的简单IDL模块名为TheModule，它含有一个称为TheInterface的基本接口。该接口仅有一个定义为整型的简单变量（即TheVariable）。 
+5.3.2  用Java做CORBA开发实例 
+为了创建一个分布式的Java小应用，并让它用CORBA访问服务器对象，我们利用一个流行的商用ORB，并用IDL定义对象接口。在示例小应用中，我们选用了Visigenic VisiBroker for Java。这种ORB已经经过Oracle、Netscape和Novell等公司的认证，并已被纳入NetscapeNavigator4.0。 
+注意：你可以在非NetscapeNavigator4.0的浏览器中运行这个小应用。由于它首先要从别处下载一些Java类文件，启动速度可能会稍慢一些。 
+我们将用一个简单的Java小应用调用一个使用CORBA的服务器对象。为简单起见，同样用Java书写服务器对象。该服务器对象用一个数组存储有关各种CORBAORB开发商及他们产品的信息。客户小应用将调用该对象并查询数组。一个更为完整的例子（仔细思考一下）是将ORB信息存储于关系数据库中，利用JDBC（或是别的数据库访问方法）获得相关信息。这种方法将用CORBA生成一个真正的三层应用程序。 
+1．最简单的IDL模块 
+Module TheModule 
+{ 
+    interface TheInterface 
+    { 
+          long TheVariable; 
+    }; 
+}; 
+如果你用一个IDL到Java的编译器编译这个IDL模块（如Visigenic的idl2java），就会得到表1-2中的Java接口。 
+表1-2与TheModule相应的Java代码 
+package TheModule; 
+public interface TheInterface 
+{ 
+public int TheVariable; 
+} 
+2．ORBQuery小应用 
+这个客户端的小应用含有标准的JavaGUI，并将调用一个远程CORBA对象。一旦该对象被调用，就可以使用其方法获得某一指定CORBA ORB的信息。在服务器端，为了获得特定ORB的如下信息：名称（Name）、销售商（Vendor）、操作系统（OperatingSystem）、语言（Languages）和URL，我们必须定义五个方法。因此，必须在IDL接口中定义这五种方法才能获取相应信息。表1-3定义了这个名为ORBInfo的接口： 
+表1-3:ORBInfoIDL界面 
+module ORBQuery 
+{ 
+    interface ORBInfo 
+    { 
+          string GetName(in long index); 
+          string GetVendor(in long  index); 
+          string GetOS(in long index); 
+          string GetLanguages(in long  index); 
+          string GetURL(in long  index); 
+    }; 
+};VisiBroker安装中含有一个IDL编译器──idl2java，你可以用它生成实现该接口必需的Java代码。软件安装完成之后，只要执行如下命令即可生成代码： 
+idl2javaORBInfo.idl 
+这步操作将创建一个名为ORBQuery的子目录（与ORBQueryJava包相对应）。在该目录内有8个文件：ORBInfo.java,ORBInfoHolder.java、ORBInfoHelper.java、_st_ORBInfo.java，_sk_ORBInfo.java、ORBInfoOperations.java、_tie_ORBInfo.java和_example_ORBInfo.java。你可能已经猜到，ORBInfo.java文件含有定义ORBInfo接口的Java源文件，但其它的Java类又怎样呢？ 
+ORBInfoHolder.java文件内含有一个传递参数时使用的主类（holderclass），而ORBInfo-Helper类则定义了各种实用函数。_st_ORBInfo类定义了客户stub，_sk_ORBInfo定义了服务器框架类（skeletonclass）。    
+ORBInfoOperations和_tie_ORBInfo类用于实现一种捆绑机制，这是VisiBroker的一个特性，它使得实现类能够继承框架类之外的类。在示例中，我们不会直接使用这几个类。最后，_example_ORBInfo含有一个示例服务器对象，对它加以扩展就可创建一个服务器应用程序。 
+通过IDL编译器生成的这八个Java类，我们可以构建一个框架，由一个接口（interface）、一个stub、一个skeleton和几个帮助类，我们可以用Java创建自己的客户机/服务器模式的CORBA应用程序。 
+3．创建服务器应用程序 
+下面，我们需要创建一个向服务器ORB登记ORBInfo对象的服务器应用程序。这个新对象将扩充框架类（skeletonclass）并实现ORBInfo接口。因此，该服务器共需两个新类：一个用于定义服务器对象并实现ORBInfo接口，另一个向服务器ORB登记该对象。ORBQuery类包含的标准Java代码负责取回数组中的指定元素。Server类中含有CORBA特有的功能。 
+接下来的例子中，开始是初始化ORB。然后，用“ORBInfo”字符串向ORB登记类，客户机利用这个字符串检索一个对象。所有的操作完成后，调用boa.obj_is_ready()，通知ORB一切准备就绪。 
+表1-4是Server类，它向ORB登记了ORBInfo对象。 
+表1-4　服务器类 
+public class Server { 
+  public static void main(String[] args) { 
+    try { 
+      // Initialize the ORB. 
+      org.omg.CORBA.ORB orb = org.omg.CORBA.ORB.init(); 
+      // Initialize the BOA. 
+      org.omg.CORBA.BOA boa = orb.BOA_init(); 
+      // Create the ORBQuery. 
+      ORBQuery serverQuery = new ORBQuery("ORBInfo"); 
+      // Export the newly create object. 
+      boa.obj_is_ready(serverQuery); 
+      System.out.println(serverQuery + " is ready."); 
+      // Wait for incoming requests 
+      boa.impl_is_ready(); 
+    } 
+    catch(org.omg.CORBA.SystemException e) { 
+      System.err.println(e); 
+    } 
+  } 
+} 
+
+表1-5给出了ORBQuery类，它实现了接口及五个帮助方法。 
+表1-5:ORBQuery类 
+import java.util.*; 
+class ORBQuery extends ORBQuery._sk_ORBInfo { 
+  String[][] ORBVendors = 
+      {{"PowerBroker","Orbix","VisiBroker","ComponentBroker"," 
+                    Solaris NEO"}, 
+      {"Expersoft Corp.","Iona Technologies","Visigenic Software", 
+                    "IBM","Sun"}, 
+      {"OLE and ActiveX Bridges; Windows95/NT; 
+                    Solaris; HP-UX; AIX; JDK 1.0.2", 
+      "Windows95/NT, MVS, OS/2, QNX, VxWorks, Solaris, HP-UX, 
+                    Irix, AIX, Digital UNIX, OLE Bridge", 
+      "Windows95/NT, Sun OS, Solaris, HP-UX, AIX, Irix", 
+      "Windows95/NT, Solaris, HP-UX, AIX, OS/390, OS/2, AS/400", 
+      "Solaris (Client & Server), Windows95/NT (client), JDK 1.0.2"}, 
+      {"C++, Java", "Java, Smalltalk, Ada95, C++", "Java, C++", 
+                    "Java, C++", "Java, C++"}, 
+      {"http://www.expersoft.com", "http://www.iona.com", 
+                    "http://www.visigenic.com", 
+      "http://www.software.ibm.com/ad/cb", "http://www.sun.com/solaris/neo/solaris_neo/index.html"}}; 
+  ORBQuery(String name) { 
+    super(name); 
+  } 
+  public java.lang.String GetName(int index) 
+  { 
+    String Name; 
+    Name = ORBVendors[index][0]; 
+    return Name; 
+  } 
+  public java.lang.String GetVendor(int index) 
+  { 
+    String Vendor; 
+    Vendor = ORBVendors[index][1]; 
+    return Vendor; 
+  } 
+
+  public java.lang.String GetOS(int index) 
+  { 
+    String OS; 
+    OS = ORBVendors[index][2]; 
+    return OS; 
+  } 
+
+  public java.lang.String GetLanguages(int index) 
+  { 
+    String Languages; 
+    Languages = ORBVendors[index][3]; 
+    return Languages; 
+  } 
+
+  public java.lang.String GetURL(int index) 
+  { 
+    String URL; 
+    URL = ORBVendors[index][4]; 
+    return URL; 
+  } 
+} 
+至此，我们已经写好了所有服务器方必需的代码，下一步的工作是创建客户小应用，初始化客户ORB，进而击活并调用刚刚生成的服务器对象。 
+4．创建CORBA小应用 
+正如服务器对象要向服务器ORB登记一样，客户端小应用或应用程序需要向客户机ORB登记。当要获得远程CORBA对象时，客户机采用了一种间接的方法，它通知客户机ORB其意图，由ORB负责ORB到ORB的通讯。这种请求方式由下面两行代码实现（在VisiBrokerforJava中）： 
+    //初始化ORB(使用applet) 
+    org.omg.CORBA.ORBorb=org.omg.CORBA.ORB.init(this); 
+//检索applet要调用的ORBInfo接口对象 
+ORBInfoQuery=ORBQuery.ORBInfoHelper.bind(orb,"ORBInfo"); 
+执行了bind()方法调用之后，我们的ORBInfoQuery本地变量与服务器的ORBInfo对象绑在一起。这一操作完成之后，我们就可以调用帮助方法来实现客户端小应用。记住，尽管示例中我们完全使用了Java语言，但实际上，服务器对象也可以用其他语言来实现，如：COBOL、C＋＋、Ada和Smalltalk。 
+5．编写简单的CORBA服务的一般流程     
+（以Java2为例）： 
+l    编写所需要的接口IDL文件。 
+n    foo.idl 
+module foo{ 
+    interface function{ 
+        float square_root(in float number); 
+    } 
+} 
+l    用idltojava编译idl文件。 
+n    idltojava –fno-cpp foo.idl 
+l    用Javac编译所产生的类。 
+n    javac ~\*.java 
+l    生成实现类。 
+n    (functions.java) functinosImpl.java 
+l    生成实现服务器。 
+n    fooServer.java 
+l    生成客户机应用程序（或小程序）。 
+n    fooClient.java 
+l    编译实现服务器和客户机代码。 
+n    javac functionsImpl.java fooServer.java fooClient.java 
+l    启动命名服务应用程序tnameserv。 
+n    tnameserv –ORBInitialPort 1080 
+l    启动服务器（用命名服务注册）。 
+n    java fooServer –ORBInitialPort 1080 
+l    启动客户机。 
+n    java fooClient –ORBInitialPort 1080 
+6．结论 
+与单纯的Java小应用相比，创建CORBAJava应用稍显复杂。事实上，这同样比用RMI创建纯粹的Java分布式对象应用要难一些。但是，CORBA和Java的联合，所创建的应用程序功能更为强大，更具可扩充性，这是单纯用JDK开发所无法比拟的。另外，现实是企业界很少使用Java应用程序。CORBA是两全其美的选择，一方面它允许开发者利用已有的代码保护投资，另一方面又可以充分发挥Java编程语言的优势。 
+5.4  JSP与CORBA技术的结合使用 
+若想实现Web上分布式客户机/服务器模式的应用程序，可以选择多种不同的技术。但是，对于必须服务于大量用户的应用，我们认为应该首选CORBA，因为它具有可扩展性和业界广泛的支持。由于CORBA的强健性可以提高Java编程语言的性能，利用已有的基于标准的技术，Java开发者可以编写出功能强大的Web应用程序。 
+想要对已有的Web软件资源加以利用，或是编写真正功能强大的应用程序，使Internet/Intranet成为通信主干，所使用的技术必须具有以下特性： 
+·    支持现有的C、C＋＋和COBOL代码 
+·    支持Java，以建立具有可移值性、平台独立性的面向对象的应用程序 
+·    商业中立性，只有这样，应用程序才易于维护，且不会被时间淘汰。 
+·    可扩充性，能够支持大量用户 
+·    它应该被多种平台所支持，而不是固定于某种平台之上。 
+·    开发模型应该是面向对象的（因为OOP有许多固有优势） 
+·    端到端的安全性 
+·    广泛的业界支持 
+这种技术便是以CORBA为最佳。 
+Servlets是JAVA 2.0中新增的一个全新功能，它是运行在请求/面向请求服务器上的模块，比如一个Java-enabled web 服务器, 和类似这样的延伸场合. 例如, 一个servlet可以从一个HTML订单表中获取数据然后用一些商业上的算法来更新公司相应的订单数据库。 
+也就是说：servlet能够象CGI脚本一样扩展WEB服务器功能，但是servlet占用很少密集资源，有很多用CGI脚本编制的一些站点由于访问量剧增,性能迅速下降，这是CGI脚本一个缺点。同时由于servlet是用java编写的，因此是跨平台的。可以这样说，实际servlet是电子商务真正的开始。 
+跨平台的Java Servlet与跨语言的corba的强强联合，使得开发者可以编写出功能强大的Web应用程序。 
+

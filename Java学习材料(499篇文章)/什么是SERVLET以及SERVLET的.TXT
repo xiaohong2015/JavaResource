@@ -1,0 +1,60 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：7/3/2001 2:27:31 PM
+　　Servlet是用Java编写的Server端程序，它与协议和平台无关。Servlet运行于Java－enabled Web Server中。Java Servlet可以动态地扩展Server的能力，并采用请求－响应模式提供Web服务。 
+
+　　最早支持Servlet技术的是JavaSoft的Java Web Server。此后，一些其它的基于Java的Web Server开始支持标准的Servlet API。Servlet的主要功能在于交互式地浏览和修改数据，生成动态Web内容。这个过程为： 
+
+　　客户端发送请求至服务器端； 
+
+　　服务器将请求信息发送至Servlet 
+
+　　Servlet生成响应内容并将其传给Server。响应内容动态生成，通常取决于客户端的请求 
+
+　　服务器将响应返回给客户端 
+
+　　Servlet看起来像是通常的Java程序。Servlet导入特定的属于Java Servlet API的包。因为是对象字节码，可动态地从网络加载，可以说Servlet对Server就如同Applet对Client一样，但是，由于Servlet运行于Server中，它们并不需要一个图形用户界面。从这个角度讲，Servlet也被称为Faceless Object。 
+
+　　JAVA Servlet的优势：
+
+　　Servlet可以和其他资源(文件、数据库、Applet、Java应用程序等)交互，以生成返回给客户端的响应内容。如果需要，还可以保存请求－响应过程中的信息。 
+
+　　采用Servlet，服务器可以完全授权对本地资源的访问(如数据库)，并且Servlet自身将会控制外部用户的访问数量及访问性质 
+
+　　Servlet可以是其它服务的客户端程序，例如，它们可以用于分布式的应用系统中，可以从本地硬盘，或者通过网络从远端硬盘激活Servlet。 
+
+　　Servlet可被链接(chain)。一个Servlet可以调用另一个或一系列Servlet，即成为它的客户端。 
+
+　　采用Servlet Tag技术，可以在HTML页面中动态调用Servlet。 
+
+　　Servlet API与协议无关。它并不对传递它的协议有任何假设。 
+
+　　像所有的Java程序一样，Servlet拥有面向对象Java语言的所有优势 
+
+　　Servlet提供了Java应用程序的所有优势——可移植、稳健、易开发。使用Servlet 的Tag技术，Servlet能够生成嵌于静态HTML页面中的动态内容。
+
+　　一个Servlet被客户端发送的第一个请求激活，然后它将继续运行于后台，等待以后的请求。每个请求将生成一个新的线程，而不是一个完整的进程。多个客户能够在同一个进程中同时得到服务。一般来说，Servlet进程只是在Web Server卸载时被卸载。
+
+　　Servlet生命周期：
+
+　　装载Servlet。这项操作一般是动态执行的。然而，Server通常会提供一个管理的选项，用于在Server启动时强制装载和初始化特定的Servlet。 
+
+　　Server创建一个Servlet的实例 
+
+　　Server调用Servlet的init()方法 
+
+　　一个客户端的请求到达Server 
+
+　　Server创建一个请求对象 
+
+　　Server创建一个响应对象 
+
+　　Server激活Servlet的service()方法，传递请求和响应对象作为参数 
+
+　　service()方法获得关于请求对象的信息，处理请求，访问其他资源，获得需要的信息 
+
+　　service()方法使用响应对象的方法，将响应传回Server，最终到达客户端。service()方法可能激活其它方法以处理请求，如doGet()或doPost()或程序员自己开发的新的方法 
+
+　　对于更多的客户端请求，Server创建新的请求和响应对象，仍然激活此Servlet的service()方法，将这两个对象作为参数传递给它。如此重复以上的循环，但无需再次调用init()方法。一般Servlet只初始化一次 ,当Server不再需要Servlet时(一般当Server关闭时)，Server调用Servlet的Destroy()方法。 
+
+　　在美国，EJB+Servlet+JSP几乎成为电子商务的开发标准。本来 ASP 也很有希望，但微软最近可能把精力都集中在打官司和Win2000上， 因此电子商务发展得太少。PHP由于其模式和一些天生缺陷，毫无希望。 在美国，很少有商业站点用PHP的。

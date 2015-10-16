@@ -1,0 +1,114 @@
+作者：虹
+日期：2000-7-22 9:26:03
+安装好你的机器来使用JSP
+你将会需要Java 2软件开发工具(JSDK)，它原来的名称是Java发展工具(JDK)以及JavaServer网站发展工具(JSWDK)，Tomcat，或是其它支持JSP的网络服务器。Sun免费提供JSDK与JSWDK来供Windows，Solaris，以及Linux平台使用。 
+如果你想要在你目前的网络服务器上使用JSP，但服务器本身并不支持JSP与Java servlets，你可以试试看Allaire的Jrun，它的作用就像是针对Netscape企业版与FastTrack服务器、微软的网际网络信息服务器(IIS)与个人网络服务器(PWS)、Apache、以及其它服务器的网络服务器附加设备。你也可以使用Apache网络服务器的Java版本，最新的JSWDK里有提供。
+下载与安装你需要的组件
+目前发表的1.2.2-001，JSDK可下载的版本是以可安装的压缩档形式。下载的档案大约是20MB，可提供完整的Java发展环境，让你能建立利用标准API为核心的Java解决之道。然而，你的网络服务器需要应用到JSP的唯一一件事是Java编译器。要让网络服务器知道编译器的位置，将环境变量JAVA.HOME设到JSDK的安装目录。如果你是在Windows上安装并且接受预设目录，将这行程序代码set JAVA.HOME=C:\1.2.2加到你的autoexec.bat档案并且重新开机。
+在安装好JSDK之后，下载 并且安装JSWDK或beta版的Tomcat，以Java为主的Apache网络服务器。安装在哪里并不重要，重要的是你可以找到它。一般而言，它会放在上层目录，这种方式可以让你取代JSWDK或 JSDK的网络服务器，不需要移动其它的网络服务器。在你安装好这个档案之后，你就可以准备发展JSP了。
+在你正确的安装JSWDK之后，执行startserver指令文件来激活网络服务器，预设通讯端口 为 8080。要看你在激活服务器之后是均C有正确的安装工具，你可以加载范例JSP档案中的任何一个(http://localhost:8080/examples/jsp/)。如果你能够成功的执行一个范例档案，你可以知道你已经正确的设定好软件了。如果你在激活服务器的控制台窗口看到错误讯息，那么你需要解决这个问题。最常发生的问题是没有设定(或者不正确设定)环境变量JAVA.HOME。要检视目前的环境设定，在DOS模式下键入set。
+开始
+解释JSP语法 之前，先建立一个显示目前日期与时间的快速网页并且将它储存成sample.jsp:
+<html>
+<head>
+<title>First Page</title>
+</head>
+<body>
+<H3>Today is:
+<%= new java.util.Date() %>
+</H3>
+</body>
+</html>.
+将这个档案与你所有的HTML与JSP网页放在你JSWDK安装目录下的网页目录里. 你可以在http://localhost:8080/sample.jsp下载此页.当你第一次参观这个网页时，网站服务器会将JSP翻译成Java servlet程序代码，那你就会看到目前的日期与时间.
+现在你已经下载，安装，并且架构好发展环境，你已经准备好要了解JSP语法与建立你自己的JSP为主的解决之道.
+
+JSP语法的基本原理
+安装之后，接下来我们要讨论JSP的语法.如果要偷懒，你可以下载语法卡 而如果你不熟悉 Java的程序设计，你可能会想要参考Sun的使用手册;然而，网站建立者不应该做太多的Java发展.除了几个函式呼叫之外，出现在你JSP网页上的Java程序代码应该将它减到最少;
+记住这点之后，现在让我们先来看看JSP的编译器指引与指令组件，之后我们将解释JavaBeans与内部对象. JSP编译器指引与指令组件有五种型态.JSP 1.0之后，大部分的JSP是包含在以<% 作为开始%>作为结束的单一卷标里.新的 JSP 1.1规格已经发表了，它同时也与XML兼容.
+JSP的编译器指引与指令组件 
+  编译器指引 	<%@ 编译器指引 %> 	  
+  宣告 	<%! 宣告 %> 	  
+  表达式 	<%= 表达式 %> 	  
+  程序代码片段/小型指令 	<% 程序代码片段 %> 	  
+  批注 	<%-- 批注 --%> 	  
+编译器指引
+JSP的编译器指引是针对JSP引擎。它们并不会直接产生任何看得见的输出；相反的，它们是在告诉引擎如何处理其它的JSP网页。它们永远包含在 <%@ ?%>卷标里。两个主要的指引是 page与include。我们不会讨论taglib编译器指引但它可以在JSP1.1里用来建立自订卷标。
+你几乎可以在你所有的JSP网页最上面找到page编译器指引。虽然这不是必须的，但它可以让你指定到哪里可以找到支持的Java类别这类的事：
+<%@ page import="java.util.Date" %>， 
+当发生Java问题的事件时应该将讯息传送到哪里：
+<%@ page errorPage="errorPage.jsp" %>， 
+以及你是?需要为使用者管理通话期的信息，可能存取多个网页(稍后在JavaBeans里会有更多通话期的讨论):
+<%@ page session="true" %>。 
+ include编译器指引让你将你的内容分成几个可管理的组件，就像那些有表头或脚注的网页。所包含的网页可以是固定格式的HTML网页或者是JSP内容的网页:
+<%@ include file="filename.jsp" %>。
+宣告
+JSP宣告让你定义网页层的变量，来储存信息或定义支持的函式，让JSP网页的其余部分能够使用。如果你发现自己有太多的程序代码，你最好将它们放在不同的Java类别里。你可以在 <%! ?%>卷标里找到宣告。记住要在变量宣告的后面加上分号，就跟任何有效的Java叙述的形式一样: <%! int i=0; %>。
+表达式
+JSP里有表达式，评估表达式的结果可以转换成字符串并且直接使用在输出网页上。JSP运算是属于 <%= ?%> 卷标里，并不包含分号，加引号字符串的无用部分。
+<%= i %>
+<%= "Hello" %> 。
+程序代码片段/小型指令文件
+JSP程序代码片段或小型指令文件是包含在<% ?%> 卷标里。当网络服务器接受这段请求时，这段Java程序代码会执行。小型指令文件可以是原始的HTML或XML，其内部的程序代码片段可以让你建立有条件的执行程序代码，或者只是一些使用另一块程序代码的东西。举例来说，下列的程序代码结合了表达式与小型指令文件，在H1，H2，H3，以及H4卷标里显示字符串"Hello"。小型指令文件不限于一行的原始程序代码 :
+<% for (int i=1; i<=4; i++) { %>
+<H<%=i%>>Hello</H<%=i%>>
+<% } %>。
+批注
+最后一个主要JSP组件是嵌入式批注。虽然你可以在你的档案里包含HTML批注，如果使用者检视网页的原始码，他们也会看到这些批注。如果你不要让使用者看到你的批注，你可以将它放在<%-- ?--%>卷标里:
+<%-- 针对伺服端的批注 --%>。
+ JSP与JavaBean
+虽然你可以在小型指令文件里放入一大块的程序代码，但是大多数的Java程序代码是属于可以重复使用的组件，称为JavaBean。JavaBean就跟ActiveX控件一样:它们提供已知的功能，并且是为了可随时重复使用的目的而设计的。
+JavaBean的价值在于它可以经由一组特性来使用，而这些特性则提供对JavaBean设定的存取。以人来作范例，此人就是JavaBean，而他的姓名，社会福利安全号码，以及住址可以是特性。对于JSP网站，基本上你是将'JavaBean'动态的连接到你的网站。
+假设JavaBean是在建立网站之前建好的，你要做的第一件事是告诉JSP网页它所需要使用JavaBean.这工作可以用<jsp:useBean>卷标来完成：
+<jsp:useBean id="localName" class="com.jguru.Person" scope="application" />.
+<jsp:useBean>卷标需要你以id 属性来辨识豆子.在这里，你提供一个名称让JSP网页来辨识豆子，除了id 属性之外，你也必须告诉网页要到哪里去找这个豆子，或者是它的Java类别名称。类别属性提供如何在各式方法之中找到它，最后一个需要的组件是scope 属性.有了范围属性的帮助，你可以告诉豆子，要它为单一网页(预设)[scope="page"]；为一个被请求的网页[scope="request"]；为通话期[scope="session"]；或为整个应用程序[scope="application"]来维护它自己的信息.对于通话期范围，你可以很容易的维护JSP网页里的项目，例如购物车。
+一但你宣告了JavaBean之后，你就可以存取它的特性来订定它。要取得一特性的值，使用<jsp:getProperty>卷标。有了<jsp:getProperty>卷标，你可以指定要使用的豆子名称(从useBean的id字段)，以及你要取得值的特性。接着，真正的值就会放在输出里：
+<jsp:getProperty id="localName" property="name" />.
+要更改JavaBean的特性，你需要使用<jsp:setProperty>卷标.对这个卷标，你也需要辨认豆子以及要修正的特性，除此之外，你还需要提供新值.如果命名正确，这些可以直接经由规定的格式取得：
+<jsp:setProperty id="localName" property="*" />; 
+要从一参数取得，你必须直接命名此特性以及参数:
+<jsp:setProperty id="localName" property="address" param="parameterName" />; 
+或是直接以名称与值来设定:
+<jsp:setProperty id="localName" property="serialNumber" value="string" /> or <jsp:setProperty id="localName" property="serialNumber" value= <%= expression %> />.
+有关JavaBean的最后一点:要让网络服务器可以找到JavaBean，你需要将它们的类别档案放在特别位置。对JSWDK而言，最简单的地方是在安装目录里的类别目录，例如 \jswdk-1.0.1\classes.
+JSP的内部对象
+最后一个与JSP语法有关的组件叫做内部对象.在JSP小型指令文件内，你可以存取这些内部对象来与执行JSP网页的servlet环境相互作用。许多对内部对象的存取应该要简化。然而，这些是范例，它们的存取都是可接受的，要完整的利用内部对象设定则需要对最新的Java Servlet API有所了解。
+下表列出你可以使用的内部对象。  
+内部对象说明 
+  request 	客户端请求，此请求会包含来自GET/POST请求的参数 	  
+  response 	网页传回客户端的响应 	  
+  pageContext 	网页的属性是在这里管理 	  
+  session 	与请求有关的通话期 	  
+  application 	servlet正在执行的内容 	  
+  out 	用来传送响应的输出资料流 	  
+  config 	servlet的架构对象 	  
+  page 	JSP网页本身 	  
+  exception 	针对错误网页，未捕捉的例外 	  
+那么，这些是做什么的，而你应该如何使用它们呢?基本上，在你的小型指令文件里，你可以使用它们来存取执行JSP程序代码的servlet。为了避免谈论到太多Servlet API 的细节，让我们来检视一些你可以利用它们来做的事: 
+不必使用表达式，你可以直接存取内部out对象来打印一些东西到response:
+<% out.println("Hello"); %>.  
+不必直接传送参数到JavaBean，你可以藉由请求对象来取得参数的值:
+<% String name=request.getParameter("name"); out.println(name); %>。 
+当你以JSP写了许多的应用程序之后，如果你建立了JavaBeans或者发现你自己将太多的Java原始码放入你的JSP档案，你需要建立支持的Java类别，这样可以鼓励重复使用并且降低JSP网页转换时所需要的时间。当你需要建立Java类别时，你必须: 
+将JDSWK的安装目录\bin目录加到你的PATH。在你的autoexec.bat档案的PATH行的最后，加入C:\1.2.2\bin; 。 
+以下面的指令将JAR档案复制到\jre\lib\ext目录:
+copy c:\jswdk-1.0.1\lib\servlet.jar c:\jdk1.2.2\jre\lib\ext. 
+建立一JSP网站
+现在到了将所有的JSP语法放在一起使用的时候了。我们将会建立一个具有输入格式的网站，让使用者来输入股票代号并且获得目前股票的价格(大约延迟20分钟)。如果有错误，则错误网页会显示。
+quote.jsp
+首先，以这段程序代码建立quote.jsp并且将它储存在JSWDK安装目录的网页目录里。网页的大部分内容是标准的HTML格式，而JSP程序代码分散各处。第6行是网页编辑器指引，指示将任何错误传送到errorPage.jsp档案。第13行到15行是小型指示码，基本上是说只有当"symbol"参数存在时才显示表格。这个if区段包含了第32行到34行的程序代码。第17行定义要使用的 JavaBean，而第18行从参数加载它的符号特性。第27行到29行指示显示豆子的特性。除了if区段之外，并没有其它的Java程序代码。
+errorPage.jsp
+接着，将下列的JSP原始码储存到网页目录下的档案errorPage.jsp.这是一个错误网页的暗示是在第一行，此行将网页编译器指引isErrorPage属性设为真。虽然前一页说明了错误网页在哪里，这页是说它是一个错误网页。JSP档案里其它特定的JSP程序代码是对内部例外对象的存取。此页只是显示它的值而已:
+<%@ page isErrorPage="true" %>
+<html>
+<head>
+<title>Error Page</title>
+</head>
+<body>
+<h1>Our Error Page</h1></font>
+<!-- Print Exception -->
+We got ourselves an exception:
+    <%= exception %>
+<a href="quote.jsp">Restart</a>
+</body>
+</html>.
+<span lang="EN-US" style="font-size:10.5pt;mso-bidi-font-size:12.0pt; font-family:"Times New Roman";mso-fareast-font-family:宋体;mso-font-kerning:1.0pt; mso-ansi-language:EN-US;mso-fareast-lang

@@ -1,0 +1,46 @@
+作者：阿土伯
+email: lu1206@yeah.net
+日期：2001-1-5 11:04:15
+I have given you the source code, how to connect with database from jsp. this is easy and simple.cut and paste the below code and modify according to your requirements.This is esspecially for those who had coding experience in ASP.I have given proper documentation.  
+ 
+ <!--first we've to import the necessary packages-->
+<!--importing packages starts-->
+<%@ page info="database handler"%>
+<%@ page import="java.io.*"%>
+<%@ page import="java.util.*"%>
+<%@ page import="java.sql.*"%>
+<%@ page import="javax.servlet.*"%>
+<%@ page import="javax.servlet.http.*"%>
+<!--importing packages ends-->
+<%
+try
+{
+//loading the drivers
+//this code loads JDBD-ODBC Driver
+Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
+//making connection
+//The second step in establishing a connection is to have the appropriate
+//driver connect to the DBMS. The following line of code illustrates the
+//general idea:
+String url="jdbc:odbc:test";
+//where "test" is the system dsn name
+Connection con=DriverManager.getConnection(url, "administrator", "password");
+//where "administrator is the username to 
+//access the database and password is " password"
+//DriverManager's getconnection method estabilishes connection 
+//with the database specified in the JDBC URL
+//Then create jdbc statement
+Statement stmt = con.createStatement();
+String query="CREATE TABLE COFFEES" +
+"(COF_NAME VARCHAR(32),"+
+"SUP_ID INTEGER,"+
+"PRICE FLOAT,"+
+"SALES INTEGER,"+
+"TOTAL INTEGER)";
+//Execute the statement
+stmt.executeUpdate(query);
+}
+catch (Exception e) {}
+//give confirmation message
+out.println("table coffees created");
+%> 

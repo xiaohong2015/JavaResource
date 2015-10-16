@@ -1,0 +1,92 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：7/4/2001 1:42:32 PM
+　　首先，对话服务器将获得Mnemosyne对象的一个实例，该实例被绑定到对话服务器的本地IP上。
+
+
+protected void bindMnemosyne() 
+{ 
+
+file://得到Mnemosyne 
+Mnemosyne Mnemosyne = null; 
+try 
+{ 
+Mnemosyne = MnemosyneFactory.getMnemosyne(); 
+} 
+catch(RemoteException remoteException) 
+{ 
+System.out.println("Internal error:"); 
+System.out.println("Can't create a Mnemosyne"); 
+System.exit(1); 
+} 
+// 把Mnemosyne绑定到MnemosyneImpl 
+try 
+{ 
+String rmiURL = "//" + _localIP + "/MnemosyneImpl"; 
+Naming.rebind(rmiURL, Mnemosyne); 
+} 
+catch(ArrayIndexOutOfBoundsException ArrayIndexOutOfBoundsException) 
+{ 
+throw new IllegalArgumentException("LocalIP is invalid"); 
+} 
+catch(MalformedURLException malformedURLException) 
+{ 
+throw new IllegalArgumentException("LocalIP is invalid"); 
+} 
+catch(RemoteException remoteException) 
+{ 
+System.out.println("Internal error:"); 
+System.out.println("Can't rebind a Mnemosyne to MnemosyneImpl"); 
+System.exit(1); 
+} 
+
+} 
+ 
+
+
+　　通过把本地Mnemosyne上一系列代表RMI名字符号的URL赋予远程对话服务器，就能引发同步操作，这些URL存贮在一个被称作rmiURL的字符串数组中。在SessionServer的符号中，URL是作为参数从命令行命令中获得的，但它可以来自其他渠道：
+
+
+protected void synchronizeMnemosyne() 
+{ 
+file://获得本地Mnemosyne 
+Mnemosyne localMnemosyne = null; 
+try 
+{ 
+localMnemosyne = (Mnemosyne) Naming.lookup(_localIP); 
+} 
+catch(Exception exception) 
+{ 
+System.out.println("Internal error:"); 
+System.out.println("Can't lookup local MnemosyneImpl"); 
+System.exit(1); 
+} 
+
+file://获得同步用的远程Mnemosynes 
+Vector remoteMnemosynes = new Vector(); 
+
+// _rmiURLS对象是代表需要进行同步的远程服务器的字符串数组 
+for(int index = 1;index < _rmiURLS.length;index++) 
+{ 
+try 
+{ 
+remoteMnemosynes.add(Naming.lookup(_rmiURLS[index])); 
+} 
+catch(Exception exception) 
+{ 
+} 
+} 
+
+file:// 同步
+try 
+{ 
+if(remoteMnemosynes.size() > 1) 
+localMnemosyne.synchronize(remoteMnemosynes); 
+} 
+catch(Exception exception) 
+{ 
+System.out.println("Internal error:"); 
+System.out.println("Can't synchronize local MnemosyneImpl"); 
+System.exit(1); 
+} 
+}

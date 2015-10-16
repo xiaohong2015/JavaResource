@@ -1,0 +1,146 @@
+作者：jean777
+email: jean263@263.net
+日期：2001-3-20 16:43:16
+  
+Java/jsp 好的入门文章共赏    
+
+--------------------------------------------------------------------------------
+ 【丑丑牛】 于 00-4-28 18:02:12 加贴在 JAVA技术 ↑：
+
+用JSP构建动态网站 孙以义 杜鹃 
+
+一、 什么是JSP JSP(JavaServer Pages)是由Sun Microsystems公司倡导、许多公司参与一起建立的一种动态网页技术标准，其网址为http://www.javasoft.com/products/jsp。 在传统的网页HTML文件(*.htm,*.html)中加入Java程序片段(Scriptlet)和JSP标记(tag)，就构成了JSP网页(*.jsp)。Web服务器在遇到访问JSP网页的请求时，首先执行其中的程序片段，然后将执行结果以HTML格式返回给客户。程序片段可以操作数据库、重新定向网页以及发送 email 等等，这就是建立动态网站所需要的功能。所有程序操作都在服务器端执行，网络上传送给客户端的仅是得到的结果，对客户浏览器的要求最低，可以实现无Plugin，无ActiveX，无Java Applet，甚至无Frame。 本文将介绍利用JSP技术开发动态网页的方法，还将简要分析JSP技术和 Microsoft 公司的 ASP 技术的不同之处。 
+二、 如何安装和启动 为了实验JSP技术，首先需要建立运行环境，这个过程相当简单：
+1、在 http://java.sun.com/jdk/处下载JDK(Java 2 SDK、Standard Edition、v 1.2.2)。 
+2、在http://java.sun.com/products/jsp/处下载JSWDK(JavaServer Web Development Kit 1.0.1)。Linux用户可以在ttp://jakarta.apache.org/处下载Tomcat 3.0。 
+3、安装 以Windows NT环境为例，JDK的安装是首先运行下载得到的jdk1_2_2-win.exe，然后修改系统环境参数，在PATH参数中加入[x:]\jdk1.2.2\bin以及增加新的环境参数 CLASSPATH=[x:]\jdk1.2.2\lib\tools.jar，其中[x:]是安装JDK的硬盘符（c:、d: 等）。 JSWDK的安装仅需将jswdk1_0_1-win.zip带目录释放到硬盘根目录下（c:\、d:\ 等），然后就可以在硬盘上找到\jswdk-1.0.1\目录。将来如果不想保留JSWDK，删除这个目录就可以了，没有任何系统文件和注册表遗留问题。更详细的安装过程以及Solaris/Unix和Linux下JDK、Tomcat的安装可以参考下载得到的文件包中的安装说明。 
+4、启动 以Windows NT环境为例，在\jswdk-1.0.1\目录下执行startserver.bat，就可启动JSWDK中一个支持JSP网页技术的Web服务器。为了不与现有的Web服务器（例如IIS、PWS等）冲突，JSWDK的Web服务器使用了8080端口。 在浏览器的地址栏中键入http://localhost:8080或者http://127.0.0.1:8080后，如果能看到 JSWDK 的欢迎页就说明JSP实验环境已经建成，可进入下一步实验。 要关闭Web服务器则运行stopserver.bat。
+三、 JSP简单示例 JSWDK中包含的Web服务器的文档目录在缺省状态下为\jswdk-1.0.1\webpages，主文档在缺省状态下为index.html和index.jsp。也就是说访问http://localhost:8080等于访问\jswdk-1.0.1\webpages\index.html。 用文本编辑器，如Windows中的记事本(Notepad)，创建一个文本文件hi.jsp，保存在\jswdk-1.0.1\webpages\目录下，其内容如下： 
+<html>
+<head>
+<title>Hi-JSP实验</title>
+</head>
+<body> 
+<%
+String Msg = "This JSP test.";  
+out.print("Hello World!");
+%>
+<h2><%=Msg%></h2>
+</body>
+</html> 
+
+在浏览器的地址栏中键入http://localhost:8080/hi.jsp，JSWDK中的Web服务器会执行JSP 文件中用<%以及%>括起来的Java程序语句，其中out.print是将文字输出到网页，语句<%= 变量 | 表达式 %>的作用是将Java Scriptlet中变量或表达式的值输出到网页，执行结果如图1。 图1 将变量Msg赋值为中文字符串，用<%= %>输出，或者用out.print输出中文字符串，则在英文版NT4及Redhat 6.1下实验运行结果正常，而在中文NT 4.0和中文98下，则反而会出现乱码。
+四、 统一的网站界面 JSP支持服务器端的文件包含，即可以在一个JSP文件中插入多个其他文件，用来实现统一的网站界面。修改上述hi.jsp并另存为mypage.jsp：
+<%@ include file="top.htm" %>
+<%
+String Msg = "This JSP test.";
+out.print("Hello World!");
+%>
+<h2><%=Msg%></h2>
+<%@ include file="bot.htm" %>
+
+
+五、 服务器参数设置
+JSWDK的Web服务器参数保存在\jswdk-1.0.1\webserver.xml中，用Windows写字板打开并编辑这个文件就可以修改缺省设置值。本节内容主要针对JSWDK，Linux下Tomcat的设置方法略有不同。
+JSWDK缺省的文档目录是\jswdk-1.0.1\webpages，在此目录下可以建立子目录，例如\jswdk-1.0.1\webpages\test，就能在浏览器中用http://localhost/test访问这个目录，为了使得这个子目录能执行JSP程序，还必须在webserver.xml中的<Service></Service>节加入：
+<WebApplication id="test" mapping="/test" docBase="webpages/test" />
+并且，还必须建立\jswdk-1.0.1\webpages\test\WEB-INF目录，并从\jswdk-1.0.1\webpages\WEB-INF目录中复制过来以下四个文件：mappings.properties、mime.properties、servlets.properties以及webapp.properties。完成这些过程，才能通知JSWDK的Web服务器执行http://localhost/test 中的JSP程序。
+
+六、 JavaBean
+JSP网页吸引人的地方之一就是能结合JavaBean技术来扩充网页中程序的功能。
+JavaBean是一种Java类 (class)，通过封装属性和方法成为具有某种功能或者处理某个业务的对象。JavaBean被组织成为package（数据包）以便进行管理，实际上就是把一组JavaBean一起放在某某目录中，每个类的定义前加上package某某，本例中为test。目录test必须放在系统环境CLASSPATH包含的目录下，系统才能找到其中的JavaBean。JSWDK在缺省状态下将\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\ 加入CLASSPATH。建立自己的JavaBean和package时，就放在这个目录中也不失为一种简易的方法。
+下面介绍一个简单的JavaBean框架。用文本编辑器创建一个文本文件helloWorld.java，并保存在\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\test目录下，其内容如下：
+package test;
+public class helloWorld {
+public String name = "My first bean"; 
+public String getHi()
+{
+return "Hello from " + name;
+} 
+}
+
+helloWorld.java编辑好后，在DOS状态下，进入目录\jswdk-1.0.1\webpages\WEB-INF\jsp\beans\，用JDK的javac命令编译helloWorld.java如下：
+
+javac helloWorld.java
+
+注意，Java是区分大小写的，在程序中，编译命令行中字母的大小写都不能写错。
+编译成功就表示建立了一个JavaBean。下面看如何在JSP中使用这个JavaBean。用文本编辑器创建一个文本文件hi-bean.jsp，并保存在\jswdk-1.0.1\webpages\test目录下，其内容如下：
+在JSP网页中，使用 <jsp:useBean ... />语法来创建JavaBean对象，并命名为helloBean。读者可从这个简单的例子中看出设置、获取JavaBean属性，以及调用JavaBean方法的做法。在浏览器的地址栏中键入http://localhost:8080/test/hi-bean.jsp，得到结果如图3所示。
+注意，如果修改和重新编译了JavaBean程序，则需要关闭和重新启动JSWDK的Web服务器以后修改的结果才会有效。如果仅仅修改JSP文件，则不用重新启动JSWDK的Web服务器.
+
+虽然，这仅仅完成了一个非常简单的JavaBean框架，但是遵循这个框架可以设计出多种多样的JavaBean。例如，从JSP中访问数据通常就是通过JavaBean来实现的。
+
+
+附文
+
+
+CLASS文件的存放位置    
+
+--------------------------------------------------------------------------------
+ 【何志强】 于 2000-8-11 9:01:57 加贴在 JAVA技术 ↑：
+
+在Linux平台下的Tomcat中，只需把相关的类库(*.zip、*.jar)放到$TOMCAT_HOME/lib目录下，Tomcat启动时就会自动将这些类库放到CLASSPATH环境变量中，Windows平台下的Tomcat不行，必须手工添加到CLASSPATH环境变量中。
+
+  
+回答：为什么执行JAVA程序时，会出现Exception in thread"main" java.lang.NoClassDefFoundError的错？（太多人问了，烦！建议放入精华区！）    
+
+--------------------------------------------------------------------------------
+ 【sonymusic】 于 2001-2-15 13:29:54 加贴在 JAVA技术 ↑：
+
+应该这样检查你的环境和你的操作：
+
+1、你的文件名对吗？
+JAVA要求你的文件和你的类名严格对应的。
+比如 public class HelloWorld{ .....
+那么文件名一定只能是HelloWorld.java，看仔细了！
+
+2、你的程序中有main方法吗？参数什么的对吗？
+main方法的声明应该是这样子的：
+public static void main(String[] args) 
+事实上如果你用开发工具来做的话，是不会错的。如果你用UltraEdit之类的来写程序的话，就一个字不要改的照抄吧！
+
+3、记住，javac后面跟的参数是文件名，但java 后面跟的是类名！
+这是我开始学JAVA是犯的错，java HelloWorld.class，然后就报错。后来才弄明白，应该是java HelloWorld。
+
+4、设置了classpath了吗？
+不仅是在安装JDK时要设置的内容，一般来说最好还要自己设置一个目录来存放自己的类文件的。比如d:\class目录。
+设置classpath=%classpath%;d:\class
+那么，现在将HelloWorld.class文件COPY到d:\class目录下，再java HelloWorld应该就OK了。
+
+5、结合第3点和第4点
+如果你的类是属于某一个包的，比如这样一个类sony.test.HelloWorld，那么按照我在第4点中说的目录来说，就应该将HelloWorld.class文件存放到d:\class\sony\test\目录下。
+执行的时候应该参考第3点中说的，按类名执行：java sony.test.HelloWorld。
+
+明白了吗？一直我也想不出还会有什么理由造成这个出错信息了！如果有哪位兄弟想到了就补充一下吧！
+其实如果你使用了一些比较好的编程工具的话，根本就没有机会碰到这个错误的，至少我在使用了VisualAge for Java之后，就没有这样的事情了。
+
+好啦，不说了，祝同志们好运吧！
+过了这第一道门，后面的就比较简单啦！
+Java 的執行環境
+
+本節將介紹 Java 的執行環境並說明此環境中的一些元件與相關指令。首先我們必須先安裝 Java 環境。你先上網連結至 Sun Microsystems, Inc.的 Java 專屬網站， http://java.sun.com/products/jdk/1.1/download-jdk-windows.html，下載 JDK(Java Development Kit)軟體 (jdk_1_1_8-win.exe)。然後執行該軟體，就可安裝以下幾個元件： 
+
+程式庫(CoreClasses, classes.zip)是位於你所安裝 JDK 主目錄的 LIB 次目錄下(如 C:\JDK1.1.8\LIB)，且以壓縮的方式存在，千萬不要將此檔案 解壓縮。它是在執行 Java 編譯器(Compiler)或解譯器(Interpreter)時會 使用到的檔案。 
+原始檔案位於你所安裝 JDK 主目錄的 SRC 次目錄下，是上述程式庫的 Java 原始檔。 
+位於你所安裝 JDK 主目錄的 BIN 次目錄下，是編譯或執行應用程式 (Applications)或小程式 (Applets)所需要的工具和指令，主要有： 
+編譯器(Java Compiler, javac)─將 Java 原始檔(*.java)編譯為 位元檔(*.class) 
+解譯器(Java Interpreter, java)─執行 Java 程式(*.java) 
+執行器(Java Runtime Interpreter, jre)─也是執行 Java 程式， 一般使用者(end users) 使用 
+檢視器(Java AppletViewer, appletviewer)─用來執行與測試 Java 小程式(applet) 
+除錯器(Java Debugger, jdb)─幫助發現程式的蟲蟲(bugs) 
+文件器(Java Documentation Generator, javadoc)─由 java 原始檔中製作可由導覽器 瀏覽之文件說明檔 
+壓縮器(Java Archive Tool, jar)─將多個java程式檔(*.class) 壓縮為 ZIP 格式的檔案 (*.jar) 
+Java示範程式集位於你所安裝 JDK 主目錄的 DEMO 次目錄下， 你可以變換到此次目錄的再下一層次目錄，然後執行小程式，例如： 
+>cd c:\jdk1.1.8\demo\TicTacToe 
+>c:\jdk1.1.8\bin\appletviewer .\example1.html
+<練習> 請由導覽器中開啟Java示範小程式 
+為了簡化指令長度(如上面執行示範小程式)，在執行 Java 指令前可先設定環境變數，讓系統能夠找到指令和相關程式庫所在。 
+
+set CLASSPATH=C:\jdk1.1.8\lib\classes.zip;.\.;%CLASSPATH% 
+set PATH=C:\jdk1.1.8\bin;%PATH% 
+
+以上設定完畢後，只需敲入以下指令： 
+
+>appletviewer .\example1.html
+[PREVIOUS][TOC][NEXT] 
+

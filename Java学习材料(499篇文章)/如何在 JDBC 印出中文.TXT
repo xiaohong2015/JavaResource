@@ -1,0 +1,27 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 1:22:19 PM
+1. 第一个方式: 以 Java Applet -> socket -> Java Application -> database 为例: 
+byte[] buff = new byte[512]; //buffer size 随你高兴. 
+Socket sock = //这里做 socket 的初始化工作 .. 
+
+ResultSet rs = //这里做 ResultSet 的初始化工作 .. 
+DataOutputStream dataout = 
+new DataOutputStream(new BufferedoutputStream(sock.getOutputStream())); 
+InputStream in = rs.getAsciiStream(column_index); //column_index = Column number. 
+
+for (;;) { 
+
+int size = in.read(buff); 
+if (size == -1) break; 
+dataout.write(buff, 0, size); 
+} 
+dataout.flush(); 
+
+这样就能把中文送过去. 
+
+2. 第二个方法: 把第六行改成 
+InputStream in = Runtime.getRuntime().getLocalizedInputStream( rs.getAsciiStream(column_index)) 试试. 
+
+3. 因 getLocalizedInputStream() 在 JDK1.1 已成为 deprecated method, 有可能不再 适用於以後新的 JDK 版本. 建议改用 BufferedReader 取代之. 
+例如: BufferedReader br = new BufferedReader(new InputStreamReader( rs.getAsciiStream(column_index)));  

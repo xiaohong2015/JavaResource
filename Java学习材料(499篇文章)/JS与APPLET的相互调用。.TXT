@@ -1,0 +1,22 @@
+作者：wflm
+email: wflm@263.net
+日期：6/22/2001 1:57:45 AM
+希望与大家多多交流！8-）
+
+js调用java
+
+可以在网页里使用
+<script language=javascript>
+document.applets[0].java中的方法名
+</script>
+可以对applet进行控制，也可以从applet返回值。
+返回值无需关心值得类型，js会隐式的转换。
+传值到applet中应考虑类型匹配。
+
+java调用js
+需要导入netscape.javascript.jsobject这个类
+比如：
+JSObject window=JSObject.getWindow(this);
+JSObject window=(JSObject)window.getMember("document");
+来获取对当前窗口的控制权。
+

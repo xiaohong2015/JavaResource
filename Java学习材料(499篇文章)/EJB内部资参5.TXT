@@ -1,0 +1,66 @@
+作者：jeru
+email: jeru@163.net
+日期：2001-1-12 18:11:54
+这里讲讲如何使用jdeveloper开发EJB。在此之前请先阅读 ‘EJB开发概述.doc' 
+
+
+由于jDeveloper中提供了一系列的向导（写起文档很麻烦）完成各种功能，兼之 
+jDeveloper中的帮助说明得很详细，没有另写文档 
+jDeveloper的文档在 
+Help->help topics->user's guaides->Developing Applications->Developing 
+Java Components->Developing and Deploying Enterprise JavaBeans 
+
+使用jDeveloper3.0能够开发EJB1.0（可惜不支持EJB1.1）, 并能把EJB发布到Or 
+acle8i(需要配置成多线/进程服务器)或Oracle Application server/iAs 
+
+开发EJB的方式： 
+
+通过向导file->new...->Enterprise java bean 
+1、生成一个新的EJB类框架和Remote interface, Home interface 
+2、把已经存在的类封装成EJB 
+3、把已经存在的EJB的class文件封装成EJB 
+
+注意： 
+根据jdeveloper提供的这些功能，我们可以省去写Remote interface 和Home in 
+terface的工作。 
+而直接写EJB 实现文件甚至bean文件， 但为了使开发的东西看起来干净一些，建 
+议不要使用包装bean的方式。 
+
+生成Deployment descriptor文件, jDevelper提供一个向导做这件事情， 挺简单 
+的 
+
+在生成EJB的向导中选择可以生成Deplyment descriptor文件， 以后双击生成的 
+.prf文件向Oracle8i或OAS发布。 
+或者： 
+在项目文件夹右击鼠标->New Deployment Profile... 
+或者： 
+在EJB文件夹右击鼠标->Create jServer/EJB deployment profile...或create 
+OAS/EJB deployment profile... 
+
+以后就是按照向导的提示一步步进行，不再赘述。 
+
+
+使用jDeveloper开发EJB的总体印象： 
+优点： 
+由于是和自己的产品（8i/OAS）整合在一起, jDeveloper开发EJB是一个好的思路 
+， 速度是很快的(不出错的情况下)， 隐藏了Deploy的大部分细节，大大加快开 
+发进度。根据。 
+缺点： 
+1、8i只支持EJB的1.0规范, 版本有点低。（根据Oracle公司的iAS 白皮书， iA 
+S的版本2支持EJB1.1）。 而别的产品如weblogic, jrun现在支持的时EJB1.1规范 
+，这样在向这些平台发布时还有一定的工作量。（1.0中deploy descriper是jav 
+a类， 在1.1中已改为ejb-jar.xml文件） 
+3、在8i中没有和servlet和jsp的引擎在本地，这样在web server访问EJB时实际 
+上是从外部， JNDI访问需要先验证身份， 给客户端servlet程序的移植带来一定 
+的工作量（OAS没有这个问题）。 
+2、在有的机器上jDeveloper3.0的connection manager有时连接8i不能成功， 开 
+发无法进行。具体原因尚未查明。（在程序中能连接成功） 
+3、在向8i deploy时出错时定位错误困难， 提示往往只是complie failed或dep 
+loy failed给开发造成困难。 
+4、稳定性欠佳。较频繁地出现非法访问内存之类的错误 
+
+
+根据以上原因， 可以考虑使用支持EJB1.1规范的iAS作为将来程序开发的平台。 
+在别的平台做实施只需用相应平台的Deploy tools重新发布EJB. 
+
+ 

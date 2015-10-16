@@ -1,0 +1,128 @@
+作者：bdsc
+email: bdscca@yahoo.ca
+日期：2001-7-13 17:07:24
+
+下例是一个schema片断，电话号码数组嵌入到一个类型为"Person"的结构中，并且通过accessor "phone-numbers"访问它：
+
+<simpleType name="phoneNumber" base="string"/>
+
+<element name="ArrayOfPhoneNumbers">
+  <complexType base="SOAP-ENC:Array">
+    <element name="phoneNumber" type="tns:phoneNumber" maxOccurs="unbounded"/>
+  </complexType>
+  <anyAttribute/>
+</element>
+
+<element name="Person">
+  <complexType>
+    <element name="name" type="string"/>
+    <element name="phoneNumbers" type="tns:ArrayOfPhoneNumbers"/>
+  </complexType>
+</element>
+
+<xyz:Person>
+   <name>John Hancock</name>
+   <phoneNumbers SOAP-ENC:arrayType="xyz:phoneNumber[2]">
+       <phoneNumber>206-555-1212</phoneNumber>
+       <phoneNumber>1-888-123-4567</phoneNumber>
+   </phoneNumbers>
+</xyz:Person>
+
+下面的例子中，数组值为single-reference，被编码为嵌入元素，包含它的元素名即为入口名：
+
+<xyz:PurchaseOrder>
+   <CustomerName>Henry Ford</CustomerName>
+   <ShipTo>
+       <Street>5th Ave</Street>
+       <City>New York</City>
+       <State>NY</State>
+       <Zip>10010</Zip>
+   </ShipTo>
+   <PurchaseLineItems SOAP-ENC:arrayType="Order[2]">
+       <Order>
+           <Product>Apple</Product>
+           <Price>1.56</Price>
+       </Order>
+       <Order>
+           <Product>Peach</Product>
+           <Price>1.48</Price>
+       </Order>
+   </PurchaseLineItems>
+</xyz:PurchaseOrder>
+
+5.4.2.1 部分储值（partially transmitted）数组 
+SOAP提供了对部分储值（partially transmitted）数组的支持，如某些上下文中的可变数组。一个partially transmitted 数组由一个"SOAP-ENC:offset"属性（从第一个transmitted的元素开始的偏移量，基于0）指示。如果省略，偏移量取0。
+
+下面的例子中数组的大小为5，但只有从0起，第三和第四个元素被储值。
+
+<SOAP-ENC:Array ;SOAP-ENC:arrayType="xsd:string[5]" ;SOAP-ENC:offset="[2]"> 
+  <item>The third element</item>   
+  <item>The fourth element</item>
+</SOAP-ENC:Array>
+
+5.4.2.2 稀疏数组Sparse Arrays
+SOAP提供了对稀疏数组的支持。每个表示成员值的元素包含一个"SOAP-ENC:position"属性，用来指示它在数组中的位置。下例是两维字符串稀疏数组的例子，数组大小是4，但只用到第2个。
+
+<SOAP-ENC:Array SOAP-ENC:arrayType="xsd:string[,][4]">
+   <SOAP-ENC:Array href="#array-1" SOAP-ENC:position="[2]"/>
+</SOAP-ENC:Array>
+<SOAP-ENC:Array id="array-1" SOAP-ENC:arrayType="xsd:string[10,10]">
+   <item SOAP-ENC:position="[2,2]">Third row, third col</item>
+   <item SOAP-ENC:position="[7,2]">Eighth row, third col</item>
+</SOAP-ENC:Array>
+
+如果对array-1的引用仅发生在数组内部，上例也可以编码如下：
+
+<SOAP-ENC:Array SOAP-ENC:arrayType="xsd:string[,][4]">
+  <SOAP-ENC:Array SOAP-ENC:position="[2]" SOAP-ENC:arrayType="xsd:string[10,10]>
+    <item SOAP-ENC:position="[2,2]">Third row, third col</item>
+    <item SOAP-ENC:position="[7,2]">Eighth row, third col</item>
+  </SOAP-ENC:Array>
+</SOAP-ENC:Array>
+
+5.4.3 一般复合类型
+在这里提到的编码规则不仅仅限于accessor名已知的情况，如果accessor名是运行环境下实时获得的，编码规则同样适用，也就是说accessor编码成一个元素名与accessor名匹配的元素，同时accessor可能包含或者引用该元素的值。如果accessor包含类型不能事先确定的值，它必须包含一个合适的属性xsi:type 。
+类似地，上述引用的规则已经足够用于复合类型的序列化，这些复合类型可能包含用名区分的accessors（结构）和用名及序数位置区分的accessors。（可能包含重复的accessor）实际上这并不要求任何schema模式包含这些类型，但更为准确的说法是：一个类型模型（type-model）schema如果有这些类型，就可以构造一个符合XML句法规则的schema和XML文档实例。 
+
+　
+
+<xyz:PurchaseOrder>
+   <CustomerName>Henry Ford</CustomerName>
+   <ShipTo>
+       <Street>5th Ave</Street>
+       <City>New York</City>
+       <State>NY</State>
+       <Zip>10010</Zip>
+   </ShipTo>
+   <PurchaseLineItems>
+       <Order>
+           <Product>Apple</Product>
+           <Price>1.56</Price>
+       </Order>
+       <Order>
+           <Product>Peach</Product>
+           <Price>1.48</Price>
+       </Order>
+   </PurchaseLineItems>
+</xyz:PurchaseOrder>
+
+类似地，将一个结构上类似数组但实际上不是一个 SOAP-ENC:Array类型或者 SOAP-ENC:Array子类型的复合值序列化同样是允许的，例如：
+
+<PurchaseLineItems>
+    <Order>
+        <Product>Apple</Product>
+        <Price>1.56</Price>
+    </Order>
+    <Order>
+        <Product>Peach</Product>
+        <Price>1.48</Price>
+    </Order>
+</PurchaseLineItems>
+
+5.5 缺省值 
+省略accessor元素意味着或者有一个缺省值或者值不知道。具体细节依靠这个accessor，方法和上下文。例如，对于多态accessor，省略accessor一般意味着一个Null值。同样，省略布尔accessor一般意味着False值或者值不知道，省略数字accessor一般意味着值为零或者值不知道。
+
+5.6 SOAP root属性
+SOAP root 属性可用于标记一个序列化root，从而一个对象可以反序列化（deserialized），而实际上该root并不是真正的对象root。这个属性有两个可选值"1" or "0"。对象真正的roots属性值为“1” ，序列化root但不是真正的root属性值也为“1”，元素如果要显式地指定不能为序列化root，只需将该属性设置为“0” SOAP root属性可以出现在SOAP头和SOAP体元素的任意子元素中。（译者注：SOAP root属性为0的元素不是一个独立的实体，外部的应用不能访问到该元素，但该元素可以被SOAP文档本身的其它元素访问到）
+
+SOAP root属性可以出现在SOAP头和SOAP体元素的任意子元素中。这个属性没有缺省值。

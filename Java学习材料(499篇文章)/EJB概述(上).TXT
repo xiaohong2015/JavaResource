@@ -1,0 +1,73 @@
+作者：asp2001
+email: asp2001@163.net
+日期：00-7-4 下午 07:29:04
+EJB概述(上)
+2000-05-15· ilamei·cpcw
+
+概述：
+
+本节包括了一下主要内容：
+
+EJB的体系结构：介绍了EJB技术的体系结构。
+
+为什么使用EJB容器
+
+EJB的体系结构：
+
+　　EJB的上层的分布式应用程序是基于对象组件模型的，低层的事务服务用了API技术。EJB技术简化了用JAVA语言编写的企业应用系统的开发，配置，和执行。EJB的体系结构的规范由Sun Microsystems公司制定。Inprise的EJB容器是基于1.1版的规范。
+
+　　EJB技术定义了一组可重用的组件：Enterprise Beans。你可以利用这些组件，象搭积木一样的建立你的分布式应用程序。当你把代码写好之后，这些组件就被组合到特定的文件中去。每个文件有一个或多个Enterprise Beans，在加上一些配置参数。最后，这些Enterprise Beans被配置到一个装了EJB容器的平台上。客户能够通过这些Beans的home接口，定位到某个beans，并产生这个beans的一个实例。这样，客户就能够调用Beans的应用方法和远程接口。
+
+　　EJB服务器作为容器和低层平台的桥梁管理着EJB容器和函数。它向EJB容器提供了访问系统服务的能力。例如：数据库的管理和事务的管理，或者对于其它的Enterprise的应用服务器。
+
+　　所有的EJB 实例都运行在EJB容器中。容器提供了系统级的服务，控制了EJB的生命周期。因为容器掌握了绝大多数系统级的issues(呵呵，不知道怎么翻译)。Enterprise Beans 的开发者不需要应用逻辑考虑进来。通常来说，EJB容器掌握了以下的系统级issues.
+
+　　1、Security--配置描述器（The Deployment descriptor）定义了客户能够访问的不同的应用函数。容器通过只允许授权的客户访问这些函数来达到这个效果。
+
+　　2、Remote Connectivity--容器为远程链接管理着低层的通信issues，而且对Enterprise Beas的开发者和客户都隐藏了通信issues.Enterprise Beans的开发者在编写应用方法的时候，就象是在条用本地的平台一样的。客户也不清楚他们调用的方法可能是在远程被处理的。
+
+　　3、Life Cycle managment--客户简单的创建一个Enterprise beans的实例，并通常取消一个实例。而容器管理着Enterprise Beans的实例，使Enterprise Beans实现最大的效能和内存利用率。容器能够这样来激活和去活Enterprise Beans，保持众多客户共享的实例池。等等。
+
+　　4、Trasction management—配置描述器定义了Enterprise beans 的事务处理的需求。容器管理着那些管理分布式事务处理的复杂的issues。这些事务可能要在不同的平台之间更新数据库。容器使这些事务之间互相独立，互不干扰。保证所有的更新数据库都是成功发生的，否者，就回滚到事务处理之前的状态。
+
+Enterprise Beans 组件：
+
+Enterprise Beans 是基于分布式事务处理的企业级应用程序的组件。所有的Enterprise beans都有如下的特点：
+
+Enterprise beans包含了处理企业数据的应用逻辑。 
+Enterprise beans provider定义了Enterprise beans的客户界面（Enterprise beans 的远程界面）。这样的界面不受容器和服务器的影响。于是，当一个Enterprise beans被集合到一个应用程序中去时，不用更改代码和重新编译。 
+Enterprise beans能够被定制 
+各种系统级的服务，例如安全和事务处理的特性，都不是属于Enterprise beans class的。而是由配置和组装应用程序的工具来实现。 
+有两种类型的Enterprise beans: Session beans 和 entity beans.
+
+Session beans:
+
+　　Session beans 是一种作为单个的client执行的对象。作为对远程的任务请求的相应，容器产生一个Session beans 的实例。一个Session beans有一个client.从某种程度上来说，一个Session bean 对于服务器来说就代表了它的那个client.Session beans 也能用于事务，它能够更新共享的数据，但它不直接描绘这些共享的数据。
+
+　　Session beans 的生命周期是相对较短的。典型的是，只有当client保持会话的时候，Session beans 才是活着的。一旦client退出了，Session beans 就不再与client相联系了。Session beans被看成是瞬时的，因为如果容器崩溃了，那么client必须重新建立一个新的Session对象来继续会话。
+
+　　一个Session bean典型的声明了与client的互操作或者会话。也就是说，Session bean了在客户会话期间，通过方法的调用，掌握Client的信息。一个具有状态的Session bean称为有状态的Session bean.当client终止与Session beans互操作的时候.会话终止了，而且，bean 也不再拥有状态值。
+
+　　一个Session bean也可能是一个无状态的 session bean.无状态的Session beans并不掌握它的客户的信息或者状态。Client能够调用beans的方法来完成一些操作。但是，beans只是在方法调用的时候才知道client的参数变量。当方法调用完成以后，beans并不继续保持这些参数变量。这样，所有的无状态的session beans的实例都是相同的，除非它正在方法调用期间。这样，无状态的Session beans就能够支持多个client.容器能够声明一个无状态的Session beans.能够将任何Session beans指定给任何client.
+
+Entity Beans:
+
+　　Entity Beans对数据库中的数据提供了一种对象的视图。例如：一个Entity bean能够模拟数据库表中一行相关的数据。多个client能够共享访问同一个Entity bean.多个client也能够同时的访问同一个Entity bean.Entity beans通过事务的上下文来访问或更新下层的数据。这样，数据的完整性就能够被保证。
+
+　　Entity Beans能存活相对教长的时间，并且状态是持续的。只要数据库中的数据存在，Entity beans就一直存活。而不是按照应用程序或者服务进程来说的。即使EJB容器崩溃了，Entity beans也是存活的。Entity Beans生命周期能够被容器或者 Beans自己管理。如果由容器控制着保证 Entity beans持续的issus。如果由Beans自己管理，就必须写Entity beans的代码，包括访问数据库的调用。
+
+　　Entity Beans是由主键（primary key 一种唯一的对象标识符）标识的。通常，主键与标识数据库中的一块数据，例如一个表中的一行，的主键是相同的。主键是client能够定位特定的数据块。
+
+EJB roles:
+
+　　EJB体系结构通过把编程的过程分为6个不同的角色而使开发复杂的的应用系统变的简单。6个不同的角色，每个都有特定的任务。6个角色包括下层的服务，应用程序的开发，配置和操作说明（issues）
+
+　　EJB体系结构能够简化应用程序开发人员的工作。在EJB体系结构中，容器和代理服务承担了很多在其他环境中又程序设计人员承担的工作。这样的代理提供了很多原来需要程序设计人员编写代码的系统级的服务。
+
+Infrastructure roles;（下层构造角色）
+
+　　EJB Server Providor服务提供者是典型的提供分布式低层服务的代理。EJB服务提供者提供了一个分布式应用程序开发者需要的平台和设施。也提供了分布式程序的运行时环境。
+
+　　EJB Container Providor 容器提供者是分布式系统，事务处理，安全方面的专家容器提供者提供了一个EJB的配置工具，和这些配置实例的运行时支持。
+
+　　一个容器对一个或多个EJB来说，是一个运行时系统。它将Enterprise Beans和EJB服务，包括事务服务，安全服务，分布式网络管理等胶合在一起。容器是既是一个定制的代码和对特定的 Enterprise beans产生详细代码的工具。容器也提供了一个配置Enterprise beans的工具和管理监视应用程序的方法。

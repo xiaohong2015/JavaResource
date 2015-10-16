@@ -1,0 +1,116 @@
+作者：jeru
+email: jeru@163.net
+日期：7/3/2001 9:54:36 AM
+4) Language Fundamentals 
+Objective 1) 
+Identify correctly constructed package declarations import statements class declarations (of all forms including inner classes) interface declarations and implementations (for java.lang.Runnable or other interface described in the test) method declarations (including the main method that is used to start execution of a class) variable declarations and identifiers.
+1.	Source file’s elements (in order)
+a.	Package declaration
+b.	Import statements
+c.	Class definitions
+2.	Importing packages doesn’t recursively import sub-packages.
+3.	Sub-packages are really different packages, happen to live within an enclosing package. Classes in sub-packages cannot access classes in enclosing package with default access.
+4.	Comments can appear anywhere. Can’t be nested.(No matter what type of comments)
+5.	At most one public class definition per file. This class name should match the file name. If there are more than one public class definitions, compiler will accept the class with the file’s name and give an error at the line where the other class is defined.
+6.	It’s not required having a public class definition in a file. Strange, but true. J In this case, the file’s name should be different from the names of classes and interfaces (not public obviously). 
+7.	A file can contain multiple non public classes, but bear in mind that this will produce separate .class output files for each class. 
+8.	Even an empty file is a valid source file.
+9.	In order to be run by JVM, a class should have a main method with the following signature.
+public static void main(String args[])
+static public void main(String[] s)
+10.	args array’s name is not important. args[0] is the first argument. args.length gives no. of arguments.
+11.	main method can be overloaded. 
+12.	main method can be final.
+13.	A class with a different main signature or w/o main method will compile. But throws a runtime error.
+14.	A class without a main method can be run by JVM, if its ancestor class has a main method. (main is just a method and is inherited)
+
+15.	An identifier must begin with a letter, dollar sign ($) or underscore (_). Subsequent characters may be letters, $, _ or digits.
+16.	Currency symbols are treated as any other alphabetic character for the sake of naming identifiers (e.g., &pound;347_00, &micro;18, and &yen;Price are acceptable).
+17.	An identifier cannot have a name of a Java keyword. Embedded keywords are OK. true, false and null are literals (not keywords), but they can’t be used as identifiers as well.  
+18.	const and goto are reserved words, but not used.
+19.	Unicode characters can appear anywhere in the source code. The following code is valid.
+	ch\u0061r a = 'a';
+	char \u0062 = 'b';
+	char c = '\u0063';
+19. \u000a and \u000d will give compile error, use \n and \r instead.
+
+Interfaces
+·	All methods in an interface are implicitly public, abstract, and never static.(cannot has other modifier)
+·	All variables in an interface are implicitly static, public, final. They cannot be transient or volatile. A class can shadow the variables it inherits from an interface, with its own variables.
+·	A top-level interface itself cannot be declared as static or final since it doesn’t make sense.
+·	A nested interface is any interface whose declaration occurs within the body of another class or interface.  In class, it can be private, but in interface, it has to be public.
+·	A compile-time error occurs if an interface has the same simple name as any of its enclosing classes or interfaces.
+·	Classes cannot implement an interface method with a static method, and the method has to be public.
+·	If an interface specifies an exception list for a method, then the class implementing the interface need not declare the method with the exception list. But if the interface didn’t specify any exception list for a method, then the class cannot throw any exceptions.
+·	A class can implement two interfaces that have a method with the same signature or variables with the same name.
+·	An interface can extends more than one interfaces.
+·	interfaces are not instantiated with new, but you can declare as,
+test t = new A(); // class A  implements test
+
+Objective 2) 
+State the correspondence between index values in the argument array passed to a main method and command line arguments.
+This objective can catch out the more experienced C/C++ programmer because the first element of argv[] is the first string after the name of the program on the command line.
+
+Objective 3) 
+Identify all Java programming language keywords.
+A new keyword:  strictfp
+true, false and null are literals (not keywords), but they can’t be used as identifiers as well.
+
+Abstract		boolean		break		byte		case		catch 
+Char		class		const		continue		default		do   
+Double		else		extends		final		finally		float   
+For		goto		if 		implements	import		instanceof   
+Int		interface		long 		native		new 		package   
+Private		protected 	public		return 		short		static  
+super 		switch		synchronized 	this 		throw 		throws   
+transient		try 		void 		volatile		while
+
+Objective4) 
+State the effect of using a variable or array element of any kind when no explicit assignment has been made to it.
+The default values for numeric types is zero, a boolean is false and an object reference is the only type that defaults to a null.
+
+The value of the elements of an array of any base type will always be initialised to a default value, wherever the array is defined.
+
+Objective 5) 
+State the range of all primitive data types and declare literal values for String and all primitive types using all permitted formats, bases and representations.
+1.	Java has 8 primitive data types.
+
+Data Type	Size (bits)	Initial Value	Min Value	Max Value
+boolean	1	false	 false	true
+byte	8	0	-128 (-27)	127 (27 – 1)
+short	16	0	-215 	215 - 1
+char	16	‘\u0000’	‘\u0000’ (0)	‘\uFFFF’ (216 – 1)
+int	32	0	-231 	231 - 1
+long	64	0L	-263 	263 - 1
+float	32	0.0F	1.4E-45	3.4028235E38
+double	64	0.0	4.9E-324	1.7976931348623157E308
+
+2.	All numeric data types are signed. char is the only unsigned integral type.
+3.	The char type can be used to denote a Unicode character. Unicode is an alternative to ASCII that stores characters in 2 bytes instead of the 1 byte of ASCII(7 bits). This gives you 65K worth of characters,
+4.	Octal literals begin with zero. Hex literals begin with 0X or 0x. 
+5.	Char literals are single quoted characters or unicode values (begin with \u).
+6.	A number is by default an int literal, a decimal number is by default a double literal.
+7.	1E-5d is a valid double literal, E2d is not (since it starts with a letter, compiler thinks that it’s an identifier)
+8.	Primitives are passed by value.
+9.	Objects (references) are passed by reference. The object reference itself is passed by value. So, it can’t be changed. But, the object can be changed via the reference.
+
+
+·	Every primitive type has a wrapper class (some names are different – Integer, Boolean, Character)
+·	Wrapper class objects are immutable.
+·	All Wrapper classes are public, final, seriazible.
+·	Integer, Long, Byte, Short, Double and Float extends java.lang.Number implements Comparable.
+·	Character implements Comparable, Boolean doesn’t.
+·	All wrapper classes, except Character, have a constructor accepting string. A Boolean object, created by passing a string, will have a value of false for any input other than “true” (case doesn’t matter).
+·	Numeric wrapper constructors will throw a NumberFormatException, if the passed string is not a valid number. (empty strings and null strings also throw this exception)
+·	equals also tests the class of the object, so even if an Integer object and a Long object are having the same value, equals will return false.
+·	NaN’s can be tested successfully with equals method. 
+Float f1 = new Float(Float.NaN);
+Float f2 = new Float(Float.NaN);
+System.out.println( ""+ (f1 == f2)+"  "+f1.equals(f2)+ "  "+(Float.NaN == Float.NaN) );
+The above code will print false true false.
+·	Numeric wrappers have 6 methods to return the numeric value – intValue(), longValue(), etc.
+·	valueOf method parses an input string (optionally accepts a radix in case of int and long) and returns a new instance of wrapper class, on which it was invoked. It’s a static method. For empty/invalid/null strings it throws a NumberFormatException. For null strings valueOf in Float and Double classes throw NullPointerException.
+·	parseInt and parseLong return primitive int and long values respectively, parsing a string (optionally a radix). Throw a NumberFormatException for invalid/empty/null strings.
+·	Numeric wrappers have overloaded toString methods, which accept corresponding primitive values (also a radix in case of int,long) and return a string.
+·	Void class represents void primitive type. It’s not instantiable. Just a placeholder class.
+

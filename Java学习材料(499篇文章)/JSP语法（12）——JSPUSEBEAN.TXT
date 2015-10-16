@@ -1,0 +1,47 @@
+作者：风之彩
+email: zhonggb@163.net
+日期：2001-6-29 14:34:02
+<jsp:useBean> 
+
+创建一个Bean实例并指定它的名字和作用范围. 
+
+
+JSP 语法
+<jsp:useBean 
+
+id="beanInstanceName" 
+
+scope="page | request | session | application" 
+
+{ 
+
+class="package.class" | 
+
+type="package.class" | 
+
+class="package.class" type="package.class" | 
+
+beanName="{package.class | <%= expression %>}" type="package.class" 
+
+} 
+
+  { 
+
+/> | 
+
+> other elements </jsp:useBean> 
+
+} 
+
+例子
+
+<jsp:useBean id="cart" scope="session" class="session.Carts" /> 
+
+<jsp:setProperty name="cart" property="*" /> 
+
+<jsp:useBean id="checking" scope="session" class="bank.Checking" > 
+
+<jsp:setProperty name="checking" property="balance" value="0.0" /> 
+
+</jsp:useBean> 
+

@@ -1,0 +1,192 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：2001-6-15 13:22:02
+[BLOCKQUOTE][BLOCKQUOTE][BLOCKQUOTE]
+[b]Java 编程技术中汉字问题的分析及解决[/b]
+[b][/b][/BLOCKQUOTE][/BLOCKQUOTE][/BLOCKQUOTE]
+段明辉
+自由撰稿人
+2000 年 11月 8日
+[TABLE][TR][TD][#ffffff][B]内容:[/B][/#][/TD][/TR][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#1]汉字编码的常识[/url][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#2]Java 中文问题的初步认识[/url][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#3]Java 中文问题的表层分析及处理[/url][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#4]Java 中文问题的根源分析及解决[/url][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#5]Java Servlet 中文问题的根源[/url][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#6]修改 Servlet.jar[/url][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#7]中文乱码的处理函数[/url][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#resources]参考资料[/url][/TD][/TR][TR][TD] [url href=http://www.cn.ibm.com/developerWorks/java/java_chinese/index.shtml#author]作者简介[/url][/TD][/TR][TR][TD][img]http://www.cn.ibm.com/developerWorks/i/c.gif[/img][/TD][/TR][/TABLE]
+在基于 Java 语言的编程中，我们经常碰到汉字的处理及显示的问题。一大堆看不懂的乱码肯定不是我们愿意看到的显示效果，怎样才能够让那些汉字正确显示呢？Java 语言默认的编码方式是UNICODE ，而我们中国人通常使用的文件和数据库都是基于 GB2312 或者 BIG5 等方式编码的，怎样才能够恰当地选择汉字编码方式并正确地处理汉字的编码呢？本文将从汉字编码的常识入手，结合 Java 编程实例，分析以上两个问题并提出解决它们的方案。
+
+现在 Java 编程语言已经广泛应用于互联网世界，早在 Sun 公司开发 Java 语言的时候，就已经考虑到对非英文字符的支持了。Sun 公司公布的 Java 运行环境（JRE）本身就分英文版和国际版，但只有国际版才支持非英文字符。不过在 Java 编程语言的应用中，对中文字符的支持并非如同 Java Soft 的标准规范中所宣称的那样完美，因为中文字符集不只一个，而且不同的操作系统对中文字符的支持也不尽相同，所以会有许多和汉字编码处理有关的问题在我们进行应用开发中困扰着我们。有很多关于这些问题的解答，但都比较琐碎，并不能够满足大家迫切解决问题的愿望，关于 Java 中文问题的系统研究并不多，本文从汉字编码常识出发，分析 Java 中文问题，希望对大家解决这个问题有所帮助。
+[B]汉字编码的常识[/B] 
+我们知道，英文字符一般是以一个字节来表示的，最常用的编码方法是 ASCII 。但一个字节最多只能区分256个字符，而汉字成千上万，所以现在都以双字节来表示汉字，为了能够与英文字符分开，每个字节的最高位一定为1，这样双字节最多可以表示64K格字符。我们经常碰到的编码方式有 GB2312、BIG5、UNICODE 等。关于具体编码方式的详细资料，有兴趣的读者可以查阅相关资料。我肤浅谈一下和我们关系密切的 GB2312 和 UNICODE。GB2312 码，中华人民共和国国家标准汉字信息交换用编码，是一个由中华人民共和国国家标准总局发布的关于简化汉字的编码，通行于中国大陆地区及新加坡，简称国标码。两个字节中，第一个字节（高字节）的值为区号值加32（20H），第二个字节（低字节）的值为位号值加32（20H），用这两个值来表示一个汉字的编码。UNICODE 码是微软提出的解决多国字符问题的多字节等长编码，它对英文字符采取前面加“0”字节的策略实现等长兼容。如 “A” 的 ASCII 码为0x41，UNICODE 就为0x00，0x41。利用特殊的工具各种编码之间可以互相转换。
+[B]Java 中文问题的初步认识[/B] 
+我们基于 Java 编程语言进行应用开发时，不可避免地要处理中文。Java 编程语言默认的编码方式是 UNICODE，而我们通常使用的数据库及文件都是基于 GB2312 编码的，我们经常碰到这样的情况：浏览基于 JSP 技术的网站看到的是乱码，文件打开后看到的也是乱码，被 Java 修改过的数据库的内容在别的场合应用时无法继续正确地提供信息。 
+String sEnglish = “apple”; 
+String sChinese = “苹果”; 
+String s = “苹果 apple ”; 
+sEnglish 的长度是5，sChinese的长度是4，而 s 默认的长度是14。对于 sEnglish来说， Java 中的各个类都支持得非常好，肯定能够正确显示。但对于 sChinese 和 s 来说，虽然 Java Soft 声明 Java 的基本类已经考虑到对多国字符的支持（默认 UNICODE 编码），但是如果操作系统的默认编码不是 UNICODE ，而是国标码等。从 Java 源代码到得到正确的结果，要经过 “Java 源代码-> Java 字节码-> ;虚拟机->操作系统->显示设备”的过程。在上述过程中的每一步骤，我们都必须正确地处理汉字的编码，才能够使最终的显示结果正确。 
+“ Java 源代码-> Java 字节码”，标准的 Java 编译器 javac 使用的字符集是系统默认的字符集，比如在中文 Windows 操作系统上就是 GBK ,而在 Linux 操作系统上就是ISO-8859-1，所以大家会发现在 Linux 操作系统上编译的类中源文件中的中文字符都出了问题，解决的办法就是在编译的时候添加 encoding 参数，这样才能够与平台无关。用法是 
+javac –encoding GBK。 
+“ Java 字节码->虚拟机->操作系统”， Java 运行环境 （JRE） 分英文版和国际版，但只有国际版才支持非英文字符。 Java 开发工具包 （JDK） 肯定支持多国字符，但并非所有的计算机用户都安装了 JDK 。很多操作系统及应用软件为了能够更好的支持 Java ，都内嵌了 JRE 的国际版本，为自己支持多国字符提供了方便。 
+“操作系统->显示设备”，对于汉字来说，操作系统必须支持并能够显示它。英文操作系统如果不搭配特殊的应用软件的话，是肯定不能够显示中文的。 
+还有一个问题，就是在 Java 编程过程中，对中文字符进行正确的编码转换。例如，向网页输出中文字符串的时候，不论你是用 
+out.println(string);       // string 是含中文的字符串 
+还是用 
+<%=string%>，都必须作 UNICODE 到 GBK 的转换，或者手动，或者自动。在 JSP 1.0中，可以定义输出字符集，从而实现内码的自动转换。用法是 
+<%@page ContentType=”text/html;charset=gb2312” %> 
+但是在一些 JSP 版本中并没有提供对输出字符集的支持，（例如 JSP 0.92），这就需要手动编码输出了，方法非常多。最常用的方法是 
+String s1 = request.getParameter(“keyword”); 
+String s2 = new String(s1.getBytes(“ISO-8859-1”),”GBK”); 
+getBytes 方法用于将中文字符以“ISO-8859-1”编码方式转化成字节数组，而“GBK” 是目标编码方式。我们从以ISO-8859-1方式编码的数据库中读出中文字符串 s1 ，经过上述转换过程，在支持 GBK 字符集的操作系统和应用软件中就能够正确显示中文字符串 s2 。 
+[B]Java 中文问题的表层分析及处理[/B] [TABLE][TR][TD]
+背景 [/TD][/TR][TR][TD]
+开发环境 [/TD][TD]
+JDK1.15 [/TD][TD]
+Vcafe2.0 [/TD][TD]
+JPadPro [/TD][/TR][TR][TD]
+服务器端 [/TD][TD]
+NT IIS [/TD][TD]
+Sybase System [/TD][TD]
+Jconnect（JDBC） [/TD][/TR][TR][TD]
+客户端 [/TD][TD]
+IE5.0 [/TD][TD]
+Pwin98 [/TD][TD]
+  [/TD][/TR][/TABLE]
+.CLASS 文件存放在服务器端，由客户端的浏览器运行 APPLET ， APPLET 只起调入 FRAME 类等主程序的作用。界面包括 Textfield ，TextArea，List，Choice 等。 
+I.       取中文 
+用 JDBC 执行 SELECT 语句从服务器端读取数据（中文）后，将数据用 APPEND 方法加到 TextArea（TA） ，不能正确显示。但加到 List 中时，大部分汉字却可正确显示。 
+将数据按“ISO-8859-1” 编码方式转化为字节数组，再按系统缺省编码方式 （Default Character Encoding） 转化为 STRING ，即可在 TA 和 List 中正确显示。 
+程序段如下： 
+dbstr2 = results.getString(1); 
+//After reading the result from DB server，converting it to string. 
+dbbyte1 = dbstr2.getBytes(“iso-8859-1”); 
+dbstr1 = new String(dbbyte1); 
+在转换字符串时不采用系统默认编码方式，而直接采用“ GBK” 或者 “GB2312” ,在 A 和 B 两种情况下，从数据库取数据都没有问题。 
+II.    写中文到数据库 
+处理方式与“取中文”相逆，先将 SQL 语句按系统缺省编码方式转化为字节数组，再按“ISO-8859-1”编码方式转化为 STRING ，最后送去执行，则中文信息可正确写入数据库。 
+程序段如下： 
+sqlstmt = tf_input.getText(); 
+//Before sending statement to DB server，converting it to sql statement. 
+dbbyte1 = sqlstmt.getBytes(); 
+sqlstmt = newString(dbbyte1,”iso-8859-1”); 
+_stmt = _con.createStatement(); 
+_stmt.executeUpdate(sqlstmt); 
+…… 
+问题：如果客户机上存在 CLASSPATH 指向 JDK 的 CLASSES.ZIP 时（称为 A 情况），上述程序代码可正确执行。但是如果客户机只有浏览器，而没有 JDK 和 CLASSPATH 时（称为 B 情况），则汉字无法正确转换。 
+我们的分析： 
+1.经过测试，在 A 情况下，程序运行时系统的缺省编码方式为 GBK 或者 GB2312 。在 B 情况下，程序启动时浏览器的 JAVA 控制台中出现如下错误信息： 
+Can't find resource for sun.awt.windows.awtLocalization_zh_CN 
+然后系统的缺省编码方式为“8859-1”。 
+2.如果在转换字符串时不采用系统缺省编码方式，而是直接采用 “GBK” 或“GB2312”，则在 A 情况下程序仍然可正常运行，在 B 情况下，系统出现错误： 
+UnsupportedEncodingException。 
+3.在客户机上，把 JDK 的 CLASSES.ZIP 解压后，放在另一个目录中， CLASSPATH 只包含该目录。然后一边逐步删除该目录中的 .CLASS 文件，另一边运行测试程序，最后发现在一千多个 CLASS 文件中，只有一个是必不可少的，该文件是： 
+sun.io.CharToByteDoubleByte.class。 
+将该文件拷到服务器端和其它的类放在一起，并在程序的开头 IMPORT 它，在 B 情况下程序仍然无法正常运行。 
+4.在 A 情况下，如果在 CLASSPTH 中去掉 sun.io.CharToByteDoubleByte.class ，则程序运行时测得默认编码方式为“8859-1”，否则为 “GBK” 或 “GB2312” 。 
+如果 JDK 的版本为1.2以上的话，在 B 情况下遇到的问题得到了很好的解决，测试的步骤同上，有兴趣的读者可以尝试一下。 
+[B]Java 中文问题的根源分析及解决[/B] 
+在简体中文 MS Windows 98 + JDK 1.3 下，可以用 System.getProperties() 得到 Java 运行环境的一些基本属性，类 PoorChinese 可以帮助我们得到这些属性。 
+类 PoorChinese 的源代码： 
+public class PoorChinese { 
+   public static void main(String[] args) { 
+       System.getProperties().list(System.out); 
+   } 
+} 
+执行 java PoorChinese 后，我们会得到: 
+系统变量 file.encoding 的值为 GBK ，user.language 的值为 zh ， user.region 的值为 CN ，这些系统变量的值决定了系统默认的编码方式是 GBK 。 
+在上述系统中，下面的代码将 GB2312 文件转换成 Big5 文件，它们能够帮助我们理解 Java 中汉字编码的转化: 
+  
+import java.io.*; 
+import java.util.*; 
+  
+public class gb2big5 { 
+  
+static int iCharNum=0; 
+  
+public static void main(String[] args) { 
+System.out.println("Input GB2312 file, output Big5 file."); 
+if (args.length!=2) { 
+System.err.println("Usage: jview gb2big5 gbfile big5file"); 
+System.exit(1); 
+   } 
+String inputString = readInput(args[0]); 
+writeOutput(inputString,args[1]); 
+System.out.println("Number of Characters in file: "+iCharNum+"."); 
+} 
+  
+static void writeOutput(String str, String strOutFile) { 
+try { 
+FileOutputStream fos = new FileOutputStream(strOutFile); 
+Writer out = new OutputStreamWriter(fos, "Big5"); 
+out.write(str); 
+out.close(); 
+} 
+catch (IOException e) { 
+e.printStackTrace(); 
+e.printStackTrace(); 
+} 
+} 
+  
+static String readInput(String strInFile) { 
+StringBuffer buffer = new StringBuffer(); 
+try { 
+FileInputStream fis = new FileInputStream(strInFile); 
+InputStreamReader isr = new InputStreamReader(fis, "GB2312"); 
+Reader in = new BufferedReader(isr); 
+int ch; 
+while ((ch = in.read()) > -1) { 
+iCharNum += 1; 
+buffer.append((char)ch); 
+} 
+in.close(); 
+return buffer.toString(); 
+} 
+catch (IOException e) { 
+e.printStackTrace(); 
+return null; 
+} 
+} 
+} 
+  
+编码转化的过程如下： 
+       ByteToCharGB2312         CharToByteBig5 
+GB2312------------------>Unicode------------->Big5 
+执行 java gb2big5 gb.txt big5.txt ，如果 gb.txt 的内容是“今天星期三”，则得到的文件 big5.txt 中的字符能够正确显示；而如果 gb.txt 的内容是“情人节快乐”，则得到的文件 big5.txt 中对应于“节”和“乐”的字符都是符号“？”（0x3F），可见 sun.io.ByteToCharGB2312 和 sun.io.CharToByteBig5 这两个基本类并没有编好。 
+正如上例一样， Java 的基本类也可能存在问题。由于国际化的工作并不是在国内完成的，所以在这些基本类发布之前，没有经过严格的测试，所以对中文字符的支持并不像 Java Soft 所声称的那样完美。前不久，我的一位技术上的朋友发信给我说，他终于找到了[B] Java Servlet 中文问题的根源[/B]。两周以来，他一直为 Java Servlet 的中文问题所困扰，因为每面对一个含有中文字符的字符串都必须进行强制转换才能够得到正确的结果（这好象是大家公认的唯一的解决办法）。后来，他确实不想如此继续安分下去了，因为这样的事情确实不应该是高级程序员所要做的工作，他就找出 Servlet 解码的源代码进行分析，因为他怀疑问题就出在解码这部分。经过四个小时的奋斗，他终于找到了问题的根源所在。原来他的怀疑是正确的， Servlet 的解码部分完全没有考虑双字节，直接把 %XX 当作一个字符。（原来 Java Soft 也会犯这幺低级的错误！） 
+如果你对这个问题有兴趣或者遇到了同样的烦恼的话，你可以按照他的步骤[B]对[/B][B] Servlet.jar 进行修改[/B]： 
+找到源代码 HttpUtils 中的 static private String parseName ，在返回前将 sb（StringBuffer） 复制成 byte bs[] ，然后 return new String(bs,”GB2312”)。作上述修改后就需要自己解码了： 
+HashTable form=HttpUtils .parseQueryString(request.getQueryString())或者 
+form=HttpUtils.parsePostData(……) 
+千万别忘了编译后放到 Servlet.jar 里面。 
+五、 关于 Java 中文问题的总结 
+Java 编程语言成长于网络世界，这就要求 Java 对多国字符有很好的支持。 Java 编程语言适应了计算的网络化的需求，为它能够在网络世界迅速成长奠定了坚实的基础。 Java 的缔造者 （Java Soft） 已经考虑到 Java 编程语言对多国字符的支持，只是现在的解决方案有很多缺陷在里面，需要我们付诸一些补偿性的措施。而世界标准化组织也在努力把人类所有的文字统一在一种编码之中，其中一种方案是 ISO10646 ，它用四个字节来表示一个字符。当然，在这种方案未被采用之前，还是希望 Java Soft 能够严格地测试它的产品，为用户带来更多的方便。 
+[B]附[/B]一个用于从数据库和网络中取出[B]中文乱码的处理函数[/B]，入参是有问题的字符串，出参是问题已经解决了的字符串。 
+        String parseChinese(String in) 
+        { 
+                String s = null; 
+                byte temp []; 
+                if (in == null) 
+                { 
+                        System.out.println("Warn:Chinese null founded!"); 
+                                return new String(""); 
+                } 
+                try 
+                { 
+                        temp=in.getBytes("iso-8859-1"); 
+                        temp=in.getBytes("iso-8859-1"); 
+                        s = new String(temp); 
+                } 
+                { 
+                        System.out.println("Warn:Chinese null founded!"); 
+                                return new String(""); 
+                } 
+                try 
+                { 
+                        temp=in.getBytes("iso-8859-1"); 
+                        s = new String(temp); 
+                } 
+                catch(UnsupportedEncodingException e) 
+                { 
+                        System.out.println (e.toString()); 
+                } 
+                return s; 
+        } 
+
+[b]参考资料[/b][UL][LI][url href=http://smth.org/SMTH2000/bbsdoc?NJava]BBS 水木清华站的 Java 讨论区[/url]
+
+[UL][LI]中国最大的电子公告板的 Java 讨论区，有众多高校的 Java 爱好者在此进行关于 Java 技术的讨论 [/LI][/UL][/LI][/UL]
+[b]作者简介[/b] [UL][LI]段明辉([email]duanmh@dns.ime.tsinghua.edu.cn[/email])，清华大学电子工程系学生 [UL][LI]现在正在清华大学微电子学研究所从事 Java 智能卡微处理器的研究和开发 [LI]领导 BBS 水木清华站的 Java 讨论组，为众多 Java 技术应用者提供解决方案 [/LI][/UL][/LI][/UL]

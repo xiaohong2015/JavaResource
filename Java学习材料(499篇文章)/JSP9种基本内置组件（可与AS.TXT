@@ -1,0 +1,77 @@
+作者：asp2001
+email: asp2001@163.net
+日期：2000-8-11 19:19:47
+基本组件
+
+
+JSP共有以下9种基本内置组件（可与ASP的6种内部组件相对应）： 
+request 用户端请求，此请求会包含来自GET/POST请求的参数 
+response 网页传回用户端的回应 
+pageContext 网页的属性是在这里管理 
+session 与请求有关的会话期 
+application servlet正在执行的内容 
+out 用来传送回应的输出 
+config servlet的构架部件 
+page JSP网页本身 
+exception 针对错误网页，未捕捉的例外 
+
+
+你可以使用它们来存取执行JSP代码的servlet。 为了避免谈论到太多Servlet API 的细节，让我们来检视一些你可以利用它们来做的事: 
+
+不必使用运算式，你可以直接存取内部out物件来列印一些东西到response: 
+<% out.println("Hello"); %>
+不必直接传送参数到JavaBean，你可以按照请求部件来取得参数的值: 
+<% String name=request.getParameter("name");
+
+  out.println(name); %>。 
+
+等等。
+
+以下着重介绍session对象。
+
+　 会话状态维持是 Web 应用开发者必须面对的问题。有多种方法可以用来解决这个问题，如使用 Cookies 、隐藏的表单输入域，或直接将状态信息附加到 URL 中。Java Servlet 提供了一个在多个请求之间持续有效的会话对象，该对象允许用户存储和提取会话状态信息。JSP也同样支持Servlet中的这个概念。 
+　 在 Sun 的 JSP 指南 中可以看到许多有关隐含对象的说明（隐含的含义是，这些对象可以直接引用，不需要显式地声明，也不需要专门的代码创建其实例）。例如 request 对象，它是 HttpServletRequest 的一个子类。该对象包含了所有有关当前浏览器请求的信息，包括 Cookies ， HTML 表单变量等等。 session 对象也是这样一个隐含对象。这个对象在第一个 JSP 页面被装载时自动创建，并被关联到 request 对象上。与 ASP 中的会话对象相似， JSP 中的 session 对象对于那些希望通过多个页面完成一个事务的应用是非常有用的。 
+　　 为说明 session 对象的具体应用，接下来我们用三个页面模拟一个多页面的 Web 应用。第一个页面（ q1.html ）仅包含一个要求输入用户名字的 HTML 表单，代码如下： 
+　 < HTML>
+　 < BODY>
+　 < FORM METHOD=POST ACTION="q2.jsp">
+　请输入您的姓名： 
+　 < INPUT TYPE=TEXT NAME="thename">
+　 < INPUT TYPE=SUBMIT VALUE="SUBMIT">
+　 < /FORM>
+　 < /BODY>
+　 < /HTML>
+　　 第二个页面是一个 JSP 页面（ q2.jsp ），它通过 request 对象提取 q1.html 表单中的 thename 值，将它存储为 name 变量，然后将这个 name 值保存到 session 对象中。 session 对象是一个名字 / 值对的集合，在这里，名字 / 值对中的名字为“ thename ”，值即为 name 变量的值。由于 session 对象在会话期间是一直有效的，因此这里保存的变量对后继的页面也有效。 q2.jsp 的另外一个任务是询问第二个问题。下面是它的代码： 
+　 < HTML>
+　 < BODY>
+　 < %@ page language="java" %>
+　 < %! String name=""; %>
+　 < % 
+　 name = request.getParameter("thename");
+　 session.putValue("thename", name); 
+　 %>
+　您的姓名是： < %= name %>
+　 < p>
+　 < FORM METHOD=POST ACTION="q3.jsp">
+　您喜欢吃什么 ? 
+　 < INPUT TYPE=TEXT NAME="food">
+　 < P>
+　 < INPUT TYPE=SUBMIT VALUE="SUBMIT">
+　 < /FORM>
+　 < /BODY>
+　 < /HTML>
+　　 第三个页面也是一个 JSP 页面（ q3.jsp ），主要任务是显示问答结果。它从 session 对象提取 thename 的值并显示它，以此证明虽然该值在第一个页面输入，但通过 session 对象得以保留。 q3.jsp 的另外一个任务是提取在第二个页面中的用户输入并显示它： 
+　 < HTML>
+　 < BODY>
+　 < %@ page language="java" %>
+　 < %! String food=""; %>
+　 < %
+　 food = request.getParameter("food");
+　 String name = (String) session.getValue("thename");
+　 %>
+　您的姓名是： < %= name %>
+　 < P>
+　您喜欢吃： < %= food %>
+　 < /BODY>
+　 < /HTML>
+

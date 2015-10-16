@@ -1,0 +1,176 @@
+作者：87zd
+日期：2001-3-25 13:31:29
+来源：www.jspsky.com　发布时间：2001-03-25　阅读次数：3 
+
+    从去年9月份，我就开始着手学JSP，以前也只有一点程序的意识，一路上摸索过来，经过了很多磨难，终于有一天，我就像一个旱鸭子学会游泳一样,心里无比高兴，熬了几天夜，终于写成了这个纯JSP的文章发布程序。 
+相信下面的几则小知识对向我这样水平的菜鸟有一定的帮助！ 
+    另外，www.jspsky.com这个网站将记录我JSP学习的全过程和最新进展，请多多与我联络，相互交流！(nick:87zd oicq:1941017,email:jspsky@8848.net) 
+============================================================================== 
+1.传递表单参数： 
+String name = new String(request.getParameter("name")); 
+
+2.数据库连接： 
+~~MYSQL 
+//设置数据库的URL 
+String url = "jdbc:mysql://localhost:3306/jspsky"; 
+try 
+//加载驱动程序 
+Class.forname("org.gjt.mm.mysql.Driver").newInstance(); 
+//建立连接 
+java.sql.Connection connection = java.sql.DriverManager.getConnection(url); 
+java.sql.Statement statement = connection.createStatement(); 
+//SQL语句 
+String sqlStringi ="insert into commu(name,tel,mobile,oicq,email)values(‘"+name+"’,‘"+tel+"’,‘"+mobile+"’,‘"+oicq+"’,‘"+email+"’)"; 
+//运行SQL语句，并建立结果集 
+java.sql.ResultSet rsi = statement.executeQuery(sqlStringi); 
+//在屏幕上输出库中的内容 
+while(rss.next()) 
+{ 
+String a_name = rss.getString(1); 
+out.println(a_name); 
+{} 
+//关闭连接 
+connection.close(); 
+} 
+
+//捕捉异常 
+catch(java.sql.SQLException e) 
+
+out.println(e.getMessage()); 
+{} 
+catch(ClassNotFoundException e) 
+
+out.println(e.getMessage()); 
+{} 
+
+
+~~DB2 
+//定义数据库的URL 
+String url = "jdbc:db2:portal"; 
+try 
+
+//加载驱动程序 
+Class.forName("COM.ibm.db2.jdbc.app.DB2Driver"); 
+//建立连接， 
+java.sql.Connection connection = java.sql.DriverManager.getConnection(url,"user","password"); 
+java.sql.Statement statement = connection.createStatement(); 
+//SQL语句 
+String sqlString = "select * from client"; 
+//执行SQL语句 
+java.sql.ResultSet rs = statement.executeQuery(sqlString); 
+//在屏幕上显示所连表中的内容 
+while(rs.next()) 
+{ 
+String name = rs.getString(1); 
+out.println(name); 
+{} 
+//关闭连接 
+connection.close(); 
+} 
+//捕捉异常 
+catch(java.sql.SQLException e) 
+
+out.println(e.getMessage()); 
+{} 
+catch(ClassNotFoundException e) 
+
+out.println(e.getMessage()); 
+{} 
+
+
+3.文件操作 
+
+~~将一个字符串写到一个指定的文件中，如果该文件不存在，则新建一个文件，并完成写入；如果存在，则用此字符串覆盖原文件的所有内容 
+import java.io.*; 
+String str = "print me 雪峰!"; 
+//定义好打印的目标文件名 
+
+//取得当前主机存放WEB页面的绝对路径 
+String hostdir = System.getProperty("user.dir"); 
+//取得当前主机所采用的路径分隔符 
+String fileBar = System.getProperty("file.separator"); 
+//书写完整的目标文件存放路径 
+String nameOfFile=hostdir+fileBar+"test.html"; 
+
+try 
+//实例化一个文件输出流对象 
+FileOutputStream afile = new FileOutputStream(nameOfFile); 
+//将文件输出流，创建一个打印输出流对象 
+PrintWriter pw = new PrintWriter(afile); 
+pw.println(str); 
+//clean up 
+pw.close(); 
+{} 
+catch(IOException e) 
+out.println(e.getMessage()); 
+{} 
+
+~~列出指定目录下的文件列表 
+import java.io.*; 
+String cdur = System.getProperty("user.dir"); 
+String fileBar = System.getProperty("file.separator"); 
+String mydir =cdur+fileBar+"doc"+fileBar+"jspsky"; 
+File my = new File(mydir); 
+String d[] = my.list(); 
+int i; 
+int l=d.length; 
+for(i=0;i out.print(d[i]); 
+{} 
+
+
+4.计数器 
+Integer count = null; 
+synchronized (application) 
+count =(Integer) application.getAttribute("d"); 
+if (count ==null) 
+count =new Integer("0"); 
+count = new Integer(count.intValue()+1); 
+application.setAttribute("d",count); 
+{} 
+out.println(count); 
+// 首先定义一个整形对象，并初始化为：NULL， 
+// 取回APPLICATION对像的属性D的值，并强制转化为整形对象，赋给COUNT 
+// 判断COUNT是否为空，为空时，将O赋给COUNT对象， 
+// 否则，通过COUNT。INTVALUE（）方法，实现COUNT对象加1，并赋值给COUNT 
+// 最后，将COUNT对象保存在APPLICATION对象的D变量中。 
+
+
++++++++++++++++++++ 
+
+下一步学习重点 
+文件的删除 
+文件内容的修改 
+图片的上传 
+邮件列表 
+JAVABEANS 
+EJB 
+XML 
+JAVASCRIPT 
+对数据库的操作及维护 
+了解商业项目开发流程 
+
+实例练习 
+留言板 
+聊天室 
+发送邮件 
+新闻系统 
+截取网页内容 
+购物车 
+
+
+多做练习，在实践中不断熟悉JAVA包的使用！ 
+
+
+                        \|/// 
+                       \ - - // 
+                       ( @ @ ) 
+┏━━━━━━━━━oOOo-(_)-oOOo━┓ 
+┃欢迎光临JSP学习小站：jspsky.com  ┃ 
+┃新世纪，新起点，让我们做得更好！ ┃ 
+┃nick:87zd   OICQ:1941017 　   　 ┃ 
+┃Email:jspsky@8848.net  　Oooo　  ┃ 
+┗━━━━━━━━━ oooO--(   ) ━┛ 
+                     (   )　) / 
+                      (  / (_/ 
+                       \_) 
+ 

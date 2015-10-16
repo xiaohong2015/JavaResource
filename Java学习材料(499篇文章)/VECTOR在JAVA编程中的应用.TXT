@@ -1,0 +1,124 @@
+作者：NOVEMBER RAIN
+日期：2001-1-11 8:41:19
+
+
+Vector 类提供了实现可增长数组的功能，随着更多元素加入其中，数组变的更大。在删除一些元素之后，数组变小。
+Vector 有三个构造函数，
+public Vector(int initialCapacity,int capacityIncrement)
+　　　　　　　　　public Vector(int initialCapacity)
+　　　　　　　　　public Vector()
+　　Vector 运行时创建一个初始的存储容量initialCapacity，存储容量是以capacityIncrement 变量定义的增量增长。初始的存储容量和capacityIncrement 可以在Vector 的构造函数中定义。第二个构造函数只创建初始存储容量。第三个构造函数既不指定初始的存储容量也不指定capacityIncrement。
+　　Vector 类提供的访问方法支持类似数组运算和与Vector 大小相关的运算。类似数组的运算允许向量中增加，删除和插入元素。它们也允许测试矢量的内容和检索指定的元素，与大小相关的运算允许判定字节大小和矢量中元素不数目。
+　　现针对经常用到的对向量增，删，插功能举例描述：
+addElement(Object obj)　　 
+　　把组件加到向量尾部，同时大小加1，向量容量比以前大1 
+　
+insertElementAt(Object obj, int index)　　 
+　　把组件加到所定索引处，此后的内容向后移动1 个单位
+　
+setElementAt(Object obj, int index) 
+　　把组件加到所定索引处，此处的内容被代替。
+　　removeElement(Object obj) 把向量中含有本组件内容移走。
+　　removeAllElements() 把向量中所有组件移走，向量大小为0。
+　　例如：
+　
+　　　　 import java.lang.System;
+　　　　 import java.util.Vector;
+　　　　 import java.util.Emumeration;
+　　　　 public class Avector{
+　　　　　　　　　　　　　　　　 public static void main(String args[])
+　　　　　　　　　　　　　　　　　　　　{
+0.　　 Vector v=new Vector(); 
+1. v.addElement("one"); 
+2. addElement("two");
+3. v.addElement("three"); 
+4. v.insertElementAt("zero",0);
+5. v.insertElementAt("oop",3);
+6. v.setElementAt("three",3);
+7. v.setElementAt("four",4);
+8. v.removeAllElements();
+}
+}
+Vector中的变化情况：
+1. one　　 2. one　　 3. one　　 4. zero　　 5.zero　　 6. zero　　7. zero 
+8. 
+　　　　　　　　　　two　　 two　 one　　 one　　one　　 one
+　　　　　　　　　　　　　three　　two　　 two　　two　　 two
+　　　　　　　　　　　　　　　　　three　　oop　　three　　three
+　　　　　　　　　　　　　　　　　　　　　three　　 three　　four
+　
+　　另外，Vector 在参数传递中发挥着举足轻重的作用。
+　　在Applet 中有一块画布(Canvas) 和一个(Panel), 而Panel 中放着用户要输入的信息，根据这些信息把参数传递到canvas 中，这时在Java 中用一个接口（Interface）, 而在接口中需用一个Vector 去传递这些参数。另外，在一个类向另一个类参数传递就可以用这种方法。
+　　例如：
+　
+import java.util.Vector
+interface codeselect{
+　　　　　　　　　　　Vector codeselect=new Vector();
+　　　　　　　　　　　　 }
+显示数学信息
+Vector(0)存入学生编号
+Vector(1)存入学科
+　
+　　在Panel 中当用户在TextField 和Choice 中选择自己所要求的内容，程序中
+　　通过事件响应把值传到向量Vector 中。
+　　假若在Panel 类中：
+　
+public void　　codepanel extends Panel{
+　　public void init()
+　　{ 
+　　　　**.
+TextField　　s=new TextField();
+Choice c=new Choice();
+c. addItem("语文");
+c.addItem("数学");
+c.addItem("政治");
+add(s);
+add (c);
+**
+}
+　
+public boolean handleEvent(Event event){
+if(event.id==Event.ACTION_EVENT){
+if(event.target.instanceof Textfield)
+{
+coderesult.setElementAt(s.getText(),0);
+}
+else if(event.target intanceof Choice)
+{
+coderesult.setElementAt(new Integer(c.getSelectedIndex()),1);
+}
+}
+}
+}
+　
+　
+　
+　　这时，向量中已经存入学生编号和学科索引号（0 为语文，1 为数学，2 为政治）。
+　　而在Canvas 中得到此值，
+　
+public class codecanvas extends Canvas{
+　
+public void code{
+　　　　　　　　　　　　}
+public void paint{
+　
+String str;
+int t;
+str=(String)coderesult.elementAt(0);
+t=(new Integer(codeselect.elementAt(1).toString())).intValue();
+if(t==0)
+{
+显示语文信息
+}
+else if(t==1)
+{
+显示数学信息
+　
+}
+else if(t==2)
+{
+显示政治信息
+}
+}
+}　
+

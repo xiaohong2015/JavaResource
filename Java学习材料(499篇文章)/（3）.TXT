@@ -1,0 +1,161 @@
+作者：friendcn
+日期：2001-2-22 12:50:46
+Page changes
+The following are the list of changes that occurred using the Struts tag library: 
+
+Imports
+<%@ taglib uri="/WEB-INF/struts.tld" prefix="struts" %>
+ 
+The <%@page import? for Java has been replaced by <%@ taglib uri? for the Struts tag library.
+
+
+Text
+<struts:message key="join.title"/>
+ 
+The resource property file contains the text for join.title. In this example, ApplicationResources property file contains the name-value pair. This makes string review and changes for internationalization easier.
+
+
+Errors
+<form:errors/>
+ 
+ActionServlet or ActionForm builds the error message to display. These error messages can also be contained in the property file. ApplicationResources also provides a way of formatting the error by setting error.header and error.footer.
+
+
+HTML Form
+<form:form action="join.do" focus="email" >
+ 
+
+JSP <form> tags and attributes replace HTML <form> tags and attributes. <form action="join.jsp" name="join"> has changed to <form:form action="join.do" focus="email" >. 
+HTML <input> tag has been replaced by <form:text/>. 
+HTML <submit> tag has been replaced by <form:submit/>. 
+
+Model -- Session state
+JoinForm subclasses ActionForm and contains the form data. The form data in this example is simply the e-mail address. I have added a setter and getter for the e-mail address for the framework to access. For demonstration purposes, I overwrote the validate() method and used the error tracking feature of Struts. Struts will create JoinForm and set the state information.
+
+Model -- Business logic 
+As we discussed earlier, Action is the interface between the Controller and the actual business object. JoinAction wraps the calls to the business.jar that was originally in join.jsp. The perform() method for JoinAction is displayed in Listing 5. 
+
+Listing 5. - JoinAction.perform()
+public ActionForward perform(ActionMapping mapping,
+                             ActionForm form,
+                             HttpServletRequest request,
+                             HttpServletResponse response)
+                             throws IOException, ServletException {
+    // Extract attributes and parameters we will need
+    JoinForm joinForm = (JoinForm) form;
+    String email = joinForm.getEmail();
+
+    ActionErrors errors = new ActionErrors();
+
+    // store input....
+    try {
+        business.db.MailingList.AddEmail(email);
+    } catch (Exception e) {
+        // log, print stack
+
+
+        // display error back to user
+        errors.add("email",new ActionError("error.mailing.db.add"));
+    }
+
+    // If any messages is required, save the specified error messages keys 
+    // into the HTTP request for use by the <struts:errors> tag.
+    if (!errors.empty()) {
+        saveErrors(request, errors);
+
+        // return to the original form
+        return (new ActionForward(mapping.getInput()));
+    }
+
+    // Forward control to the specified 'success' URI that is in the Action.xml
+    return (mapping.findForward("success"));
+}
+
+ 
+
+
+Note: The perform() returns a class called ActionForward that tells the Controller where to go next. In this example, I am using the mapping passed in from the Controller to determine where to go. 
+
+Controller
+I have modified the JSP file and created two new classes: one to contain form data and one to call the business package. Finally, I glue it all together with changes to the configuration file struts-config.xml. Listing 6 displays the action element I added to control the flow of joinMVC.jsp.
+
+Listing 6. Action Configuration <action  path="/join" 
+         name="joinForm"
+         type="web.mailinglist.JoinAction"
+        scope="request"
+        input="/joinMVC.jsp"
+     validate="true">
+    <forward  name="success"  path="/welcome.html"/>
+</action>
+
+ 
+
+
+The action element describes a mapping from a request path to the corresponding Action classes that should be used to process the requests. Each request type should have a corresponding action element describing how to process the request. On a join request: 
+
+joinForm is used to hold the form data. 
+Since validate is marked true, joinForm will try to validate itself. 
+web.mailinglist.JoinAction is the action class used to process requests for this mapping. 
+If everything works correctly, the request will forward to welcome.jsp. 
+If there is a business logic failure, the flow will return to joinMVC.jsp, which is the original page that made the request. Why is this? In the action element in Listing 6 is an attribute called input with a value of "/joinMVC.jsp". In my JoinAction.perform(), displayed in Listing 5, if the business logic fails, perform() returns an ActionForward using mapping.getInput() as the parameter. The getInput() in this instance is "/joinMVC.jsp". If the business logic fails, it will return to joinMVC.jsp, which is the original page that made the request.
+
+Before and after Struts 
+As we can see from Figure 9, a lot of complexity and layers have been added. No more direct calls from the JSP file to the Service layer. 
+
+Figure 9. Before and after Struts
+
+
+Struts pros
+Use of JSP tag mechanism
+The tag feature promotes reusable code and abstracts Java code from the JSP file. This feature allows nice integration into JSP-based development tools that allow authoring with tags.
+
+
+Tag library
+Why re-invent the wheel, or a tag library? If you cannot find something you need in the library, contribute. In addition, Struts provides a starting point if you are learning JSP tag technology.
+Open source
+You have all the advantages of open source, such as being able to see the code and having everyone else using the library reviewing the code. Many eyes make for great code review.
+
+
+Sample MVC implementation
+Struts offers some insight if you want to create your own MVC implementation.
+
+
+Manage the problem space
+Divide and conquer is a nice way of solving the problem and making the problem manageable. Of course, the sword cuts both ways. The problem is more complex and needs more management. 
+
+Struts cons
+
+
+Youth
+Struts development is still in preliminary form. They are working toward releasing a version 1.0, but as with any 1.0 version, it does not provide all the bells and whistles. 
+
+
+Change
+The framework is undergoing a rapid amount of change. A great deal of change has occurred between Struts 0.5 and 1.0. You may want to download the most current Struts nightly distributions, to avoid deprecated methods. In the last 6 months, I have seen the Struts library grow from 90K to over 270K. I had to modify my examples several times because of changes in Struts, and I am not going to guarantee my examples will work with the version of Struts you download.
+
+
+Correct level of abstraction 
+Does Struts provide the correct level of abstraction? What is the proper level of abstraction for the page designer? That is the $64K question. Should we allow a page designer access to Java code in page development? Some frameworks like Velocity say no, and provide yet another language to learn for Web development. There is some validity to limiting Java code access in UI development. Most importantly, give a page designer a little bit of Java, and he will use a lot of Java. I saw this happen all the time in Microsoft ASP development. In ASP development, you were supposed to create COM objects and then write a little ASP script to glue it all together. Instead, the ASP developers would go crazy with ASP script. I would hear "Why wait for a COM developer to create it when I can program it directly with VBScript?" Struts helps limit the amount of Java code required in a JSP file via tag libraries. One such library is the Logic Tag, which manages conditional generation of output, but this does not prevent the UI developer from going nuts with Java code. Whatever type of framework you decide to use, you should understand the environment in which you are deploying and maintaining the framework. Of course, this task is easier said than done.
+
+
+Limited scope
+Struts is a Web-based MVC solution that is meant be implemented with HTML, JSP files, and servlets.
+
+
+J2EE application support
+Struts requires a servlet container that supports JSP 1.1 and Servlet 2.2 specifications. This alone will not solve all your install issues, unless you are using Tomcat 3.2. I have had a great deal of problems installing the library with Netscape iPlanet 6.0, which is supposedly the first J2EE-compliant application server. I recommend visiting the Struts User Mailing List archive (see Resources) when you run into problems.
+
+
+Complexity 
+Separating the problem into parts introduces complexity. There is no question that some education will have to go on to understand Struts. With the constant changes occurring, this can be frustrating at times. Welcome to the Web.
+
+
+Where is...
+I could point out other issues, for instance, where are the client side validations, adaptable workflow, and dynamic strategy pattern for the controller? However, at this point, it is too easy to be a critic, and some of the issues are insignificant, or are reasonable for a 1.0 release. The way the Struts team goes at it, Struts might have these features by the time you read this article, or soon after. 
+
+Future of Struts
+Things change rapidly in this new age of software development. In less than 5 years, I have seen things go from cgi/perl, to ISAPI/NSAPI, to ASP with VB, and now Java and J2EE. Sun is working hard to adapt changes to the JSP/servlet architecture, just as they have in the past with the Java language and API. You can obtain drafts of the new JSP 1.2 and Servlet 2.3 specifications from the Sun Web site. Additionally, a standard tag library for JSP files is appearing; see Resources for links to the specifications and the tag library.
+
+Final notes
+Struts solved some big problems using tags and MVC. This approach aided in code re-usability and flexibility. By separating the problem into smaller components, you will be more likely to reuse when changes do occur in the technology or problem space. Additionally, Struts enabled page designers and Java developers to focus on what they do best. Yet, the tradeoff in increased robustness implies an increase in complexity. Struts is much more complex than a simple single JSP page, but for larger systems Struts actually helps manage the complexity. Additionally, I do not want to write my own MVC implementation, just learn one. Whether you use Struts or not, reviewing the Struts framework (excuse me, library) can give you a better understanding of JSP files and servlets features, and how to combine them for your next Web project. Just as struts are essential to the structure of a wing, Struts might become an indispensable part of your next Web project.
+

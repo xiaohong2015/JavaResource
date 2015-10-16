@@ -1,0 +1,139 @@
+作者：icelight
+日期：2001-3-8 9:23:00
+以下摘录于Delphibbs中Dr.yysun 的回答，希望对你有帮助
+
+用 Java 编程的人, 如果不想公开源程序, 就得与反编译器作斗争,
+必须使用反编译器,先看看别人将会如何看你的程序,再看看Obfuscators(扰乱器)的效果.
+
+JAD 是 Windows 下效果极佳的反编译器 http://www.geocities.com/SiliconValley/Bridge/8617/jad.html
+围绕这个引擎, 有很多图形界面, 例如 FrontEnd. (我常用)
+
+JODE 是免费的 Java 反编译器和优化器.
+http://jode.sourceforge.net/
+
+Intr@byte 是个 JBuilder 的外挂工具 (OpenTool), 使得您在 JB 中能打开 *.class
+http://www.webappcabaret.com/bjb/index.jsp
+它也使用 JAD 引擎, 并限制为只反编译器类的定义部分.
+
+有些网站可以帮您反编译, 您给个 URL, 它分析出其中有多少个 applet,
+然后, 再反编译掉. http://www.jreveal.org/
+
+最后, 您想了解反编译原理, 想自己编个反编译器和扰乱器, 这里有本免费得书 .
+http://www.riis.com/depile.html
+
+其他到 yahoo 里找吧, 太多了.
+
+JJams_King: 扰乱器就是把 bytecode 中的类名，方法名，变量名等变成无意义的符号。
+例如，以下源程序：
+package temp;
+public class HelloWorld {
+  String helloWorld = "Hello World";
+  String byeWorld = "Bye World";
+  public static void main(String[] args) {
+      new HelloWorld(true);
+      new HelloWorld(false);
+  }
+  HelloWorld(boolean isHappy) {
+      if (isHappy) {
+        System.out.println(helloWorld);
+      }
+      else {
+        System.out.println(byeWorld);
+      }
+  }
+}
+加扰后，再反编译出来是：
+package a;
+import java.io.PrintStream;
+public class a
+{
+    String a;
+    String b;
+    a(boolean flag)
+    {
+        a = "Hello World";
+        b = "Bye World";
+        if (flag)
+            System.out.println(a);
+        else
+            System.out.println(b);
+    }
+    public static void main(String astring[])
+    {
+        new a(true);
+        new a(false);
+    }
+}
+
+而更高级的扰乱器，还能加密字符常量和扰乱程序流。加扰后，再反编译后变成这样：
+package a;
+import java.io.PrintStream;
+public class a
+{
+    String a;
+    String b;
+    public static boolean c;
+    a(boolean flag)
+    {
+        a = a("q\0041\033/\03162\005,]");
+        b = a("{\0308W\027V\0231\023");
+        if (!flag) goto 42 else 26;
+        System.out.println(a);
+        if (!c) goto 52 else 42;
+        System.out.println(b);
+    }
+
+    public static void main(String astring[])
+    {
+        new a(1);
+        new a(0);
+    }
+
+    private static String a(String string)
+    {
+        char ach[];
+        int i;
+        int j;
+        int k;
+        ach = string.toCharArray();
+        i = ach.length;
+        j = 0;
+        k = 0;
+        expression 57
+        expression ach
+        expression j
+        expression 97
+        expression ach
+        expression j
+        expression 93
+        expression ach
+        expression j
+        expression 119
+        expression ach
+        expression j
+        expression 64
+        expression ach
+        expression j
+        dup 2 over 1
+        push []
+        ^
+        pop []
+        j++;
+        k++;
+        if (i == j)
+            return new String(ach);
+        expression k
+        switch
+case 1: goto 21
+case 2: goto 29
+case 3: goto 37
+case 4: goto 45
+case 5: goto 10
+default: goto 54
+    }
+}
+你想破译其中的思路可就难了 :)
+
+以上资料摘自:http://www.zelix.com/klassmaster/
+
+

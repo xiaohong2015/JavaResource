@@ -1,0 +1,125 @@
+作者：asp2001
+email: asp2001@163.net
+日期：2000-8-12 9:38:37
+Below is a simple example of a CORBA program
+download the source file 
+
+1. produce a idl file like this
+   hello.idl
+   module HelloApp {
+     interface Hello    {         
+         string sayHello();
+    };
+  };
+
+2. produce stub and skeleton files through idltojava.exe
+   idltojava hello.idl
+   idltojava is not include in the jdk. But you can download it from idldojava.
+
+3. write a server program like this 
+
+// HelloServer.java 
+  
+import HelloApp.*;
+
+import org.omg.CosNaming.*;
+import org.omg.CosNaming.NamingContextPackage.*;
+import org.omg.CORBA.*;
+
+import java.io.*;
+class HelloServant extends _HelloImplBase 
+{
+    public String sayHello()
+    {
+       return "\nHello world !!\n"; 
+    }   
+  
+}
+
+public class HelloServer {
+
+    public static void main(String args[])
+    {
+	try{
+	    // create and initialize the ORB
+	    ORB orb = ORB.init(args, null);
+
+	    // create servant and register it with the ORB
+	    HelloServant helloRef = new HelloServant();
+	    orb.connect(helloRef);
+
+	    // get the root naming context
+	    org.omg.CORBA.Object objRef = 
+		orb.resolve_initial_references("NameService");
+	    NamingContext ncRef = NamingContextHelper.narrow(objRef);
+
+	    // bind the Object Reference in Naming
+	    NameComponent nc = new NameComponent("Hello", "");
+	    NameComponent path[] = {nc};
+	    ncRef.rebind(path, helloRef);
+
+	    // wait for invocations from clients
+            java.lang.Object sync = new java.lang.Object();
+            synchronized (sync) {
+                sync.wait();
+            }
+
+	} catch (Exception e) {
+	    System.err.println("ERROR: " + e);
+	    e.printStackTrace(System.out);
+	}
+    }
+}    
+
+4. write a client program like this
+// HelloClient.java
+import HelloApp.*;
+import org.omg.CosNaming.*;
+import org.omg.CORBA.*;
+
+public class HelloClient 
+{
+    public static void main(String args[])
+    {
+	try{
+	    // create and initialize the ORB
+	    ORB orb = ORB.init(args, null);
+
+            // get the root naming context
+            org.omg.CORBA.Object objRef = 
+		orb.resolve_initial_references("NameService");
+            NamingContext ncRef = NamingContextHelper.narrow(objRef);
+            // test
+            System.out.println("OK..");                
+            // resolve the Object Reference in Naming
+            NameComponent nc = new NameComponent("Hello", "");
+            NameComponent path[] = {nc};
+            Hello helloRef = HelloHelper.narrow(ncRef.resolve(path));
+
+	    // call the Hello server object and print results
+           //String oldhello = helloRef.lastMessage();
+           //System.out.println(oldhello);
+	    String Hello = helloRef.sayHello();
+	    System.out.println(Hello);
+
+	} catch (Exception e) {
+	    System.out.println("ERROR : " + e) ;
+	    e.printStackTrace(System.out);
+	}
+    }
+}
+
+5. complie these files
+
+   javac *.java HelloApp/*.java
+
+6. run the application
+   
+  a. first you've to run the Name Service prior to the others likethis
+     c:\>tnameserv
+  b. run server
+     c:\>java HelloServer
+  c. run client 
+     c:\>java HelloClient
+
+ If you have problems with this example, do let me know!

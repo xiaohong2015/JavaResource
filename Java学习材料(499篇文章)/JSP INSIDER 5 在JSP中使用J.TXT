@@ -1,0 +1,89 @@
+作者：caoli
+email: caoli@dicp.ac.cn
+日期：2001-7-4 17:57:26
+第三部分：在JSP中使用JavaMail
+
+构造JSP
+现在，将介绍如何把这些对象放到一起，需要用页面指示语把这些对象导入，这点是很关键的。注意：也要用到java.util.date，因为email的时戳要用到java.util.date。
+
+<%@ page
+ import= " javax.mail.*, javax.mail.internet.*, 
+  =>javax.activation.*, java.util.*"
+%>
+下一步要创建一个特定的信息，表示邮件已经被发送。你可以自己设定该信息，通常是：“Your mail has been sent。”
+
+如何创建和发送消息
+
+创建Message对象的代码在第二部分已经出现了。现在我们可以处理该消息。很简单，只要在对象中使用get和 set properties方法即可。使用post过来的信息作为参数，例如request.getParameter()就是个很有用的方法，可以获取post发送来的参数。参见Listing B。
+Listing B:
+
+newMessage.setFrom(new InternetAddress(request.getParameter("from")));
+newMessage.setRecipient(Message.RecipientType.TO, new 
+InternetAddress(request.getParameter("to"))); 
+newMessage.setSubject(request.getParameter("subject")); 
+newMessage.setSentDate(new Date()); 
+newMessage.setText(request.getParameter("text"));
+
+
+最后就是发送消息了，JavaMail工具使得这件事变得很简单：
+
+transport.send(newMessage);
+把它们组合在一起
+
+刚才我们介绍的是一个个的分开的组件，现在可以把它们组合在一起，放在一个JSP脚本中。注意，要加入捕捉错误并显示给用户的脚本语句。JSP脚本请见Listing C。要使用该脚本，只要把脚本拷贝到你的电脑中即可。
+Listing C:
+
+<%@ page
+import=" javax.mail.*, javax.mail.internet.*, javax.activation.*,java.util.*"
+%>
+<html>
+<head>
+<TITLE>JSP meets JavaMail, what a sweet combo.</TITLE>
+</HEAD>
+<BODY>
+<% 
+
+try{
+Properties props = new Properties();
+Session sendMailSession;
+Store store;
+Transport transport;
+
+
+sendMailSession = Session.getInstance(props, null);
+
+props.put("mail.smtp.host", "smtp.jspinsider.com");
+
+Message newMessage = new MimeMessage(sendMailSession);
+newMessage.setFrom(new InternetAddress(request.getParameter("from")));
+newMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(request.getParameter("to")));
+newMessage.setSubject(request.getParameter("subject"));
+newMessage.setSentDate(new Date());
+newMessage.setText(request.getParameter("text"));
+
+transport = sendMailSession.getTransport("smtp");
+transport.send(newMessage);
+%>
+<P>Your mail has been sent.</P>
+<%
+}
+catch(MessagingException m)
+{
+out.println(m.toString());
+}
+%>
+</BODY>
+
+
+这就行了！如果你打算了解JavaMail所做的一步步的动作，就使用'sendMailSession.setDebug(true);'。
+
+现在你已经对JSP 和JavaMail的使用有所入门。如果想了解更多信息，请参见Sun's JavaMail links。
+
+如何做得更好？
+
+最重要的是这个工具能够运行。但我们可以改进它。后续教程将介绍：
+
+为什么不把表单放在JSP中? 
+客户端的验证 
+如何使用beans来代替那些杂乱的不能重用的代码。 
+通过JSP，把功能和设计分开。 

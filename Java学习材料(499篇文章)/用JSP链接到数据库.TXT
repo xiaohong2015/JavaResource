@@ -1,0 +1,41 @@
+作者：zergman
+email: zergman@chinaasp.com
+日期：6/12/2001 1:26:47 PM
+使用起来非常简单，CUT然后PASTE，原代码中我给出了详细的注释。 
+
+<!--首先导入一些必要的packages--> 
+<!--开始导入packages--> 
+<%@ page info="database handler"%> 
+<%@ page import="java.io.*"%> 
+<%@ page import="java.util.*"%> 
+<%@ page import="java.sql.*"%> 
+<%@ page import="javax.servlet.*"%> 
+<%@ page import="javax.servlet.http.*"%> 
+<!--导入结束--> 
+<% 
+try 
+{ 
+//加载驱动程序 
+//下面的代码为加载JDBD-ODBC驱动程序 
+Class.forName("sun.jdbc.odbc.JdbcOdbcDriver"); 
+//建立连接 
+//第二步是用适当的驱动程序连接到DBMS，看下面的代码： 
+String url="jdbc:odbc:test"; 
+//"test"是系统dsn名 
+Connection con=DriverManager.getConnection(url, "administrator", "password"); 
+//"administrator","password"是用户名和口令 
+//然后创建一个JDBC声明 
+Statement stmt = con.createStatement(); 
+String query="CREATE TABLE COFFEES" + 
+"(COF_NAME VARCHAR(32),"+ 
+"SUP_ID INTEGER,"+ 
+"PRICE FLOAT,"+ 
+"SALES INTEGER,"+ 
+"TOTAL INTEGER)"; 
+//执行声明 
+stmt.executeUpdate(query); 
+} 
+catch (Exception e) {} 
+//输出确认信息 
+out.println("table coffees created"); 
+%>

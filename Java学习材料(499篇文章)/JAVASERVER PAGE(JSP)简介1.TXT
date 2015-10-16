@@ -1,0 +1,38 @@
+作者：blackwhites
+日期：2000-10-23 17:17:41
+JavaServer Page(JSP)是一种基于Java的技术，用于生成动态网页，支持跨平台、跨Web服务器。 
+
+JSP可以与Microsoft的Active Server Page相比，但它使用类似HTML的标记以及Java代码片段来代替VBScript。如果你使用本身不支持ASP的Web服务器（即Apache或Netscape服务器），那么可以考虑JSP。你也可以为这些服务器购买ASP插入模块，但是很贵。而且，现在Sun还不对使用JSP收取许可费（尽管将来有可能会收的）。Solaris、Linux以及Windows的这些组件也非常容易获得。 
+
+不要把JSP和服务器端的JavaScript弄混。Web服务器可以自动地把由JSP生成的Java代码段转换成Java Servlet。JSP还可以自动控制以前用Perl脚本或服务器专用API（如ASP）手工编写的许多功能。 
+
+现在我们将带你入门，并帮你创建一你需要一个Java 2 Software Development Kit（JSDK），它以前被称为Java Development Kit（JDK），你还需要JavaServer Web Development Kit (JSWDK)、Tomcat或其他支持JSP的Web服务器。Sun免费提供Windows、Solaris和Linux等操作系统的JSDK和JSWDK。 
+
+如果你想在你现有的Web服务器使用JSP，而这个Web服务器本身不支持JSP和Java servlet，试一试Allaire的Jrun，它可以作为Netscape的Enterprise和FastTrack Server、Microsoft的Internet Information Server（IIS）和Personal Web Server（PWS）、Apache以及其他一些服务器的插件。你还可以使用Apache Web服务器的Java版本，它包含在最新的JSWDK中。 
+
+下载并安装软件
+目前，JSDK的1.2.2-001版本是一个可下载安装的归档文件。这个大约20MB的下载软件提供了一个完整的Java开发环境，它可以让你创建任何使用标准核心API的基于Java的解决方案。不过，你的Web服务器使用JSP时唯一要做的就是访问Java的编译器。为了告诉Web服务器编译器的位置，需要将环境变量JAVA_HOME设置为指向JSDK的安装目录。如果你已在Windows上安装并选择了缺省目录，则应在autoexec.bat文件中加入“set JAVA_HOME=C:\1.2.2”一行，然后重新启动计算机。 
+
+在安装了JSDK后，下载并安装JSWDK或基于Java的Apache Web服务器——beta版的Tomcat。你把它放在哪里都可以，只要你能再找到它。一般来说，它被放在最高一级的目录中，这样，你就可以替换JSWDK或JSDK的版本而不需要移动另一个了。在安装了这个文件后，你就可以进行JSP开发了。 
+
+正确安装了JSWDK后，运行startserver命令启动Web服务器。缺省情况下，它在8080端口侦听。要检查安装是否正确，你可以在启动服务器之后加载一个JSP示例文件（http://localhost:8080/examples/jsp/）。如果你可以成功地运行示例文件，这说明你的安装是正确的。但是如果在用来启动服务器的控制台窗口中显示了错误信息，那么你就需要解决这个问题。最常出现的问题是没有设置（或没有正确设置）JAVA_HOME环境变量。要查看当前的环境变量设置，可以在DOS命令提示符下输入“set”命令。 
+
+开始使用
+在解释JSP语法之前，先创建一个显示当前日期和时间的Web页面，并保存为sample.jsp。
+
+<html>
+<head>
+<title>First Page</title>
+</head>
+<body>
+<H3>Today is:
+<%= new java.util.Date() %>
+</H3>
+</body>
+</html>
+
+
+把这个文件和你所有的HTML和JSP页面放进JSWDK安装目录下的Web页面目录中。你可以在http://localhost:8080/sample.jsp中加载这个页面。在这个页面第一次被访问时，Web服务器把JSP翻译成Java servlet，这样你就可以看到系统当前的日期和时间。现在，在下载、安装和配置了开发环境之后，你可以去学习JSP语法并创建自己的基于JSP的解决方案了。 
+
+
+

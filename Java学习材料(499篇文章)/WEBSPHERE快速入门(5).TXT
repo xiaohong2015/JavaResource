@@ -1,0 +1,58 @@
+作者：easyinfonet
+email: easyinfonet@sina.com.cn
+日期：2001-2-16 11:24:37
+2.4 WebSphere
+电子商务的灵魂是软件，而电子商务应用系统通常采用以Web服务器为中心的计算模式（参见基本系统模型），因此，Web应用服务器软件是电子商务市场的焦点。IBM WebSphere Application Server(WebSphere应用服务器)是众多Web应用服务器软件中的杰出代表。
+事实上，IBM WebSphere产品系列是一套典型的电子商务应用开发工具及运行环境。该产品系列包括：
+1)	NetObject Fusion提供许多构建和组织站点的工具，可用来建立和管理整个Web站点；
+2)	NetObject BeanBuilder是一个构建applets的可视化写作工具；
+3)	NetObjects ScriptBuilder提供了Smart HTML、JavaScript、JSP等的编辑器；
+4)	Lotus Domino Go Webserver是一个Servlet使能的Web服务器；
+5)	IBM WebSphere Studio提供了项目工作台和有关向导，这些向导可用来存取数据库、创建JavaBean和servlet等等；
+6)	IBM WebSphere Application Server (WebSphere应用服务器)是一个Web应用服务器（内含IBM Http Server）,它本质上是适合于servlet的Web服务器插件，提供了增强的Servlet API和Servlets管理工具，并集成了JSP技术和数据库连接技术。
+第三章 WebSphere Studio应用开发
+本章结合IBM WebSphere Studio产品的使用，介绍电子商务应用开发技术。
+3.1 Lotus Domino Go Webserver
+    Lotus Domino Go Webserver是一个Web服务器软件。它具有下列特性：
+    = 支持CGI、Servlet和一些其它的应用编程接口。这些应用编程接口用来创建动态页面。
+    = 具备代理服务器（Proxy Server）的功能。一个代理服务器是一个请求代理（Broker）。浏览器把请求发到代理服务器，代理服务器从网上或从缓存里取这个页。
+    = 支持SSL 3.0。SSL用来确保在web服务器和web浏览器之间安全通信。
+    = 支持PICS（Platform for Internet Content Selection）。PICS使得用户可以过滤他们遇到的材料，按照材料的分级（由Web管理员设置）接受或者拒绝材料。
+    = 集成了搜索引擎。集成的搜索引擎是NetQuestion.
+    = 易维护性。如很容易地维护用户和访问控制列表
+    下面就Domino Go Webserver的特性及有关使用技术加以详述，包括Web服务器的配置、启动Web服务器、URL与目录映射规则、服务器日志、访问控制、代理服务器。
+    1．Web服务器的配置
+配置Lotus Domino Go Webserver有两种方式，一种是使用Web浏览器来配置和管理，另一种是直接编辑配置文件。第一种方法更简单。安装Lotus Domino Go Webserver 之后，启动Web服务器，使用web浏览器打开http://127.0.0.1/frntpage.html，输入用户名和口令后，浏览器就显示配置和管理Web服务器的表单。.这些表单是CGI程序和HTML表格的结合，为配置Web服务器或查看Web服务器的当前配置提供一个简单的方法。浏览器可以和服务器在同一台机器上或在访问Web服务器的远程的客户机上。在远程的客户机上进行配置和管理时需要访问http://your.server.name/，当然要求输入正确的用户名和口令。另一种方法是直接编辑配置文件。缺省地，配置文件名为httpd.cnf，在系统目录下，通常是C:\WINNT。配置文件是由指示语句（directive）构成的。通过更新这些directives来设置Web服务器的配置项，如主机名（Hostname）和URL传递规则（Passing Rules）。
+    2．启动Widows NT上的Web服务器
+    有两种方式来启动Widows NT上的Web服务器。第一种是从服务面板启动(NT Service Panel->StartUp Panel)，有3个可选的启动类型（Auto、Manual、Disable），并提供了从系统帐号启动的方式，当选择从系统帐号启动Web服务器时，还可以选择在桌面上启动图形用户界面来显示日志或跟踪信息。另一种是用命令行启动，命令的语法为：whttpg [-p port] [-r config_file]。其中，端口号（port）指定Web服务器侦听的端口，而配置文件名（config_file）指定Web服务器的配置文件，通常不是缺省的配置文件（在WINNT目录下的httpd.cnf文件）。
+需要指出的是在一个Widows NT上可以运行多个Web服务器，但是有两个注意事项。第一，同时运行的Web服务器必须使用不同的端口。第二，最多有一个Web服务器可以从服务面板启动，也就是说，附加的Web服务器需要用命令行启动，并使用不同的端口，但可以使用同一个配置文件（建议使用不同的配置文件为妥）。另外，一个Web服务器可以有多个IP地址，每个IP地址有不同的主机名，这称为多IP服务器。一个Web服务器也可以只有一个IP地址，但是有多个主机名，这称为虚拟主机。多IP和虚拟主机可以为不同的虚拟主机提供不同的信息，尽管不同的虚拟主机是由同一个Web服务器服务的。
+    3．URL与目录映射规则
+    URL（Uniform Resource Locator、统一资源定位器）是指定Web上资源项的地址的约定规则。它包括协议、后面跟着完整的主机名、和请求。一个URL的语法时：
+协议：//主机名[：端口][/[目录名[/...][/文件名[？变量名= 值[&...]]]]]。
+协议指的是提供http、https、ftp等服务的有关协议，Go WebServer服务器提供自己的http和https服务，并代理ftp、gopher、wais等服务。通常，Web服务器把URL的主机名和端口后面的部分映射到一个路径和文件名，即所谓的目录映射。Go WebServer的Web文档根目录缺省为c:\WWW\HTML，在安装该Web服务器软件时可以指定Web文档根目录。当服务器收到的URL请求没有规定文件名字时，Web服务器会在相应的目录里搜索某个文件名列表，该文件名列表称为欢迎页面(Welcome Pages)列表。欢迎页面列表通常包括Welcome.html和index.htm等。关于目录映射，Go WebServer使用URL传递规则来实现所需的目录映射。传递模板及示例如下：
+    传递模板          动作    	         请求模板      		        替代的文件路径
+      示例            Pass			       /test/*						c:\myhome\test\*
+其中，请求模板代表被请求的URL，可以包含（*）通配符。当一个URL匹配请求模板时，Web服务器按照替代的文件路径访问系统资源。这些规则可以用来维护物理文件系统的独立性。而动作类型及其含义如下:
+    (1) Map：Web服务器按照替代的文件路径改变URL，继续比较。
+	(2) Pass：Web服务器接受请求。
+	(3) Fail：Web服务器拒绝请求。
+	(4) Exec：Web服务器接受请求，并按照替代的文件路径运行一个CGI程序。
+	(5) Redirect：Web服务器使用一个由替代的文件路径确定的URL来响应。
+	(6) NameTrans：Web服务器接受请求，在处理请求的名字转换步骤中，运行一个由替代的文件路径
+确定的API应用。
+	(7) Service：Web服务器接受请求，在处理请求的服务步骤中，运行一个由替代的文件路径确定的API
+应用。
+    如果设置了下列传递规则：
+    = Map    /beta/*      /text/*
+    = Exec   /cgi-bin/*    c:\www\cgi-bin\*
+    = Pass   /*           c:\www\html\*
+    = Pass   /abc.html     c:\abc.html
+URL请求与实际的系统资源之间的对应举例如下：
+表3-1：URL到系统资源之间的对应举例
+     URL请求							对应的系统资源	应用的规则
+	/cgi-bin/search.exe					c:\www\cgi-bin\serch.exe	规则1）、2）
+	/index.html							c:\www\html\index.html	规则3）
+	/beta/download.html					c:\www\html\test\download.html	规则1）、3）
+	/abc.html								c:\www\html\abc.html	规则3）
+
+在匹配了Map规则以后，服务器会继续比较余下的规则。服务器会在Exec和Pass规则后停止比较。第4个规则永远不会被使用，因为任何可以匹配第4个规则的都会匹配第3个规则。因此，Pass /* 规则通常应该放在最后。

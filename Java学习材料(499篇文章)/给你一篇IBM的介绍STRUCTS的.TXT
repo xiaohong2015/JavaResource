@@ -1,0 +1,184 @@
+作者：friendcn
+日期：2001-2-22 12:46:17
+ibm公司的一篇介绍Struts的文章，
+觉的不错，我没时间翻译，你要是E文好的话自己看看吧
+网址http://www-106.ibm.com/developerworks/library/j-struts/?dwzone=java
+
+
+Struts, an open-source MVC implementation 
+Manage complexity in large Web sites with this servlets and JSP framework
+
+Malcolm Davis
+Consultant
+February 2001
+
+Contents: 
+ Introduction 
+ JSP is a servlet 
+ No more Java in my HTML 
+ MVC 
+ MVC Model 2 
+ Struts 
+ Struts details 
+ Mailing list sample 
+ Before and after 
+ Future of Struts 
+  Resources 
+ About the author 
+ 
+
+
+This article introduces Struts, a Model-View-Controller implementation that uses servlets and JavaServer Pages (JSP) technology. Struts can help you control change in your Web project and promote specialization. Even if you never implement a system with Struts, you may get some ideas for your future servlets and JSP page implementations.
+
+Introduction
+Kids in grade school put HTML pages on the Internet. However, there is a monumental difference between a grade school page and a professionally developed Web site. The page designer (or HTML developer) must understand colors, the customer, product flow, page layout, browser compatibility, image creation, JavaScript, and more. Putting a great looking site together takes a lot of work, and most Java developers are more interested in creating a great looking object interface than a user interface. JavaServer Pages (JSP) technology provides the glue between the page designer and the Java developer. 
+
+If you have worked on a large-scale Web application, you understand the term change. Model-View-Controller (MVC) is a design pattern put together to help control change. MVC decouples interface from business logic and data. Struts is an MVC implementation that uses Servlets 2.2 and JSP 1.1 tags, from the J2EE specifications, as part of the implementation. You may never implement a system with Struts, but looking at Struts may give you some ideas on your future Servlets and JSP implementations.
+
+In this article, I will begin with a JSP file that uses elements you may be familiar with and discuss the pros and cons of such a page. I will then cover Struts and how it can control change in your Web project and promote specialization. Finally, I will re-develop the simple JSP file with the page designer and change in mind. 
+
+A JSP file is a Java servlet 
+A JavaServer Page (JSP) file is nothing more than another way to view a servlet. The concept of a JSP file is to allow us to see a Java servlet as an HTML page. This view eliminates all of the ugly print() statements that normally show up in Java code. The JSP file is pre-processed into a .java file, then compiled into a .class. If you are using Tomcat, you can view your pre-processed .java files in the work directory. Other containers may store the .java and .class files elsewhere; the location is container specific. Figure 1 demonstrates the JSP file-to-servlet flow. 
+
+Figure 1. JSP file-to-servlet flow
+
+
+(This is significantly different from a Microsoft Active Server Page (ASP). An ASP is compiled into memory, not into a separate file.)
+
+The simple self-contained JSP file
+In a small JSP application, it is common to see the data, business logic, and the user interface combined into one module of code. In addition, the application generally contains the logic that controls the flow of the application. Listing 1 and Figure 2 demonstrate a simple JSP file that allows a user to join a mailing list.
+
+Listing 1. join.jsp -- a simple request and response JSP file <%@ page language="java" %>
+<%@ page import="business.util.Validation" %>
+<%@ page import="business.db.MailingList" %>
+<%
+String error = "";
+String email = request.getParameter("email");
+
+// do we have an email address
+if( email!=null ) {
+
+    // validate input...
+    if( business.util.Validation.isValidEmail(email) ) {
+
+        // store input...
+        try {
+            business.db.MailingList.AddEmail(email);
+        } catch (Exception e) {
+            error = "Error adding email address to system.  " + e;
+        }
+
+        if( error.length()==0 ) {
+%>
+            // redirect to welcome page...
+            <jsp:forward page="welcome.html"/> 
+<%
+        }
+    } else {
+        // set error message and redisplay page
+        error = email + " is not a valid email address, please try again.";
+    }
+
+} else {
+    email = "";
+}
+%>
+<html>
+<head>
+<title>Join Mailing List</title>
+</head>
+<body>
+<font color=red><%=error%></font><br>
+
+<h3>Enter your email to join the group</h3>
+<form action="join.jsp" name="joinForm">
+    <input name="email" id="email" value=<%=email%>></input> 
+    <input type=submit value="submit">
+</form>
+</body>
+</html>
+
+ 
+
+
+Figure 2. In a simple request and response, the JSP file sets the data, controls the flow to the next page, and creates the HTML
+
+
+The mailing list JSP file is a self-contained, do-it-all module. The only things not contained in the JSP file are the actual code for validation that is contained in isValidEmail() and the code that puts the e-mail address in the database. (Separating the isValidEmail() method into reusable code might seem like an obvious thing to do, but I have seen the code for isValidEmail() embedded directly into the page.) The advantage of the single-page approach is that it is easy to understand and initially easy to build. In addition, with all the graphical development tools, it is easy to get started. 
+
+Activities of join.jsp
+
+
+Display opening input page. 
+Read the email value from the form parameter. 
+Validate the email address. 
+If email address is valid: 
+Add the address to the database. 
+Redirect to the next page. 
+If email address is invalid: 
+Set an error message. 
+Redisplay join.jsp with the error message. 
+
+Consequences of the single-page approach 
+
+Heavy HTML and Java coupling
+The coder of the JSP file must be both a page designer and a Java developer. The result is often either terrible Java code or an ugly page, or sometimes both.
+
+
+Java and JavaScript blur
+As the pages become larger, there can be a tendency to implement some JavaScript. When the JavaScript appears in a page, the script can get confused with the Java code. An example of a possible point of confusion is using client-side JavaScript to validate the email field.
+
+
+Embedded flow logic
+To understand the entire flow of the application, you have to navigate all of the pages. Imagine the spaghetti logic on a 100-page Web site.
+
+
+Debugging difficulties
+In addition to being ugly to look at, HTML tags, Java code, and JavaScript code all in one page makes it difficult to debug problems.
+
+
+Tight coupling
+Changes to business logic or data means possibly touching every page involved. 
+
+
+Aesthetics
+Visually, in large pages, this type of coding looks messy. When I was doing Microsoft ASP development, I would commonly see 1000-line pages. Even with syntax coloring, it was still difficult to read and understand. 
+
+No more Java code in my HTML, please
+In Listing 1, instead of having a lot of HTML in Java code, I have a lot of Java code in an HTML file. From this standpoint, I really have not accomplished much, other than permit page designers to write Java code. However, all is not lost; with JSP 1.1, we got a new feature called tags. 
+
+A JSP tag is simply a way of abstracting out code from a JSP file. Some people think of JSP tags as macros for JSP files, where the code for the tag is contained in the servlet. (The macro perspective is almost true.) For the same reason I do not want to see HTML tags in Java code, I do not want to see Java code in a JSP file. The entire point of JSP technology is to allow the page designer to create servlets without being distracted with Java code. Tags allow Java programmers to extend JSP files by making Java code look like HTML. Figure 3 displays the general concept of pulling the code from the JSP page and putting into a JSP tag.
+
+Figure 3. JSP tag
+
+
+An example of Struts tag capability is in Listing 2. In Listing 2, the normal HTML <form> tag is replaced with the Struts <form:form> tag. Listing 3 shows the resulting HTML that the browser receives. The browser gets the HTML <form> tag, but with additional code, such as the JavaScript. The additional JavaScript sets the focus on the email address field. The server side <form:form> tag code created the appropriate HTML and abstracts the JavaScript away from the page designer. 
+
+Listing 2. Struts form tag
+
+<form:form action="join.do" focus="email" >
+    <form:text   property="email" size="30" maxlength="30"/>
+    <form:submit property="submit" value="Submit"/>
+</form:form>
+
+ 
+
+
+Listing 3. Resulting HTML sent to the browser
+<form name="joinForm" method="POST" action="join.do;jsessionid=ndj71hjo01">
+    <input type="text" name="email" maxlength="30" size="30" value="">
+    <input type="submit" name="submit" value="Submit">
+</form>
+<script language="JavaScript">
+<!--
+    document.joinForm.email.focus()
+// -->
+</script>
+
+
+ 
+
+
+Notes about JSP tags: 
+
+JSP tags require a container that runs JSP 1.1 or later.

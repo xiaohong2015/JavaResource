@@ -1,0 +1,91 @@
+作者：friendcn
+email: friedcn@163.net
+日期：8/2/2001 10:59:07 AM
+我到sun站点上，发现他们的java Applet聊天室能够突破proxy,
+我在公司的局域网可以使用的，而一般的java程序是不能够的。
+大家可以去分析一下他们的程序
+
+
+本技巧将向您讲述如何编写可通过代理访问因特网上的 Web 服务器的 Java 应用程序。在 Java 应用程序中加入代理支持只需额外编写几行代码，且不依赖任何安全性“漏洞”。 
+几乎所有的公司都十分关注保护自己的内部网络，以防黑客及入窃者。一种常见的安全措施是完全断开与因特网的连接。如果黑客们不能连接到您的任何一台机器，他们就不能非法进入您的系统。这种策略产生的不利副作用是，内部用户无法访问外部的因特网服务器，如 Yahoo 或 JavaWorld。为了解决这一问题，网络管理员通常安装“代理服务器”。实际上，代理是安装于因特网和内部网之间的一种服务，用来管理这两个领域之间的连接。代理有助于减少安全性的外部威胁，同时还允许内部用户访问因特网服务。尽管 Java 使得编写因特网客户机不再困难，但是如果客户机不能通过代理，则它们毫无用处。幸运的是，Java 使得使用代理支持不再困难 -- 如果您知道密诀，这就是事实。 
+将 Java 和代理结合起来的秘诀即在 Java 运行时激活特定的系统属性。这些属性未被写入正式文件，只是作为 Java 传说的一部分在 Java 编程人员中秘传。为了支持代理，Java 应用程序不仅需要指定代理本身的信息，而且需要指定用于认证的用户信息。在开始使用网际协议之前，您需要在程序中添加以下几行代码： 
+
+System.getProperties().put( "proxySet", "true" );
+System.getProperties().put( "proxyHost", "myProxyMachineName" );
+System.getProperties().put( "proxyPort", "85" );
+
+
+上面的第一行通知 Java 您要通过代理进行连接，第二行指定代理所在的机器，第三行指定代理监听的端口。有些代理在授权用户访问因特网之前，要求用户输入用户名和口令。如果您使用位于防火墙之内的 Web 浏览器，您就可能碰到过这种情况。以下是执行认证的方法： 
+
+URLConnection connection = url.openConnection();
+String password = "username:password";
+String encodedPassword = base64Encode( password );
+connection.setRequestProperty( "Proxy-Authorization", encodedPassword );
+
+
+这段代码的思想是，您必须调整 HTTP 标头以发出用户信息。这是通过调用 setRequestProperty() 来实现的。这种方法允许您在发出请求之前处理 HTTP 标头。HTTP 要求用 base64 对用户名和口令进行编码。幸运的是，有一组公用域 API，它们将代您执行编码（请参阅参考资源部分）。 
+
+如您所见，在 Java 应用程序中加入代理支持并不需要做多少工作。有了现在的知识，再做一点研究（您必须查明您的代理是如何处理您感兴趣的协议以及如何进行用户认证的），您就能用其他协议实现代理。 
+
+FTP 代理
+Scott D. Taylor 提出这个秘诀来处理 FTP 协议代理： 
+
+defaultProperties.put( "ftpProxySet", "true" );
+defaultProperties.put( "ftpProxyHost", "proxy-host-name" );
+defaultProperties.put( "ftpProxyPort", "85" );
+
+
+接下来您便可以通过以下代码使用 "ftp" 协议访问文件 URL： 
+
+URL url = new URL("ftp://ftp.netscape.com/pub/navigator/3.04/windows/readme.txt" ); 
+
+
+如果有人有使用其他网际协议代理的例子，我很想看看。 
+
+注意：代码示例 (Example.java) 仅在 JDK 1.1.4 下测试过。 
+
+
+后续技巧！  
+来自 Marla Bonar：
+
+
+对于仍在使用 JDK 1.1.7（配合 WebSphere 3.0）的开发人员而言，将 proxyHost 和 proxyPort 设为系统属性不起作用；conn.getInputStream() 或者返回连接超时，或者是找不到主机路径。但是，我使用接受 Host 和 Port 为参数的 URL 构造函数解决了这一问题（使用我的代理主机和端口）： 
+
+public URL(String protocol, String host, int port, String file). 
+
+来自 Dylan Walsh：
+
+
+借助用户名和口令进行认证的方法不起作用。应将 "Basic " 置于认证字符串的开头；例如： 
+
+String encodedPassword = base64Encode( password ); 
+
+应该是： 
+
+String encodedPassword = "Basic " + base64Encode( password ); 
+
+您也不必用一个单独的程序来进行 64 位编码。您可以使用 sun.misc.BASE64Encoder() 类。下面是完成这两处改动之后的代码： 
+
+System.getProperties().put("proxySet", "true");
+System.getProperties().put("proxyHost", proxyHost);
+System.getProperties().put("proxyPort", proxyPort);
+String authString = "userid:password";
+String auth = "Basic " + new sun.misc.BASE64Encoder
+().encode(authString.getBytes());
+URL url = new URL("http://java.sun.com/");
+URLConnection conn = url.openConnection();
+conn.setRequestProperty("Proxy-Authorization", auth);
+
+
+来自 Marcel Oerlemans：
+
+
+下面是使用 socks 4 代理服务器的方法： 
+
+System.getProperty("socksProxySet", true);
+System.getProperty("socksProxyHost", proxyHostName);
+System.getProperty("socksProxyPort", proxyPort);
+Usually the proxyPort for Socks 4 is port 1080
+
+
+接下来您就可以用 Socks 4 进行连接了。

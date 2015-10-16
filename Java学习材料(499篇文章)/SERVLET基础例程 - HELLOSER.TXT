@@ -1,0 +1,128 @@
+作者：何志强
+email: hhzqq@21cn.com
+日期：2000-8-10 17:07:04
+/*
+作者：何志强[hhzqq@21cn.com]
+日期：2000-08-10
+版本：1.0
+功能：Servlet基础例程 - HelloServlet
+*/
+
+import java.io.*;
+import java.text.*; //MessageFormat
+import javax.servlet.*;
+import javax.servlet.http.*;
+
+public class HelloServlet extends HttpServlet{
+   //页面标题
+   protected static final String strTitle = "Servlet基础例程 - HelloServlet";
+
+   //页眉
+   protected static final String strHeader =
+      "<html>"+
+      "<head>"+
+      "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=gb2312\">"+
+      "<title>{0}</title>"+
+      "</head>"+
+      "<body>";
+
+   //页脚
+   protected static final String strFooter =
+      "</body>"+
+      "</html>";
+
+   //表单
+   protected static final String strForm =
+      "<form action=\"{0}\" method=\"post\">"+
+      "您尊姓大名：<input type=\"text\" name=\"name\">"+
+      "<input type=\"submit\" name=\"submit\" value=\"提交\">"+
+      "</form>";
+
+   protected static final String strHello =
+      "您好，{0}，欢迎来到Servlet/JSP世界！";
+
+   //出错信息
+   protected static final String strError =
+      "<h2><font color=\"#ff0000\">{0}</font></h2>";
+
+   protected void doGet(HttpServletRequest req,HttpServletResponse resp) throws ServletException,IOException{
+      process(req,resp);
+   }
+
+   protected void doPost(HttpServletRequest req,HttpServletResponse resp) throws ServletException,IOException{
+      process(req,resp);
+   }
+
+   protected void process(HttpServletRequest req,HttpServletResponse resp) throws ServletException,IOException{
+      try{
+         String submit = req.getParameter("submit");
+         if(submit==null)
+           printForm(req,resp);
+         else
+           printHello(req,resp);
+      }
+      catch(Exception e){
+         printError(e.toString(),req,resp);
+      }
+   }
+
+   protected void printForm(HttpServletRequest req,HttpServletResponse resp) throws ServletException,IOException{
+      //在使用PrintWriter前得先设置Content Type
+      resp.setContentType("text/html");
+
+      PrintWriter out = resp.getWriter();
+
+      //输出页眉
+      out.print(MessageFormat.format(strHeader,new Object[]{strTitle+" - 请输入尊姓大名"}));
+
+      //输出表单
+      out.print(MessageFormat.format(strForm,new Object[]{req.getContextPath()+req.getServletPath()}));
+
+      //输出页脚
+      out.print(strFooter);
+
+      out.flush();
+   }
+
+   protected void printHello(HttpServletRequest req,HttpServletResponse resp) throws ServletException,IOException{
+      //获取用户输入的数据
+      String name = req.getParameter("name");
+
+      if(name==null)
+         name = "无名氏";
+
+      //在使用PrintWriter前得先设置Content Type
+      resp.setContentType("text/html");
+
+      PrintWriter out = resp.getWriter();
+
+      //输出页眉
+      out.print(MessageFormat.format(strHeader,new Object[]{strTitle+" - 欢迎您"}));
+
+      //输出欢迎信息
+      out.print(MessageFormat.format(strHello,new Object[]{name}));
+
+      //输出页脚
+      out.print(strFooter);
+
+      out.flush();
+   }
+
+   protected void printError(String error, HttpServletRequest req,HttpServletResponse resp) throws ServletException,IOException{
+      //在使用PrintWriter前得先设置Content Type
+      resp.setContentType("text/html");
+
+      PrintWriter out = resp.getWriter();
+
+      //输出页眉
+      out.print(MessageFormat.format(strHeader,new Object[]{strTitle+" - 出错信息"}));
+
+      //输出出错信息
+      out.print(MessageFormat.format(strError,new Object[]{error}));
+
+      //输出页脚
+      out.print(strFooter);
+
+      out.flush();
+   }
+}

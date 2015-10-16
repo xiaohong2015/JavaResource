@@ -1,0 +1,89 @@
+作者：jeru
+日期：2000-12-9 21:28:13
+6 - PreparedStatement
+本概述是从《JDBCTM Database Access from JavaTM: A Tutorial and Annotated Reference 》这本书中摘引来的。JavaSoft 目前正在准备这本书。这是一本教程，同时也是 JDBC 的重要参考手册，它将作为 Java 系列的组成部份在 1997 年春季由 Addison-Wesley 出版公司出版。 
+
+
+6.1 概述
+该 PreparedStatement 接口继承 Statement，并与之在两方面有所不同： 
+
+
+PreparedStatement 实例包含已编译的 SQL 语句。这就是使语句“准备好”。 
+包含于 PreparedStatement 对象中的 SQL 语句可具有一个或多个 IN 参数。IN 参数的值在 SQL 语句创建时未被指定。相反的，该语句为每个 IN 参数保留一个问号（“？”）作为占位符。每个问号的值必须在该语句执行之前，通过适当的 setXXX 方法来提供。 
+
+由于 PreparedStatement 对象已预编译过，所以其执行速度要快于 Statement 对象。因此，多次执行的 SQL 语句经常创建为 PreparedStatement 对象，以提高效率。
+
+作为 Statement 的子类，PreparedStatement 继承了 Statement 的所有功能。另外它还添加了一整套方法，用于设置发送给数据库以取代 IN 参数占位符的值。同时，三种方法 execute、 executeQuery 和 executeUpdate 已被更改以使之不再需要参数。这些方法的 Statement 形式（接受 SQL 语句参数的形式）不应该用于 PreparedStatement 对象。
+
+
+6.1.1 创建 PreparedStatement 对象
+以下的代码段（其中 con 是 Connection 对象）创建包含带两个 IN 参数占位符的 SQL 语句的 PreparedStatement 对象： 
+
+PreparedStatement pstmt = con.prepareStatement(
+"UPDATE table4 SET m = ? WHERE x = ?");
+
+pstmt 对象包含语句 "UPDATE table4 SET m = ? WHERE x = ?"，它已发送给 DBMS，并为执行作好了准备。
+
+
+6.1.2 传递 IN 参数
+在执行 PreparedStatement 对象之前，必须设置每个 ? 参数的值。这可通过调用 setXXX 方法来完成，其中 XXX 是与该参数相应的类型。例如，如果参数具有 Java 类型 long，则使用的方法就是 setLong。setXXX 方法的第一个参数是要设置的参数的序数位置，第二个参数是设置给该参数的值。例如，以下代码将第一个参数设为 123456789，第二个参数设为 100000000： 
+
+pstmt.setLong(1, 123456789);
+pstmt.setLong(2, 100000000);
+
+一旦设置了给定语句的参数值，就可用它多次执行该语句，直到调用 clearParameters 方法清除它为止。
+
+在连接的缺省模式下（启用自动提交），当语句完成时将自动提交或还原该语句。
+
+如果基本数据库和驱动程序在语句提交之后仍保持这些语句的打开状态，则同一个 PreparedStatement 可执行多次。如果这一点不成立，那么试图通过使用 PreparedStatement 对象代替 Statement 对象来提高性能是没有意义的。
+
+利用 pstmt（前面创建的 PreparedStatement 对象），以下代码例示了如何设置两个参数占位符的值并执行 pstmt 10 次。如上所述，为做到这一点，数据库不能关闭 pstmt。在该示例中，第一个参数被设置为 "Hi"并保持为常数。在 for 循环中，每次都将第二个参数设置为不同的值：从 0 开始，到 9 结束。
+
+pstmt.setString(1, "Hi");
+for (int i = 0; i < 10; i++) {
+pstmt.setInt(2, i);
+int rowCount = pstmt.executeUpdate();
+}
+
+6.1.3 IN 参数中数据类型的一致性
+setXXX 方法中的 XXX 是 Java 类型。它是一种隐含的 JDBC 类型（一般 SQL 类型），因为驱动程序将把 Java 类型映射为相应的 JDBC 类型（遵循该 JDBC Guide中§8.6.2 “映射 Java 和 JDBC 类型”表中所指定的映射），并将该 JDBC 类型发送给数据库。例如，以下代码段将 PreparedStatement 对象 pstmt 的第二个参数设置为 44，Java 类型为 short： 
+
+pstmt.setShort(2, 44);
+
+驱动程序将 44 作为 JDBC SMALLINT 发送给数据库，它是 Java short 类型的标准映射。
+
+程序员的责任是确保将每个 IN 参数的 Java 类型映射为与数据库所需的 JDBC 数据类型兼容的 JDBC 类型。不妨考虑数据库需要 JDBC SMALLINT 的情况。如果使用方法 setByte ，则驱动程序将 JDBC TINYINT 发送给数据库。这是可行的，因为许多数据库可从一种相关的类型转换为另一种类型，并且通常 TINYINT 可用于 SMALLINT 适用的任何地方。然而，对于要适用于尽可能多的数据库的应用程序，最好使用与数据库所需的确切的 JDBC 类型相应的 Java 类型。如果所需的 JDBC 类型是 SMALLINT，则使用 setShort 代替 setByte 将使应用程序的可移植性更好。
+
+
+6.1.4 使用 setObject
+程序员可使用 setObject 方法显式地将输入参数转换为特定的 JDBC 类型。该方法可以接受第三个参数，用来指定目标 JDBC 类型。将 Java Object 发送给数据库之前，驱动程序将把它转换为指定的 JDBC 类型。
+
+如果没有指定 JDBC 类型，驱动程序就会将 Java Object 映射到其缺省的 JDBC 类型（参见第 8.6.4 节中的表格），然后将它发送到数据库。这与常规的 setXXX 方法类似；在这两种情况下，驱动程序在将值发送到数据库之前，会将该值的 Java 类型映射为适当的 JDBC 类型。二者的差别在于 setXXX 方法使用从 Java 类型到 JDBC 类型的标准映射（参见第 8.6.2 节中的表格），而 setObject 方法使用从 Java Object 类型到 JDBC 类型的映射（参见第 8.6.4 节中的表格）。
+
+方法 setObject 允许接受所有 Java 对象的能力使应用程序更为通用，并可在运行时接受参数的输入。这种情况下，应用程序在编译时并不清楚输入类型。通过使用 setObject，应用程序可接受所有 Java 对象类型作为输入，并将其转换为数据库所需的 JDBC 类型。第 8.6.5 节中的表格显示了 setObject 可执行的所有可能转换。
+
+
+6.1.5 将 JDBC NULL 作为 IN 参数发送
+setNull 方法允许程序员将 JDBC NULL 值作为 IN 参数发送给数据库。但要注意，仍然必须指定参数的 JDBC 类型。
+
+当把 Java null 值传递给 setXXX 方法时（如果它接受 Java 对象作为参数），也将同样把 JDBC NULL 发送到数据库。但仅当指定 JDBC 类型时，方法 setObject 才能接受 null 值。
+
+
+6.1.6 发送大的 IN 参数
+setBytes 和 setString 方法能够发送无限量的数据。但是，有时程序员更喜欢用较小的块传递大型的数据。这可通过将 IN 参数设置为 Java 输入流来完成。当语句执行时，JDBC 驱动程序将重复调用该输入流，读取其内容并将它们当作实际参数数据传输。
+
+JDBC 提供了三种将 IN 参数设置为输入流的方法：setBinaryStream 用于含有未说明字节的流， setAsciiStream 用于含有 ASCII 字符的流，而 setUnicodeStream 用于含有 Unicode 字符的流。因为必须指定流的总长度，所以这些方法所采用的参数比其它的 setXXX 方法要多一个。这很有必要，因为一些数据库在发送数据之前需要知道其总的传送大小。
+
+以下代码例示了使用流作为 IN 参数来发送文件内容： 
+
+java.io.File file = new java.io.File("/tmp/data");
+int fileLength = file.length();
+java.io.InputStream fin = new java.io.FileInputStream(file);
+java.sql.PreparedStatement pstmt = con.prepareStatement(
+"UPDATE Table5 SET stuff = ? WHERE index = 4");
+pstmt.setBinaryStream (1, fin, fileLength);
+pstmt.executeUpdate();
+
+当语句执行时，将反复调用输入流 fin 以传递其数据。
+
+

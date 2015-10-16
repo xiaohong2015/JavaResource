@@ -1,0 +1,88 @@
+作者：运气
+email: webmaster@chinaspx.com
+日期：7/4/2001 1:43:04 PM
+　　远程访问Mnemosyne
+
+　　下面我们来讨论在servlet服务器上访问远程Mnemosyne的方法。要在无需特定服务器在线的情况下加载一个包含对话信息的Mnemosyne，需要创建一个FailoverHandler的实例，FailoverHandler利用JDK 1.3中的Proxy API处理对话服务器当机的问题。FailoverHandler把一个代表访问远程对话服务器的RMI URL的字符串数组作为参数，然后，从Proxy类中获取Mnemosyne实例。下面的SessionManager类中的initializeMnemosyne()方法可以显示出这一切是如何完成的：
+
+
+public static void initializeMnemosyne(String[] rmiURLs) 
+{ 
+// 设置当机服务器的处理程序 
+FailoverHandler fh = new FailoverHandler(null, rmiURLs); 
+
+// 得到Mnemosyne. 的一个实例
+_Mnemosyne = 
+(Mnemosyne)Proxy.newProxyInstance(Mnemosyne.class.getClassLoader(), 
+new Class[] { Mnemosyne.class }, 
+fh ); 
+} 
+ 
+
+
+　　如果用Proxy类获取Mnemosyne的实例，所有的方法调用必须通过FailoverHandler的 invoke()方法进行。当有方法访问Mnemosyne时，FailoverHandler将试着调用该方法访问一个远程对象。如果方法调用失败（例如服务器关机），FailoverHandler将从提供给构造器的URL清单中再取得下一个URL，这样就会无缝地转向下一个对话服务器。
+
+
+// 建立远程加载类的URL清单
+public FailoverHandler(Remote delegate, String[] delegateURLS) 
+{ 
+this.delegateURLS = delegateURLS; 
+
+// 如果这个URL无效，则获取下一个有效的URL
+try { 
+this.delegate = 
+((delegate == null)?getNextValidDelegate():delegate); 
+} catch (RemoteException ex) { 
+// 如果发生远程意外错误，则该URL不能使用，向调用者发送一个 //IllegalArgumentException事件
+throw new IllegalArgumentException("Remote URLs could not " 
++ "be found"); 
+} 
+
+} 
+
+public Object invoke(Object proxy, 
+Method method, 
+Object[] arguments) 
+throws Throwable 
+{ 
+while(true) 
+{ 
+try 
+{ 
+file:// 尝试对获得的最后一个URL调用被调用的方法
+return method.invoke(delegate, arguments); 
+} 
+catch(InvocationTargetException invocationTargetException) 
+{ 
+file://如果获得的URL无效，则取下一个URL 
+try 
+{ 
+throw invocationTargetException.getTargetException(); 
+} 
+catch(RemoteException remoteException) 
+{ 
+delegate = getNextValidDelegate(); 
+} 
+} 
+} 
+} 
+
+file://从构造器中的URL清单中获得下一个URL 
+protected Remote getNextValidDelegate() throws RemoteException 
+{ 
+for(int i = 0; i < delegateURLS.length;i++) 
+{ 
+try 
+{ 
+return Naming.lookup(delegateURLS[i]); 
+} 
+catch(Exception exception) 
+{ 
+} 
+} 
+
+throw new RemoteException("All lookup failed"); 
+} 
+ 
+
+　　当使用FailoverHandler对象时，从一个对话服务器向另一个对话服务器的转换对于调用Mnemosyne的任何用户端机器都是透明的。
